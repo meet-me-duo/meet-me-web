@@ -1,0 +1,45 @@
+name: Deploy production
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+concurrency:
+  group: production-web
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: https://app.meet-me.co.kr
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test && pnpm lint && pnpm api:check && pnpm build
+        env:
+          VITE_API_BASE_URL: ${{ vars.API_BASE_URL }}
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Upload versioned assets
+        run: aws s3 sync dist/ "s3://${{ vars.WEB_BUCKET_NAME }}" --delete --exclude index.html --cache-control "public,max-age=31536000,immutable"
+      - name: Upload application shell
+        run: aws s3 cp dist/index.html "s3://${{ vars.WEB_BUCKET_NAME }}/index.html" --content-type "text/html; charset=utf-8" --cache-control "no-cache,no-store,must-revalidate"
+      - name: Invalidate CloudFront shell
+        run: aws cloudfront create-invalidation --distribution-id "${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}" --paths "/" "/index.html"

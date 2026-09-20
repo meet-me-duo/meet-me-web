@@ -1,0 +1,6 @@
+aws_region           = "ap-northeast-2"
+domain_name          = "meet-me.co.kr"
+github_owner         = "meet-me-duo"
+github_owner_id      = 319248346
+github_repository    = "meet-me-web"
+github_repository_id = 1341255220

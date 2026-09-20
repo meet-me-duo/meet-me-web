@@ -55,6 +55,14 @@ test("a new browser is asked to join before seeing the room", async ({ page }) =
   await expect(page.getByRole("heading", { name: "가능한 조건을 알려주세요" })).toBeVisible();
 });
 
+test("brand link returns to the landing page", async ({ page }) => {
+  await mockRoom(page, "COLLECTING");
+  await page.goto(`/rooms/${code}`);
+  await page.getByRole("link", { name: "Meet me 홈" }).click();
+  await expect(page).toHaveURL("/");
+  await expect(page.getByRole("heading", { name: /조건만 말하세요/ })).toBeVisible();
+});
+
 for (const [status, heading] of [
   ["ANALYZING", "모두의 조건을 분석하고 있어요"],
   ["INSUFFICIENT_PARTICIPANTS", "조율에 필요한 인원이 부족해요"],

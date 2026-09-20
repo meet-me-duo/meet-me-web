@@ -71,7 +71,7 @@ resource "aws_cloudfront_distribution" "web" {
   is_ipv6_enabled     = true
   default_root_object = "index.html"
   aliases             = [local.app_domain]
-  price_class         = "PriceClass_200"
+  price_class         = "PriceClass_All"
   web_acl_id          = aws_wafv2_web_acl.web.arn
   origin {
     domain_name              = aws_s3_bucket.web.bucket_regional_domain_name

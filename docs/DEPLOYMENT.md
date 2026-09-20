@@ -10,7 +10,7 @@
 
 ## 현재 상태
 
-2026-09-20에 Terraform을 적용했고 `https://app.meet-me.co.kr`을 공개했다. CloudFront Free 정액 플랜은 PricingPlanManager API로 관리하며, 가입 전에는 일반 종량제다. 계정은 `PAID / ACTIVE`이고 Free 플랜은 유료 승인이 없는 월 $0 플랜이다.
+2026-09-20에 Terraform을 적용했고 `https://app.meet-me.co.kr`을 공개했다. CloudFront 배포판, WAF와 Route 53 zone은 PricingPlanManager의 `FREE / ACTIVE` 구독에 연결됐다. 계정은 `PAID / ACTIVE`이고 이 구독은 유료 승인이 없는 월 $0 플랜이다.
 
 Free 플랜은 AWS 관리형 캐시·응답 헤더 정책과 전용 WAF Web ACL을 사용해야 한다. 현재 인프라는 이 조건에 맞춰 `Managed-CachingOptimized`, `Managed-SecurityHeadersPolicy`, IP rate-limit WAF 규칙을 사용한다.
 

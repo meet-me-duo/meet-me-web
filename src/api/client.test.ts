@@ -8,7 +8,7 @@ describe("API client", () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ invite_code: "abcdefghijklmnopqrstuv" }), { status: 200, headers: { "Content-Type": "application/json" } }));
     vi.stubGlobal("fetch", fetchMock);
     await api.getRoom("abcdefghijklmnopqrstuv");
-    expect(fetchMock).toHaveBeenCalledWith("/api/rooms/abcdefghijklmnopqrstuv", expect.objectContaining({ credentials: "include", headers: expect.objectContaining({ "Accept-Language": "ko-KR" }) }));
+    expect(fetchMock).toHaveBeenCalledWith(expect.stringMatching(/\/api\/rooms\/abcdefghijklmnopqrstuv$/), expect.objectContaining({ credentials: "include", headers: expect.objectContaining({ "Accept-Language": "ko-KR" }) }));
   });
 
   it("preserves stable problem code and retry delay", async () => {

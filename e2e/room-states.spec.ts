@@ -46,8 +46,6 @@ async function mockRoom(page: Page, status: string, options: { joined?: boolean;
   });
 }
 
-test.beforeEach(async ({}, testInfo) => test.skip(testInfo.project.name === "mobile", "상태 매트릭스는 desktop에서 검증"));
-
 test("a new browser is asked to join before seeing the room", async ({ page }) => {
   await mockRoom(page, "COLLECTING", { joined: false });
   await page.goto(`/rooms/${code}`);

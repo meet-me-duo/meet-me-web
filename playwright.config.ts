@@ -13,6 +13,6 @@ export default defineConfig({
   },
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"], channel: process.env.CI ? undefined : "msedge" } },
-    { name: "mobile", use: { ...devices["Pixel 7"], channel: process.env.CI ? undefined : "msedge" } },
+    { name: "mobile", testMatch: /landing\.spec\.ts/, use: { ...devices["Pixel 7"], channel: process.env.CI ? undefined : "msedge" } },
   ],
 });

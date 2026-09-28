@@ -26,6 +26,7 @@ export default function App() {
     <Shell>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/create" element={<LandingPage key="create" creating />} />
         <Route path="/rooms/:inviteCode" element={<RoomPage />} />
         <Route path="*" element={<div className="center-state"><h1>페이지를 찾을 수 없어요</h1><Link className="button primary" to="/">홈으로 돌아가기</Link></div>} />
       </Routes>

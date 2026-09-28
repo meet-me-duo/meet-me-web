@@ -41,18 +41,14 @@ const MODE_OPTIONS: { value: MeetingMode; label: string; detail: string }[] = [
   { value: "REMOTE", label: "비대면", detail: "온라인으로 진행" },
 ];
 
-export default function LandingPage() {
-  const [creating, setCreating] = useState(false);
+export default function LandingPage({ creating = false }: { creating?: boolean }) {
   const [step, setStep] = useState(1);
   const navigate = useNavigate();
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { hostName: "", purpose: "", meetingMode: "EITHER", searchStart: "", searchEnd: "", useExpected: true, expectedParticipants: "4", useDeadline: false, deadline: "", manualOnly: false },
   });
-  const mutation = useMutation({
-    mutationFn: api.createRoom,
-    onSuccess: (room) => navigate(`/rooms/${room.invite_code}`, { replace: true }),
-  });
+  const mutation = useMutation({ mutationFn: api.createRoom });
   const values = form.watch();
 
   const next = async () => {
@@ -69,7 +65,9 @@ export default function LandingPage() {
       search_start_date: value.searchStart || null,
       search_end_date: value.searchEnd || null,
     };
-    mutation.mutate(body);
+    mutation.mutate(body, {
+      onSuccess: (room) => navigate(`/rooms/${room.invite_code}`, { replace: true }),
+    });
   });
 
   if (!creating) return (
@@ -78,7 +76,7 @@ export default function LandingPage() {
         <div className="eyebrow"><Sparkles size={16} /> 자연어 조건 입력 & 스마트 조율</div>
         <h1>조건만 말하세요,<br />결정은 <span>Meet me</span>가 할게요</h1>
         <p>일정 색칠하기와 눈치게임은 이제 그만.<br />각자의 조건을 비공개로 모아 최적의 약속 플랜을 제안해요.</p>
-        <button className="button primary hero-cta" onClick={() => setCreating(true)}>모임 만들기 <ArrowRight size={20} /></button>
+        <button className="button primary hero-cta" onClick={() => navigate("/create")}>모임 만들기 <ArrowRight size={20} /></button>
       </section>
       <section className="feature-grid" aria-label="Meet me 주요 기능">
         <Feature icon={<MessageSquare />} title="말하듯 조건 작성" description="“화·목 저녁 봉천역 근처”처럼 일상 언어로 편하게 입력하세요." />
@@ -95,7 +93,7 @@ export default function LandingPage() {
   return (
     <div className="form-page page-width narrow">
       <div className="glass-card create-card">
-        <div className="progress-head"><span>Step {step} of 2</span><button className="text-button" onClick={() => { setCreating(false); setStep(1); form.reset(); }}>취소</button></div>
+        <div className="progress-head"><span>Step {step} of 2</span><button className="text-button" onClick={() => navigate("/")}>취소</button></div>
         <div className="progress-track"><div style={{ width: `${step * 50}%` }} /></div>
         {step === 1 ? (
           <div className="form-step">

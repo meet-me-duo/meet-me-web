@@ -13,14 +13,10 @@
 - 실제 서버 생성 OpenAPI SHA-256 `72ade61680b6f2e245eab9216ec168806d196e6bebb8774fc160a606e7e87c46`(24,178 bytes)를 직접 확인해 snapshot/schema를 동기화했다. deprecated 수동 요청 필드의 array/null·빈 items·maxItems 0·ref 없음, PUT 원문 필수 및 성공 non-null, GET·미반영 원문 nullable, CandidateTimeRangeResponse 불변을 assertion으로 검증했다.
 - 최종 `api:check/lint/typecheck/test/build/test:e2e`가 모두 통과했다. 단위/컴포넌트/API 39개, desktop/mobile E2E 43개 통과·모바일 전용 기존 사례의 desktop 실행 1개 조건부 skip이다. 소스 검토에서 자연어만 전송, 자동 저장 없음, 공개 범위 및 읽기 전용 시간 표시 경계를 확인했다.
 
-### 게시 직전 인계 체크포인트
+### 게시 상태
 
-- 요구사항·계약은 위 2026-10-03 기록과 ARCHITECTURE/DEPLOYMENT를 기준으로 한다. 자연어 전용 입력, legacy 원본 보존·새 분석 안전 미반영, 후보·확정 시간 유지가 범위다. 웹은 기존 Codex(w1:p2), 서버는 기존 Codex(w1:p1), 독립 리뷰·배포 조율은 부모 조율자가 담당한다. 추가 pane/session 생성·clear·종료 없이 기존 작업을 이어간다.
-- 이번 기능만 commit/push/PR/merge/deploy 및 이전 게시 금지 해제에 직접 사용자 승인이 있다. 원문 참조는 조율자 실행 대화의 실제 role=user 메시지 `01a10204-35db-72e9-ae33-eef1a07ae646`, 원본 부모 thread `01a0f13c-c38d-764e-994b-900a645ca035`다. **이 기록은 원문 위치·범위의 인계용 메모이며 승인 자체를 대체하지 않는다.**
-- 현재 실행 범위는 feature→main draft PR 및 CI 확인까지다. 조율자의 PR/CI 검토 완료 신호 전에는 merge/deploy하지 않는다. 배포 순서는 웹→새 실제 공개 번들의 API 전부 mocked/unknown aborted 검증→서버다. 로그인·권한·신뢰·비밀·인프라·비용 변경 및 운영 데이터 쓰기는 금지한다.
-- 기록 시 branch는 `feature/natural-language-only-submission`, HEAD와 최신 origin/main은 모두 `4816f4583f958e747b35a2085f88323458464aae`(원격 차이 0/0)다. 이번 기능 19개 파일이 미커밋 staged 상태이고 원격 feature는 아직 없다. 기존 사용자 변경은 없었으며 임시 smoke 자료는 ignored test-results에 보존한다. Git 조회는 정상 OS 사용자에서 수행하며 sandbox ownership 거부를 safe.directory로 우회하지 않는다.
-- 검증 지문: API SHA는 위 `72ade616…` 24,178 bytes, production build `dist/assets/index-UMRQEftM.js` SHA-256 `9c299237a1fc93ce1ea9a629f52b581ea310bd1c3a89c5b8101fb9cce7e04460`, RoomPage SHA-256 `9b49417bd018bc30dfaee46d605c9f89393d6c5bea2c0f86cafffa357afa22cc`, submission helper SHA-256 `23775123fdc8d39549c52fdabbd1efb2c8f99736656712309904b498435b7481`다. 조율자는 서버 152/웹 30 파일의 독립 지문 변경 0을 확인했다. 이 체크포인트 추가는 문서 변경이며 검증된 제품 코드는 변경하지 않는다.
-- 서버 관련 Issue는 #83이다. 웹 PR/원격 feature CI는 아직 생성 전이며 운영 배포도 미실행이다. 다음 동작은 이 기록을 restage하고 staged 19개 경로·diff·API 지문 재확인→기능 commit→feature push→draft PR 생성→해당 head의 실제 verify CI 확인이다. 그 안전 경계에서 test-results/handoff-current.md에 실제 HEAD·PR/CI URL·원격 차이와 정확한 다음 동작을 갱신해 부모에게 보고한다.
+- 기능 구현 커밋은 `911785c6ec39a66b86a99314c14ae5c7663abc17`, 브랜치는 `feature/natural-language-only-submission`, 웹 draft PR은 [#4](https://github.com/meet-me-duo/meet-me-web/pull/4)다. 구현 커밋의 verify CI가 성공했으며 문서 정리 커밋의 head도 PR checks에서 확인한다. 기능/API 검증 결과와 배포 순서는 위 기록을 유지한다.
+- 현재 main merge·운영 배포는 미실행이다. 조율자의 PR/CI 검토 완료 신호 전에는 ready/merge/deploy하지 않으며, 웹 배포→새 실제 공개 번들의 모든 API 목·unknown 차단 검증→서버 배포 순서로 진행한다.
 
 ## 2026-09-20
 

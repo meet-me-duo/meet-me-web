@@ -3,10 +3,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, CheckCircle2, Clock3, Copy, LoaderCircle, LockKeyhole, RefreshCw, Share2, Sparkles, TriangleAlert, Users } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { api, ApiError, errorMessage } from "../api/client";
-import type { ManualAvailability, Room, Submission } from "../api/types";
+import type { Room, Submission } from "../api/types";
 import { CandidateCard } from "../components/CandidateCard";
-import { TimeGrid } from "../components/TimeGrid";
 import { formatDate, formatDateTime } from "../utils/time";
+import { submissionText, SUBMISSION_TEXT_LIMIT } from "../utils/submission";
 
 export default function RoomPage() {
   const { inviteCode = "" } = useParams();
@@ -33,7 +33,7 @@ export default function RoomPage() {
       {room.public_status === "ANALYZING" && <StateCard icon={<LoaderCircle className="spin" />} title="모두의 조건을 분석하고 있어요" body="입력은 안전하게 저장됐어요. 최적의 플랜을 만드는 데 잠시 시간이 걸릴 수 있어요." />}
       {room.public_status === "INSUFFICIENT_PARTICIPANTS" && <StateCard icon={<Users />} title="조율에 필요한 인원이 부족해요" body="최소 두 명의 제출이 필요해 후보를 만들지 않았어요." />}
       {room.public_status === "ANALYSIS_DELAYED" && <DelayedState room={room} onRetried={setRoom} />}
-      {room.public_status === "NO_MATCH" && <StateCard icon={<AlertCircle />} title="모두에게 맞는 후보를 찾지 못했어요" body="입력은 정상적으로 분석됐지만 겹치는 조건이 없었어요. 다음 모임에서는 탐색 기간이나 조건을 조금 넓혀 보세요." />}
+      {room.public_status === "NO_MATCH" && <><StateCard icon={<AlertCircle />} title="모두에게 맞는 후보를 찾지 못했어요" body="반영 가능한 조건에서 함께할 일정을 찾지 못했어요. 일부 입력은 반영되지 않았을 수 있어요. 다음 모임에서는 탐색 기간이나 조건을 조정해 보세요." />{room.viewer.role === "HOST" && <UnappliedInputs room={room} />}</>}
       {(room.public_status === "READY" || room.public_status === "READY_WITH_WARNINGS") && <CandidatesPanel room={room} />}
       {room.public_status === "CONFIRMED" && <ResultPanel room={room} />}
     </div>
@@ -56,7 +56,6 @@ function JoinRoom({ room, onJoined }: { room: Room; onJoined: (room: Room) => vo
 function SubmissionPanel({ room, onRoomChanged }: { room: Room; onRoomChanged: (room: Room) => void }) {
   const queryClient = useQueryClient();
   const [rawText, setRawText] = useState("");
-  const [availability, setAvailability] = useState<ManualAvailability[]>([]);
   const [loadedRevision, setLoadedRevision] = useState<number | null>(null);
   const submissionQuery = useQuery<Submission | null>({
     queryKey: ["submission", room.invite_code],
@@ -65,12 +64,11 @@ function SubmissionPanel({ room, onRoomChanged }: { room: Room; onRoomChanged: (
   useEffect(() => {
     if (submissionQuery.data && submissionQuery.data.revision !== loadedRevision) {
       setRawText(submissionQuery.data.raw_text ?? "");
-      setAvailability(submissionQuery.data.manual_available_times);
       setLoadedRevision(submissionQuery.data.revision);
     }
   }, [submissionQuery.data, loadedRevision]);
   const save = useMutation({
-    mutationFn: () => api.saveSubmission(room.invite_code, { raw_text: rawText.trim() || null, manual_available_times: availability }),
+    mutationFn: () => api.saveSubmission(room.invite_code, { raw_text: submissionText(rawText).text }),
     onSuccess: async (submission) => { queryClient.setQueryData(["submission", room.invite_code], submission); setLoadedRevision(submission.revision); const latest = await api.getRoom(room.invite_code); onRoomChanged(latest); },
   });
   const close = useMutation({
@@ -85,9 +83,10 @@ function SubmissionPanel({ room, onRoomChanged }: { room: Room; onRoomChanged: (
       }
     },
   });
-  const valid = Boolean(rawText.trim()) || availability.length > 0;
+  const { length, valid } = submissionText(rawText);
+  const legacyManualOnly = submissionQuery.data?.raw_text === null;
 
-  return <div className="submission-layout"><section className="glass-card submission-card"><div className="section-heading"><span className="eyebrow subtle"><LockKeyhole size={14} /> 나만 볼 수 있는 입력</span><h2>{loadedRevision ? "내 조건을 수정해 주세요" : "가능한 조건을 알려주세요"}</h2><p>자연어 또는 시간표 중 편한 방법 하나만 사용해도 괜찮아요.</p></div>{submissionQuery.isPending ? <div className="inline-loading"><LoaderCircle className="spin" /> 기존 입력 확인 중…</div> : submissionQuery.isError ? <div className="alert error">{errorMessage(submissionQuery.error)}</div> : <><label className="field"><span>시간·장소 조건 <small>선택</small></span><textarea maxLength={500} rows={4} value={rawText} onChange={(event) => setRawText(event.target.value)} placeholder="예: 화요일과 목요일 저녁, 봉천역 근처면 좋아요. 비대면도 가능해요." /><small className="character-count">{Array.from(rawText).length}/500</small></label><TimeGrid room={room} value={availability} onChange={setAvailability} /><div className="submission-footer"><div>{loadedRevision ? <span className="saved-revision"><CheckCircle2 size={16} /> 저장된 입력 #{loadedRevision}</span> : <span className="field-hint">조건은 마감 전까지 수정할 수 있어요.</span>}</div><button className="button primary" onClick={() => save.mutate()} disabled={!valid || save.isPending}>{save.isPending ? "저장 중…" : loadedRevision ? "수정 내용 저장" : "조건 제출하기"}</button></div>{save.isError && <div className="alert error">{errorMessage(save.error)}</div>}{save.isSuccess && <div className="alert success" role="status">조건이 안전하게 저장됐어요.</div>}</>}</section><aside className="room-sidebar"><div className="glass-card side-card"><h3>진행 상황</h3><StatusLine icon={<Users />} label="마감 조건" value={room.expected_participants ? `${room.expected_participants}명 제출` : room.submission_deadline ? formatDateTime(room.submission_deadline) : "주최자 수동 마감"} /><StatusLine icon={<Clock3 />} label="탐색 기간" value={`${formatDate(room.search_start_date)} ~ ${formatDate(room.search_end_date)} 전`} /></div>{room.viewer.role === "HOST" && <div className="glass-card side-card host-tools"><h3>주최자 도구</h3><p>필요한 입력이 모였다면 자동 조건 전에도 마감할 수 있어요.</p><button className="button danger-outline wide" onClick={() => close.mutate(false)} disabled={close.isPending}>{close.isPending ? "마감 중…" : "입력 마감하기"}</button>{close.isError && !(close.error instanceof ApiError && close.error.problem.code === "EARLY_CLOSE_CONFIRMATION_REQUIRED") && <div className="alert error">{errorMessage(close.error)}</div>}</div>}</aside></div>;
+  return <div className="submission-layout"><section className="glass-card submission-card"><div className="section-heading"><span className="eyebrow subtle"><LockKeyhole size={14} /> 나만 볼 수 있는 입력</span><h2>{loadedRevision ? "내 조건을 수정해 주세요" : "가능한 조건을 알려주세요"}</h2><p>가능한 시간과 장소 조건을 자연어로 입력해 주세요.</p></div>{submissionQuery.isPending ? <div className="inline-loading"><LoaderCircle className="spin" /> 기존 입력 확인 중…</div> : submissionQuery.isError ? <div className="alert error">{errorMessage(submissionQuery.error)}</div> : <>{legacyManualOnly && <div className="alert warning" role="status">기존 시간표 입력은 보존되어 있어요. 가능한 시간을 자연어로 다시 입력하고 저장해 주세요.</div>}<label className="field"><span>시간·장소 조건 <small>필수</small></span><textarea aria-describedby="submission-count submission-hint" aria-invalid={length > SUBMISSION_TEXT_LIMIT} rows={4} value={rawText} onChange={(event) => setRawText(event.target.value)} placeholder="예: 화요일과 목요일 저녁, 봉천역 근처면 좋아요. 비대면도 가능해요." /><small id="submission-count" className={`character-count ${length > SUBMISSION_TEXT_LIMIT ? "field-error" : ""}`}>{length}/{SUBMISSION_TEXT_LIMIT}</small></label><p id="submission-hint" className="field-hint">앞뒤 공백을 제외하고 1~500자로 입력해 주세요.</p><div className="submission-footer"><div>{loadedRevision ? <span className="saved-revision"><CheckCircle2 size={16} /> 저장된 입력 #{loadedRevision}</span> : <span className="field-hint">조건은 마감 전까지 수정할 수 있어요.</span>}</div><button className="button primary" onClick={() => save.mutate()} disabled={!valid || save.isPending || submissionQuery.data?.editable === false}>{save.isPending ? "저장 중…" : loadedRevision ? "수정 내용 저장" : "조건 제출하기"}</button></div>{save.isError && <div className="alert error">{errorMessage(save.error)}</div>}{save.isSuccess && <div className="alert success" role="status">조건이 안전하게 저장됐어요.</div>}</>}</section><aside className="room-sidebar"><div className="glass-card side-card"><h3>진행 상황</h3><StatusLine icon={<Users />} label="마감 조건" value={room.expected_participants ? `${room.expected_participants}명 제출` : room.submission_deadline ? formatDateTime(room.submission_deadline) : "주최자 수동 마감"} /><StatusLine icon={<Clock3 />} label="탐색 기간" value={`${formatDate(room.search_start_date)} ~ ${formatDate(room.search_end_date)} 전`} /></div>{room.viewer.role === "HOST" && <div className="glass-card side-card host-tools"><h3>주최자 도구</h3><p>필요한 입력이 모였다면 자동 조건 전에도 마감할 수 있어요.</p><button className="button danger-outline wide" onClick={() => close.mutate(false)} disabled={close.isPending}>{close.isPending ? "마감 중…" : "입력 마감하기"}</button>{close.isError && !(close.error instanceof ApiError && close.error.problem.code === "EARLY_CLOSE_CONFIRMATION_REQUIRED") && <div className="alert error">{errorMessage(close.error)}</div>}</div>}</aside></div>;
 }
 
 function DelayedState({ room, onRetried }: { room: Room; onRetried: (room: Room) => void }) {
@@ -98,11 +97,15 @@ function DelayedState({ room, onRetried }: { room: Room; onRetried: (room: Room)
 function CandidatesPanel({ room }: { room: Room }) {
   const queryClient = useQueryClient();
   const candidates = useQuery({ queryKey: ["candidates", room.invite_code], queryFn: () => api.getCandidates(room.invite_code) });
-  const unapplied = useQuery({ queryKey: ["unapplied", room.invite_code], queryFn: () => api.getUnappliedInputs(room.invite_code), enabled: room.public_status === "READY_WITH_WARNINGS" && room.viewer.role === "HOST" });
   const confirm = useMutation({ mutationFn: (id: string) => api.confirmCandidate(room.invite_code, id), onSuccess: () => queryClient.invalidateQueries({ queryKey: ["room", room.invite_code] }), onError: (error) => { if (error instanceof ApiError && error.problem.code === "CANDIDATE_ALREADY_CONFIRMED") queryClient.invalidateQueries({ queryKey: ["room", room.invite_code] }); } });
   if (candidates.isPending) return <StateCard icon={<LoaderCircle className="spin" />} title="후보를 불러오고 있어요" />;
   if (candidates.isError) return <StateCard icon={<AlertCircle />} title="후보를 불러오지 못했어요" body={errorMessage(candidates.error)} action={<button className="button secondary" onClick={() => candidates.refetch()}>다시 시도</button>} />;
-  return <section className="results-section"><div className="section-heading centered"><span className="eyebrow subtle"><Sparkles size={15} /> 스마트 조율 완료</span><h2>모두에게 가장 좋은 플랜이에요</h2><p>서버가 계산한 우선순위대로 보여드려요. {room.viewer.role === "HOST" ? "하나를 골라 확정해 주세요." : "주최자가 최종 플랜을 고르는 중이에요."}</p></div>{candidates.data.quality === "PARTIAL" && <div className="alert warning"><TriangleAlert size={18} /> 일부 자연어 조건을 해석하지 못해 가능한 입력만으로 만든 결과예요. ({candidates.data.applied_submissions}/{candidates.data.total_submissions}개 반영)</div>}<div className="candidate-list">{candidates.data.candidates.map((candidate) => <CandidateCard key={candidate.candidate_id} candidate={candidate} canConfirm={room.viewer.role === "HOST"} pending={confirm.isPending} onConfirm={() => { if (window.confirm(`Plan ${candidate.plan_type}을 최종 일정으로 확정할까요?`)) confirm.mutate(candidate.candidate_id); }} />)}</div>{confirm.isError && <div className="alert error">{errorMessage(confirm.error)}</div>}{room.public_status === "READY_WITH_WARNINGS" && room.viewer.role === "HOST" && <details className="unapplied glass-card"><summary>반영되지 않은 입력 {candidates.data.unapplied_inputs}개 확인</summary>{unapplied.isPending ? <p>불러오는 중…</p> : unapplied.data?.map((item) => <article key={`${item.participant_display_name}-${item.raw_text}`}><strong>{item.participant_display_name}</strong><p>{item.raw_text}</p><small>{item.reason}</small></article>)}</details>}</section>;
+  return <section className="results-section"><div className="section-heading centered"><span className="eyebrow subtle"><Sparkles size={15} /> 스마트 조율 완료</span><h2>모두에게 가장 좋은 플랜이에요</h2><p>서버가 계산한 우선순위대로 보여드려요. {room.viewer.role === "HOST" ? "하나를 골라 확정해 주세요." : "주최자가 최종 플랜을 고르는 중이에요."}</p></div>{candidates.data.quality === "PARTIAL" && <div className="alert warning"><TriangleAlert size={18} /> 일부 입력이 반영되지 않아 반영 가능한 조건으로 만든 결과예요. ({candidates.data.applied_submissions}/{candidates.data.total_submissions}개 반영)</div>}<div className="candidate-list">{candidates.data.candidates.map((candidate) => <CandidateCard key={candidate.candidate_id} candidate={candidate} canConfirm={room.viewer.role === "HOST"} pending={confirm.isPending} onConfirm={() => { if (window.confirm(`Plan ${candidate.plan_type}을 최종 일정으로 확정할까요?`)) confirm.mutate(candidate.candidate_id); }} />)}</div>{confirm.isError && <div className="alert error">{errorMessage(confirm.error)}</div>}{room.public_status === "READY_WITH_WARNINGS" && room.viewer.role === "HOST" && <UnappliedInputs room={room} count={candidates.data.unapplied_inputs} />}</section>;
+}
+
+function UnappliedInputs({ room, count }: { room: Room; count?: number }) {
+  const unapplied = useQuery({ queryKey: ["unapplied", room.invite_code], queryFn: () => api.getUnappliedInputs(room.invite_code), enabled: room.viewer.role === "HOST" });
+  return <details className="unapplied glass-card"><summary>반영되지 않은 입력{count === undefined ? "" : ` ${count}개`} 확인</summary>{unapplied.isPending ? <p>불러오는 중…</p> : unapplied.isError ? <div className="alert error">{errorMessage(unapplied.error)}<button className="button secondary" onClick={() => unapplied.refetch()}>다시 시도</button></div> : unapplied.data.length === 0 ? <p>반영되지 않은 입력이 없어요.</p> : unapplied.data.map((item, index) => <article key={index}><strong>{item.participant_display_name}</strong><p>{item.raw_text ?? "기존 시간표만 제출되어 자연어 원문이 없어요."}</p><small>{item.reason === "LEGACY_MANUAL_ONLY_UNSUPPORTED" ? "기존 시간표 입력은 새 분석에서 지원하지 않아 반영되지 않았어요." : item.reason}</small></article>)}</details>;
 }
 
 function ResultPanel({ room }: { room: Room }) {

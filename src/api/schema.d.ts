@@ -179,40 +179,43 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** @description 방 전용 수동 가능 시간 구간 */
-        ManualAvailabilityDto: {
-            /**
-             * @description 명시 날짜 또는 주간 반복 구분
-             * @enum {string}
-             */
-            kind?: "DATED" | "WEEKLY";
-            /**
-             * Format: date
-             * @description DATED 구간의 지역 날짜
-             */
-            date?: string | null;
-            /**
-             * @description WEEKLY 구간의 요일
-             * @enum {string|null}
-             */
-            day_of_week?: "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY" | null;
-            /**
-             * @description 포함 시작 지역 시각
-             * @example 18:00
-             */
-            start_time?: string;
-            /**
-             * @description 제외 종료 지역 시각
-             * @example 20:00
-             */
-            end_time?: string;
+        JsonNode: {
+            array?: boolean;
+            empty?: boolean;
+            null?: boolean;
+            float?: boolean;
+            string?: boolean;
+            container?: boolean;
+            number?: boolean;
+            floatingPointNumber?: boolean;
+            missingNode?: boolean;
+            int?: boolean;
+            /** @enum {string} */
+            nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
+            double?: boolean;
+            bigDecimal?: boolean;
+            bigInteger?: boolean;
+            integralNumber?: boolean;
+            short?: boolean;
+            pojo?: boolean;
+            valueNode?: boolean;
+            object?: boolean;
+            long?: boolean;
+            boolean?: boolean;
+            /** @deprecated */
+            textual?: boolean;
+            binary?: boolean;
+            embeddedValue?: boolean;
         };
-        /** @description 현재 익명 참여자의 조건 제출 또는 수정 요청 */
+        /** @description 현재 익명 참여자의 자연어 제출 또는 수정 요청 */
         SaveSubmissionRequest: {
-            /** @description 선택적인 자연어 시간·장소 조건 */
-            raw_text?: string | null;
-            /** @description 선택적인 방 전용 가능 시간 배열 */
-            manual_available_times?: components["schemas"]["ManualAvailabilityDto"][];
+            /** @description 필수 자연어. ECMAScript trim 후 1~500 Unicode 코드포인트이며 내부 공백은 보존 */
+            raw_text: string;
+            /**
+             * @deprecated
+             * @description 호환 필드: 생략·[]·null만 허용. Nonempty 배열은 SUBMISSION_MANUAL_AVAILABILITY_UNSUPPORTED
+             */
+            manual_available_times?: unknown[] | null;
         };
         /** @description RFC 9457 기반 공통 오류 응답 */
         ApiProblemSchema: {
@@ -268,8 +271,8 @@ export interface components {
              */
             retry_after_seconds?: number | null;
         };
-        /** @description 현재 익명 참여자의 최신 제출 */
-        SubmissionResponse: {
+        /** @description 성공적으로 저장한 자연어 제출. 원문은 항상 non-null */
+        SavedSubmissionResponse: {
             /**
              * Format: int32
              * @description 불변 제출 revision
@@ -279,10 +282,13 @@ export interface components {
             locale?: string;
             /** @description 현재 입력 수집 상태에서 수정 가능한지 여부 */
             editable?: boolean;
-            /** @description 저장된 자연어 조건 */
-            raw_text?: string | null;
-            /** @description 정렬·병합된 방 전용 가능 시간 */
-            manual_available_times?: components["schemas"]["ManualAvailabilityDto"][];
+            /** @description ECMAScript trim 후 저장된 필수 자연어 */
+            raw_text: string;
+            /**
+             * @deprecated
+             * @description 호환용으로 항상 빈 배열
+             */
+            manual_available_times?: unknown[];
             /**
              * Format: date-time
              * @description 현재 revision 저장 시각
@@ -430,14 +436,14 @@ export interface components {
         CandidatePlaceResponse: {
             /**
              * Format: double
-             * @description WGS84 위도
+             * @description Post-MVP 지도 공급자 검증 시 제공되는 WGS84 위도
              */
-            latitude?: number;
+            latitude?: number | null;
             /**
              * Format: double
-             * @description WGS84 경도
+             * @description Post-MVP 지도 공급자 검증 시 제공되는 WGS84 경도
              */
-            longitude?: number;
+            longitude?: number | null;
             /** @description 정규화된 표시 이름 */
             display_name?: string;
         };
@@ -503,6 +509,30 @@ export interface components {
              */
             confirmed_at?: string;
         };
+        /** @description 현재 익명 참여자의 최신 제출 */
+        SubmissionResponse: {
+            /**
+             * Format: int32
+             * @description 불변 제출 revision
+             */
+            revision?: number;
+            /** @description BCP 47 제출 locale */
+            locale?: string;
+            /** @description 현재 입력 수집 상태에서 수정 가능한지 여부 */
+            editable?: boolean;
+            /** @description 저장된 자연어 조건 */
+            raw_text?: string | null;
+            /**
+             * @deprecated
+             * @description 호환용으로 항상 빈 배열. 구 수동 원본은 노출하지 않음
+             */
+            manual_available_times?: unknown[];
+            /**
+             * Format: date-time
+             * @description 현재 revision 저장 시각
+             */
+            created_at?: string;
+        };
         /** @description 후보 생성 결과 */
         CandidateListResponse: {
             /**
@@ -534,8 +564,8 @@ export interface components {
             reason?: string;
             /** @description 입력을 제출한 참여자의 표시 이름 */
             participant_display_name?: string;
-            /** @description 후보에 반영되지 않은 원문 */
-            raw_text?: string;
+            /** @description 후보에 반영되지 않은 원문. 구 슬롯 전용 입력은 null */
+            raw_text?: string | null;
         };
     };
     responses: never;
@@ -620,7 +650,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["SubmissionResponse"];
+                    "*/*": components["schemas"]["SavedSubmissionResponse"];
                 };
             };
             /** @description 입력 계약 위반 */

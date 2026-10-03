@@ -5,6 +5,7 @@ import type {
   CreateRoomBody,
   Room,
   SaveSubmissionBody,
+  SavedSubmission,
   Submission,
   UnappliedInput,
 } from "./types";
@@ -60,7 +61,7 @@ export const api = {
     request<Room>(`/api/rooms/${encode(inviteCode)}/participants`, { method: "POST", body: JSON.stringify({ display_name: displayName }) }),
   getSubmission: (inviteCode: string) => request<Submission>(`/api/rooms/${encode(inviteCode)}/submission`),
   saveSubmission: (inviteCode: string, body: SaveSubmissionBody) =>
-    request<Submission>(`/api/rooms/${encode(inviteCode)}/submission`, { method: "PUT", body: JSON.stringify(body) }),
+    request<SavedSubmission>(`/api/rooms/${encode(inviteCode)}/submission`, { method: "PUT", body: JSON.stringify(body) }),
   closeRoom: (inviteCode: string, confirmEarly = false) =>
     request<Room>(`/api/rooms/${encode(inviteCode)}/close`, { method: "POST", body: JSON.stringify({ confirm_early: confirmEarly }) }),
   retryAnalysis: (inviteCode: string) => request<Room>(`/api/rooms/${encode(inviteCode)}/analysis/retry`, { method: "POST" }),
@@ -80,7 +81,9 @@ export function errorMessage(error: unknown): string {
       HOST_PERMISSION_REQUIRED: "주최자만 실행할 수 있습니다.",
       ROOM_NOT_FOUND: "존재하지 않거나 만료된 모임입니다.",
       ROOM_CLOSED: "이미 입력이 마감된 모임입니다.",
-      SUBMISSION_INPUT_REQUIRED: "자연어 조건이나 가능한 시간을 하나 이상 입력해 주세요.",
+      SUBMISSION_INPUT_REQUIRED: "가능한 시간·장소 조건을 자연어로 입력해 주세요.",
+      SUBMISSION_TEXT_TOO_LONG: "조건은 앞뒤 공백을 제외하고 500자 이하로 입력해 주세요.",
+      SUBMISSION_MANUAL_AVAILABILITY_UNSUPPORTED: "시간표 입력은 더 이상 지원하지 않아요. 가능한 시간을 자연어로 다시 입력해 주세요.",
       ANALYSIS_NOT_DELAYED: "현재는 재분석이 필요한 상태가 아닙니다.",
       CANDIDATES_NOT_READY: "후보를 아직 준비하고 있습니다.",
       CANDIDATE_ALREADY_CONFIRMED: "다른 후보가 이미 확정되었습니다.",

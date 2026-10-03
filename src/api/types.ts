@@ -8,13 +8,14 @@ type RawCandidate = components["schemas"]["CandidateResponse"];
 type RawCandidateList = components["schemas"]["CandidateListResponse"];
 type RawResult = components["schemas"]["ConfirmedResultResponse"];
 type RawSubmission = components["schemas"]["SubmissionResponse"];
+type RawSavedSubmission = components["schemas"]["SavedSubmissionResponse"];
 
 export type MeetingMode = "IN_PERSON" | "REMOTE" | "EITHER";
 export type PublicStatus = "COLLECTING" | "ANALYZING" | "INSUFFICIENT_PARTICIPANTS" | "ANALYSIS_DELAYED" | "NO_MATCH" | "READY" | "READY_WITH_WARNINGS" | "CONFIRMED";
 export type Viewer = Complete<RawViewer>;
 export type Room = Omit<Complete<RawRoom>, "viewer"> & { viewer: Viewer };
-export type ManualAvailability = Complete<components["schemas"]["ManualAvailabilityDto"]>;
-export type Submission = Omit<Complete<RawSubmission>, "manual_available_times"> & { manual_available_times: ManualAvailability[] };
+export type Submission = Omit<Complete<RawSubmission>, "manual_available_times">;
+export type SavedSubmission = Omit<Complete<RawSavedSubmission>, "manual_available_times">;
 export type Candidate = Omit<Complete<RawCandidate>, "time_ranges" | "place"> & {
   time_ranges: Complete<components["schemas"]["CandidateTimeRangeResponse"]>[];
   place: Complete<components["schemas"]["CandidatePlaceResponse"]> | null;
@@ -35,7 +36,4 @@ export interface CreateRoomBody {
   search_end_date: string | null;
 }
 
-export interface SaveSubmissionBody {
-  raw_text: string | null;
-  manual_available_times: ManualAvailability[];
-}
+export type SaveSubmissionBody = Pick<components["schemas"]["SaveSubmissionRequest"], "raw_text">;

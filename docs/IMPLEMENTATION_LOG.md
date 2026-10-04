@@ -1,5 +1,26 @@
 # Implementation log
 
+## 2026-10-04 — scrollytelling 재설계 진행 상태
+
+- 사용자는 로컬 `96fdbf9`의 GIF를 보고 보통 스크롤 속도에서 효과가 너무 짧고 미미하다고 피드백했다. 현재 브랜치는 `feature/scroll-content-reveal`이며 이 커밋은 미게시 상태다. 후속 범위는 로컬 scrollytelling/parallax 구현·미리보기·일반/빠른 스크롤 검증으로 한정하고 push/PR/merge/deploy는 하지 않는다.
+- 현재 구조는 문장·카드의 짧은 CSS entry 범위에서 clip과 위치를 바꾸므로 휠·스와이프가 큰 경우 단계가 쉽게 지나간다. 첫 hero/CTA·브랜드·기존 기능 설명 카피는 유지한다. 설명 장면은 sticky stage로 충분히 머무르게 하고 전경·배경의 이동량을 달리하며 단계별 설명 전환을 설계한다. 스크롤 가로채기·잠금·강제 snap은 사용하지 않는다.
+- 부모가 조사한 실제 참고 사이트를 전달하면 관찰한 상호작용 원리를 반영해 구현한다. 참고 수신 전에는 구조 확인과 설계·검증 준비만 진행한다. reduced-motion·CSS/JS 실패·키보드·짧은 viewport에서는 내용이 자연스럽게 읽히는 fallback을 유지한다. 검증은 작은 delta의 느린 시연 대신 일반 wheel/trackpad delta와 빠른 모바일 스와이프에 해당하는 입력·영상으로 수행한다.
+- 참고 수신 후 [Firewatch](https://www.firewatchgame.com/)의 뚜렷한 레이어 속도 차이, [Pudding](https://pudding.cool/process/scrollytelling-sticky/)의 sticky 무대, [Deep Sea](https://neal.fun/deep-sea/)의 현재 위치로 완결된 상태를 이해하는 원리를 반영했다. 이미지·코드는 복제하지 않았다. 기존 문구·아이콘·팔레트를 사용한 `LandingStory`로 기존 세 기능 설명을 보여준다. hero/CTA·방 생성·결과 화면은 유지한다.
+- desktop 400svh·mobile/tablet 320svh의 한 구간 안에서 CSS sticky 무대가 머문다. 고정 무대 높이를 뺀 실제 진행거리(PC 약 300vh·모바일 약 220vh)를 세 읽기 구간으로 나누며 160~220ms 전환 외에는 완결된 문장을 계속 보여준다. 전경 이동 범위는 PC 190px/작은 모바일 100px, 원경은 520px/360px로 속도 차이를 둔다. 현재 절대 스크롤 위치로 0~1 진행도와 현재 단계를 계산하므로 큰 점프·역스크롤에도 중간 이벤트 순서에 의존하지 않는다.
+- JS는 passive scroll/resize + requestAnimationFrame만 사용하며 스크롤을 취소하거나 감속하지 않는다. 단계 버튼은 키보드로 다시 읽을 수 있고 현재 단계를 aria-current로 표시하며 보이지 않는 패널은 aria-hidden/inert 처리한다. reduced-motion·높이 540px 미만·sticky/RAF 미지원·확대된 본문이 무대에 안 들어오는 경우에는 일반 흐름의 세 정적 패널을 제공한다. 장식 이동으로 발생하는 넘침과 본문 높이를 구분하고 전경 장식은 무대 안에서 clip한다.
+- 기존 api:check·lint·typecheck·단위 테스트 39개·build가 통과했다. 최종 실제 Chrome desktop/mobile 전체 E2E는 81개 통과, 기존 모바일 전용 desktop 검사 1개 조건부 skip이다. sticky 위치 유지·같은 설명의 읽기 구간·원경/전경 이동량 차이·240px wheel·빠른 단계 점프·역스크롤·키보드 버튼/End·RAF 실패·reduced-motion·짧은 화면을 검증했다.
+- 실제 Chrome 153.0.8010.54에서 이전과 같은 11개 viewport의 최초 hero/CTA, 각 완결된 설명 상태, 페이지 끝·가로넘침·200% 텍스트·sticky 미지원·RAF 실패를 확인했다. 320/360/390/430폭 모바일·768×1024·1440×900·1280×600는 sticky 활성, 높이 480/390/320의 짧은 화면·가로모드는 정적 fallback이다. 페이지 오류는 0개였다.
+- 정상/빠른 스크롤 영상은 PC wheel 240px/220ms 및 900px/90ms, 모바일 native touchStart/Move/End(12회×35ms 및 8회×15ms)로 기록했다. 모바일은 viewport의 65%를 드래그하고 들어 올리기 전 100ms 멈추어 끝 상태를 읽으며 실제 브라우저 스크롤을 사용한다. 모든 영상은 현재 위치에 맞는 마지막 완결된 장면으로 끝나고 단계 버튼으로 재방문할 수 있다. GIF는 캡처 타임스탬프 간격을 유지한다. 영상·GIF·전경/원경 측정·viewport 화면·스크립트는 `test-results/landing-scrollytelling-2026-10-04/`에 보존한다. 실제 휴대전화 관성·주소창·Safari는 미검증이다. 기존 로컬 preview 4187을 재사용했으며 원격 push/PR/merge/deploy는 수행하지 않았다.
+
+## 2026-10-04 — 설명 콘텐츠 스크롤 등장 후속 수정
+
+- 운영 Chrome 확인 후 사용자가 밝기 변화보다 설명이 숨겨진 상태에서 스크롤에 따라 분명하게 나타나는 동작을 요청했다. 배포된 main `4690e53`의 깨끗한 상태에서 로컬 `feature/scroll-content-reveal` 브랜치로 후속 작업을 시작했다. 이번 범위는 로컬 구현·미리보기·검증이며 원격 push/PR/merge/deploy를 포함하지 않는다.
+- 문장별 가로 clip 공개와 32px 위치 이동, 카드별 세로 clip 공개와 64px 위치 이동으로 변경한다. 첫 상태는 opacity 0이고 PC의 같은 줄 카드도 순서대로 시작한다. 기존 CSS view timeline을 사용하여 새 JavaScript·observer·스크롤 잠금 없이 구현하며 미지원 CSS·reduced-motion에서는 정적인 전체 내용을 제공한다.
+- 검증 계획: 실제 Chrome의 모바일 320/360/390/430폭·태블릿·PC·짧은 화면·가로모드에서 최초/진입 중/완료 상태, 페이지 끝에서 모든 콘텐츠 공개, 키보드·높이 변화·fallback을 확인하고 PC/모바일 스크롤 동영상과 GIF를 보존한다. 기존 API 검사·lint·typecheck·단위 테스트·build·E2E를 실행한다.
+- 실제 Google Chrome 153.0.8010.54에서 320×568, 360×640, 390×844, 430×932, 768×1024, 1440×900, 320×480, 844×390, 568×320, 844×320, 1280×600의 초기 숨김·진입 중 clip/이동·페이지 끝 전체 공개를 확인했다. 모든 크기에서 가로넘침·브라우저 오류가 없으며 reduced-motion·observer 부재·CSS timeline 미지원 fallback·200% 텍스트·높이 변경·Tab/Enter 이동이 통과했다.
+- 기존 api:check·lint·typecheck·단위 테스트 39개·build가 통과했다. 전체 E2E를 기존 desktop/mobile 설정에 실제 Chrome channel만 임시 지정해 실행했고 79개 통과, 기존 모바일 전용 검사의 desktop 1개는 조건부 skip이다. Chrome clip 완료값의 0px/0% 직렬화 차이는 각 inset 수치가 0인지 확인하는 방식으로 검증했다. 실제 스크롤 좌표의 정수 반올림을 고려하여 범위 끝을 충분히 넘긴 완료 상태와 페이지 끝을 모두 확인했다.
+- 스크롤은 테스트의 실제 wheel 입력으로 기록했다. PC/모바일 WebM 동영상, 그 프레임으로 만든 GIF, 전·중·후 화면과 측정·검증 스크립트는 `test-results/landing-content-reveal-2026-10-04/`에 보존한다. 실제 휴대전화 주소창·Safari는 미검증이며 운영 반영은 이번 요청 범위에 없다.
+
 ## 2026-10-04 — 스크롤 랜딩 UI
 
 - 최신 원격 main을 조회해 `b7bb7a5`와 일치하고 사용자 변경이 없는 것을 확인한 뒤 로컬 `feature/scroll-landing-hero` 브랜치에서 작업했다. 서버 저장소는 수정하지 않았다.

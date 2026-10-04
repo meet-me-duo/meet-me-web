@@ -57,6 +57,8 @@ for (const [width, height] of [[320, 568], [360, 640], [390, 844], [430, 932], [
     const buttonBox = (await action.boundingBox())!;
     expect(buttonBox.y).toBeGreaterThanOrEqual(68);
     expect(buttonBox.y + buttonBox.height).toBeLessThanOrEqual(height);
+    expect(buttonBox.height).toBeCloseTo(56, 2);
+    if (width <= 540) expect(buttonBox.width).toBeCloseTo(width - 24, 2);
     expect((await details.boundingBox())!.y).toBeGreaterThanOrEqual(height);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
 
@@ -85,6 +87,54 @@ test("landing supports keyboard navigation and viewport height changes", async (
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/create$/);
   await expect(page.getByLabel("주최자 이름")).toBeFocused();
+});
+
+test("hero action has strong contrast, keyboard focus and subtle pointer feedback", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  const action = page.getByRole("button", { name: "모임 만들기" });
+  const contrast = await action.evaluate((element) => {
+    const style = getComputedStyle(element);
+    const luminance = (color: string) => {
+      const channels = color.match(/\d+/g)!.slice(0, 3).map((channel) => {
+        const value = Number(channel) / 255;
+        return value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4;
+      });
+      return channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722;
+    };
+    const text = luminance(style.color);
+    const background = luminance(style.backgroundColor);
+    return (Math.max(text, background) + .05) / (Math.min(text, background) + .05);
+  });
+  expect(contrast).toBeGreaterThanOrEqual(4.5);
+  await expect(action).toHaveCSS("background-image", "none");
+  await page.keyboard.press("Tab");
+  await page.keyboard.press("Tab");
+  await expect(action).toBeFocused();
+  expect(await action.evaluate((element) => element.matches(":focus-visible"))).toBe(true);
+  await expect(action).toHaveCSS("outline-width", "3px");
+  await expect(action).toHaveCSS("outline-color", "rgb(15, 23, 42)");
+  await action.hover();
+  await expect.poll(() => action.evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).m42)).toBe(-1);
+  await page.mouse.down();
+  await expect.poll(() => action.evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).m42)).toBe(0);
+  await page.mouse.move(0, 0);
+  await page.mouse.up();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/create$/);
+  await expect(page.getByLabel("주최자 이름")).toBeFocused();
+});
+
+test("hero action stays still for reduced motion", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const action = page.getByRole("button", { name: "모임 만들기" });
+  await action.hover();
+  await expect(action).toHaveCSS("transform", "none");
+  await page.mouse.down();
+  await expect(action).toHaveCSS("transform", "none");
+  await page.mouse.move(0, 0);
+  await page.mouse.up();
 });
 
 test("landing details stay readable with reduced motion and no observer", async ({ page }) => {

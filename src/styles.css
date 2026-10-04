@@ -56,7 +56,11 @@ footer { padding: 28px 16px; color: #94a3b8; font-size: .75rem; text-align: cent
 .button.secondary { border: 1px solid #d6e0ea; background: rgb(255 255 255 / .85); color: #334155; }
 .button.danger-outline { border: 1px solid #fecaca; background: #fffafa; color: #b91c1c; }
 .button.wide { width: 100%; }
-.hero-cta { min-height: 56px; margin-top: 31px; padding-inline: 27px; border-radius: 17px; font-size: 1.05rem; }
+.hero-cta { min-height: 56px; min-width: 224px; max-width: 100%; margin-top: 36px; padding-inline: 32px; border-radius: 17px; font-size: 1.05rem; }
+.button.primary.hero-cta { background: #0369a1; box-shadow: 0 10px 24px -12px var(--sky-dark); }
+.button.primary.hero-cta:hover:not(:disabled) { box-shadow: 0 12px 28px -10px var(--sky-dark); }
+.button.primary.hero-cta:active:not(:disabled) { box-shadow: 0 5px 14px -10px var(--sky-dark); }
+.hero-cta:focus-visible { outline-color: #0f172a; outline-offset: 4px; }
 .glass-card { border: 1px solid rgb(255 255 255 / .9); background: rgb(255 255 255 / .76); box-shadow: var(--shadow); backdrop-filter: blur(16px); }
 .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
 .feature { padding: 25px; border-radius: 22px; }
@@ -186,6 +190,7 @@ fieldset.field legend { margin-bottom: 9px; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+@media (prefers-reduced-motion: reduce) { .hero-cta:hover:not(:disabled), .hero-cta:active:not(:disabled) { transform: none; } }
 
 @media (max-width: 780px) {
   .feature-grid { grid-template-columns: 1fr; }
@@ -202,6 +207,7 @@ fieldset.field legend { margin-bottom: 9px; }
   .header-inner, .page-width { width: min(100% - 24px, 1100px); }
   .mvp-badge { display: none; }
   .hero h1 { font-size: clamp(1.6rem, 6.8vw, 2.3rem); }
+  .hero-cta { width: 100%; }
   .two-columns, .mode-grid, .room-sidebar { grid-template-columns: 1fr; }
   .mode-grid { gap: 7px; }
   .mode-grid button { min-height: 55px; }

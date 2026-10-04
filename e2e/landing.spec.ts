@@ -1,9 +1,5 @@
 import { expect, test } from "@playwright/test";
 
-function isUnclipped(element: Element) {
-  const clip = getComputedStyle(element).clipPath;
-  return clip === "none" || clip.match(/[\d.]+/g)!.every((value) => Number(value) === 0);
-}
 
 test("landing page starts the two-step room flow", async ({ page }) => {
   await page.goto("/");
@@ -160,74 +156,79 @@ test("landing details stay readable with reduced motion and no observer", async 
   await expect(page.getByRole("heading", { name: "블라인드 일정 입력" })).toBeVisible();
 });
 
-test("each feature reveals progressively while entering the viewport", async ({ page }) => {
+test("sticky story holds a complete explanation and its layers move at different speeds", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
-  test.skip(!await page.evaluate(() => CSS.supports("animation-timeline", "view()")), "Static accessible fallback for browsers without scroll timelines");
-  const feature = page.locator(".feature").first();
-  await expect(feature).toHaveCSS("opacity", "0");
-  await expect(feature).toHaveCSS("clip-path", "inset(0px 0px 100%)");
-  const position = await feature.evaluate((element) => {
-    const bounds = element.getBoundingClientRect();
-    const translation = new DOMMatrix(getComputedStyle(element).transform).m42;
-    return { top: bounds.top + scrollY - translation, height: bounds.height };
+  const story = page.locator(".story");
+  await expect(story).toHaveAttribute("data-enhanced", "true");
+  const position = await story.evaluate((element) => {
+    const stage = element.querySelector<HTMLElement>(".story-stage")!;
+    return { start: element.getBoundingClientRect().top + scrollY - Number.parseFloat(getComputedStyle(stage).top), distance: element.clientHeight - stage.offsetHeight };
   });
-  await page.evaluate(({ top, height }) => scrollTo(0, top - innerHeight + height * .7), position);
-  await expect.poll(() => feature.evaluate((element) => Number(getComputedStyle(element).opacity))).toBeGreaterThan(0);
-  expect(await feature.evaluate((element) => Number(getComputedStyle(element).opacity))).toBeLessThan(1);
-  const movement = await feature.evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).m42);
-  expect(movement).toBeGreaterThan(0);
-  expect(movement).toBeLessThan(64);
-  expect(await feature.evaluate(isUnclipped)).toBe(false);
-  await page.evaluate(({ top, height }) => scrollTo(0, top - innerHeight + height * 1.8), position);
-  await expect(feature).toHaveCSS("opacity", "1");
-  await expect.poll(() => feature.evaluate(isUnclipped)).toBe(true);
-  expect(await feature.evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).m42)).toBe(0);
+  const snapshots = [];
+  for (const fraction of [.06, .28]) {
+    await page.evaluate(({ start, distance, fraction }) => scrollTo(0, start + distance * fraction), { ...position, fraction });
+    await expect(story.getByRole("heading", { name: "말하듯 조건 작성" })).toBeInViewport();
+    await expect(story.locator('[data-current="true"]')).toHaveCSS("opacity", "1");
+    snapshots.push(await story.evaluate((element) => ({
+      top: element.querySelector(".story-stage")!.getBoundingClientRect().top,
+      far: new DOMMatrix(getComputedStyle(element.querySelector(".story-backdrop i")!).transform).m42,
+      near: new DOMMatrix(getComputedStyle(element.querySelector('[data-current="true"] .story-art')!).transform).m42,
+    })));
+  }
+  expect(snapshots[1].top).toBeCloseTo(snapshots[0].top, 1);
+  expect(Math.abs(snapshots[1].far - snapshots[0].far)).toBeGreaterThan(Math.abs(snapshots[1].near - snapshots[0].near) * 2);
+  expect(position.distance).toBeGreaterThan(page.viewportSize()!.height * 2);
 });
 
-test("desktop cards unfold in sequence and all details finish before the page ends", async ({ page }) => {
+test("normal wheel and a fast jump resolve the story from current position, including reverse scroll", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
-  test.skip(!await page.evaluate(() => CSS.supports("animation-timeline", "view()")), "Static accessible fallback for browsers without scroll timelines");
-  const cards = page.locator(".feature");
-  const top = await cards.first().evaluate((element) => element.getBoundingClientRect().top + scrollY - new DOMMatrix(getComputedStyle(element).transform).m42);
-  const height = (await cards.first().boundingBox())!.height;
-  await page.evaluate(({ top, height }) => scrollTo(0, top - innerHeight + height * .4), { top, height });
-  await expect.poll(() => cards.first().evaluate((element) => Number(getComputedStyle(element).opacity))).toBeGreaterThan(0);
-  const progress = await cards.evaluateAll((elements) => elements.map((element) => Number(getComputedStyle(element).opacity)));
-  expect(progress[0]).toBeGreaterThan(progress[1]);
-  expect(progress[1]).toBeGreaterThan(progress[2]);
-  expect(progress[2]).toBe(0);
-  await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
-  for (const element of await page.locator(".landing-reveal").all()) {
-    await expect(element).toHaveCSS("opacity", "1");
-    await expect.poll(() => element.evaluate(isUnclipped)).toBe(true);
-  }
+  const story = page.locator(".story");
+  await expect(story).toHaveAttribute("data-enhanced", "true");
+  const position = await story.evaluate((element) => {
+    const stage = element.querySelector<HTMLElement>(".story-stage")!;
+    return { start: element.getBoundingClientRect().top + scrollY - Number.parseFloat(getComputedStyle(stage).top), distance: element.clientHeight - stage.offsetHeight };
+  });
+  await page.evaluate(({ start }) => scrollTo(0, start), position);
+  for (let i=0;i<3;i++) await page.mouse.wheel(0, 240);
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(position.start + 500);
+  const target = position.start + position.distance * .9;
+  const current = await page.evaluate(() => scrollY);
+  await page.mouse.wheel(0, target - current);
+  await expect(story.getByRole("heading", { name: "Plan A·B·C 제안" })).toBeVisible();
+  await expect(story.getByText("복잡한 비교 대신 우선순위가 정해진 후보 중 하나만 고르면 돼요.")).toBeVisible();
+  await expect(story.getByRole("button", { name: /Plan A/ })).toHaveAttribute("aria-current", "step");
+  await page.mouse.wheel(0, -(position.distance * .4));
+  await expect(story.getByRole("heading", { name: "블라인드 일정 입력" })).toBeVisible();
+  await expect(story.locator('[data-current="true"]')).toHaveCSS("opacity", "1");
 });
 
-test("sentences uncover their text with scroll and the static fallback remains readable", async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.addInitScript(() => { Object.defineProperty(window, "IntersectionObserver", { value: undefined }); });
+test("story steps can be revisited with the keyboard without a scroll lock", async ({ page }) => {
   await page.goto("/");
-  const sentences = page.locator(".landing-sentence");
-  test.skip(!await page.evaluate(() => CSS.supports("animation-timeline", "view()")), "Static accessible fallback for browsers without scroll timelines");
-  await expect(sentences.first()).toHaveCSS("opacity", "0");
-  await expect(sentences.first()).toHaveCSS("clip-path", "inset(0px 100% 0px 0px)");
-  const position = await sentences.first().evaluate((element) => ({top:element.getBoundingClientRect().top+scrollY-new DOMMatrix(getComputedStyle(element).transform).m42,height:element.getBoundingClientRect().height}));
-  await page.evaluate(({top,height})=>scrollTo(0,top-innerHeight+height*.8),position);
-  await expect.poll(() => sentences.first().evaluate((element) => Number(getComputedStyle(element).opacity))).toBeGreaterThan(0);
-  expect(await sentences.first().evaluate((element) => Number(getComputedStyle(element).opacity))).toBeLessThan(1);
-  expect(await sentences.first().evaluate(isUnclipped)).toBe(false);
-  await page.evaluate(() => {
-    for (const sheet of document.styleSheets) for (let i=sheet.cssRules.length-1;i>=0;i--) {
-      const rule=sheet.cssRules[i];
-      if(rule instanceof CSSSupportsRule && rule.conditionText.includes("animation-timeline")) sheet.deleteRule(i);
-    }
-  });
-  for (const element of await page.locator(".landing-reveal").all()) {
-    await expect(element).toHaveCSS("opacity", "1");
-    await expect(element).toHaveCSS("transform", "none");
-    await expect(element).toHaveCSS("clip-path", "none");
+  const story = page.locator(".story");
+  await expect(story).toHaveAttribute("data-enhanced", "true");
+  const button = story.getByRole("button", { name: /Plan A/ });
+  await button.focus();
+  await page.keyboard.press("Enter");
+  await expect(button).toBeFocused();
+  await expect(story.getByRole("heading", { name: "Plan A·B·C 제안" })).toBeInViewport();
+  await page.keyboard.press("End");
+  await expect(page.getByRole("heading", { name: "링크 하나로 시작하는 일정 조율" })).toBeInViewport();
+});
+
+test("story animation failure and short viewports leave all three static panels readable", async ({ page }) => {
+  await page.addInitScript(() => { Object.defineProperty(window, "requestAnimationFrame", { value: undefined }); });
+  await page.goto("/");
+  const story = page.locator(".story");
+  for (const panel of await story.locator(".story-panel").all()) {
+    await expect(panel).toHaveCSS("opacity", "1");
+    await expect(panel).not.toHaveAttribute("inert", "");
+    await expect(panel.getByRole("heading")).toBeVisible();
   }
+  await page.setViewportSize({ width: 844, height: 320 });
+  await page.reload();
+  await expect(story.locator(".story-stage")).toHaveCSS("position", "static");
+  await expect(story.getByRole("heading", { name: "블라인드 일정 입력" })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(844);
 });

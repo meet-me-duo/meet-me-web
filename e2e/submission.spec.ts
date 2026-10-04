@@ -7,7 +7,7 @@ const candidate = {
   time_ranges: [{ start_at: "2026-09-22T10:00:00Z", end_at: "2026-09-22T12:00:00Z" }], place: null, summary: "화요일 저녁 비대면 일정",
 };
 
-async function mockApi(page: Page, options: { rawText?: string | null; status?: string; role?: "HOST" | "MEMBER"; failSave?: boolean; oldServer?: boolean } = {}) {
+async function mockApi(page: Page, options: { rawText?: string | null; status?: string; role?: "HOST" | "MEMBER"; failSave?: boolean; oldServer?: boolean; unappliedReason?: string; emptyCandidates?: boolean } = {}) {
   const status = options.status ?? "COLLECTING";
   let stored = options.rawText === undefined ? null : { revision: 1, raw_text: options.rawText, locale: "ko-KR", created_at: "2026-09-20T12:00:00Z", editable: true, manual_available_times: options.oldServer ? [{ kind: "DATED", date: "2026-09-22", day_of_week: null, start_time: "18:00", end_time: "20:00" }] : [] };
   const puts: unknown[] = [];
@@ -30,9 +30,9 @@ async function mockApi(page: Page, options: { rawText?: string | null; status?: 
     }
     if (url.endsWith("/unapplied-inputs")) {
       unappliedRequests.push(url);
-      return route.fulfill({ json: [{ participant_display_name: "레거시 참여자", raw_text: null, reason: "LEGACY_MANUAL_ONLY_UNSUPPORTED" }, { participant_display_name: "다른 참여자", raw_text: "비공개 조건 원문", reason: "PARSE_FAILED" }] });
+      return route.fulfill({ json: [{ participant_display_name: "레거시 참여자", raw_text: null, reason: "LEGACY_MANUAL_ONLY_UNSUPPORTED" }, { participant_display_name: "다른 참여자", raw_text: "비공개 조건 원문", reason: options.unappliedReason ?? "PARSE_FAILED" }] });
     }
-    if (url.endsWith("/candidates")) return route.fulfill({ json: { quality: "PARTIAL", applied_submissions: 2, total_submissions: 3, unapplied_inputs: 2, candidates: [candidate] } });
+    if (url.endsWith("/candidates")) return route.fulfill({ json: { quality: "PARTIAL", applied_submissions: 2, total_submissions: options.emptyCandidates ? 4 : 3, unapplied_inputs: 2, candidates: options.emptyCandidates ? [] : [candidate] } });
     if (url.endsWith("/result")) return route.fulfill({ json: { candidate, confirmed_at: "2026-09-20T13:00:00Z" } });
     return route.fulfill({ json: {
       invite_code: code, purpose: "자연어 조건 모임", meeting_mode: "EITHER", time_zone_id: "Asia/Seoul",
@@ -176,14 +176,60 @@ for (const status of ["NO_MATCH", "READY_WITH_WARNINGS"]) {
   });
 
   test(`${status} MEMBER never requests or renders other participants' originals`, async ({ page }) => {
-    const api = await mockApi(page, { status });
+    const api = await mockApi(page, { status, unappliedReason: "UNSUPPORTED_CONDITIONAL_CONSTRAINT" });
     await page.goto(`/rooms/${code}`);
     await expect(page.getByRole("heading", { name: status === "NO_MATCH" ? "모두에게 맞는 후보를 찾지 못했어요" : "모두에게 가장 좋은 플랜이에요" })).toBeVisible();
     await expect(page.getByText(/반영되지 않은 입력.*확인/)).toHaveCount(0);
     await expect(page.getByText("비공개 조건 원문")).toHaveCount(0);
     expect(api.unappliedRequests).toHaveLength(0);
   });
+
+  for (const [reason, message] of [
+    ["UNSUPPORTED_CONDITIONAL_CONSTRAINT", "장소에 따라 시간이 달라지는 등 조건별로 시간과 장소를 연결한 입력은 현재 처리할 수 없어요. 이 입력은 후보 계산에 반영되지 않았어요."],
+    ["AMBIGUOUS_TIME_CONSTRAINT", "가능한 시간이 명확하지 않아 이 입력을 후보 계산에 반영하지 못했어요. 날짜와 시작·종료 시간을 구체적으로 적어 주세요."],
+  ]) test(`${status} HOST sees the explanation for ${reason}`, async ({ page }, testInfo) => {
+    const api = await mockApi(page, { status, role: "HOST", unappliedReason: reason });
+    await page.goto(`/rooms/${code}`);
+    await page.getByText(/반영되지 않은 입력.*확인/).click();
+    await expect(page.getByText(message!, { exact: true })).toBeVisible();
+    await expect(page.getByText(reason!, { exact: true })).toHaveCount(0);
+    await expect(page.getByText("비공개 조건 원문")).toBeVisible();
+    await expect(page.getByText("기존 시간표 입력은 새 분석에서 지원하지 않아 반영되지 않았어요.")).toBeVisible();
+    expect(api.unappliedRequests).toHaveLength(1);
+    if (status === "READY_WITH_WARNINGS") await expect(page.getByText(/일부 입력이 반영되지 않아/)).toBeVisible();
+    await page.screenshot({ path: testInfo.outputPath("conditional-reason.png"), fullPage: true });
+  });
+
+  test(`${status} MEMBER never fetches ambiguous time originals`, async ({ page }) => {
+    const api = await mockApi(page, { status, unappliedReason: "AMBIGUOUS_TIME_CONSTRAINT" });
+    await page.goto(`/rooms/${code}`);
+    await expect(page.getByRole("heading", { name: status === "NO_MATCH" ? "모두에게 맞는 후보를 찾지 못했어요" : "모두에게 가장 좋은 플랜이에요" })).toBeVisible();
+    await expect(page.locator(".unapplied")).toHaveCount(0);
+    await expect(page.getByText("비공개 조건 원문")).toHaveCount(0);
+    expect(api.unappliedRequests).toHaveLength(0);
+  });
+
+  test(`${status} does not invent a plan when a partial analysis has no candidates`, async ({ page }, testInfo) => {
+    const api = await mockApi(page, { status, role: "HOST", unappliedReason: "AMBIGUOUS_TIME_CONSTRAINT", emptyCandidates: true });
+    await page.goto(`/rooms/${code}`);
+    await page.getByText(/반영되지 않은 입력.*확인/).click();
+    await expect(page.getByText(/가능한 시간이 명확하지 않아/)).toBeVisible();
+    await expect(page.locator(".candidate-card")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /Plan .*로 확정/ })).toHaveCount(0);
+    if (status === "READY_WITH_WARNINGS") await expect(page.getByText(/일부 입력이 반영되지 않아/)).toContainText("2/4개 반영");
+    else await expect(page.getByRole("heading", { name: "모두에게 맞는 후보를 찾지 못했어요" })).toBeVisible();
+    expect(api.puts).toHaveLength(0);
+    expect(api.unappliedRequests).toHaveLength(1);
+    await page.screenshot({ path: testInfo.outputPath("partial-no-candidates.png"), fullPage: true });
+  });
 }
+
+test("an unknown reason preserves the server code fallback", async ({ page }) => {
+  await mockApi(page, { status: "NO_MATCH", role: "HOST", unappliedReason: "toString" });
+  await page.goto(`/rooms/${code}`);
+  await page.getByText(/반영되지 않은 입력.*확인/).click();
+  await expect(page.locator(".unapplied small").filter({ hasText: /^toString$/ })).toBeVisible();
+});
 
 test("confirmed result keeps the read-only candidate time ranges", async ({ page }) => {
   await mockApi(page, { status: "CONFIRMED" });

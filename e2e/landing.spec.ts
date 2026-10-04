@@ -41,3 +41,138 @@ test("mobile layout keeps primary action inside viewport", async ({ page }, test
   expect(box).not.toBeNull();
   expect(box!.x + box!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
 });
+
+for (const [width, height] of [[320, 568], [360, 640], [390, 844], [430, 932], [768, 1024], [1440, 900], [320, 480], [844, 390], [568, 320], [844, 320], [1280, 600]]) {
+  test(`landing focuses the first screen and reveals details at ${width}x${height}`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    await page.goto("/");
+    const hero = page.locator(".hero");
+    const action = page.getByRole("button", { name: "모임 만들기" });
+    const details = page.locator(".landing-details");
+    await expect(hero.getByRole("heading", { level: 1 })).toBeVisible();
+    const heading = hero.getByRole("heading", { level: 1 });
+    const lineHeight = await heading.evaluate((element) => Number.parseFloat(getComputedStyle(element).lineHeight));
+    expect((await heading.boundingBox())!.height).toBeLessThanOrEqual(lineHeight * 2 + 1);
+    await expect.poll(async () => (await hero.boundingBox())!.y + (await hero.boundingBox())!.height).toBeGreaterThanOrEqual(height);
+    const buttonBox = (await action.boundingBox())!;
+    expect(buttonBox.y).toBeGreaterThanOrEqual(68);
+    expect(buttonBox.y + buttonBox.height).toBeLessThanOrEqual(height);
+    expect(buttonBox.height).toBeCloseTo(56, 2);
+    if (width <= 540) expect(buttonBox.width).toBeCloseTo(width - 24, 2);
+    expect((await details.boundingBox())!.y).toBeGreaterThanOrEqual(height);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+
+    await page.mouse.wheel(0, height);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+    await page.getByRole("heading", { name: "말하듯 조건 작성" }).scrollIntoViewIfNeeded();
+    await expect(page.getByRole("heading", { name: "말하듯 조건 작성" })).toBeInViewport();
+    await page.getByRole("heading", { name: "링크 하나로 시작하는 일정 조율" }).scrollIntoViewIfNeeded();
+    await expect(page.getByRole("heading", { name: "링크 하나로 시작하는 일정 조율" })).toBeInViewport();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+  });
+}
+
+test("landing supports keyboard navigation and viewport height changes", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 664 });
+  await page.goto("/");
+  await page.setViewportSize({ width: 390, height: 844 });
+  const action = page.getByRole("button", { name: "모임 만들기" });
+  await expect(action).toBeInViewport({ ratio: 1 });
+  await page.setViewportSize({ width: 390, height: 564 });
+  await expect(action).toBeInViewport({ ratio: 1 });
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("link", { name: "Meet me 홈" })).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(action).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/create$/);
+  await expect(page.getByLabel("주최자 이름")).toBeFocused();
+});
+
+test("hero action has strong contrast, keyboard focus and subtle pointer feedback", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  const action = page.getByRole("button", { name: "모임 만들기" });
+  const contrast = await action.evaluate((element) => {
+    const style = getComputedStyle(element);
+    const luminance = (color: string) => {
+      const channels = color.match(/\d+/g)!.slice(0, 3).map((channel) => {
+        const value = Number(channel) / 255;
+        return value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4;
+      });
+      return channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722;
+    };
+    const text = luminance(style.color);
+    const background = luminance(style.backgroundColor);
+    return (Math.max(text, background) + .05) / (Math.min(text, background) + .05);
+  });
+  expect(contrast).toBeGreaterThanOrEqual(4.5);
+  await expect(action).toHaveCSS("background-image", "none");
+  await page.keyboard.press("Tab");
+  await page.keyboard.press("Tab");
+  await expect(action).toBeFocused();
+  expect(await action.evaluate((element) => element.matches(":focus-visible"))).toBe(true);
+  await expect(action).toHaveCSS("outline-width", "3px");
+  await expect(action).toHaveCSS("outline-color", "rgb(15, 23, 42)");
+  await action.hover();
+  await expect.poll(() => action.evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).m42)).toBe(-1);
+  await page.mouse.down();
+  await expect.poll(() => action.evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).m42)).toBe(0);
+  await page.mouse.move(0, 0);
+  await page.mouse.up();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/create$/);
+  await expect(page.getByLabel("주최자 이름")).toBeFocused();
+});
+
+test("hero action stays still for reduced motion", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const action = page.getByRole("button", { name: "모임 만들기" });
+  await action.hover();
+  await expect(action).toHaveCSS("transform", "none");
+  await page.mouse.down();
+  await expect(action).toHaveCSS("transform", "none");
+  await page.mouse.move(0, 0);
+  await page.mouse.up();
+});
+
+test("landing details stay readable with reduced motion and no observer", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.addInitScript(() => { Object.defineProperty(window, "IntersectionObserver", { value: undefined }); });
+  await page.goto("/");
+  const features = page.getByRole("region", { name: "Meet me 주요 기능" });
+  await features.scrollIntoViewIfNeeded();
+  await expect(features).toBeInViewport();
+  await expect(features).toHaveCSS("opacity", "1");
+  await expect(features).toHaveCSS("transform", "none");
+  await expect(features).toHaveCSS("animation-name", "none");
+  for (const feature of await features.locator("article").all()) {
+    await expect(feature).toHaveCSS("opacity", "1");
+    await expect(feature).toHaveCSS("transform", "none");
+    await expect(feature).toHaveCSS("animation-name", "none");
+  }
+  await expect(page.getByRole("heading", { name: "블라인드 일정 입력" })).toBeVisible();
+});
+
+test("each feature reveals progressively while entering the viewport", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  test.skip(!await page.evaluate(() => CSS.supports("animation-timeline", "view()")), "Static accessible fallback for browsers without scroll timelines");
+  const feature = page.locator(".feature").first();
+  await expect(feature).toHaveCSS("opacity", "0.35");
+  const position = await feature.evaluate((element) => {
+    const bounds = element.getBoundingClientRect();
+    const translation = new DOMMatrix(getComputedStyle(element).transform).m42;
+    return { top: bounds.top + scrollY - translation, height: bounds.height };
+  });
+  await page.evaluate(({ top, height }) => scrollTo(0, top - innerHeight + height * .25), position);
+  await expect.poll(() => feature.evaluate((element) => Number(getComputedStyle(element).opacity))).toBeGreaterThan(.35);
+  expect(await feature.evaluate((element) => Number(getComputedStyle(element).opacity))).toBeLessThan(1);
+  const movement = await feature.evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).m42);
+  expect(movement).toBeGreaterThan(0);
+  expect(movement).toBeLessThan(20);
+  await feature.scrollIntoViewIfNeeded();
+  await expect(feature).toHaveCSS("opacity", "1");
+  expect(await feature.evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).m42)).toBe(0);
+});

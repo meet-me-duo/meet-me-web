@@ -73,20 +73,24 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
   if (!creating) return (
     <div className="landing page-width">
       <section className="hero">
-        <div className="eyebrow"><Sparkles size={16} /> 자연어 조건 입력 & 스마트 조율</div>
-        <h1>조건만 말하세요,<br />결정은 <span>Meet me</span>가 할게요</h1>
-        <p>일정 색칠하기와 눈치게임은 이제 그만.<br />각자의 조건을 비공개로 모아 최적의 약속 플랜을 제안해요.</p>
+        <h1><span className="hero-line">조건만 말하세요,</span><span className="hero-line">결정은 <span className="hero-accent">Meet me</span>가 할게요</span></h1>
         <button className="button primary hero-cta" onClick={() => navigate("/create")}>모임 만들기 <ArrowRight size={20} /></button>
       </section>
-      <section className="feature-grid" aria-label="Meet me 주요 기능">
-        <Feature icon={<MessageSquare />} title="말하듯 조건 작성" description="“화·목 저녁 봉천역 근처”처럼 일상 언어로 편하게 입력하세요." />
-        <Feature icon={<ShieldCheck />} title="블라인드 일정 입력" description="서로의 조건은 후보가 나오기 전까지 누구에게도 공개되지 않아요." />
-        <Feature icon={<Layers3 />} title="Plan A·B·C 제안" description="복잡한 비교 대신 우선순위가 정해진 후보 중 하나만 고르면 돼요." />
-      </section>
-      <section className="how-card">
-        <h2>링크 하나로 시작하는 일정 조율</h2>
-        <div><How number="1" icon={<Link2 />} title="방 생성 & 공유" /><How number="2" icon={<CalendarRange />} title="각자 조건 제출" /><How number="3" icon={<Sparkles />} title="플랜 선택 & 확정" /></div>
-      </section>
+      <div className="landing-details">
+        <div className="landing-intro landing-reveal">
+          <div className="eyebrow"><Sparkles size={16} /> 자연어 조건 입력 & 스마트 조율</div>
+          <p>일정 색칠하기와 눈치게임은 이제 그만.<br />각자의 조건을 비공개로 모아 최적의 약속 플랜을 제안해요.</p>
+        </div>
+        <section className="feature-grid" aria-label="Meet me 주요 기능">
+          <Feature icon={<MessageSquare />} title="말하듯 조건 작성" description="“화·목 저녁 봉천역 근처”처럼 일상 언어로 편하게 입력하세요." />
+          <Feature icon={<ShieldCheck />} title="블라인드 일정 입력" description="서로의 조건은 후보가 나오기 전까지 누구에게도 공개되지 않아요." />
+          <Feature icon={<Layers3 />} title="Plan A·B·C 제안" description="복잡한 비교 대신 우선순위가 정해진 후보 중 하나만 고르면 돼요." />
+        </section>
+        <section className="how-card landing-reveal">
+          <h2>링크 하나로 시작하는 일정 조율</h2>
+          <div><How number="1" icon={<Link2 />} title="방 생성 & 공유" /><How number="2" icon={<CalendarRange />} title="각자 조건 제출" /><How number="3" icon={<Sparkles />} title="플랜 선택 & 확정" /></div>
+        </section>
+      </div>
     </div>
   );
 
@@ -120,7 +124,7 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
   );
 }
 
-function Feature({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) { return <article className="glass-card feature"><span>{icon}</span><h2>{title}</h2><p>{description}</p></article>; }
+function Feature({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) { return <article className="glass-card feature landing-reveal"><span>{icon}</span><h2>{title}</h2><p>{description}</p></article>; }
 function How({ number, icon, title }: { number: string; icon: React.ReactNode; title: string }) { return <div className="how-step"><b>{number}</b><span>{icon}</span><strong>{title}</strong></div>; }
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) { return <label className="field"><span>{label}</span>{children}<ErrorText text={error} /></label>; }
 function ErrorText({ text }: { text?: string }) { return text ? <small className="field-error">{text}</small> : null; }

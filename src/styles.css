@@ -63,6 +63,23 @@ footer { padding: 28px 16px; color: #94a3b8; font-size: .75rem; text-align: cent
 .button.primary.hero-cta:active:not(:disabled) { box-shadow: 0 5px 14px -10px var(--sky-dark); }
 .hero-cta:focus-visible { outline-color: #0f172a; outline-offset: 4px; }
 .glass-card { border: 1px solid rgb(255 255 255 / .9); background: rgb(255 255 255 / .76); box-shadow: var(--shadow); backdrop-filter: blur(16px); }
+.recent-shortcut { margin-top: 20px; padding: 10px; color: #0369a1; font-size: .85rem; text-decoration: underline; text-underline-offset: 4px; }
+.recent-rooms { max-width: 790px; margin: 0 auto 28px; padding: clamp(18px, 4vw, 28px); border-radius: 22px; scroll-margin-top: 84px; }
+.recent-rooms h2 { margin: 0 0 12px; font-size: 1.2rem; }
+.recent-note, .recent-message, .room-history-note { color: #526176; font-size: .8rem; line-height: 1.65; overflow-wrap: anywhere; }
+.recent-note { margin: 8px 0; }
+.recent-message { margin: 10px 0 0; }
+.recent-list { list-style: none; margin: 20px 0; padding: 0; }
+.recent-list li { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 16px 0; border-top: 1px solid var(--border); }
+.recent-room-info { flex: 1 1 180px; min-width: 0; }
+.recent-room-info h3 { margin: 0 0 5px; font-size: .95rem; overflow-wrap: anywhere; }
+.recent-room-info small { color: #64748b; font-size: .7rem; }
+.recent-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+.recent-actions .button { min-height: 44px; padding-inline: 12px; font-size: .75rem; }
+.recent-copy { flex-basis: 100%; margin: 0; }
+.room-history-note { margin: 14px 0 20px; }
+.room-history-note a { color: #0369a1; text-decoration: underline; text-underline-offset: 3px; }
+.previous-participation { color: #526176; font-size: .8rem; line-height: 1.65; }
 .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
 .feature { padding: 25px; border-radius: 22px; }
 .feature > span { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 13px; background: #e0f2fe; color: #0284c7; }

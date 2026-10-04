@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
 
+function isUnclipped(element: Element) {
+  const clip = getComputedStyle(element).clipPath;
+  return clip === "none" || clip.match(/[\d.]+/g)!.every((value) => Number(value) === 0);
+}
+
 test("landing page starts the two-step room flow", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /조건만 말하세요/ })).toBeVisible();
@@ -160,19 +165,69 @@ test("each feature reveals progressively while entering the viewport", async ({ 
   await page.goto("/");
   test.skip(!await page.evaluate(() => CSS.supports("animation-timeline", "view()")), "Static accessible fallback for browsers without scroll timelines");
   const feature = page.locator(".feature").first();
-  await expect(feature).toHaveCSS("opacity", "0.35");
+  await expect(feature).toHaveCSS("opacity", "0");
+  await expect(feature).toHaveCSS("clip-path", "inset(0px 0px 100%)");
   const position = await feature.evaluate((element) => {
     const bounds = element.getBoundingClientRect();
     const translation = new DOMMatrix(getComputedStyle(element).transform).m42;
     return { top: bounds.top + scrollY - translation, height: bounds.height };
   });
-  await page.evaluate(({ top, height }) => scrollTo(0, top - innerHeight + height * .25), position);
-  await expect.poll(() => feature.evaluate((element) => Number(getComputedStyle(element).opacity))).toBeGreaterThan(.35);
+  await page.evaluate(({ top, height }) => scrollTo(0, top - innerHeight + height * .7), position);
+  await expect.poll(() => feature.evaluate((element) => Number(getComputedStyle(element).opacity))).toBeGreaterThan(0);
   expect(await feature.evaluate((element) => Number(getComputedStyle(element).opacity))).toBeLessThan(1);
   const movement = await feature.evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).m42);
   expect(movement).toBeGreaterThan(0);
-  expect(movement).toBeLessThan(20);
-  await feature.scrollIntoViewIfNeeded();
+  expect(movement).toBeLessThan(64);
+  expect(await feature.evaluate(isUnclipped)).toBe(false);
+  await page.evaluate(({ top, height }) => scrollTo(0, top - innerHeight + height * 1.8), position);
   await expect(feature).toHaveCSS("opacity", "1");
+  await expect.poll(() => feature.evaluate(isUnclipped)).toBe(true);
   expect(await feature.evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).m42)).toBe(0);
+});
+
+test("desktop cards unfold in sequence and all details finish before the page ends", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+  test.skip(!await page.evaluate(() => CSS.supports("animation-timeline", "view()")), "Static accessible fallback for browsers without scroll timelines");
+  const cards = page.locator(".feature");
+  const top = await cards.first().evaluate((element) => element.getBoundingClientRect().top + scrollY - new DOMMatrix(getComputedStyle(element).transform).m42);
+  const height = (await cards.first().boundingBox())!.height;
+  await page.evaluate(({ top, height }) => scrollTo(0, top - innerHeight + height * .4), { top, height });
+  await expect.poll(() => cards.first().evaluate((element) => Number(getComputedStyle(element).opacity))).toBeGreaterThan(0);
+  const progress = await cards.evaluateAll((elements) => elements.map((element) => Number(getComputedStyle(element).opacity)));
+  expect(progress[0]).toBeGreaterThan(progress[1]);
+  expect(progress[1]).toBeGreaterThan(progress[2]);
+  expect(progress[2]).toBe(0);
+  await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+  for (const element of await page.locator(".landing-reveal").all()) {
+    await expect(element).toHaveCSS("opacity", "1");
+    await expect.poll(() => element.evaluate(isUnclipped)).toBe(true);
+  }
+});
+
+test("sentences uncover their text with scroll and the static fallback remains readable", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.addInitScript(() => { Object.defineProperty(window, "IntersectionObserver", { value: undefined }); });
+  await page.goto("/");
+  const sentences = page.locator(".landing-sentence");
+  test.skip(!await page.evaluate(() => CSS.supports("animation-timeline", "view()")), "Static accessible fallback for browsers without scroll timelines");
+  await expect(sentences.first()).toHaveCSS("opacity", "0");
+  await expect(sentences.first()).toHaveCSS("clip-path", "inset(0px 100% 0px 0px)");
+  const position = await sentences.first().evaluate((element) => ({top:element.getBoundingClientRect().top+scrollY-new DOMMatrix(getComputedStyle(element).transform).m42,height:element.getBoundingClientRect().height}));
+  await page.evaluate(({top,height})=>scrollTo(0,top-innerHeight+height*.8),position);
+  await expect.poll(() => sentences.first().evaluate((element) => Number(getComputedStyle(element).opacity))).toBeGreaterThan(0);
+  expect(await sentences.first().evaluate((element) => Number(getComputedStyle(element).opacity))).toBeLessThan(1);
+  expect(await sentences.first().evaluate(isUnclipped)).toBe(false);
+  await page.evaluate(() => {
+    for (const sheet of document.styleSheets) for (let i=sheet.cssRules.length-1;i>=0;i--) {
+      const rule=sheet.cssRules[i];
+      if(rule instanceof CSSSupportsRule && rule.conditionText.includes("animation-timeline")) sheet.deleteRule(i);
+    }
+  });
+  for (const element of await page.locator(".landing-reveal").all()) {
+    await expect(element).toHaveCSS("opacity", "1");
+    await expect(element).toHaveCSS("transform", "none");
+    await expect(element).toHaveCSS("clip-path", "none");
+  }
 });

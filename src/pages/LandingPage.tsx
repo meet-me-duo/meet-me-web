@@ -77,9 +77,9 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
         <button className="button primary hero-cta" onClick={() => navigate("/create")}>모임 만들기 <ArrowRight size={20} /></button>
       </section>
       <div className="landing-details">
-        <div className="landing-intro landing-reveal">
-          <div className="eyebrow"><Sparkles size={16} /> 자연어 조건 입력 & 스마트 조율</div>
-          <p>일정 색칠하기와 눈치게임은 이제 그만.<br />각자의 조건을 비공개로 모아 최적의 약속 플랜을 제안해요.</p>
+        <div className="landing-intro">
+          <div className="eyebrow landing-reveal"><Sparkles size={16} /> 자연어 조건 입력 & 스마트 조율</div>
+          <p><span className="landing-sentence landing-reveal">일정 색칠하기와 눈치게임은 이제 그만.</span><span className="landing-sentence landing-reveal">각자의 조건을 비공개로 모아 최적의 약속 플랜을 제안해요.</span></p>
         </div>
         <section className="feature-grid" aria-label="Meet me 주요 기능">
           <Feature icon={<MessageSquare />} title="말하듯 조건 작성" description="“화·목 저녁 봉천역 근처”처럼 일상 언어로 편하게 입력하세요." />

@@ -47,6 +47,7 @@ footer { padding: 28px 16px; color: #94a3b8; font-size: .75rem; text-align: cent
 .landing-details { padding-top: clamp(36px, 6vw, 64px); word-break: keep-all; overflow-wrap: anywhere; text-wrap: pretty; }
 .landing-intro { margin: 0 auto 32px; text-align: center; }
 .landing-intro p { max-width: 620px; margin: 18px auto 0; color: #526176; font-size: clamp(.94rem, 2vw, 1.15rem); line-height: 1.8; text-wrap: balance; }
+.landing-sentence { display: block; }
 .button { min-height: 43px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 13px; padding: 10px 17px; cursor: pointer; font-weight: 750; transition: transform .15s, box-shadow .2s, background .2s; }
 .button:hover:not(:disabled) { transform: translateY(-1px); }
 .button:active:not(:disabled) { transform: translateY(0); }
@@ -182,10 +183,17 @@ fieldset.field legend { margin-bottom: 9px; }
 .result-copy { display: flex; margin: 18px auto 0; }
 
 @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-@keyframes landing-reveal { from { opacity: .35; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+@keyframes landing-reveal { from { opacity: 0; transform: translateY(64px); clip-path: inset(0 0 100% 0); } to { opacity: 1; transform: none; clip-path: inset(0); } }
+@keyframes landing-sentence-reveal { from { opacity: 0; transform: translateY(32px); clip-path: inset(0 100% 0 0); } to { opacity: 1; transform: none; clip-path: inset(0); } }
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    .landing-reveal { animation: landing-reveal linear both; animation-timeline: view(); animation-range: entry 0% entry 80%; }
+    .landing-reveal { animation: landing-reveal linear both; animation-timeline: view(); animation-range: entry 0% entry 140%; }
+    .landing-sentence { animation-name: landing-sentence-reveal; animation-range: entry 0% entry 160%; }
+    .how-card { animation-range: entry 0% entry 100%; }
+  }
+  @media (min-width: 781px) and (prefers-reduced-motion: no-preference) {
+    .feature:nth-child(2) { animation-range: entry 25% entry 160%; }
+    .feature:nth-child(3) { animation-range: entry 50% entry 180%; }
   }
 }
 @keyframes spin { to { transform: rotate(360deg); } }

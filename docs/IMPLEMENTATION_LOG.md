@@ -1,5 +1,14 @@
 # Implementation log
 
+## 2026-10-04 — 설명 콘텐츠 스크롤 등장 후속 수정
+
+- 운영 Chrome 확인 후 사용자가 밝기 변화보다 설명이 숨겨진 상태에서 스크롤에 따라 분명하게 나타나는 동작을 요청했다. 배포된 main `4690e53`의 깨끗한 상태에서 로컬 `feature/scroll-content-reveal` 브랜치로 후속 작업을 시작했다. 이번 범위는 로컬 구현·미리보기·검증이며 원격 push/PR/merge/deploy를 포함하지 않는다.
+- 문장별 가로 clip 공개와 32px 위치 이동, 카드별 세로 clip 공개와 64px 위치 이동으로 변경한다. 첫 상태는 opacity 0이고 PC의 같은 줄 카드도 순서대로 시작한다. 기존 CSS view timeline을 사용하여 새 JavaScript·observer·스크롤 잠금 없이 구현하며 미지원 CSS·reduced-motion에서는 정적인 전체 내용을 제공한다.
+- 검증 계획: 실제 Chrome의 모바일 320/360/390/430폭·태블릿·PC·짧은 화면·가로모드에서 최초/진입 중/완료 상태, 페이지 끝에서 모든 콘텐츠 공개, 키보드·높이 변화·fallback을 확인하고 PC/모바일 스크롤 동영상과 GIF를 보존한다. 기존 API 검사·lint·typecheck·단위 테스트·build·E2E를 실행한다.
+- 실제 Google Chrome 153.0.8010.54에서 320×568, 360×640, 390×844, 430×932, 768×1024, 1440×900, 320×480, 844×390, 568×320, 844×320, 1280×600의 초기 숨김·진입 중 clip/이동·페이지 끝 전체 공개를 확인했다. 모든 크기에서 가로넘침·브라우저 오류가 없으며 reduced-motion·observer 부재·CSS timeline 미지원 fallback·200% 텍스트·높이 변경·Tab/Enter 이동이 통과했다.
+- 기존 api:check·lint·typecheck·단위 테스트 39개·build가 통과했다. 전체 E2E를 기존 desktop/mobile 설정에 실제 Chrome channel만 임시 지정해 실행했고 79개 통과, 기존 모바일 전용 검사의 desktop 1개는 조건부 skip이다. Chrome clip 완료값의 0px/0% 직렬화 차이는 각 inset 수치가 0인지 확인하는 방식으로 검증했다. 실제 스크롤 좌표의 정수 반올림을 고려하여 범위 끝을 충분히 넘긴 완료 상태와 페이지 끝을 모두 확인했다.
+- 스크롤은 테스트의 실제 wheel 입력으로 기록했다. PC/모바일 WebM 동영상, 그 프레임으로 만든 GIF, 전·중·후 화면과 측정·검증 스크립트는 `test-results/landing-content-reveal-2026-10-04/`에 보존한다. 실제 휴대전화 주소창·Safari는 미검증이며 운영 반영은 이번 요청 범위에 없다.
+
 ## 2026-10-04 — 스크롤 랜딩 UI
 
 - 최신 원격 main을 조회해 `b7bb7a5`와 일치하고 사용자 변경이 없는 것을 확인한 뒤 로컬 `feature/scroll-landing-hero` 브랜치에서 작업했다. 서버 저장소는 수정하지 않았다.

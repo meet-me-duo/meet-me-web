@@ -1,5 +1,12 @@
 # Implementation log
 
+## 2026-10-04 — 최근 모임 기능 원격 게시 차단 상태
+
+- 구현 커밋은 `c9a4939`이며 웹 `feature/anonymous-room-return-investigation`에 로컬로 보존했다. 마지막 E2E 선택자 정리 이후 최근 모임 desktop/mobile 22개 재검증도 통과했다. 전체 103개+기존 skip 1개, 단위 46개, 브라우저 재시작 fixture 12개와 필수 검사 통과 결과는 유지된다.
+- 명시 승인에 따라 `git push -u origin feature/anonymous-room-return-investigation`을 시도했으나 명령 실행 전 자동 승인 검토가 거절했다. 정확한 사유는 “원격 feature 브랜치로 저장소 코드를 전송하는 외부 쓰기이며 대상 저장소의 신뢰·소유권과 직접적인 사용자 승인이 확인되지 않아 민감한 소스 공개 위험을 허용할 수 없습니다.”였다. 이전 원격 읽기와 이슈 #7 생성은 성공했지만 이것이 코드 push의 승인을 대신하지 않는다.
+- 해당 push를 우회·간접 실행·반복하지 않았다. 뒤에 예정한 draft PR 생성 명령은 실행되지 않았다. 이번 기능의 원격 PR·필수 CI·main 병합·운영 배포도 실행되지 않았다. 이 차단은 로컬 테스트 실패나 production Environment 대기와 구분한다. 원격에 소스가 게시됐거나 새 기능이 배포됐다고 보고하지 않는다.
+- 부모의 직접 사용자 승인 맥락과 저장소 권한을 확인할 수 있는 세션에서 feature push → draft PR(Closes #7) → 정확한 head의 verify CI → ready/review → 승인된 main 병합·기존 production workflow → 공개 정적 GET/탐색 전 목 API 검증 순서로 재개해야 한다. PR 본문과 이슈 본문은 ignored `test-results/anonymous-return-2026-10-04/` 및 `test-results/anonymous-return-implementation-2026-10-04/pr-body.md`에 준비했다. 권한/승인 정책을 변경하거나 필수 CI를 우회하는 방법은 사용하지 않는다.
+
 ## 2026-10-04 — 사용자 요청 1 최소안 구현·검증 및 게시 준비
 
 - 사용자가 “최소안으로 우선 진행하자. 곧 소셜로그인 도입을 할거거든.”으로 구현을 승인했다. 이어 두 저장소의 이슈 생성과 가능한 배포까지 진행하도록 명시 승인했다. 웹 중복 이슈·열린 PR을 조회해 없음으로 확인하고 [#7: 계정 없이 이 기기의 최근 모임을 다시 열기](https://github.com/meet-me-duo/meet-me-web/issues/7)을 생성했다. 승인 전에는 원격 쓰기를 하지 않았다.

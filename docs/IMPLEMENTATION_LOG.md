@@ -8,7 +8,7 @@
 - 설명 문장·각 기능 카드·진행 단계는 지원 브라우저에서 각각 CSS `view()` 타임라인으로 점진적으로 나타난다. opacity .35→1과 translateY 20px→0이 화면 진입량에 따라 실제로 변하는 것을 PC·모바일에서 검증했다. 스크롤 잠금·snap·observer·추가 JavaScript는 사용하지 않으며 미지원 브라우저와 reduced-motion에서는 정적으로 표시한다. 기존 키보드 포커스와 생성 폼 진입 동작을 확인했다.
 - 실제 Microsoft Edge의 desktop/mobile Playwright 프로젝트에서 320×568, 360×640, 390×844, 430×932, 768×1024, 1440×900, 320×480, 844×390, 568×320, 844×320, 1280×600의 최초 화면·스크롤 후를 검증했다. CTA가 최초 뷰포트 안에 있고 설명은 다음 영역에 있으며, 모든 크기에서 제목 두 줄·가로넘침 없음·자연 스크롤을 확인했다. 뷰포트 높이 664→844→564 변경, Tab/Enter, observer 부재, reduced-motion 및 200% 텍스트 확대도 확인했다. 실제 휴대폰 주소창과 Safari는 검증하지 않았다.
 - lint·typecheck·build 및 단위/컴포넌트/API 39개가 통과했다. 최종 전체 E2E는 71개 통과, 기존 모바일 전용 검사의 desktop 실행 1개 조건부 skip이다. build의 기존 Zod 순수성 주석 경고는 남아 있다.
-- `api:check`는 변경 전부터 있는 Windows CRLF/LF 차이로 원문 비교에 실패한다. 체크아웃 타입 파일의 CRLF 1,281개를 정규화하면 생성 결과와 일치하고, Git HEAD의 타입 blob은 생성 결과와 바이트 단위로 일치한다(SHA-256 `0a3ef82998746b79ac898396aa336feb0d9ee618771aafd41aaf58d34023aed5`). API 계약·생성 타입·검사 스크립트는 변경하지 않았다.
+- `api:check`의 기존 실패 경로는 사용자 `core.autocrlf=true` → 생성 타입 체크아웃 CRLF 1,281개 → 생성기 출력 LF → 검사 스크립트의 원문 비교였다. `.gitattributes`에서 `src/api/schema.d.ts` 한 파일만 `text eol=lf`로 고정하고 실제 내용 차이가 없음을 확인한 뒤 Git blob의 LF 바이트로 복원했다. 원래 `corepack pnpm api:check`가 통과하고 생성 타입과 검사 스크립트의 Git diff는 없다. 전역 Git 설정과 API 계약은 유지했다. 별도 복사본에서 타입명을 `paths_stale_probe`로 바꾼 음성 검사는 exit 1과 stale 오류로 실패해 실제 차이를 계속 탐지함을 확인했다. Git blob·생성 결과 SHA-256은 `0a3ef82998746b79ac898396aa336feb0d9ee618771aafd41aaf58d34023aed5`다.
 - 전후 화면과 뷰포트 측정·API 줄바꿈 증거는 `test-results/landing-ui-2026-10-04/`에 보존한다. 작업 범위는 로컬 구현과 검증이며 원격 push·PR·merge·배포는 실행하지 않았다.
 
 ## 2026-10-03

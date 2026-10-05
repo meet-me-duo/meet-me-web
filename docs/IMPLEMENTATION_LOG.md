@@ -1,5 +1,11 @@
 # Implementation log
 
+## 2026-10-05 — 최근 모임 게시·배포 승인 확인
+
+- 사용자가 이 작업 대화에서 직접 `승인`을 보냈다. 직전 제시 범위는 `meet-me-duo/meet-me-web`의 최근 모임 복귀와 두 미반영 사유 한국어 안내를 각각 독립 PR로 진행하는 이슈 생성·연결, 커밋·푸시·PR 생성·main 병합·`app.meet-me.co.kr` 배포다. 기존 자동 승인 거절 이후 새 직접 승인을 확인했으며 인프라·권한·정책은 변경하지 않는다. 운영 데이터 쓰기는 수행하지 않는다.
+- 원격 main은 기준 `90908b6`과 일치하고 이 worktree HEAD `615cc4c`와 companion HEAD `5708f81`은 clean이었다. 최근 모임 이슈 #7은 열린 상태이며 feature 원격 브랜치와 PR은 없었다. Companion을 먼저 게시·배포·검증하고 이 기능을 독립 PR로 진행한다.
+- 최신 코드의 `api:check/lint/typecheck/test/build/test:e2e`를 다시 실행해 모두 통과했다。 단위 테스트 46개, desktop/mobile E2E 103개 통과와 기존 조건부 skip 1개다. 다른 worktree의 preview를 재사용하지 않도록 ignored 임시 설정에서 이 worktree cwd와 전용 4178 서버를 명시했다. 공식 설정·서버 파일은 수정하지 않았다. 이 증거는 `test-results/anonymous-return-implementation-2026-10-04/publish-runs/`에 보존한다.
+
 ## 2026-10-04 — 최근 모임 기능 원격 게시 차단 상태
 
 - 구현 커밋은 `c9a4939`이며 웹 `feature/anonymous-room-return-investigation`에 로컬로 보존했다. 마지막 E2E 선택자 정리 이후 최근 모임 desktop/mobile 22개 재검증도 통과했다. 전체 103개+기존 skip 1개, 단위 46개, 브라우저 재시작 fixture 12개와 필수 검사 통과 결과는 유지된다.

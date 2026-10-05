@@ -7,6 +7,8 @@ import type { Room, Submission } from "../api/types";
 import { CandidateCard } from "../components/CandidateCard";
 import { formatDate, formatDateTime } from "../utils/time";
 import { submissionText, SUBMISSION_TEXT_LIMIT } from "../utils/submission";
+import { useRecentRooms } from "../hooks/useRecentRooms";
+import { rememberRoom, roomLink } from "../utils/recentRooms";
 
 const UNAPPLIED_REASON_MESSAGES: Record<string, string> = {
   LEGACY_MANUAL_ONLY_UNSUPPORTED: "기존 시간표 입력은 새 분석에서 지원하지 않아 반영되지 않았어요.",
@@ -17,6 +19,7 @@ const UNAPPLIED_REASON_MESSAGES: Record<string, string> = {
 export default function RoomPage() {
   const { inviteCode = "" } = useParams();
   const queryClient = useQueryClient();
+  const recent = useRecentRooms();
   const roomQuery = useQuery({
     queryKey: ["room", inviteCode],
     queryFn: ({ signal }) => api.getRoom(inviteCode, signal),
@@ -30,11 +33,12 @@ export default function RoomPage() {
   if (roomQuery.isError) return <StateCard icon={<AlertCircle />} title="모임을 불러오지 못했어요" body={errorMessage(roomQuery.error)} action={<button className="button secondary" onClick={() => roomQuery.refetch()}>다시 시도</button>} />;
   const room = roomQuery.data;
 
-  if (!room.viewer.joined) return room.public_status === "COLLECTING" ? <JoinRoom room={room} onJoined={setRoom} /> : <StateCard icon={<LockKeyhole />} title="입력이 마감된 모임이에요" body="이 브라우저에서 마감 전에 참여한 사람만 결과를 확인할 수 있어요." />;
+  if (!room.viewer.joined) return room.public_status === "COLLECTING" ? <JoinRoom room={room} onJoined={setRoom} previouslySaved={recent.rooms.some(item => item.inviteCode === inviteCode)} /> : <StateCard icon={<LockKeyhole />} title="입력이 마감된 모임이에요" body="참여했던 브라우저에서 다시 열어 주세요. 참여 정보가 삭제되거나 만료되면 보관한 링크만으로 기존 권한이나 결과를 복구할 수 없어요." />;
 
   return (
     <div className="room-page page-width">
       <RoomHeader room={room} />
+      <RoomHistoryNotice room={room} />
       {room.public_status === "COLLECTING" && <SubmissionPanel room={room} onRoomChanged={setRoom} />}
       {room.public_status === "ANALYZING" && <StateCard icon={<LoaderCircle className="spin" />} title="모두의 조건을 분석하고 있어요" body="입력은 안전하게 저장됐어요. 최적의 플랜을 만드는 데 잠시 시간이 걸릴 수 있어요." />}
       {room.public_status === "INSUFFICIENT_PARTICIPANTS" && <StateCard icon={<Users />} title="조율에 필요한 인원이 부족해요" body="최소 두 명의 제출이 필요해 후보를 만들지 않았어요." />}
@@ -48,15 +52,26 @@ export default function RoomPage() {
 
 function RoomHeader({ room }: { room: Room }) {
   const [copied, setCopied] = useState(false);
-  const inviteUrl = `${window.location.origin}/rooms/${room.invite_code}`;
+  const inviteUrl = roomLink(room.invite_code);
   const copy = async () => { try { await navigator.clipboard.writeText(inviteUrl); setCopied(true); setTimeout(() => setCopied(false), 1_800); } catch { window.prompt("아래 링크를 복사해 주세요.", inviteUrl); } };
   return <section className="room-header glass-card"><div><span className="room-kicker">{room.viewer.role === "HOST" ? "내가 만든 모임" : `${room.viewer.display_name}님이 참여한 모임`}</span><h1>{room.purpose}</h1><p>{formatDate(room.search_start_date)}부터 {formatDate(room.search_end_date)} 전까지 · {room.meeting_mode === "REMOTE" ? "비대면" : room.meeting_mode === "IN_PERSON" ? "대면" : "대면·비대면 모두"}</p></div><button className="button secondary" onClick={copy}>{copied ? <CheckCircle2 size={18} /> : <Share2 size={18} />}{copied ? "복사됨" : "초대 링크 복사"}</button></section>;
 }
 
-function JoinRoom({ room, onJoined }: { room: Room; onJoined: (room: Room) => void }) {
+function RoomHistoryNotice({ room }: { room: Room }) {
+  const [saved, setSaved] = useState<boolean | null>(null);
+  const recent = useRecentRooms();
+  const { invite_code, purpose, viewer: { joined } } = room;
+  useEffect(() => { setSaved(rememberRoom({ invite_code, purpose, viewer: { joined } })); }, [invite_code, purpose, joined]);
+  return <p className={`room-history-note ${saved === false ? "alert warning" : ""}`} role="status">
+    {saved === false ? "이 브라우저에 모임 주소를 보관하지 못했어요. 초대 링크를 복사하거나 북마크해 주세요." : recent.rooms.some(item => item.inviteCode === invite_code) ? <>홈의 <Link to="/">이 기기의 최근 모임</Link>에서 다시 열 수 있어요. 초대 링크도 복사하거나 북마크해 보관해 주세요.</> : "초대 링크를 복사하거나 북마크해 보관해 주세요."}
+    {" "}주최자 기능은 모임을 만든 브라우저에서 사용할 수 있어요. 시크릿 모드 종료·데이터 삭제·만료·다른 기기에서는 기존 참여 권한이 이어지지 않을 수 있어요.
+  </p>;
+}
+
+function JoinRoom({ room, onJoined, previouslySaved }: { room: Room; onJoined: (room: Room) => void; previouslySaved: boolean }) {
   const [name, setName] = useState("");
-  const mutation = useMutation({ mutationFn: () => api.joinRoom(room.invite_code, name.trim()), onSuccess: onJoined });
-  return <div className="form-page page-width narrow"><div className="glass-card join-card"><div className="large-icon"><Users /></div><span className="eyebrow subtle">초대받은 모임</span><h1>{room.purpose}</h1><p>참여할 이름을 입력해 주세요. 다른 참여자에게 표시되는 이름이에요.</p><form onSubmit={(event) => { event.preventDefault(); if (name.trim()) mutation.mutate(); }}><label className="field"><span>내 이름</span><input autoFocus maxLength={50} value={name} onChange={(event) => setName(event.target.value)} placeholder="예: 지수" /></label>{mutation.isError && <div className="alert error">{errorMessage(mutation.error)}</div>}<button className="button primary wide" disabled={!name.trim() || mutation.isPending}>{mutation.isPending ? "참여 중…" : "모임 참여하기"}</button></form><p className="privacy-note"><LockKeyhole size={15} /> 내 입력은 후보가 나오기 전까지 다른 사람에게 공개되지 않아요.</p></div></div>;
+  const mutation = useMutation({ mutationFn: () => api.joinRoom(room.invite_code, name.trim()), onSuccess: joinedRoom => { rememberRoom(joinedRoom); onJoined(joinedRoom); } });
+  return <div className="form-page page-width narrow"><div className="glass-card join-card"><div className="large-icon"><Users /></div><span className="eyebrow subtle">초대받은 모임</span><h1>{room.purpose}</h1>{previouslySaved && <p className="previous-participation">이 브라우저의 이전 참여 정보를 확인하지 못했어요. 참여했던 브라우저에서 다시 열어 주세요. 같은 이름으로 새로 참여해도 기존 주최자 권한이나 입력은 복구되지 않아요.</p>}<p>참여할 이름을 입력해 주세요. 다른 참여자에게 표시되는 이름이에요.</p><form onSubmit={(event) => { event.preventDefault(); if (name.trim()) mutation.mutate(); }}><label className="field"><span>내 이름</span><input autoFocus maxLength={50} value={name} onChange={(event) => setName(event.target.value)} placeholder="예: 지수" /></label>{mutation.isError && <div className="alert error">{errorMessage(mutation.error)}</div>}<button className="button primary wide" disabled={!name.trim() || mutation.isPending}>{mutation.isPending ? "참여 중…" : "모임 참여하기"}</button></form><p className="privacy-note"><LockKeyhole size={15} /> 내 입력은 후보가 나오기 전까지 다른 사람에게 공개되지 않아요.</p></div></div>;
 }
 
 function SubmissionPanel({ room, onRoomChanged }: { room: Room; onRoomChanged: (room: Room) => void }) {
@@ -118,7 +133,7 @@ function ResultPanel({ room }: { room: Room }) {
   const result = useQuery({ queryKey: ["result", room.invite_code], queryFn: () => api.getResult(room.invite_code) });
   if (result.isPending) return <StateCard icon={<LoaderCircle className="spin" />} title="확정 결과를 불러오는 중이에요" />;
   if (result.isError) return <StateCard icon={<AlertCircle />} title="결과를 불러오지 못했어요" body={errorMessage(result.error)} />;
-  return <section className="results-section"><div className="section-heading centered"><span className="eyebrow success"><CheckCircle2 size={15} /> 일정 확정</span><h2>우리의 만남이 정해졌어요!</h2><p>{formatDateTime(result.data.confirmed_at)}에 주최자가 확정했어요.</p></div><div className="candidate-list single"><CandidateCard candidate={result.data.candidate} canConfirm={false} confirmed /></div><button className="button secondary result-copy" onClick={() => navigator.clipboard.writeText(window.location.href)}><Copy size={17} /> 결과 링크 복사</button></section>;
+  return <section className="results-section"><div className="section-heading centered"><span className="eyebrow success"><CheckCircle2 size={15} /> 일정 확정</span><h2>우리의 만남이 정해졌어요!</h2><p>{formatDateTime(result.data.confirmed_at)}에 주최자가 확정했어요.</p></div><div className="candidate-list single"><CandidateCard candidate={result.data.candidate} canConfirm={false} confirmed /></div><button className="button secondary result-copy" onClick={() => navigator.clipboard.writeText(roomLink(room.invite_code)).catch(() => window.prompt("아래 링크를 복사해 주세요.", roomLink(room.invite_code)))}><Copy size={17} /> 결과 링크 복사</button></section>;
 }
 
 function StateCard({ icon, title, body, action, error }: { icon: React.ReactNode; title: string; body?: string; action?: React.ReactNode; error?: string }) { return <div className="center-state glass-card"><div className="large-icon">{icon}</div><h1>{title}</h1>{body && <p>{body}</p>}{error && <div className="alert error">{error}</div>}{action}<Link className="text-link" to="/">새 모임 만들기</Link></div>; }

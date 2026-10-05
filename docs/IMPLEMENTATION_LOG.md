@@ -1,5 +1,117 @@
 # Implementation log
 
+## 2026-10-05 — 최근 모임 게시·배포 승인 확인
+
+- 사용자가 이 작업 대화에서 직접 `승인`을 보냈다. 직전 제시 범위는 `meet-me-duo/meet-me-web`의 최근 모임 복귀와 두 미반영 사유 한국어 안내를 각각 독립 PR로 진행하는 이슈 생성·연결, 커밋·푸시·PR 생성·main 병합·`app.meet-me.co.kr` 배포다. 기존 자동 승인 거절 이후 새 직접 승인을 확인했으며 인프라·권한·정책은 변경하지 않는다. 운영 데이터 쓰기는 수행하지 않는다.
+- 원격 main은 기준 `90908b6`과 일치하고 이 worktree HEAD `615cc4c`와 companion HEAD `5708f81`은 clean이었다. 최근 모임 이슈 #7은 열린 상태이며 feature 원격 브랜치와 PR은 없었다. Companion을 먼저 게시·배포·검증하고 이 기능을 독립 PR로 진행한다.
+- 최신 코드의 `api:check/lint/typecheck/test/build/test:e2e`를 다시 실행해 모두 통과했다. 단위 테스트 46개, desktop/mobile E2E 103개 통과와 기존 조건부 skip 1개다. 다른 worktree의 preview를 재사용하지 않도록 ignored 임시 설정에서 이 worktree cwd와 전용 4178 서버를 명시했다. 공식 설정·서버 파일은 수정하지 않았다. 이 증거는 `test-results/anonymous-return-implementation-2026-10-04/publish-runs/`에 보존한다.
+- Companion 이슈 [#8](https://github.com/meet-me-duo/meet-me-web/issues/8)와 PR [#9](https://github.com/meet-me-duo/meet-me-web/pull/9), 최근 모임 PR [#10](https://github.com/meet-me-duo/meet-me-web/pull/10)을 게시했다. 두 PR 본문은 기존 내용·Closes 링크를 보존하고 사용자가 요청한 정확한 H2 `변경사항` / `검증` 구조로 수정한 뒤 재조회했다.
+- Companion PR head `c52c59e`의 첫 verify는 기존 RoomPage 입력 화면 단위 테스트가 textbox를 1초 내에 찾지 못해 실패했다. 같은 코드의 실패 job 재실행은 전체 통과했고 main merge 뒤 verify와 deploy도 통과했다. 제품/테스트 코드나 CI 정책을 바꾸지 않았으며 간헐적 실패 기록은 [CI run](https://github.com/meet-me-duo/meet-me-web/actions/runs/37276503185)에 남아 있다.
+- Companion main merge 커밋은 `50dd973fb2b89f5aa7e881e320131294d505364e`, [운영 deploy run](https://github.com/meet-me-duo/meet-me-web/actions/runs/37277173075)은 성공이다. 공개 정적 GET에서 루트·가상 방 직접 경로의 동일 HTML과 `index-vu2jYeAK.js`/`index-BQRR7iip.css`, HTML no-cache 및 해시 자산 immutable·보안 헤더를 확인했다. 배포 로그의 자산명과 일치하며 JS SHA-256은 `d9876fa1e5ecb797a0a22f0f4822ac8e22a35892e47281cad2fd00f6c74fa453`다.
+- 실제 운영 번들의 새 desktop/mobile context에서 기존 자연어 입력·구 서버 fixture·nullable legacy·두 사유·HOST/MEMBER 경계·PARTIAL 후보 0개·unknown fallback·후보/확정 시간을 검증해 40개가 통과했다. 탐색 전에 API 목과 웹 GET 허용 목록을 설치했고 실제 참여 쿠키·운영 데이터 쓰기는 없었다. 첫 smoke는 검증 스크립트가 `/candidates/unapplied-inputs`를 허용 목록에서 빠뜨려 안전 차단으로 실패했으며 제품 결함으로 분류하지 않는다. 허용 목록 수정 뒤 최종 실행의 차단 요청·pageerror는 0개다. 실패 증거와 최종 report/screenshots, 자산 SHA는 companion worktree의 `test-results/conditional-reason-2026-10-04/`에 보존한다. 완료 커밋/run URL/검증 결과를 부모에게 전달해 서버 배포 gate를 열 수 있음을 알렸다.
+- 최신 main `50dd973`을 최근 모임 PR에 merge했다. RoomPage의 두 기능은 자동 병합됐고 작업 기록 충돌은 양쪽 기록을 모두 보존해 해결했다. main 대비 변경은 최근 모임 구현·테스트와 기록뿐이다. 통합 코드의 `api:check/lint/typecheck/test/build/test:e2e` 모두 통과, 단위 46개와 desktop/mobile E2E 121개 통과·기존 skip 1개다. 최신 head의 원격 verify를 다시 확인한 후 별도 최근 모임 배포를 진행한다.
+
+## 2026-10-04 — 최근 모임 기능 원격 게시 차단 상태
+
+- 구현 커밋은 `c9a4939`이며 웹 `feature/anonymous-room-return-investigation`에 로컬로 보존했다. 마지막 E2E 선택자 정리 이후 최근 모임 desktop/mobile 22개 재검증도 통과했다. 전체 103개+기존 skip 1개, 단위 46개, 브라우저 재시작 fixture 12개와 필수 검사 통과 결과는 유지된다.
+- 명시 승인에 따라 `git push -u origin feature/anonymous-room-return-investigation`을 시도했으나 명령 실행 전 자동 승인 검토가 거절했다. 정확한 사유는 “원격 feature 브랜치로 저장소 코드를 전송하는 외부 쓰기이며 대상 저장소의 신뢰·소유권과 직접적인 사용자 승인이 확인되지 않아 민감한 소스 공개 위험을 허용할 수 없습니다.”였다. 이전 원격 읽기와 이슈 #7 생성은 성공했지만 이것이 코드 push의 승인을 대신하지 않는다.
+- 해당 push를 우회·간접 실행·반복하지 않았다. 뒤에 예정한 draft PR 생성 명령은 실행되지 않았다. 이번 기능의 원격 PR·필수 CI·main 병합·운영 배포도 실행되지 않았다. 이 차단은 로컬 테스트 실패나 production Environment 대기와 구분한다. 원격에 소스가 게시됐거나 새 기능이 배포됐다고 보고하지 않는다.
+- 부모의 직접 사용자 승인 맥락과 저장소 권한을 확인할 수 있는 세션에서 feature push → draft PR(Closes #7) → 정확한 head의 verify CI → ready/review → 승인된 main 병합·기존 production workflow → 공개 정적 GET/탐색 전 목 API 검증 순서로 재개해야 한다. PR 본문과 이슈 본문은 ignored `test-results/anonymous-return-2026-10-04/` 및 `test-results/anonymous-return-implementation-2026-10-04/pr-body.md`에 준비했다. 권한/승인 정책을 변경하거나 필수 CI를 우회하는 방법은 사용하지 않는다.
+
+## 2026-10-04 — 사용자 요청 1 최소안 구현·검증 및 게시 준비
+
+- 사용자가 “최소안으로 우선 진행하자. 곧 소셜로그인 도입을 할거거든.”으로 구현을 승인했다. 이어 두 저장소의 이슈 생성과 가능한 배포까지 진행하도록 명시 승인했다. 웹 중복 이슈·열린 PR을 조회해 없음으로 확인하고 [#7: 계정 없이 이 기기의 최근 모임을 다시 열기](https://github.com/meet-me-duo/meet-me-web/issues/7)을 생성했다. 승인 전에는 원격 쓰기를 하지 않았다.
+- 실제 작업은 `C:/Users/jinhy/Projects/meet-me/meet-me-web`의 `feature/anonymous-room-return-investigation`에서 진행했다. `git worktree list`에는 이 경로 하나만 있고 별도 worktree를 만들지 않았다. 웹 `docs/BRANCHING.md`의 최신 main → feature 브랜치 → 검증 → PR 절차를 따른다. 이슈를 브랜치 전에 만들라는 규칙은 서버 `.agents/rules/development.md`의 규칙이며 웹 BRANCHING에는 없다. main·서버·정책 파일을 직접 수정하지 않았다.
+- 홈 첫 화면에 최근 모임이 있으면 “이 기기의 최근 모임 N개 보기” 진입점을 보여주고 다음 영역에서 목록을 선택하도록 했다. 생성+참여가 확인된 모임을 기록하며 다시 열기·링크 복사·목록에서 지우기를 제공한다. 미참여 초대 URL 단순 방문은 기록하지 않는다. 생성 및 join 성공은 화면 이동/상태 반영 전에 기록하고, 기존 직접 URL 방문은 서버 viewer.joined 확인 뒤 기록한다. 홈 자동 리다이렉트·계정 체계·서버 목록 API·익명 세션 수명 변경은 없다.
+- `meet-me:recent-rooms:v1`에는 버전과 최대 10개의 공개 inviteCode·80 Unicode 코드포인트 이내 모임 제목·최근 열람 epoch 시각만 저장한다. 중복을 제거하고 최근순으로 표시하며 마지막 열람 이후 30일이 지나면 목록에서 제외한다. 조건 원문·참여자명·역할·hostsecret·인증 쿠키·내 제출은 저장하지 않는다. 서버 권한·방 데이터 보존과 로컬 기록 보관 기간은 별개다. 기존 방 주소와 참여 정보가 있어도 실제 접근은 서버 viewer로 판정한다.
+- 스토리지 조회/쓰기 거부·용량 오류가 생성/참여 성공을 취소하지 않도록 처리하고 링크 복사·북마크 안내를 표시한다. 잘못된 JSON·미지원 버전·부적절한 코드·시각은 기록으로 사용하지 않는다. storage event·현재 탭 변경 event·focus로 열린 탭의 목록을 갱신한다. 로컬 삭제에는 서버 요청을 하지 않으며 “실제 모임은 삭제되지 않았어요”로 안내하고 키보드 포커스를 목록 제목으로 이동한다. 404·503 응답에서 기존 기록은 보존하고 사용자가 직접 지울 수 있다.
+- 초대 링크와 최근 목록 공유는 항상 현재 origin+공개 방 경로를 사용한다. 결과 링크도 같은 공개 경로로 정규화하여 URL query/hash를 무심코 공유하지 않게 했다. 최근 목록의 자동 복사가 거부되면 읽기 전용 URL 입력을 표시해 선택·직접 복사가 가능하다. 시크릿 종료·브라우저 데이터 삭제·만료·기기 변경·기존 HOST 복구 불가를 안내하고, 이전 기록이 있는데 viewer.joined=false이면 같은 이름의 새 참여가 기존 권한/입력을 복구하지 않는다는 안내를 추가했다.
+- 필수 로컬 `api:check`, lint, typecheck, 단위/컴포넌트/API 46개, build가 통과했다. 전체 desktop/mobile E2E는 103개 통과·기존 모바일 전용 사례의 desktop 1개 조건부 skip이다. 추가한 22개 UI 사례는 생성·참여 기록, 404/503 기록 보존과 로컬 삭제, 권한 손실, 저장 거부, 복사 성공/실패, 키보드, 실제 다중 탭 storage event, 기록 만료·손상, 320/390/1440폭에서 긴 제목 10개와 44px 버튼·가로 넘침을 검증한다. build의 기존 Zod 주석 경고는 유지된다.
+- `test-results/anonymous-return-implementation-2026-10-04/`에 별도 E2E 출력 경로를 사용해 이전 조사/다른 작업 증거가 지워지지 않게 했다. `browser/verify-browser.mjs`와 `browser/evidence.json`의 실제 Chrome/격리 프로필·localhost HTTP fixture 12개도 통과했다. 공유 없이 탭 종료 → 홈 목록 발견, 실제 Chrome 종료/재시작 → 홈 목록과 유효 HOST 복귀, localStorage만 삭제, 다른 프로필의 같은 이름 MEMBER, 시크릿 종료, 쿠키/서버 세션 손실·마감·방 삭제를 재현했다. 외부 API 요청·pageerror는 0개이며 실제 서버·운영 방/DB는 사용하지 않았다. HTTP fixture의 Secure=false는 로컬만 해당하고 운영 Secure/CORS 검증을 대신하지 않는다. 모바일 Safari·실기기는 미검증이다.
+- 로컬 정적 preview는 `http://127.0.0.1:4195`에서 별도 숨김 프로세스로 구동했다. 상호작용 검증은 목 API로만 수행했으며 preview 자체에 운영 API를 연결하지 않았다. 계정 귀속/쿠키 손실 복구/동일 프로필 공유 기기의 신원 분리는 후속 소셜 로그인 설계 범위다.
+- 별도 서버 후보 로직 작업에서 전달받은 `UNSUPPORTED_CONDITIONAL_CONSTRAINT`와 PARTIAL을 현재 웹 빌드의 로컬 fixture로 확인했다. HOST는 일반 부분 결과 경고와 사유 코드 원문을 표시하고, MEMBER는 부분 경고만 표시하며 타인 미반영 원문 API 요청은 0개였다. 실제 웹 OpenAPI의 reason은 string이므로 새 사유 수신을 위한 enum/타입 변경은 필수가 아니다. 조건별 시간·장소가 미반영됐다는 정확한 한국어 설명은 별도 최소 UI 매핑·회귀 테스트 PR이 필요하다. 증거는 `conditional-reason.mjs/json`과 HOST/MEMBER 화면이며 최근 모임 브랜치에 해당 계약/표시 변경을 섞지 않았다. 현재 서버 운영 계약과 최근 모임 기능은 독립적이다.
+- 게시 전 diff에서 저장 필드 allowlist·권한 판정·로컬 삭제의 무쓰기·공유 경로·기존 입력 비공개 경계를 검토했다. GitHub main 보호는 strict verify와 required approvals 0, production Environment는 branch policy만 있는 것을 읽기 전용으로 확인했다. GitHub 정책·승인 설정은 변경하지 않았다. 최종 PR/CI/배포 상태는 실제 실행 결과 확인 후 후속 기록한다.
+
+## 2026-10-04 — 사용자 요청 1: 계정 없는 모임 재방문 조사 (제안, 구현 전)
+
+- 범위: Wanted 제출 MVP의 소셜 로그인 유예를 유지하면서, 생성 후 공유하지 않고 탭을 닫거나 공유 후 홈에 재방문했을 때 기존 모임을 찾기 어려운 문제를 조사했다. 이번 기록은 원인·권고·사용자 결정사항이며 기능 구현이나 확정된 인증 정책 변경이 아니다. 웹 `src/`, 서버 파일, 정책 파일은 수정하지 않았고 원격 push·PR·merge·배포와 운영 방 생성·데이터 변경은 하지 않았다.
+- 사전 확인: 상위 `C:/Users/jinhy/AGENTS.md`, 웹 README·ARCHITECTURE·BRANCHING·DEPLOYMENT·기존 Implementation log, 사용자 `.agents/skills`의 관련 지침을 확인했다. 서버 `AGENTS.md`, `project-architecture/SKILL.md`, architecture·adr·user-intervention 규칙 및 PRD·ARCHITECTURE·ADR·FRONTEND_HANDOFF의 관련 범위를 확인했다. ADR-020/021/032/036의 쿠키·여러 방 소유권·익명 주최자·고정 만료 결정이 현재 기준이다. 미합의 후보를 ADR로 확정하지 않는다.
+- 실제 상태: 시작 시 웹 작업 트리는 깨끗한 `main`, HEAD는 `90908b626ec2ef7571ad312398a3cc43f8503713`이었다. `git ls-remote origin refs/heads/main`도 동일했다. 해당 SHA의 [CI](https://github.com/meet-me-duo/meet-me-web/actions/runs/37212119555)와 [Deploy production](https://github.com/meet-me-duo/meet-me-web/actions/runs/37212119631)는 completed/success였다. 기록은 이 HEAD에서 만든 로컬 `feature/anonymous-room-return-investigation` 브랜치에 남긴다. 서버 조사 기준 HEAD는 `c43a30b`이며 조사 중 별도 작업이 서버의 `MatchingNaturalLanguageOnlyTest.kt`를 변경한 것을 관찰했다. 해당 파일과 서버 작업 트리에 손대지 않았다.
+- 운영 확인은 쿠키 없이 공개 HTML/JS/CSS/SVG GET만 수행했다. `/` 및 가상 코드의 `/rooms/abcdefghijklmnopqrstuv`는 HTTP 200으로 같은 SPA shell을 반환했고 shell은 `no-cache,no-store,must-revalidate`였다. 운영 JS는 `index-C_yol5G2.js`(SHA-256 `106ea0aa7fb75e048b11b8023ed04a5a2494d27e0cf04e4f52a1a4ba517dec00`), CSS는 `index-BQRR7iip.css`(SHA-256 `4dfaaf9efbb6859fd67cc288b43dcd7c02d5abb601740ccd8991c02b022c5b6d`)이며 모두 immutable/1년 캐시와 200 응답을 확인했다. JS에 운영 API 주소와 방 경로가 있고 localStorage/sessionStorage 사용 문자열은 없다. 실제 운영 방 API·쿠키 발급·운영 DB 기능은 검증하지 않았다.
+
+### 현재 구조와 원인
+
+| 확인 항목 | 현재 구현 및 근거 | 재방문에 미치는 영향 |
+| --- | --- | --- |
+| 방 식별 | 서버 내부 방·참여자·세션은 UUID. 외부에는 128비트 난수의 22자 base64url `invite_code`만 공개한다. 서버 `SecureInviteCodeGenerator.kt`, `RoomLifecycleDtos.kt`, V1/V2 migration 참조. | 웹이 보관할 주소는 `/rooms/<invite_code>`이며 내부 UUID가 필요하지 않다. |
+| 생성과 홈 라우팅 | `src/pages/LandingPage.tsx:70`은 생성 성공 후 `navigate(..., { replace: true })`만 한다. `src/App.tsx:28`의 `/`는 항상 랜딩이고 기존 모임 선택·자동 복귀 로직이 없다. | 탭을 닫으면 사이트 자체에는 기존 방을 발견할 수단이 없다. replace는 생성 폼을 방 경로로 바꾸며 브라우저 전체 방문 이력을 삭제하는 동작은 아니다. 방문 기록·최근 닫은 탭 복원은 가능한 수동 우회다. |
+| 웹 저장 | `src/`에 localStorage/sessionStorage 저장·복원 코드가 없고 TanStack Query는 `src/main.tsx`에서 메모리 캐시만 생성한다. | 재방문 홈에서 기존 방 주소 목록을 만들 수 없다. sessionStorage를 새로 사용해도 탭 종료 문제를 해결하지 못한다. |
+| 권한 | 서버 `RoomLifecycleService.kt:59/103/117/152/192`에서 유효 세션과 `(roomId, guestSessionId)`의 참여자를 조회한다. 한 세션은 여러 방의 HOST 또는 MEMBER를 소유한다. V1 migration은 방별 세션 참여 유일성과 방당 HOST 1명을 강제한다. | 같은 유효 쿠키로 링크를 열면 기존 역할·참여자를 찾는다. 공유 URL이나 같은 표시 이름은 소유권 증명이 아니다. 별도의 방별 hostsecret은 현재 없다. |
+| 쿠키 | `RoomLifecycleController.kt:178`은 새 세션에만 `meet_me_guest`를 Set-Cookie로 발급한다. HttpOnly·Secure·SameSite=Lax·Path=/api, Domain 미지정 API host 전용, Max-Age=30일이다. `GuestCredentialService.kt:21`과 `Participant.kt:26`이 서버의 고정 만료·회수도 검사한다. | 일반 프로필의 탭 종료·브라우저 재시작만으로 세션을 잃지는 않는다. 30일은 **최초 세션 발급 기준**이며 모임 생성·방문 때 연장되지 않는다. 오래된 세션에서 만든 새 모임에는 30일 전체가 남지 않을 수 있다. |
+| 공유 링크 | `RoomPage.tsx:45`는 현재 origin+방 경로만 복사한다. `RoomPage.tsx:115`의 결과 링크는 현재 전체 URL을 복사한다. `api/client.ts:29`는 credentials: include를 사용하고 화면은 `viewer.role`을 따른다. | 같은 브라우저의 링크 재진입은 권한 복구가 아닌 기존 유효 세션의 재식별이다. 다른 기기·프로필에는 HOST 권한을 전달하지 않는다. 향후에도 모든 공유 기능은 공개 방 경로로 정규화하며 비밀 query/hash를 도입하지 않아야 한다. |
+| 세션 손실 | 공개 GET은 쿠키 누락·만료·회수 시 `viewer.joined=false`, role=null을 반환한다. 수집 중이면 웹은 이름 입력·새 참여, 마감 뒤에는 `RoomPage.tsx:27`의 접근 제한 화면을 보여준다. | 이전 이름을 다시 입력해도 수집 중 새 MEMBER가 될 뿐 기존 HOST·내 제출을 되찾지 못한다. 마감된 방은 새 참여가 불가능하고 결과도 기존 유효 참여 세션이 필요하다. |
+| 방 데이터 보존 | `DataRetentionConfiguration.kt:16`과 `RoomDataRetentionRepository.kt:26`의 기본 정리는 30일이다. 수집 중 방은 created_at, 마감된 방은 closed_at 기준으로 배치 삭제한다. | 모임 주소 보관·익명 세션·방 자체 보존은 서로 다른 수명이다. 목록에 주소가 있어도 삭제된 방은 열리지 않는다. 운영 환경의 보존 설정 override나 실제 삭제 실행 여부는 이번에 확인하지 않았다. |
+| 서버 목록 API | 현재 웹 OpenAPI에 POST `/api/rooms`와 GET `/api/rooms/{inviteCode}` 등은 있으나 현재 세션의 모임을 열거하는 GET 목록 API는 없다. | 쿠키만으로 웹에서 이전 모든 방을 역조회할 수 없다. 목록 도입 이전 모임은 저장한 링크·방문 기록으로 직접 들어와야 웹 이력에 추가할 수 있다. |
+
+핵심 원인은 **주소 발견 UX 부재**다. 쿠키가 남아 있을 때 이를 해결하려고 인증 방식을 바꿀 필요는 없다. **쿠키 손실 이후 소유권 복구**는 별도의 인증·제품 문제로 남는다.
+
+### 로컬 재현과 검증 범위
+
+- 현재 소스로 `corepack pnpm build`가 성공했다. 기존 Zod 순수성 주석 경고는 남아 있다. 별도의 localhost HTTP 모의 API와 격리된 Chrome 프로필에서 실제 웹 production build를 구동했다. mock은 서버 소스에서 확인한 쿠키·유효 세션·HOST/MEMBER 응답 경계를 모사하며 실제 서버·DB·외부 AI는 실행하지 않았다. localhost HTTP의 mock 쿠키만 Secure=false로 했고 운영 Secure/CORS/서브도메인 정책의 실브라우저 통합 검증으로 해석하지 않는다.
+- 브라우저의 모든 요청은 실행 중인 localhost origin만 허용하고 외부 요청은 abort하도록 탐색 전에 설정했다. 운영 확인은 별도의 공개 정적 GET뿐이다. 자격 증명·Cookie/Set-Cookie 원문·입력 개인정보를 출력·로그에 남기지 않았다.
+- `test-results/anonymous-return-2026-10-04/investigate.mjs`, `evidence.json`, 화면 4장에 재현 절차와 결과를 보존했다. `test-results/`는 기존 gitignore 대상이다. 화면은 가상 모임 정보만 포함한다.
+
+| 로컬 사례 (12개 PASS) | 관찰 결과 |
+| --- | --- |
+| 생성 직후 | HOST 도구 표시, localStorage/sessionStorage 비어 있음, JavaScript에서 HttpOnly 쿠키가 보이지 않음, 30일 persistent cookie 확인. |
+| 공유 없이 탭 닫기 → 새 탭 홈 | 쿠키 유지, 자동 복귀 없음, 기존 방 링크 0개. |
+| 같은 프로필에서 공유 URL 재진입 | HOST 도구 표시, 복사 링크는 origin+방 경로뿐이며 query/hash 없음. |
+| 같은 세션으로 두 번째 방 생성 | 2개 방·1개 세션, 기존 쿠키의 만료 시각 연장 없음 (mock 및 서버 소스 일치). |
+| 실제 Chrome 프로세스 종료 → 같은 격리 프로필로 재시작 | 쿠키 유지, 홈 목록 없음, 주소를 직접 열면 HOST 표시. |
+| 웹 localStorage만 삭제 | 쿠키가 유지되므로 직접 링크에서 HOST 유지. |
+| 다른 프로필에서 링크 → 기존 주최자와 같은 이름으로 참여 | 새 MEMBER, HOST 도구 없음, mock 주최자 명령은 403. |
+| 시크릿 context 종료 → 새 context | 쿠키 없음, 재참여 화면. 실제 다른 기기는 사용하지 않았으며 독립 저장소 동작을 모사했다. |
+| 서버 세션 만료, 쿠키는 브라우저에 잔존 | 참여되지 않은 화면. mock 만료값을 바꾸어 재현했으며 실제 30일을 기다리지는 않았다. |
+| 쿠키 삭제, 수집 중 방 직접 진입 | 기존 HOST 복구 없음, 이름 입력 화면. |
+| 쿠키 삭제, 마감된 방 직접 진입 | 새 참여·결과 열람 불가 안내. |
+| 서버에서 방 삭제, 보관 링크 직접 진입 | 방을 불러오지 못함 표시. 삭제는 mock 메모리 fixture만 변경했다. |
+
+브라우저 pageerror 0개, 외부 요청 0개였다. 기능 구현을 하지 않았으므로 전체 기존 E2E/단위 테스트를 반복하지 않았다. 모바일 Safari·실기기·운영 쿠키 발급/DB 통합은 미검증이다.
+
+### 권고안: 계정 없이 최근 모임 주소를 보관
+
+1. 홈에 **“이 기기의 최근 모임”**을 추가하고 각 항목에 **다시 열기 / 링크 복사 / 목록에서 지우기**를 제공한다. 새 모임 만들기 CTA는 유지한다. 여러 모임을 지원하며 마지막 방으로 자동 리다이렉트하지 않는다. 최초 viewport에 다시 열기 진입점이 보여야 하고 목록을 긴 스크롤 설명 아래에만 두지 않는다. 목록 지우기는 서버 모임 삭제가 아니라 이 브라우저의 주소 기록 삭제임을 명시한다.
+2. 생성 성공 직후 **화면 이동 전에** 공개 초대 코드를 저장한다. 서버가 참여를 확인한 join 성공 및 GET `viewer.joined=true`에서도 갱신한다. 초대 링크를 단순 조회한 미참여 방문자는 기본적으로 자동 기록하지 않는다. 과거 모임도 직접 URL로 재진입하고 참여가 확인되면 기록할 수 있다. 기존 모임을 웹 이력으로 소급 수집하는 기능은 제공하지 않는다.
+3. localStorage에는 버전·invite_code·최근 열람 시각·구분용 최소 표시 이름만 보관하는 안을 권한다. 목적/이름은 선택된 정책에 따라 짧게 보관하고 원문 조건·참여자명·참여자 목록·내 제출·자격 증명·guest credential·hostsecret은 넣지 않는다. URL은 저장된 코드로 고정 origin의 공개 경로를 재구성하고, 목록 입력의 임의 외부 URL은 실행하지 않는다. 캐시된 “내가 만든” 표시가 있더라도 권한 증명으로 사용하지 않는다.
+4. 열기 시 기존 GET으로 서버 `viewer`와 상태를 다시 확인한다. 저장된 role/코드만으로 HOST UI·명령·계정 귀속을 인정하지 않는다. 다른 프로필에서 가져온 주소는 참여 링크일 뿐이다. 404는 항목을 사용할 수 없음으로 표시하고 지우기를 제공한다. 네트워크/5xx/429를 만료로 단정해 기록을 자동 삭제하지 않는다. 홈에서 모든 방을 계속 polling하지 않는다.
+5. 목록은 **최대 10개·최근 열람 후 30일**을 초기 후보로 제시한다 (사용자 결정 전 미확정). 이는 로컬 기록 정리 기준이고 서버 세션·방의 실제 만료 보장이 아니다. 현재 응답은 세션 expires_at을 제공하지 않으므로 남은 권한 일수나 “이 모임 생성일부터 30일 보장”을 표시하지 않는다. 여러 탭에서는 storage event로 목록을 갱신한다.
+6. 생성 직후/방 헤더에서 “이 브라우저의 최근 모임에서 다시 열 수 있어요. 초대 링크도 북마크하거나 나에게 보내 보관해 주세요. 주최자 기능은 모임을 만든 브라우저에서 사용할 수 있어요.”를 안내한다. 저장 성공 확인 후에만 보관됐다고 표시한다. 저장이 차단되거나 용량 오류가 나면 생성·참여 자체는 성공으로 유지하고 “이 브라우저에 목록을 저장하지 못했어요. 링크를 복사해 보관해 주세요.”를 보여준다. 링크 복사로 타인 메시지 전송까지 자동 실행하지 않는다.
+7. 한계는 짧게 명시한다: “기록은 이 브라우저에만 저장돼요. 시크릿 모드 종료, 브라우저 데이터 삭제·만료, 다른 기기에서는 이어서 관리하지 못할 수 있어요. 링크 보관만으로 주최자 권한이 이전되지는 않아요.” 쿠키 손실이 확인된 이전 기록에서는 “모임을 만든 브라우저로 다시 열기” 안내를 우선하고, 새 이름 입력이 주최자 복구가 아님을 알린다. 장기간 수동 마감 방은 주최자 세션 만료 후 관리할 수 없을 수 있으며 자동 마감 정책 변경은 이번 최소 범위에 포함하지 않는다.
+
+### 대안과 서버 변경 필요성
+
+| 방안 | 장점 | 한계·비용 | 서버 변경 |
+| --- | --- | --- | --- |
+| 링크 보관/같은 브라우저 안내만 | 가장 작은 변경, URL 분실을 예방 | 사용자가 복사·북마크 전에 닫으면 반복됨, 여러 모임 발견이 어려움 | 없음 |
+| 최근 모임 목록 + 명시적 열기 + 보관 안내 (권고) | 미공유 탭 종료·재시작 후 주소 발견, 여러 모임 선택, 비로그인 경험 유지 | 브라우저 단위 기록, 쿠키 손실·기기 이동의 권한 복구 불가, 도입 전 누락 모임 소급 조회 불가 | 없음: 기존 create/join/get/viewer 계약 사용 |
+| 유효 guest cookie에 연결된 서버 모임 목록 | localStorage 삭제 후에도 쿠키가 남으면 소유한 방 목록 재조회 가능 | 목록 API·pagination/정렬·보존/인가 테스트 필요, 쿠키 손실·다른 기기는 여전히 미해결 | 필요: 신규 현재 세션 목록 use case/repository/API |
+| 별도 주최자 복구 코드/관리 링크 | 계정 없이 기기 이동 복구를 제공할 수 있음 | bearer secret 유출·폐기·회전·일회성 claim·속도 제한·안전한 전달 UX를 새로 설계해야 함. 현재 1개 쿠키가 여러 방을 소유하므로 이를 복사하면 피해 범위가 큼 | 필요: 인증 계약/ADR/서버 보안 변경. 이번 최소안에서 제외 |
+| 로그인 후 주최자 계정:모임 1:N | 계정 기준 여러 기기 목록·지속적 소유권 제공 | OAuth·계정 귀속·게스트 연결·충돌/보존 정책과 기존 데이터 호환 설계 필요 | 필요: Post-MVP 기능으로 분리 |
+
+공유 URL·query/hash·브라우저 이력·clipboard·로그·analytics·localStorage/sessionStorage에 주최자 bearer secret을 넣는 우회는 권고하지 않는다. 현재 HttpOnly guest credential 하나를 꺼내서 방별 “관리 토큰”처럼 사용하지 않는다. 초대 코드는 HOST 권한은 아니지만 공개 메타데이터 열람과 수집 중 참여의 진입점이므로, 최근 모임 기록과 링크 역시 공용 기기·XSS·analytics 노출을 최소화한다. HttpOnly는 XSS의 토큰 원문 읽기를 막는 경계이지 브라우저에서 인증된 요청 실행까지 막는 보장은 아니다.
+
+### 향후 계정 전환 후보 (미확정)
+
+- localStorage는 주소 발견용 캐시로 유지하고 서버의 실제 방·참여자 ID와 기존 invite_code를 보존하는 전환을 권한다. 현 V1 스키마의 참여자는 guest_session_id가 필수이므로 계정 소유권 모델·migration·일대다 목록 API는 별도 작업이다. 지금 계정 흉내용 식별자나 로컬 role을 권한 모델로 추가하지 않는다.
+- 나중에 로그인한 사용자가 명시적으로 “이 브라우저에서 만든 모임을 내 계정에 연결”할 때, 서버가 로그인 신원과 **현재 유효한 익명 세션의 실제 HOST 참여**를 모두 검증한 방만 귀속시켜야 한다. localStorage 목록, 초대 URL, 같은 표시 이름은 소유권 증거가 아니다. MEMBER 참여 연결은 HOST 방 귀속과 별도 범위로 결정한다.
+- 한 번에 모든 소유 방을 옮길지 선택한 방만 옮길지, 이미 계정에 귀속된 방의 충돌·재귀속 금지, 계정 전환 후 익명 쿠키의 접근 유지/폐기, 원자적 연결과 중복 요청, 계정 로그아웃 및 공용 기기, 기존 데이터의 30일 보존을 유지할지 함께 합의해야 한다. 쿠키를 이미 잃거나 세션/방이 만료·삭제된 데이터의 자동 복구를 약속하지 않는다.
+
+### 사용자 결정사항과 다음 검증
+
+- 권고 범위인 **프론트 recent 목록 + 보관/한계 안내**만 먼저 구현할지, **유효 익명 세션 서버 목록 API**까지 추가할지 결정한다. 최소안은 서버 작업 완료를 기다릴 인증 계약 의존성이 없으며 이번 별도 후보 로직 검증과 분리할 수 있다.
+- 기록 대상을 “생성 + 참여 확인된 모임” 모두로 할지 주최한 모임만으로 시작할지 결정한다 (권고는 둘 다). 제목/목적의 로컬 보관 허용 여부와 표시 길이, 최대 10개·최근 30일 정리, 공용 기기에서 개별/전체 지우기 제공 범위를 정한다.
+- 시크릿·다른 기기·쿠키 삭제 후 주최자 복구를 이번 범위에서 제외할지 확인한다 (권고는 제외). 이 복구까지 요구하면 최소 UX 변경을 넘어 별도 인증 설계가 필요하다. 장기 계정 전환은 후속 설계로 유지한다.
+- 구현 승인 후에는 저장 성공·실패·손상/버전·중복/정렬·목록 제한·생성 성공 후 즉시 닫기·같은 프로필 재시작·여러 탭·기존 URL 재진입·localStorage만 삭제·cookie만 삭제·만료·404/일시 오류·다른 프로필의 HOST 오인 방지·공유 링크 비밀값 부재를 작은 관련 테스트와 실제 브라우저로 검증한다. 당시 변경 범위에 맞는 repo 체크를 실행하고 원격 출판은 별도 요청 범위에서만 한다.
 ## 2026-10-05 — companion 게시·배포 승인 확인
 
 - 사용자가 이 작업 대화에서 직접 `승인`을 보냈다. 바로 앞에 제시한 승인 범위는 `meet-me-duo/meet-me-web`의 최근 모임 복귀와 두 미반영 사유 한국어 안내를 독립 PR로 진행하는 이슈 생성·연결, 커밋·푸시·PR 생성·main 병합·`app.meet-me.co.kr` 배포다. Companion 웹을 먼저 배포해 운영 공개 번들을 목 API로 검증하고 서버 배포를 조율한다. 운영 방 생성·데이터 쓰기나 인프라·권한 설정 변경은 포함하지 않는다.

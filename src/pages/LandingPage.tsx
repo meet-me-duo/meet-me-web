@@ -9,6 +9,9 @@ import { api, errorMessage } from "../api/client";
 import type { CreateRoomBody, MeetingMode } from "../api/types";
 import { localSeoulToIso } from "../utils/time";
 import { LandingStory } from "../components/LandingStory";
+import { RecentRooms } from "../components/RecentRooms";
+import { useRecentRooms } from "../hooks/useRecentRooms";
+import { rememberRoom } from "../utils/recentRooms";
 
 const schema = z.object({
   hostName: z.string().trim().min(1, "이름을 입력해 주세요.").max(50, "50자 이하로 입력해 주세요."),
@@ -45,6 +48,7 @@ const MODE_OPTIONS: { value: MeetingMode; label: string; detail: string }[] = [
 export default function LandingPage({ creating = false }: { creating?: boolean }) {
   const [step, setStep] = useState(1);
   const navigate = useNavigate();
+  const recent = useRecentRooms();
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { hostName: "", purpose: "", meetingMode: "EITHER", searchStart: "", searchEnd: "", useExpected: true, expectedParticipants: "4", useDeadline: false, deadline: "", manualOnly: false },
@@ -67,7 +71,7 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
       search_end_date: value.searchEnd || null,
     };
     mutation.mutate(body, {
-      onSuccess: (room) => navigate(`/rooms/${room.invite_code}`, { replace: true }),
+      onSuccess: (room) => { rememberRoom(room); navigate(`/rooms/${room.invite_code}`, { replace: true }); },
     });
   });
 
@@ -76,7 +80,9 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
       <section className="hero">
         <h1><span className="hero-line">조건만 말하세요,</span><span className="hero-line">결정은 <span className="hero-accent">Meet me</span>가 할게요</span></h1>
         <button className="button primary hero-cta" onClick={() => navigate("/create")}>모임 만들기 <ArrowRight size={20} /></button>
+        {recent.rooms.length > 0 && <a className="recent-shortcut" href="#recent-rooms">이 기기의 최근 모임 {recent.rooms.length}개 보기</a>}
       </section>
+      <RecentRooms recent={recent} />
       <div className="landing-details">
         <div className="landing-intro">
           <div className="eyebrow"><Sparkles size={16} /> 자연어 조건 입력 & 스마트 조율</div>

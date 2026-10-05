@@ -67,6 +67,7 @@ test("submits and reloads natural language, edits it, and has no input timetable
   await expect(page.getByText("저장된 입력 #1")).toBeVisible();
   expect(api.puts).toEqual([{ raw_text: "월요일  저녁\n봉천역 근처" }]);
   await page.reload();
+  await page.getByRole("button", { name: "내 조건 수정" }).click();
   await expect(input).toHaveValue("월요일  저녁\n봉천역 근처");
   expect(api.puts).toHaveLength(1);
   await input.fill("목요일 저녁 비대면");
@@ -78,6 +79,7 @@ test("submits and reloads natural language, edits it, and has no input timetable
 test("old server fixture accepts new web raw_text-only at 500 codepoints and old manual responses are unused", async ({ page }) => {
   const api = await mockApi(page, { oldServer: true, rawText: "화요일 저녁" });
   await page.goto(`/rooms/${code}`);
+  await page.getByRole("button", { name: "내 조건 수정" }).click();
   const input = page.getByRole("textbox");
   await expect(input).toHaveValue("화요일 저녁");
   await expect(page.getByRole("grid")).toHaveCount(0);
@@ -87,6 +89,7 @@ test("old server fixture accepts new web raw_text-only at 500 codepoints and old
   await expect(page.getByText("저장된 입력 #2")).toBeVisible();
   expect(api.puts).toEqual([{ raw_text: "😀".repeat(500) }]);
   await page.reload();
+  await page.getByRole("button", { name: "내 조건 수정" }).click();
   await expect(input).toHaveValue("😀".repeat(500));
   await input.fill("😀".repeat(501));
   await expect(page.getByRole("button", { name: "수정 내용 저장" })).toBeDisabled();
@@ -107,6 +110,7 @@ test("old server U001C trim difference is visible without silently changing new 
   await page.getByRole("button", { name: "조건 제출하기" }).click();
   await expect(page.getByText("저장된 입력 #1")).toBeVisible();
   await page.reload();
+  await page.getByRole("button", { name: "내 조건 수정" }).click();
   await expect(input).toHaveValue("월요일");
 });
 
@@ -147,6 +151,7 @@ test("loads legacy null without autosaving and supports deliberate natural-langu
 test("failed save keeps the edited text and existing revision", async ({ page }) => {
   const api = await mockApi(page, { rawText: "화요일 저녁", failSave: true });
   await page.goto(`/rooms/${code}`);
+  await page.getByRole("button", { name: "내 조건 수정" }).click();
   const input = page.getByRole("textbox");
   await expect(input).toHaveValue("화요일 저녁");
   await input.fill("목요일 저녁");
@@ -156,6 +161,7 @@ test("failed save keeps the edited text and existing revision", async ({ page })
   await expect(page.getByText("저장된 입력 #1")).toBeVisible();
   expect(api.puts).toEqual([{ raw_text: "목요일 저녁" }]);
   await page.reload();
+  await page.getByRole("button", { name: "내 조건 수정" }).click();
   await expect(input).toHaveValue("화요일 저녁");
 });
 

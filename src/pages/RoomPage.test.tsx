@@ -24,9 +24,87 @@ afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 function mount() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 }, mutations: { retry: false } } });
   render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[`/rooms/${room.invite_code}`]}><Routes><Route path="/rooms/:inviteCode" element={<RoomPage />} /></Routes></MemoryRouter></QueryClientProvider>);
+  return client;
 }
 
 describe("natural-language conditions screen", () => {
+  it.each([401, 403, 404])("hides cached host actions when a subsequent room read returns %s", async status => {
+    const getRoom = vi.spyOn(api, "getRoom").mockResolvedValue({ ...room, viewer: { ...room.viewer, role: "HOST" } });
+    vi.spyOn(api, "getSubmission").mockResolvedValue(submission("화요일 저녁"));
+    const client = mount();
+    await screen.findByRole("button", { name: "입력 마감하기" });
+    getRoom.mockRejectedValue(new ApiError(status, { detail: "접근할 수 없는 모임" }));
+    await client.invalidateQueries({ queryKey: ["room", room.invite_code] });
+    await screen.findByRole("heading", { name: "모임을 불러오지 못했어요" });
+    expect(screen.queryByRole("button", { name: "입력 마감하기" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "내 조건 수정" })).not.toBeInTheDocument();
+  });
+
+  it.each(["HOST", "MEMBER"] as const)("restores %s submission completion with editing as a secondary action", async (role) => {
+    vi.spyOn(api, "getRoom").mockResolvedValue({ ...room, viewer: { ...room.viewer, role } });
+    vi.spyOn(api, "getSubmission").mockResolvedValue(submission("화요일 저녁"));
+    const save = vi.spyOn(api, "saveSubmission");
+    mount();
+    await screen.findByRole("heading", { name: "조건 제출을 완료했어요" });
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    expect(screen.getByText(role === "HOST" ? "초대 링크를 공유해 주세요" : "입력 마감을 기다려 주세요")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "내 조건 수정" }));
+    const input = await screen.findByRole("textbox");
+    expect(input).toHaveValue("화요일 저녁");
+    fireEvent.change(input, { target: { value: "목요일 저녁" } });
+    fireEvent.click(screen.getByRole("button", { name: "수정 취소" }));
+    await screen.findByRole("heading", { name: "조건 제출을 완료했어요" });
+    expect(save).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "내 조건 수정" }));
+    expect(await screen.findByRole("textbox")).toHaveValue("화요일 저녁");
+  });
+
+  it.each([true, false])("preserves edits during save and only returns to completion explicitly (existing=%s)", async existing => {
+    vi.spyOn(api, "getRoom").mockResolvedValue(room);
+    const getSubmission = vi.spyOn(api, "getSubmission");
+    if (existing) getSubmission.mockResolvedValue(submission("화요일 저녁"));
+    else getSubmission.mockRejectedValue(new ApiError(404, { code: "SUBMISSION_NOT_FOUND" }));
+    let complete!: (value: SavedSubmission) => void;
+    const save = vi.spyOn(api, "saveSubmission").mockImplementationOnce(() => new Promise(resolve => { complete = resolve; })).mockResolvedValue(submission("토요일 저녁", existing ? 3 : 2));
+    mount();
+    if (existing) fireEvent.click(await screen.findByRole("button", { name: "내 조건 수정" }));
+    const input = await screen.findByRole("textbox");
+    fireEvent.change(input, { target: { value: "목요일 저녁" } });
+    fireEvent.click(screen.getByRole("button", { name: existing ? "수정 내용 저장" : "조건 제출하기" }));
+    await waitFor(() => expect(save).toHaveBeenCalledWith(room.invite_code, { raw_text: "목요일 저녁" }));
+    expect(input).toBeEnabled();
+    if (existing) expect(screen.getByRole("button", { name: "수정 취소" })).toBeDisabled();
+    fireEvent.change(input, { target: { value: "금요일 저녁" } });
+    complete(submission("목요일 저녁", existing ? 2 : 1));
+    await screen.findByText(`저장된 입력 #${existing ? 2 : 1}`);
+    expect(input).toHaveValue("금요일 저녁");
+    expect(screen.queryByRole("heading", { name: "조건 제출을 완료했어요" })).not.toBeInTheDocument();
+    fireEvent.change(input, { target: { value: "목요일 저녁" } });
+    expect(screen.getByRole("textbox")).toBe(input);
+    fireEvent.click(screen.getByRole("button", { name: "수정 취소" }));
+    await screen.findByRole("heading", { name: "조건 제출을 완료했어요" });
+    expect(screen.getByText("목요일 저녁", { exact: true })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "내 조건 수정" }));
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "토요일 저녁" } });
+    fireEvent.click(screen.getByRole("button", { name: "수정 내용 저장" }));
+    await screen.findByRole("heading", { name: "조건 제출을 완료했어요" });
+    expect(screen.getByText("토요일 저녁", { exact: true })).toBeInTheDocument();
+  });
+
+  it.each([
+    [4, "2026-09-25T10:00:00Z", false, "목표 4명 제출 시", true],
+    [null, "2026-09-25T10:00:00Z", false, "자동 마감 시간", false],
+    [null, null, true, "주최자 직접 마감", false],
+  ] as const)("shows every configured closure condition (%s / %s)", async (expected, deadline, manual, label, both) => {
+    vi.spyOn(api, "getRoom").mockResolvedValue({ ...room, expected_participants: expected, submission_deadline: deadline, manual_only: manual });
+    vi.spyOn(api, "getSubmission").mockResolvedValue(submission("화요일 저녁"));
+    mount();
+    await screen.findByText(label);
+    if (deadline) expect(screen.getByText(/오후 7:00/)).toBeInTheDocument();
+    if (both) expect(screen.getByText(/먼저 충족되는 조건/)).toBeInTheDocument();
+    expect(screen.queryByText("4명 제출", { exact: true })).not.toBeInTheDocument();
+  });
+
   it("blocks blank and over-limit text, accepts 500 emoji and submits only trimmed raw_text", async () => {
     vi.spyOn(api, "getRoom").mockResolvedValue(room);
     vi.spyOn(api, "getSubmission").mockRejectedValue(new ApiError(404, { code: "SUBMISSION_NOT_FOUND" }));
@@ -71,6 +149,7 @@ describe("natural-language conditions screen", () => {
     vi.spyOn(api, "getSubmission").mockResolvedValue(submission("화요일 저녁"));
     vi.spyOn(api, "saveSubmission").mockRejectedValue(new ApiError(400, { code: "SUBMISSION_TEXT_TOO_LONG" }));
     mount();
+    fireEvent.click(await screen.findByRole("button", { name: "내 조건 수정" }));
     const input = await screen.findByRole("textbox");
     await waitFor(() => expect(input).toHaveValue("화요일 저녁"));
     fireEvent.change(input, { target: { value: "목요일 저녁" } });

@@ -1,5 +1,34 @@
 # Implementation log
 
+## 2026-10-05 — UX #12 귀속 보완 및 독립 브랜치 재검증 완료
+
+- 통합 중 원본 보존 제한을 해제하고 #12/#13 귀속 보완만 원본 feature worktree에서 마무리하라는 추가 위임을 확인했다. 적용 전 HEAD/branch/status/ref/diff 및 변경·신규 파일 SHA-256을 재확인했고 최초 인계와 모두 동일해 사용자 추가 변경이나 충돌이 없었다. #11·main/develop·서버는 수정하지 않았다. 이번 보완은 미커밋이며 커밋·push·PR·merge·배포 없음.
+- #12 최소 보완: 저장 클릭 시 raw_text를 mutation 인자로 고정하고 latestInput ref를 textarea change에서 갱신한다. 성공 응답은 현재 입력이 요청 당시 텍스트와 같을 때만 복원하며, 추가 편집이 있으면 editing을 유지해 완료 화면으로 숨기지 않는다. 저장 중 textarea 편집을 허용하고 수정 취소/중복 저장은 계속 잠근다. 저장본으로 다시 되돌린 뒤에도 폼은 유지되고 명시 취소 또는 다음 정상 저장으로 완료 화면에 복귀한다.
+- 신규 단위 2건은 기존 저장본 있음/첫 제출 두 흐름에서 요청 body, 저장 중 편집·취소 잠금·응답 후 원문 보존·동일 텍스트로 되돌리기·명시 취소·후속 저장을 검증한다. 신규 E2E 6건은 두 프로젝트의 1440/320/390폭에서 같은 흐름을 확인한다. 기존 성공·실패·원문·legacy·500 Unicode 코드포인트 검증은 유지한다.
+- submission-flow mock의 고정 4242 origin/복사 기대값을 실행 설정 baseURL로 계산한다. HOST 후보 버튼 선택자는 정확한 두 기존 표현 `Plan A/B/C로 확정` 또는 #11 적용 후 `Plan A/B/C 선택`만 허용하고 HOST=1/MEMBER=0 검증을 유지한다. #11의 CandidateCard/부분 결과/dirty/개인정보 문구/후속 GET 실패 분리는 이 단독 브랜치에 복사하지 않았다. #13 생성 폼/CSS/utility도 섞지 않았다.
+- 이번 보완 파일은 RoomPage.tsx, RoomPage.test.tsx, e2e/submission-flow.spec.ts 및 본 Worklog뿐이다. 이전 #12 변경 파일 경계는 유지했다. 추가 원본 diff는 task-6/owned-followups/에 별도 보존한다.
+- 이 브랜치 자체에서 API 일치/lint/typecheck/unit **56개**/build/전체 mock E2E **187개 통과·기존 skip 1개**를 순차 실행했다. 모든 명령 exit 0, unexpected/flaky 0. ignored `test-results/submission-followup-2026-10-05/`와 독립 strictPort 4282를 사용했고 다른 서버는 재사용·종료하지 않았다. git diff --check 통과. 기존 Zod 주석 경고만 유지된다.
+- #11/#12/#13 최종 통합본도 필수 검사·unit 94개·전체 E2E 257개+기존 skip 1개를 재실행해 모두 통과했다. #12의 두 신규 단위·6개 E2E를 통합본에도 반영했으며 제품 API/정책 변경은 없다. 최종 aggregate 증거는 task-6/integration/test-results/aggregate-followup-2026-10-05/이다.
+- 원본 #11·web main/develop·서버 기존 implementation_plan.md 변경의 해시를 최종 재확인한다. 실제 AI/운영 backend/DB/실모바일 Safari 미검증 유지. 로컬 PR 준비 완료이며 #11이 반영된 최신 main에서 #12의 공통 RoomPage 충돌을 의미적으로 반영·재검증한 뒤 독립 PR로 처리한다. PR 게시/commit/push/merge/배포는 이번 범위에 포함하지 않는다.
+
+## 2026-10-05 — UX #12 제출 후 공유·대기·상태 갱신 구현 완료
+
+- 승인: 부모 대화 `01a0f13c-c38d-764e-994b-900a645ca035`에서 사용자의 `추천대로 진행해`, 기존 PC gh 경로 사용에 대한 `진행해`를 확인한 위임이다. 이번 범위는 [#12](https://github.com/meet-me-duo/meet-me-web/issues/12)의 로컬 구현·검증·기록까지다. 이슈를 기존 gh로 읽고 원격 main을 읽기 전용 확인했으며 새 인증·권한·Git 전역 설정은 변경하지 않았다.
+- 작업 위치: `C:/Users/jinhy/Documents/Codex/2026-10-05/task-4/submission-flow`, 브랜치 `feature/12-submission-share-and-wait`, HEAD 및 기준 main `d9724d56205705647062da29c6e333a255152cd3`. 모든 구현은 미커밋 상태다. 커밋·푸시·PR·병합·배포는 수행하지 않았다.
+- 사전 확인: 상위 AGENTS.md, 웹 README와 ARCHITECTURE/BRANCHING/DEPLOYMENT/기존 Worklog, 사용자 .agents/skills의 orchestration/orca-cli discovery stub, 서버 AGENTS와 PRD의 공개·마감 정책, #11 worktree Worklog 및 task-3 인계를 읽었다. Orca 관리 상태나 다중 에이전트는 사용하지 않았다. 웹의 main 기반 feature 규칙을 적용했다.
+- 제출 완료 또는 재방문에서는 수정 폼 대신 `조건 제출을 완료했어요`를 먼저 표시한다. 주최자는 초대 링크 공유를 주행동으로, 참여자는 `입력 마감을 기다려 주세요`를 안내한다. 저장한 원문·revision과 `내 조건 수정`은 아래 보조 영역에 둔다. 명시적으로 수정하고 취소하면 저장된 원문으로 돌아오며, 저장 성공 후 완료 화면으로 복귀한다. 저장 요청 중에는 입력·취소를 잠가 중간 편집이 완료 화면 뒤에 숨지 않도록 했다. legacy null 입력은 기존 재입력 화면과 자동 저장 없음 정책을 유지한다.
+- 마감 조건은 목표 인원(주최자 포함), 자동 마감 시간, 직접 마감을 실제 설정에 따라 표시한다. 인원과 시간 동시 설정은 모두 표시하고 먼저 충족되는 조건에 마감된다고 설명한다. 목표 인원을 현재 참여·제출 수로 표현하거나 추정하지 않는다. 조기 마감 확인은 기존 오류 응답의 실제 제출 수와 설정 값을 사용하고 기존 확인·부분 결과 확정 정책을 유지한다.
+- READY 및 READY_WITH_WARNINGS의 참여한 HOST/MEMBER도 5초 간격으로 기존 room GET을 조회한다. ANALYZING 2초와 COLLECTING 5초는 유지하고 CONFIRMED 등 종료 상태에서는 interval을 중단한다. 기존 Query의 포커스 재조회·숨겨진 탭 interval 중지·요청 signal 취소를 유지한다. 일시적인 재조회 오류에는 마지막 화면과 편집 상태를 유지하고 다시 확인 버튼을 제공한다. 401/403/404는 캐시된 주최자 행동을 숨기는 기존 오류 경계로 처리한다.
+- 헤더·제출 완료·결과의 링크 복사는 동일한 컴포넌트로 성공 메시지를 제공한다. 실패에는 성공을 표시하지 않고 선택 가능한 읽기 전용 링크를 제공한다. 공유 주소는 기존 roomLink의 현재 origin+공개 방 경로만 사용해 query/hash를 제외한다. 주소 보관·권한 한계 안내는 주행동 뒤에 배치했다.
+- 변경: `src/pages/RoomPage.tsx`, `src/styles.css`, `src/pages/RoomPage.test.tsx`, 기존 `e2e/submission.spec.ts`, 신규 `e2e/submission-flow.spec.ts`, 본 로그. 기존 제출 E2E는 저장본 복원 후 `내 조건 수정`을 명시적으로 선택하도록 수정했으며 원문/500 코드포인트/legacy/실패 보존 검증은 유지했다. CandidateCard, 생성 폼 #13, API 타입·계약·서버는 변경하지 않았다.
+- RED: 기존 코드에서 새 완료/마감 단위 5건 실패·기존 46건 통과를 확인했다. 기존 production build의 MEMBER READY→CONFIRMED 회귀도 1440/320/390 세 폭에서 모두 실패했다. 실패 trace/맥락은 `test-results/submission-flow-2026-10-05/e2e-output/`에 보존한다. sandbox 실행의 테스트 종료 정리가 지연돼 중단했고, 그 preview 종료 전 첫 후속 실행은 포트 사용 오류로 끝났다. 종료 확인 후 승인된 로컬 브라우저 실행으로 검증했으며 제품 실패와 구분한다. pnpm exec의 초기 실행 경로 오류도 실제 테스트 실행으로 계산하지 않았다.
+- GREEN: 새 desktop mock 회귀 30건 통과 후 전체 검증했다. 최종 `corepack pnpm api:check`, `lint`, `typecheck`, `test`(54건), `test:e2e --config test-results/submission-flow-2026-10-05/playwright.config.ts --output test-results/submission-flow-2026-10-05/final-output`(production build 포함) 모두 통과했다. 최종 desktop/mobile E2E는 **181건 통과·기존 조건부 skip 1건**, 실패·flaky 0건이다. `git diff --check`도 통과했다. build의 기존 Zod 주석 제거 경고만 남았다. 설치된 의존성은 기존 경로를 읽는 로컬 junction으로 사용하되 .tmp/.vite 캐시는 이 worktree에 분리했다. lockfile 및 제품 설정은 변경하지 않았다.
+- 새 mock E2E 60건은 두 프로젝트에서 1440/320/390, HOST/MEMBER, 반복 수정·취소·새로고침·뒤로 가기, 마감의 인원/시간/동시/직접 설정, 복사 성공/실패 및 공개 URL 정규화, 마감 오류·조기 마감 거절/확인, 일시 조회 실패와 복구, READY/READY_WITH_WARNINGS→CONFIRMED 및 종료 후 polling 중단을 확인한다. API는 탐색 전에 로컬 mock으로 처리하고 외부 origin과 정의되지 않은 API를 차단한다. 운영 모임·실제 쿠키·DB는 사용하지 않았다.
+- 캡처: 최종 `final-output/`의 완료 화면에서 HOST/MEMBER와 1440/320/390 모두 확인했다. 수평 넘침 및 버튼 잘림 없음, 완료 화면 버튼 높이 44px 이상이다. 320 참여자 제목의 외톨이 글자 줄바꿈은 짧고 실제 수집 상태에 맞는 문구로 수정해 다시 전체 검사했다. 실기기 Safari·실제 서버 상태 전파는 이번 로컬 mock 검증 범위 밖이다.
+- 증거 경로: `test-results/submission-flow-2026-10-05/playwright.config.ts`, `api-check.log`, `final-lint.log`, `final-typecheck.log`, `final-test.log`, `final-e2e.log`, `e2e-report.json`, `final-output/`. 최종 JSON의 expected=181/skipped=1/unexpected=0/flaky=0을 확인했다. 이전 1차 전체 결과는 `full-e2e.log`/`full-output/`, 작은 회귀는 `targeted.log`/`targeted-output/`에 별도로 보존했다.
+- 보존: 원본 웹 main은 clean이며 #11의 `task-3/accuracy` 미커밋 파일 목록은 인계와 동일하다. #11 파일을 수정·복사·reset하거나 이번 브랜치에 섞지 않았다. 서버는 기존 사용자 수정 `implementation_plan.md`만 남아 있고 서버 파일은 건드리지 않았다. 원격 작업과 운영 데이터 생성은 없다. 현재 차단 사항 없음.
+- 남은 통합 위험: #11과 RoomPage의 SubmissionPanel/ResultPanel, CSS, RoomPage 단위·기존 제출 E2E 및 Worklog가 겹친다. 향후 승인된 통합에서 #11의 dirty/저장 중 편집 보존/PUT 성공과 후속 GET 실패 분리/원문 공개 안내를 유지하면서 #12 완료·편집 상태를 결합해야 한다. 특히 #12의 저장 중 textarea 잠금과 무조건 완료 복귀를 그대로 채택하면 #11의 저장 중 추가 편집 흐름을 바꾸므로, #11의 요청 텍스트 비교 및 dirty 보존을 우선해 완료 전환을 결정해야 한다. #11의 결과 문구·부분 결과 정책을 보존한 ResultPanel에 CopyRoomLink를 적용하고, #11 회귀의 복원/저장 후 textbox 접근은 명시적 수정 동선에 맞춰야 한다. 실제 통합·통합 후 검증은 이번에 수행하지 않았다. #13은 별도 feature 작업으로 남긴다.
+
 ## 2026-10-05 — 최근 모임 게시·배포 승인 확인
 
 - 사용자가 이 작업 대화에서 직접 `승인`을 보냈다. 직전 제시 범위는 `meet-me-duo/meet-me-web`의 최근 모임 복귀와 두 미반영 사유 한국어 안내를 각각 독립 PR로 진행하는 이슈 생성·연결, 커밋·푸시·PR 생성·main 병합·`app.meet-me.co.kr` 배포다. 기존 자동 승인 거절 이후 새 직접 승인을 확인했으며 인프라·권한·정책은 변경하지 않는다. 운영 데이터 쓰기는 수행하지 않는다.
@@ -200,3 +229,10 @@
 ## 남은 운영 체크포인트
 
 - 첫 배포 후 운영 Origin의 credential CORS와 Secure HttpOnly cookie 실브라우저 검증
+
+## 2026-10-05 — UX #12 커밋·Draft PR 준비 승인
+
+- 부모 대화 `01a0f13c-c38d-764e-994b-900a645ca035`에서 “#11 → #12 → #13 순서로 커밋·푸시하고 별도 Draft PR 세 개를 만들어 CI까지 확인” 요청에 사용자가 `진행해`로 직접 승인했다. 이번 범위는 커밋·feature push·Draft PR·정확한 SHA의 verify CI 확인이다. 최종 병합·운영 배포·auto-merge 설정은 제외한다.
+- 최신 원격 main과 로컬 기준은 `d9724d56205705647062da29c6e333a255152cd3`이며 같은 feature/PR은 없었다. 기존 gh CLI 인증과 저장소 push 권한을 확인했으며 새 인증·권한·전역 Git 설정은 변경하지 않는다. feature push/PR에는 배포 트리거가 없고 main merge가 운영 배포를 실행한다.
+- 원본 diff 및 변경·신규 파일의 SHA-256을 최신 인계와 대조하고 별도 백업했다. 이번 커밋은 이 이슈의 원본 구현·테스트·기록만 보존한다. 기존 로컬 검증은 단위 56개 / E2E 187개 통과 + 기존 skip 1개, API/lint/typecheck/build 및 diff 검사 통과이며 이번 기록을 새 테스트 실행으로 표시하지 않는다.
+- 공통 RoomPage/CSS/기록 충돌은 #11 → #12 → #13 stacked PR으로 준비하며 각 PR의 diff는 직접 앞 브랜치를 기준으로 해당 이슈 변경만 표시한다. main 반영 전후에는 다음 PR의 기준·diff·CI를 재확인한다. 실제 AI·운영 backend/DB·HTTPS 쿠키/CORS·실모바일 Safari는 미검증이다. Commit/PR: 동일 커밋 예정, 실제 SHA/URL은 Git 이력과 후속 인계에서 확인한다.

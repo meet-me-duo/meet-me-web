@@ -11,8 +11,9 @@ test("landing page starts the two-step room flow", async ({ page }) => {
   await page.getByLabel("모임 목적 / 이름").fill("프로젝트 킥오프");
   await page.getByRole("button", { name: /다음 단계/ }).click();
   await expect(page.getByRole("heading", { name: "언제 입력을 마감할까요?" })).toBeVisible();
-  await page.getByRole("checkbox", { name: /자동 마감 없이 직접 마감/ }).check();
-  await expect(page.getByRole("checkbox", { name: /목표 인원이 모두 제출하면/ })).not.toBeChecked();
+  await page.getByRole("radio", { name: "직접 마감", exact: true }).check();
+  await expect(page.getByRole("checkbox", { name: /목표 인원이 모두 제출하면/ })).toHaveCount(0);
+  await expect(page.getByRole("status")).toContainText("자동 마감 없이 주최자가 직접 마감");
 });
 
 test("back and the logo return from room creation to the home page", async ({ page }) => {

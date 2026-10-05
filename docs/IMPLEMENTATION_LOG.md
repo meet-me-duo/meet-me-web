@@ -1,5 +1,26 @@
 # Implementation log
 
+## 2026-10-05 — UX #13 모바일 제목 귀속 보완 및 독립 재검증 완료
+
+- 추가 위임에 따라 기존 #13 원본 feature worktree의 보완을 마무리했다. 적용 전 원본 상태·diff/신규 파일 SHA-256이 최초 인계와 일치했고 사용자 추가 변경·충돌이 없었다. 다른 이슈 브랜치/main/develop/서버는 변경하지 않았다. 미커밋 상태이며 commit/push/PR/merge/배포 없음.
+- 통합 화면 QA의 320px 생성 첫 단계에서 마지막 ‘요’ 한 글자만 줄바꿈되는 문제를 h1 `모임 기본 정보를 입력해 주세요`→`모임 기본 정보` 한 줄 문구 변경으로 해결했다. 자동/직접 마감·default14일·inclusive 날짜→exclusive API 계약·요청 body·CSS/utility/기존 테스트는 추가 변경하지 않았다. #11/#12 RoomPage/저장/공유 테스트는 섞지 않았다. 추가 변경 파일은 LandingPage.tsx 및 본 Worklog뿐이다.
+- 본 브랜치 자체 API 일치/lint/typecheck/unit **77개**/build/전체 mock E2E **149개 통과·기존 skip 1개**, 모든 명령 exit 0, unexpected/flaky 0. 독립 4283 strictPort, ignored test-results/create-followup-2026-10-05/를 사용했다. 320/390/1440 생성 화면은 기존 키보드/44px/가로 넘침 검증을 유지했고 제목 보완 화면을 재확인했다. git diff --check 통과. 기존 Zod 주석 경고만 유지된다.
+- 최종 aggregate도 unit 94개·전체 E2E 257개+기존 skip 1개 및 필수 검사를 재실행해 모두 통과했다. API/제품 정책/실제 backend/AI/운영 데이터/실모바일 Safari 검증 범위는 확대하지 않았다. 로컬 PR 준비 완료이며 #11→#12 이후 최신 main의 CSS/Worklog를 보존해 별도 #13 PR로 처리한다. 게시·merge·배포는 아직 수행하지 않는다.
+
+## 2026-10-05 — UX #13 생성 폼 단순화 로컬 구현·검증
+
+- 승인 범위는 [#13](https://github.com/meet-me-duo/meet-me-web/issues/13)의 로컬 구현·전체 검증·기존 Worklog 기록이다. 상위 `C:/Users/jinhy/AGENTS.md`, 웹 README·ARCHITECTURE·BRANCHING·기존 Worklog 및 관련 `.agents/skills` 목록을 확인했다. #11 Worklog와 CSS diff, 서버의 `FRONTEND_HANDOFF.md`, `RoomLifecycleService.kt`, `MeetingRoom.kt`, `shared/domain/time/TimeModels.kt`의 날짜/마감 계약을 읽기 참고했다. 웹에 별도 AGENTS나 작업에 적용할 프로젝트 skill은 없었다.
+- 기준 HEAD/main은 `d9724d56205705647062da29c6e333a255152cd3`. 별도 브랜치는 `feature/13-simplify-create-form`, worktree는 `C:/Users/jinhy/Documents/Codex/2026-10-05/task-5/create-form`이다. main/develop·서버 문서·다른 worktree를 수정하지 않았고 #11의 미커밋 변경과 #12의 별도 `task-4/submission-flow` 작업을 보존했다. 커밋·push·PR·merge·배포 및 운영 데이터 생성은 수행하지 않았다.
+- 생성 2단계에서 자동/직접 마감을 native radio로 먼저 구분한다. 자동에서만 인원/시간 checkbox를 보여주며 하나 이상 선택하게 한다. 두 조건을 선택하면 **주최자를 포함한 목표 인원 제출 또는 지정 한국 시각 중 먼저 충족**되면 마감한다는 요약을 표시한다. 직접 마감은 자동 조건 없이 주최자가 마감한다. 전환·이전 이동에서 인원/시간 입력은 보존하지만 직접 모드의 요청은 `expected_participants=null`, `submission_deadline=null`, `manual_only=true`로 정규화한다. 서버의 OR 종료 의미와 조기 마감 정책은 변경하지 않았다. 제출 중 방식·이전·취소·생성 버튼을 잠근다.
+- 기본 탐색 기간은 서울의 오늘부터 마지막 날까지 실제 ISO 날짜로 표시하며 날짜 편집은 `기간 변경`으로 펼친다. 기본값/기본값 복귀의 요청은 기존 `search_start_date=null`, `search_end_date=null`을 유지하고 서버가 생성 시각의 서울 날짜를 기준으로 DEFAULTED 14일을 결정한다. 변경 시 사용자가 선택하는 마지막 날을 포함하며 API에는 그 다음 날짜를 보내 기존 exclusive end를 유지한다. 시작일부터 포함 마지막 날까지 1~31일을 검증한다. 잘못된 날짜·한쪽 누락·역순·32일은 차단한다. 화면 기본 날짜는 30초 주기 및 visibility 복귀에 갱신하며 변경 날짜는 보존한다. API snapshot·타입·서버/제품 정책은 수정하지 않았다.
+- 모바일 모임 방식 세 개를 48px 한 줄 선택 묶음으로 바꾸고 선택한 방식 설명만 보여준다. 생성 폼에 한정된 스타일로 카드 여백, 날짜/설명 글자, 이전·다음·생성·기간 변경·취소 터치 영역을 정리했다. native radio의 방향키/Tab/Enter, 선택 테두리·focus, 단계 제목 focus와 이전 시 이름 focus, 날짜 오류의 aria-invalid/설명 연결을 검증했다. 랜딩 hero·패럴랙스는 수정하지 않았다.
+- 변경 파일은 `src/pages/LandingPage.tsx`, `src/styles.css`, 신규 `src/utils/createRoom.ts`·`createRoom.test.ts`·`e2e/create-form.spec.ts`, 기존 radio 전환에 맞춘 `e2e/landing.spec.ts`, 본 기록이다. 기존 `RoomPage`·공유/대기 테스트는 수정하지 않았다.
+- `api:check`, lint, typecheck, unit **77개**(신규 날짜/마감 31개 포함), build가 통과했다. 전체 Playwright desktop/mobile **149개 통과·기존 desktop 조건부 skip 1개**, unexpected/flaky 0개다. 공식 test:e2e의 build+Playwright 경로와 동일한 검증을 전용 ignored 설정의 4263 서버에서 수행했다. 최종 명령은 `corepack pnpm exec node node_modules/@playwright/test/cli.js test --config test-results/create-form-2026-10-05/playwright.config.ts`이며 완료된 build 뒤 순차 실행했다. Node 24.11.0/pnpm 10.17.1, lockfile 고정 의존성과 Microsoft Edge desktop/Pixel 7 에뮬레이션을 사용했다. build의 기존 Zod 주석 경고는 유지된다.
+- 신규 E2E 28개는 기본 null/null·서울 자정 표시 갱신, 인원/시간/직접 전환과 재전환, 이전과 취소, 오류와 제출 재시도, 하루·31일·32일 거부·윤년·연말, UTC/LA/서울 브라우저 시간대, 320/390/1440폭의 키보드·44px 이상 버튼·한 줄 모임 방식·가로 넘침을 검증한다. 단위 테스트는 월말·윤년·UTC/서울 날짜 경계·DST offset 입력과 기본14일 포함/배타 경계도 확인한다. 신규 fixture는 탐색 전에 모든 API를 목 처리하고 외부 origin 요청을 abort한다. 실제 서버/운영 API를 호출하지 않았다.
+- 첫 실행에서 같은 worktree build와 E2E가 겹쳐 `dist` 재생성 중 기존 제출 테스트 2개가 페이지 404로 실패했다. 실패 context/trace/screenshots는 `test-results/create-form-2026-10-05/first-run-output/`에 보존했다. 코드 수정 없이 순차 전체 재실행에서 두 테스트를 포함한 전부가 통과했다. Windows sandbox가 테스트 종료 후 preview를 종료하지 못해 마지막 리포트 저장이 지연되었으며, 전용 4263 preview의 PID/명령을 확인한 뒤 해당 프로세스만 종료했다. 최종 runner exit 0과 JSON stats를 확인했으며 다른 worktree 프로세스는 건드리지 않았다. 의존성 복사 중 pnpm 링크가 손실된 준비 문제는 별도 로컬 store로 frozen install하여 해결했고 lockfile은 바꾸지 않았다.
+- 최종 증거: `test-results/create-form-2026-10-05/playwright.config.ts`, `e2e-report.json`, `e2e-output/`의 320/390/1440 기본/날짜/자동/직접 화면. animation 완료 뒤 스크롤을 처음으로 맞춘 캡처를 시각 확인해 입력·날짜·요약·버튼의 겹침/수평 잘림이 없음을 확인했다. `git diff --check`도 통과했다. 전용 preview는 종료했다.
+- 남은 통합 위험: #11/#12와 `src/styles.css`·본 Worklog를 함께 통합할 때 각 단계 내용을 보존하고 합쳐진 코드의 회귀 검증을 다시 해야 한다. #11 CSS 변경과 본 생성 폼 CSS는 서로 다른 구역이며 본 단계는 RoomPage를 변경하지 않는다. 실제 모바일 Safari/기기 및 실제 백엔드 통합은 검증하지 않았으며 이번 범위의 로컬 구현 차단 사항은 없다.
+
 ## 2026-10-05 — 최근 모임 게시·배포 승인 확인
 
 - 사용자가 이 작업 대화에서 직접 `승인`을 보냈다. 직전 제시 범위는 `meet-me-duo/meet-me-web`의 최근 모임 복귀와 두 미반영 사유 한국어 안내를 각각 독립 PR로 진행하는 이슈 생성·연결, 커밋·푸시·PR 생성·main 병합·`app.meet-me.co.kr` 배포다. 기존 자동 승인 거절 이후 새 직접 승인을 확인했으며 인프라·권한·정책은 변경하지 않는다. 운영 데이터 쓰기는 수행하지 않는다.
@@ -200,3 +221,10 @@
 ## 남은 운영 체크포인트
 
 - 첫 배포 후 운영 Origin의 credential CORS와 Secure HttpOnly cookie 실브라우저 검증
+
+## 2026-10-05 — UX #13 커밋·Draft PR 준비 승인
+
+- 부모 대화 `01a0f13c-c38d-764e-994b-900a645ca035`에서 “#11 → #12 → #13 순서로 커밋·푸시하고 별도 Draft PR 세 개를 만들어 CI까지 확인” 요청에 사용자가 `진행해`로 직접 승인했다. 이번 범위는 커밋·feature push·Draft PR·정확한 SHA의 verify CI 확인이다. 최종 병합·운영 배포·auto-merge 설정은 제외한다.
+- 최신 원격 main과 로컬 기준은 `d9724d56205705647062da29c6e333a255152cd3`이며 같은 feature/PR은 없었다. 기존 gh CLI 인증과 저장소 push 권한을 확인했으며 새 인증·권한·전역 Git 설정은 변경하지 않는다. feature push/PR에는 배포 트리거가 없고 main merge가 운영 배포를 실행한다.
+- 원본 diff 및 변경·신규 파일의 SHA-256을 최신 인계와 대조하고 별도 백업했다. 이번 커밋은 이 이슈의 원본 구현·테스트·기록만 보존한다. 기존 로컬 검증은 단위 77개 / E2E 149개 통과 + 기존 skip 1개, API/lint/typecheck/build 및 diff 검사 통과이며 이번 기록을 새 테스트 실행으로 표시하지 않는다.
+- 공통 RoomPage/CSS/기록 충돌은 #11 → #12 → #13 stacked PR으로 준비하며 각 PR의 diff는 직접 앞 브랜치를 기준으로 해당 이슈 변경만 표시한다. main 반영 전후에는 다음 PR의 기준·diff·CI를 재확인한다. 실제 AI·운영 backend/DB·HTTPS 쿠키/CORS·실모바일 Safari는 미검증이다. Commit/PR: 동일 커밋 예정, 실제 SHA/URL은 Git 이력과 후속 인계에서 확인한다.

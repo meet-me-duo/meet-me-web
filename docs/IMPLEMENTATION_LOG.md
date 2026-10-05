@@ -1,5 +1,21 @@
 # Implementation log
 
+## 2026-10-05 — companion 게시·배포 승인 확인
+
+- 사용자가 이 작업 대화에서 직접 `승인`을 보냈다. 바로 앞에 제시한 승인 범위는 `meet-me-duo/meet-me-web`의 최근 모임 복귀와 두 미반영 사유 한국어 안내를 독립 PR로 진행하는 이슈 생성·연결, 커밋·푸시·PR 생성·main 병합·`app.meet-me.co.kr` 배포다. Companion 웹을 먼저 배포해 운영 공개 번들을 목 API로 검증하고 서버 배포를 조율한다. 운영 방 생성·데이터 쓰기나 인프라·권한 설정 변경은 포함하지 않는다.
+- 게시 전 읽기 전용 점검에서 두 worktree는 clean, 최근 모임 HEAD `615cc4c`, companion HEAD `5708f81`, 원격 main은 기준 `90908b6`과 일치했다. 두 feature 원격 브랜치와 PR은 없었고 최근 모임 이슈 #7은 열려 있다. 이전 검증 대상 코드에 변경이 없음을 확인했으며 companion 필수 검사를 다시 실행한다. 기존 정책 파일은 수정하지 않는다.
+
+## 2026-10-04 — 미반영 입력 사유 한국어 안내 (별도 companion)
+
+- 사용자 추가 승인 범위에 따라 서버 작업과 연결되는 최소 웹 안내를 로컬에서 구현했다. 원격 main 조회값과 로컬 main이 `90908b626ec2ef7571ad312398a3cc43f8503713`으로 일치함을 확인하고, `meet-me-web-conditional-reason` 별도 worktree의 `feature/conditional-constraint-notice`를 main에서 만들었다. 기존 최근 모임 작업은 원래 `meet-me-web` worktree의 `feature/anonymous-room-return-investigation`, HEAD `615cc4c`에 그대로 보존한다. 두 기능을 섞지 않았다.
+- 조율자가 확정한 `UNSUPPORTED_CONDITIONAL_CONSTRAINT`는 현재 스키마로 시간·장소의 조건별 연결을 처리하지 못한다는 뜻이고, `AMBIGUOUS_TIME_CONSTRAINT`는 가능한 시간 경계를 결정할 수 없다는 뜻이다. 기존 HOST 미반영 입력 목록에서 두 코드를 각각 한국어 설명으로 표시하며 해당 입력이 후보 계산에 반영되지 않았음을 밝힌다. 조건별 장소를 독립된 목록으로 바꾸도록 유도하거나 가능한 시간을 추정하지 않는다.
+- 기존 `LEGACY_MANUAL_ONLY_UNSUPPORTED` 안내를 유지한다. 알 수 없는 사유는 서버 문자열을 그대로 표시하고 `Object.hasOwn`으로 `toString` 같은 프로토타입 이름도 정상 fallback 처리한다. `reason`은 기존 OpenAPI의 문자열 필드이므로 snapshot·생성 타입·API 계약 변경은 없다. 서버 파일·정책·저장소 workflow는 수정하지 않았다.
+- 변경 범위는 `src/pages/RoomPage.tsx`, `e2e/submission.spec.ts`, 이 작업 기록이다. NO_MATCH와 READY_WITH_WARNINGS 각각에서 HOST의 두 사유 안내·nullable legacy 원문, MEMBER의 타인 원문 미요청·미표시, 알 수 없는 사유 fallback을 검증했다. PARTIAL 후보 0개 fixture에서도 후보/확정 버튼을 만들어내지 않으며 서버의 `2/4개 반영` 숫자를 보존한다. 기존 READY_WITH_WARNINGS의 일반 제목·설명은 이 최소 사유 매핑 범위에서 변경하지 않았다.
+- 최종 `corepack pnpm api:check`, `lint`, `typecheck`, `test`, production `build`가 통과했다. 단위/컴포넌트/API 테스트 39개와 desktop/mobile 전체 E2E 99개가 통과했고 기존 모바일 전용 검사의 desktop 실행 1개는 조건부 skip이다. Zod 주석 위치에 대한 기존 build 경고는 남아 있다. E2E는 모든 API를 로컬 fixture로 처리했고 운영 방 생성·데이터 변경은 하지 않았다.
+- 첫 E2E는 4173에서 다른 worktree의 기존 preview를 재사용해 새 안내 4개가 실패했다. 해당 프로세스를 중단하지 않고 ignored 임시 Playwright 설정에서 이 worktree를 cwd로 명시하고 별도 4177 서버를 실행해 수정했다. 임시 설정 첫 실행의 상대 cwd 오류도 고친 뒤 최종 전체 검사를 통과했다. 저장소의 공식 Playwright 설정은 변경하지 않았다. 실제 모바일 기기·Safari는 검증하지 않았다.
+- 최종 화면 12장 중 desktop NO_MATCH 시간 모호 안내, mobile READY_WITH_WARNINGS 조건 연결 안내와 후보 0개 화면을 직접 검토했다. 사유의 한국어 줄바꿈과 원문·숫자·버튼 경계를 확인했다. 캡처·임시 설정·로컬 PR 본문은 `test-results/conditional-reason-2026-10-04/`에 보존한다. 서버 테스트 결과는 조율자로부터 전달받았으며 이 worktree에서 서버 검사를 실행하지 않았다.
+- 이번 companion 작업은 로컬 커밋·PR 본문 준비까지만 수행한다. 원격 issue/branch/push/PR/merge/deploy는 실행하지 않으며, 기존 최근 모임 push의 자동 승인 거절도 재시도하지 않는다. 운영에는 아직 이 안내와 새 서버 로직이 반영되지 않았다.
+
 ## 2026-10-04 — scrollytelling 재설계 진행 상태
 
 - 사용자는 로컬 `96fdbf9`의 GIF를 보고 보통 스크롤 속도에서 효과가 너무 짧고 미미하다고 피드백했다. 현재 브랜치는 `feature/scroll-content-reveal`이며 이 커밋은 미게시 상태다. 후속 범위는 로컬 scrollytelling/parallax 구현·미리보기·일반/빠른 스크롤 검증으로 한정하고 push/PR/merge/deploy는 하지 않는다.

@@ -1,5 +1,10 @@
 # Implementation log
 
+## 2026-10-05 — companion 게시·배포 승인 확인
+
+- 사용자가 이 작업 대화에서 직접 `승인`을 보냈다. 바로 앞에 제시한 승인 범위는 `meet-me-duo/meet-me-web`의 최근 모임 복귀와 두 미반영 사유 한국어 안내를 독립 PR로 진행하는 이슈 생성·연결, 커밋·푸시·PR 생성·main 병합·`app.meet-me.co.kr` 배포다. Companion 웹을 먼저 배포해 운영 공개 번들을 목 API로 검증하고 서버 배포를 조율한다. 운영 방 생성·데이터 쓰기나 인프라·권한 설정 변경은 포함하지 않는다.
+- 게시 전 읽기 전용 점검에서 두 worktree는 clean, 최근 모임 HEAD `615cc4c`, companion HEAD `5708f81`, 원격 main은 기준 `90908b6`과 일치했다. 두 feature 원격 브랜치와 PR은 없었고 최근 모임 이슈 #7은 열려 있다. 이전 검증 대상 코드에 변경이 없음을 확인했으며 companion 필수 검사를 다시 실행한다. 기존 정책 파일은 수정하지 않는다.
+
 ## 2026-10-04 — 미반영 입력 사유 한국어 안내 (별도 companion)
 
 - 사용자 추가 승인 범위에 따라 서버 작업과 연결되는 최소 웹 안내를 로컬에서 구현했다. 원격 main 조회값과 로컬 main이 `90908b626ec2ef7571ad312398a3cc43f8503713`으로 일치함을 확인하고, `meet-me-web-conditional-reason` 별도 worktree의 `feature/conditional-constraint-notice`를 main에서 만들었다. 기존 최근 모임 작업은 원래 `meet-me-web` worktree의 `feature/anonymous-room-return-investigation`, HEAD `615cc4c`에 그대로 보존한다. 두 기능을 섞지 않았다.

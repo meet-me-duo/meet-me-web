@@ -10,6 +10,12 @@ import { submissionText, SUBMISSION_TEXT_LIMIT } from "../utils/submission";
 import { useRecentRooms } from "../hooks/useRecentRooms";
 import { rememberRoom, roomLink } from "../utils/recentRooms";
 
+const UNAPPLIED_REASON_MESSAGES: Record<string, string> = {
+  LEGACY_MANUAL_ONLY_UNSUPPORTED: "기존 시간표 입력은 새 분석에서 지원하지 않아 반영되지 않았어요.",
+  UNSUPPORTED_CONDITIONAL_CONSTRAINT: "장소에 따라 시간이 달라지는 등 조건별로 시간과 장소를 연결한 입력은 현재 처리할 수 없어요. 이 입력은 후보 계산에 반영되지 않았어요.",
+  AMBIGUOUS_TIME_CONSTRAINT: "가능한 시간이 명확하지 않아 이 입력을 후보 계산에 반영하지 못했어요. 날짜와 시작·종료 시간을 구체적으로 적어 주세요.",
+};
+
 export default function RoomPage() {
   const { inviteCode = "" } = useParams();
   const queryClient = useQueryClient();
@@ -120,7 +126,7 @@ function CandidatesPanel({ room }: { room: Room }) {
 
 function UnappliedInputs({ room, count }: { room: Room; count?: number }) {
   const unapplied = useQuery({ queryKey: ["unapplied", room.invite_code], queryFn: () => api.getUnappliedInputs(room.invite_code), enabled: room.viewer.role === "HOST" });
-  return <details className="unapplied glass-card"><summary>반영되지 않은 입력{count === undefined ? "" : ` ${count}개`} 확인</summary>{unapplied.isPending ? <p>불러오는 중…</p> : unapplied.isError ? <div className="alert error">{errorMessage(unapplied.error)}<button className="button secondary" onClick={() => unapplied.refetch()}>다시 시도</button></div> : unapplied.data.length === 0 ? <p>반영되지 않은 입력이 없어요.</p> : unapplied.data.map((item, index) => <article key={index}><strong>{item.participant_display_name}</strong><p>{item.raw_text ?? "기존 시간표만 제출되어 자연어 원문이 없어요."}</p><small>{item.reason === "LEGACY_MANUAL_ONLY_UNSUPPORTED" ? "기존 시간표 입력은 새 분석에서 지원하지 않아 반영되지 않았어요." : item.reason}</small></article>)}</details>;
+  return <details className="unapplied glass-card"><summary>반영되지 않은 입력{count === undefined ? "" : ` ${count}개`} 확인</summary>{unapplied.isPending ? <p>불러오는 중…</p> : unapplied.isError ? <div className="alert error">{errorMessage(unapplied.error)}<button className="button secondary" onClick={() => unapplied.refetch()}>다시 시도</button></div> : unapplied.data.length === 0 ? <p>반영되지 않은 입력이 없어요.</p> : unapplied.data.map((item, index) => <article key={index}><strong>{item.participant_display_name}</strong><p>{item.raw_text ?? "기존 시간표만 제출되어 자연어 원문이 없어요."}</p><small>{Object.hasOwn(UNAPPLIED_REASON_MESSAGES, item.reason) ? UNAPPLIED_REASON_MESSAGES[item.reason] : item.reason}</small></article>)}</details>;
 }
 
 function ResultPanel({ room }: { room: Room }) {

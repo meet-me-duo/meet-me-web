@@ -1,5 +1,11 @@
 # Implementation log
 
+## 2026-10-06 — UX #12 배포 전 CI 높이 정밀도 보완
+
+- 승인된 #14 → #15 → #16 순차 main 병합·운영 웹 배포에서 #14 main/CD 성공 후 최신 main을 일반 병합했다. head `d2cda0672cc603e789b6285ed6d4168689420ad0`의 [CI](https://github.com/meet-me-duo/meet-me-web/actions/runs/37396057919)는 success이나 최근 모임과 제출 완료 화면의 모바일 버튼 높이 측정이 43.999969482421875로 보고되어 E2E221 passed·2 flaky·기존 skip1이었다.
+- 44px 기준과 실제 computed min-height 44 이상 검증을 유지하고 bounding box만 0.001 CSS pixel 정밀도로 정규화했다. 최근 모임 검사는 이미 #13에서 검증한 동일 보완이다. 제품/CSS/API/CI retry·보호 규칙은 변경하지 않는다.
+- 해당 최근 모임·MEMBER 제출 편집 사례를 PC/mobile·320/390/1440에서 각 5회, 총40회 retry0으로 전부 통과하고 lint/diff 검사도 통과했다. ignored `test-results/deploy-geometry-2026-10-06/`에 증거를 보존하며 새로운 정확한 head의 전체 CI를 다시 확인한다. 서버 및 사용자 문서 변경은 보존한다. Commit/PR: 동일 커밋 및 PR #15.
+
 ## 2026-10-06 — UX #12 CI 확인창 테스트 동기화 보완
 
 - 최초 게시 head `adbf9365f068e7a63230644ac0f63bef5e58b239`의 [CI](https://github.com/meet-me-duo/meet-me-web/actions/runs/37392525132)는 completed/success였지만 전체 E2E는 219 passed·4 flaky·기존 skip 1이었다. 로컬 전체 223 passed·flaky 0과 달라 CI 로그를 조사했다. 같은 조기 마감 사례의 두 dialog handler가 첫 비동기 확인창을 동시에 처리해 `Cannot accept dialog which is already handled`가 발생했다.

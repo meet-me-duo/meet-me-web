@@ -57,7 +57,9 @@ async function checkLayout(page: Page) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   for (const button of await page.locator(".submission-complete button").all()) {
     const box = await button.boundingBox();
-    expect(box!.height).toBeGreaterThanOrEqual(44);
+    expect(await button.evaluate(element => Number.parseFloat(getComputedStyle(element).minHeight))).toBeGreaterThanOrEqual(44);
+    // Normalize Chromium's fractional scroll geometry without lowering the 44px target.
+    expect(Math.round(box!.height * 1_000) / 1_000).toBeGreaterThanOrEqual(44);
     expect(box!.x).toBeGreaterThanOrEqual(0);
     expect(box!.x + box!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
   }

@@ -188,6 +188,8 @@ fieldset.field legend { margin-bottom: 9px; }
 .submission-card .section-heading .eyebrow { margin-bottom: 10px; }
 .submission-footer { display: flex; align-items: center; justify-content: space-between; gap: 15px; border-top: 1px solid #e6edf3; padding-top: 20px; }
 .saved-revision { display: inline-flex; align-items: center; gap: 6px; color: #15803d; font-size: .75rem; font-weight: 700; }
+.submission-privacy { margin: 14px 0; color: #526176; font-size: .78rem; line-height: 1.6; }
+.refresh-warning { flex-wrap: wrap; }
 .room-sidebar { display: grid; gap: 15px; }
 .side-card { padding: 19px; border-radius: 17px; }
 .side-card h3 { margin: 0 0 16px; font-size: .86rem; }
@@ -225,6 +227,9 @@ fieldset.field legend { margin-bottom: 9px; }
 .time-options { display: grid; gap: 7px; margin: 16px 0; border-radius: 12px; padding: 13px; background: #f8fafc; color: #475569; font-size: .72rem; }
 .confirmed-label { display: flex; align-items: center; justify-content: center; gap: 7px; margin-top: 16px; color: #15803d; font-size: .8rem; font-weight: 800; }
 .candidate-card .button { margin-top: 7px; }
+.candidate-limit { color: #526176; font-size: .78rem; line-height: 1.6; }
+.candidate-warning { margin: 12px 0 5px; color: #92400e; font-size: .78rem; line-height: 1.6; }
+.results-section > .unapplied { margin-bottom: 18px; }
 .unapplied { max-width: 780px; margin: 18px auto 0; border-radius: 16px; padding: 17px 20px; }
 .unapplied summary { cursor: pointer; color: #92400e; font-size: .78rem; font-weight: 750; }
 .unapplied article { margin-top: 13px; border-top: 1px solid #e7edf3; padding-top: 13px; }

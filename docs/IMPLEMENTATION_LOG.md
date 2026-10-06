@@ -1,5 +1,11 @@
 # Implementation log
 
+## 2026-10-06 — UX #13 CI 버튼 높이 측정 정밀도 보완
+
+- 최초 최종 head `b4af5c1c5cc6e6a98da66da6f2a0e3efe99a2f44`의 [CI](https://github.com/meet-me-duo/meet-me-web/actions/runs/37393534744)는 success, unit94, E2E256 passed·1 flaky·기존 skip1이었다. 기존 최근 모임 긴 제목 테스트의 44px 버튼 높이가 Chromium에서 43.999969482421875로 보고되어 경계 검사에서 재시도했다. 생성 폼·API 실패와 구분한다.
+- 44px 기준을 유지하면서 computed min-height도 44 이상임을 직접 검증하고 bounding box 측정을 0.001 CSS pixel 정밀도로 정규화한다. 페이지의 가로 넘침·10개 제목·버튼·320/390/1440 화면 검증은 유지한다. 제품/CSS/CI retry·정책은 변경하지 않는다.
+- 해당 테스트를 desktop/mobile 각 5회씩 총10회·retry0으로 실행해 전부 통과하고 lint/diff 검사도 통과했다. ignored `test-results/geometry-followup-2026-10-06/`에 증거를 보존한다. 새 정확한 head의 전체 CI를 다시 추적한다. Commit/PR: 동일 커밋 예정.
+
 ## 2026-10-06 — UX #13에 부모 CI 테스트 동기화 반영
 
 - #12의 확인창 테스트 동기화 보완 `a707239f56192faba5a64319f343da628fc10ce2`를 병합으로 반영했다. 이 병합의 변경은 `e2e/submission-flow.spec.ts`와 양쪽 기록을 보존한 Worklog뿐이며 제품·생성 폼·API·CI 정책 파일은 그대로다. 테스트 파일은 부모와 정확히 일치하고 #13 부모 대비 diff에는 이 #12 보완이 나타나지 않는다.

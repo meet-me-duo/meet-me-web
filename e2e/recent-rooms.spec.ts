@@ -142,7 +142,12 @@ test("ten long titles remain usable on narrow mobile and desktop", async ({ page
     await page.setViewportSize({ width, height: 844 });
     await page.getByRole("link", { name: /이 기기의 최근 모임 10개 보기/ }).click();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
-    for (const button of await page.locator(".recent-actions .button").all()) expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    for (const button of await page.locator(".recent-actions .button").all()) {
+      expect(await button.evaluate(element => Number.parseFloat(getComputedStyle(element).minHeight))).toBeGreaterThanOrEqual(44);
+      // Chromium can report 43.999969px for a 44px box at a fractional scroll position.
+      const height = (await button.boundingBox())!.height;
+      expect(Math.round(height * 1_000) / 1_000).toBeGreaterThanOrEqual(44);
+    }
     await page.screenshot({ path: testInfo.outputPath(`recent-${width}.png`) });
   }
 });

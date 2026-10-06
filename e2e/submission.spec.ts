@@ -184,7 +184,7 @@ for (const status of ["NO_MATCH", "READY_WITH_WARNINGS"]) {
   test(`${status} MEMBER never requests or renders other participants' originals`, async ({ page }) => {
     const api = await mockApi(page, { status, unappliedReason: "UNSUPPORTED_CONDITIONAL_CONSTRAINT" });
     await page.goto(`/rooms/${code}`);
-    await expect(page.getByRole("heading", { name: status === "NO_MATCH" ? "모두에게 맞는 후보를 찾지 못했어요" : "모두에게 가장 좋은 플랜이에요" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: status === "NO_MATCH" ? "모두에게 맞는 후보를 찾지 못했어요" : "일부 조건으로 만든 후보 플랜이에요" })).toBeVisible();
     await expect(page.getByText(/반영되지 않은 입력.*확인/)).toHaveCount(0);
     await expect(page.getByText("비공개 조건 원문")).toHaveCount(0);
     expect(api.unappliedRequests).toHaveLength(0);
@@ -209,7 +209,7 @@ for (const status of ["NO_MATCH", "READY_WITH_WARNINGS"]) {
   test(`${status} MEMBER never fetches ambiguous time originals`, async ({ page }) => {
     const api = await mockApi(page, { status, unappliedReason: "AMBIGUOUS_TIME_CONSTRAINT" });
     await page.goto(`/rooms/${code}`);
-    await expect(page.getByRole("heading", { name: status === "NO_MATCH" ? "모두에게 맞는 후보를 찾지 못했어요" : "모두에게 가장 좋은 플랜이에요" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: status === "NO_MATCH" ? "모두에게 맞는 후보를 찾지 못했어요" : "일부 조건으로 만든 후보 플랜이에요" })).toBeVisible();
     await expect(page.locator(".unapplied")).toHaveCount(0);
     await expect(page.getByText("비공개 조건 원문")).toHaveCount(0);
     expect(api.unappliedRequests).toHaveLength(0);
@@ -221,7 +221,7 @@ for (const status of ["NO_MATCH", "READY_WITH_WARNINGS"]) {
     await page.getByText(/반영되지 않은 입력.*확인/).click();
     await expect(page.getByText(/가능한 시간이 명확하지 않아/)).toBeVisible();
     await expect(page.locator(".candidate-card")).toHaveCount(0);
-    await expect(page.getByRole("button", { name: /Plan .*로 확정/ })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /Plan .* 선택/ })).toHaveCount(0);
     if (status === "READY_WITH_WARNINGS") await expect(page.getByText(/일부 입력이 반영되지 않아/)).toContainText("2/4개 반영");
     else await expect(page.getByRole("heading", { name: "모두에게 맞는 후보를 찾지 못했어요" })).toBeVisible();
     expect(api.puts).toHaveLength(0);
@@ -240,7 +240,7 @@ test("an unknown reason preserves the server code fallback", async ({ page }) =>
 test("confirmed result keeps the read-only candidate time ranges", async ({ page }) => {
   await mockApi(page, { status: "CONFIRMED" });
   await page.goto(`/rooms/${code}`);
-  await expect(page.getByText("최종 확정된 일정")).toBeVisible();
+  await expect(page.getByText("선택한 플랜", { exact: true })).toBeVisible();
   await expect(page.locator(".time-options")).toContainText("오후 7:00");
   await expect(page.locator(".time-options")).toContainText("오후 09:00");
   await expect(page.getByRole("grid")).toHaveCount(0);

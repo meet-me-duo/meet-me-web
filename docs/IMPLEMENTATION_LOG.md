@@ -1,5 +1,11 @@
 # Implementation log
 
+## 2026-10-06 — UX #13 main 기준 필수 CI 연결 재확인
+
+- main 반영 head `ba824042f7bc51a3b649cc424620b8987e79cf05`의 [CI](https://github.com/meet-me-duo/meet-me-web/actions/runs/37397252142)는 unit94/E2E257+skip1·flaky0으로 성공했다. 그러나 push 직후 옛 stacked base의 synthetic merge ref를 체크아웃했다. 로그는 `Merge ba82404 into a853310`이며 base를 main으로 전환한 뒤 GitHub의 strict required verify가 현재 병합 기준에서 BLOCKED로 남았다.
+- API 조회에서 실제 main `c177661f0aeeee8759bc226b4c4d10f90a7d4c4b`, feature behind0, mergeable=true, required verify app15368·strict=true와 원래 권한 규칙을 확인했다. 설정/보호 규칙 우회는 하지 않는다. 이 기록만 정상 커밋·push해 이미 main으로 전환한 PR에서 새 synchronize CI를 실행하고 정확한 최신 SHA와 main 기준 체크가 연결된 CLEAN 상태를 확인한 뒤 승인된 병합을 수행한다.
+- 제품/src/CSS/API/테스트/CI 설정 내용은 변경하지 않는다. 기존 성공 SHA·CI 로그와 모든 부모 커밋은 보존한다. 운영 데이터 쓰기·서버/인증/권한 변경 없음. Commit/PR: 동일 기록 커밋 및 PR #16.
+
 ## 2026-10-06 — UX #13 운영 웹 배포 승인 및 최신 main 반영
 
 - 사용자가 PR #14·#15·#16의 순차 main 병합과 운영 웹 배포를 명시적으로 승인했다. #14의 main CI/CD 성공과 #15의 정확한 head CI(unit63/E2E223+skip1, flaky0) 후 #15를 main에 병합했다. 기준 main은 `c177661f0aeeee8759bc226b4c4d10f90a7d4c4b`이며 해당 CI/CD 성공을 확인한 뒤에만 #16을 병합한다.

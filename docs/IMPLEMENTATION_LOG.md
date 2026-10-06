@@ -1,5 +1,11 @@
 # Implementation log
 
+## 2026-10-06 — UX #13 운영 웹 배포 승인 및 최신 main 반영
+
+- 사용자가 PR #14·#15·#16의 순차 main 병합과 운영 웹 배포를 명시적으로 승인했다. #14의 main CI/CD 성공과 #15의 정확한 head CI(unit63/E2E223+skip1, flaky0) 후 #15를 main에 병합했다. 기준 main은 `c177661f0aeeee8759bc226b4c4d10f90a7d4c4b`이며 해당 CI/CD 성공을 확인한 뒤에만 #16을 병합한다.
+- 최신 main을 기존 #13 브랜치에 일반 병합해 원본/부모 이력을 보존했다. Worklog의 #12/#13 기록 충돌은 양쪽 기록을 모두 보존했다. 제품/src/CSS/API/정책 파일의 내용은 기존 검증본과 동일하며 #12의 검증된 제출 완료 버튼 높이 정밀도 보완만 상속했다. 동일한 최근 모임 높이 보완은 이미 양쪽에 있어 main 대비 #13 diff에서 제거된다.
+- base를 main으로 바꾸고 #13 생성 폼/통합 회귀만 표시하는 diff와 새 정확한 head CI를 재확인한다. 최종 main 배포 완료 뒤 실제 배포 HTML/JS/CSS를 PC/mobile·320/390/1440에서 탐색 전 API 목으로 검증한다. 공개 앱 GET만 허용하고 운영 데이터 쓰기·실제 참여 쿠키·서버 변경·인증/권한 설정 변경은 없다. 실제 AI/backend/DB/실기기 Safari 미검증은 유지한다. Commit/PR: 동일 병합 커밋 및 PR #16.
+
 ## 2026-10-06 — UX #13 CI 버튼 높이 측정 정밀도 보완
 
 - 최초 최종 head `b4af5c1c5cc6e6a98da66da6f2a0e3efe99a2f44`의 [CI](https://github.com/meet-me-duo/meet-me-web/actions/runs/37393534744)는 success, unit94, E2E256 passed·1 flaky·기존 skip1이었다. 기존 최근 모임 긴 제목 테스트의 44px 버튼 높이가 Chromium에서 43.999969482421875로 보고되어 경계 검사에서 재시도했다. 생성 폼·API 실패와 구분한다.
@@ -10,6 +16,11 @@
 
 - #12의 확인창 테스트 동기화 보완 `a707239f56192faba5a64319f343da628fc10ce2`를 병합으로 반영했다. 이 병합의 변경은 `e2e/submission-flow.spec.ts`와 양쪽 기록을 보존한 Worklog뿐이며 제품·생성 폼·API·CI 정책 파일은 그대로다. 테스트 파일은 부모와 정확히 일치하고 #13 부모 대비 diff에는 이 #12 보완이 나타나지 않는다.
 - 보완 전 이 브랜치의 전체 로컬 unit94/E2E257+skip1·실패/flaky0 결과와 부모의 수정 테스트 retry0 반복30회/lint 통과 근거를 구분한다. 새 정확한 #13 head의 전체 verify CI를 게시 후 확인한다. 최종 병합·배포·auto-merge는 승인 범위 밖이다. Commit/PR: 동일 병합 커밋 예정.
+## 2026-10-06 — UX #12 배포 전 CI 높이 정밀도 보완
+
+- 승인된 #14 → #15 → #16 순차 main 병합·운영 웹 배포에서 #14 main/CD 성공 후 최신 main을 일반 병합했다. head `d2cda0672cc603e789b6285ed6d4168689420ad0`의 [CI](https://github.com/meet-me-duo/meet-me-web/actions/runs/37396057919)는 success이나 최근 모임과 제출 완료 화면의 모바일 버튼 높이 측정이 43.999969482421875로 보고되어 E2E221 passed·2 flaky·기존 skip1이었다.
+- 44px 기준과 실제 computed min-height 44 이상 검증을 유지하고 bounding box만 0.001 CSS pixel 정밀도로 정규화했다. 최근 모임 검사는 이미 #13에서 검증한 동일 보완이다. 제품/CSS/API/CI retry·보호 규칙은 변경하지 않는다.
+- 해당 최근 모임·MEMBER 제출 편집 사례를 PC/mobile·320/390/1440에서 각 5회, 총40회 retry0으로 전부 통과하고 lint/diff 검사도 통과했다. ignored `test-results/deploy-geometry-2026-10-06/`에 증거를 보존하며 새로운 정확한 head의 전체 CI를 다시 확인한다. 서버 및 사용자 문서 변경은 보존한다. Commit/PR: 동일 커밋 및 PR #15.
 
 ## 2026-10-06 — UX #12 CI 확인창 테스트 동기화 보완
 

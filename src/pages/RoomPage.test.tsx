@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { api, ApiError } from "../api/client";
-import type { Room, SavedSubmission, Submission } from "../api/types";
+import type { Candidate, Room, SavedSubmission, Submission } from "../api/types";
 import RoomPage from "./RoomPage";
 
 const room: Room = {
@@ -24,9 +24,87 @@ afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 function mount() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 }, mutations: { retry: false } } });
   render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[`/rooms/${room.invite_code}`]}><Routes><Route path="/rooms/:inviteCode" element={<RoomPage />} /></Routes></MemoryRouter></QueryClientProvider>);
+  return client;
 }
 
 describe("natural-language conditions screen", () => {
+  it.each([401, 403, 404])("hides cached host actions when a subsequent room read returns %s", async status => {
+    const getRoom = vi.spyOn(api, "getRoom").mockResolvedValue({ ...room, viewer: { ...room.viewer, role: "HOST" } });
+    vi.spyOn(api, "getSubmission").mockResolvedValue(submission("화요일 저녁"));
+    const client = mount();
+    await screen.findByRole("button", { name: "입력 마감하기" });
+    getRoom.mockRejectedValue(new ApiError(status, { detail: "접근할 수 없는 모임" }));
+    await client.invalidateQueries({ queryKey: ["room", room.invite_code] });
+    await screen.findByRole("heading", { name: "모임을 불러오지 못했어요" });
+    expect(screen.queryByRole("button", { name: "입력 마감하기" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "내 조건 수정" })).not.toBeInTheDocument();
+  });
+
+  it.each(["HOST", "MEMBER"] as const)("restores %s submission completion with editing as a secondary action", async (role) => {
+    vi.spyOn(api, "getRoom").mockResolvedValue({ ...room, viewer: { ...room.viewer, role } });
+    vi.spyOn(api, "getSubmission").mockResolvedValue(submission("화요일 저녁"));
+    const save = vi.spyOn(api, "saveSubmission");
+    mount();
+    await screen.findByRole("heading", { name: "조건 제출을 완료했어요" });
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    expect(screen.getByText(role === "HOST" ? "초대 링크를 공유해 주세요" : "입력 마감을 기다려 주세요")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "내 조건 수정" }));
+    const input = await screen.findByRole("textbox");
+    expect(input).toHaveValue("화요일 저녁");
+    fireEvent.change(input, { target: { value: "목요일 저녁" } });
+    fireEvent.click(screen.getByRole("button", { name: "수정 취소" }));
+    await screen.findByRole("heading", { name: "조건 제출을 완료했어요" });
+    expect(save).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "내 조건 수정" }));
+    expect(await screen.findByRole("textbox")).toHaveValue("화요일 저녁");
+  });
+
+  it.each([true, false])("preserves edits during save and only returns to completion explicitly (existing=%s)", async existing => {
+    vi.spyOn(api, "getRoom").mockResolvedValue(room);
+    const getSubmission = vi.spyOn(api, "getSubmission");
+    if (existing) getSubmission.mockResolvedValue(submission("화요일 저녁"));
+    else getSubmission.mockRejectedValue(new ApiError(404, { code: "SUBMISSION_NOT_FOUND" }));
+    let complete!: (value: SavedSubmission) => void;
+    const save = vi.spyOn(api, "saveSubmission").mockImplementationOnce(() => new Promise(resolve => { complete = resolve; })).mockResolvedValue(submission("토요일 저녁", existing ? 3 : 2));
+    mount();
+    if (existing) fireEvent.click(await screen.findByRole("button", { name: "내 조건 수정" }));
+    const input = await screen.findByRole("textbox");
+    fireEvent.change(input, { target: { value: "목요일 저녁" } });
+    fireEvent.click(screen.getByRole("button", { name: existing ? "수정 내용 저장" : "조건 제출하기" }));
+    await waitFor(() => expect(save).toHaveBeenCalledWith(room.invite_code, { raw_text: "목요일 저녁" }));
+    expect(input).toBeEnabled();
+    if (existing) expect(screen.getByRole("button", { name: "수정 취소" })).toBeDisabled();
+    fireEvent.change(input, { target: { value: "금요일 저녁" } });
+    complete(submission("목요일 저녁", existing ? 2 : 1));
+    await screen.findByText(`저장된 입력 #${existing ? 2 : 1}`);
+    expect(input).toHaveValue("금요일 저녁");
+    expect(screen.queryByRole("heading", { name: "조건 제출을 완료했어요" })).not.toBeInTheDocument();
+    fireEvent.change(input, { target: { value: "목요일 저녁" } });
+    expect(screen.getByRole("textbox")).toBe(input);
+    fireEvent.click(screen.getByRole("button", { name: "수정 취소" }));
+    await screen.findByRole("heading", { name: "조건 제출을 완료했어요" });
+    expect(screen.getByText("목요일 저녁", { exact: true })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "내 조건 수정" }));
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "토요일 저녁" } });
+    fireEvent.click(screen.getByRole("button", { name: "수정 내용 저장" }));
+    await screen.findByRole("heading", { name: "조건 제출을 완료했어요" });
+    expect(screen.getByText("토요일 저녁", { exact: true })).toBeInTheDocument();
+  });
+
+  it.each([
+    [4, "2026-09-25T10:00:00Z", false, "목표 4명 제출 시", true],
+    [null, "2026-09-25T10:00:00Z", false, "자동 마감 시간", false],
+    [null, null, true, "주최자 직접 마감", false],
+  ] as const)("shows every configured closure condition (%s / %s)", async (expected, deadline, manual, label, both) => {
+    vi.spyOn(api, "getRoom").mockResolvedValue({ ...room, expected_participants: expected, submission_deadline: deadline, manual_only: manual });
+    vi.spyOn(api, "getSubmission").mockResolvedValue(submission("화요일 저녁"));
+    mount();
+    await screen.findByText(label);
+    if (deadline) expect(screen.getByText(/오후 7:00/)).toBeInTheDocument();
+    if (both) expect(screen.getByText(/먼저 충족되는 조건/)).toBeInTheDocument();
+    expect(screen.queryByText("4명 제출", { exact: true })).not.toBeInTheDocument();
+  });
+
   it("blocks blank and over-limit text, accepts 500 emoji and submits only trimmed raw_text", async () => {
     vi.spyOn(api, "getRoom").mockResolvedValue(room);
     vi.spyOn(api, "getSubmission").mockRejectedValue(new ApiError(404, { code: "SUBMISSION_NOT_FOUND" }));
@@ -71,6 +149,7 @@ describe("natural-language conditions screen", () => {
     vi.spyOn(api, "getSubmission").mockResolvedValue(submission("화요일 저녁"));
     vi.spyOn(api, "saveSubmission").mockRejectedValue(new ApiError(400, { code: "SUBMISSION_TEXT_TOO_LONG" }));
     mount();
+    fireEvent.click(await screen.findByRole("button", { name: "내 조건 수정" }));
     const input = await screen.findByRole("textbox");
     await waitFor(() => expect(input).toHaveValue("화요일 저녁"));
     fireEvent.change(input, { target: { value: "목요일 저녁" } });
@@ -78,5 +157,128 @@ describe("natural-language conditions screen", () => {
     await screen.findByText(/500자 이하로 입력/);
     expect(input).toHaveValue("목요일 저녁");
     expect(screen.getByText("저장된 입력 #1")).toBeInTheDocument();
+  });
+});
+
+describe("saved conditions and plan accuracy", () => {
+  it("marks edits unsaved, restores saved status on undo, and avoids saving unchanged text", async () => {
+    vi.spyOn(api, "getRoom").mockResolvedValue(room);
+    vi.spyOn(api, "getSubmission").mockResolvedValue(submission("화요일 저녁"));
+    const save = vi.spyOn(api, "saveSubmission");
+    mount();
+    fireEvent.click(await screen.findByRole("button", { name: "내 조건 수정" }));
+    const input = await screen.findByRole("textbox");
+    await waitFor(() => expect(input).toHaveValue("화요일 저녁"));
+    expect(screen.getByRole("button", { name: "수정 내용 저장" })).toBeDisabled();
+    expect(screen.getByText("조건이 안전하게 저장됐어요.")).toBeInTheDocument();
+    expect(screen.getByText(/저장은 분석 완료를 뜻하지 않아요/)).toBeInTheDocument();
+    expect(screen.getByText(/반영하지 못한 원문은 주최자에게 공개/)).toBeInTheDocument();
+    fireEvent.change(input, { target: { value: "목요일 저녁" } });
+    expect(screen.queryByText("조건이 안전하게 저장됐어요.")).not.toBeInTheDocument();
+    expect(screen.getByText("수정한 내용이 아직 저장되지 않았어요.")).toBeInTheDocument();
+    fireEvent.change(input, { target: { value: "  화요일 저녁  " } });
+    expect(screen.getByRole("button", { name: "수정 내용 저장" })).toBeDisabled();
+    expect(screen.getByText("조건이 안전하게 저장됐어요.")).toBeInTheDocument();
+    expect(save).not.toHaveBeenCalled();
+  });
+
+  it("keeps a successful save distinct from a failed room refresh and retries only the refresh", async () => {
+    vi.spyOn(api, "getRoom").mockResolvedValueOnce(room).mockRejectedValueOnce(new ApiError(503, { code: "SERVICE_UNAVAILABLE" })).mockResolvedValue(room);
+    vi.spyOn(api, "getSubmission").mockResolvedValue(submission("화요일 저녁"));
+    const save = vi.spyOn(api, "saveSubmission").mockResolvedValue(submission("목요일 저녁", 2));
+    mount();
+    fireEvent.click(await screen.findByRole("button", { name: "내 조건 수정" }));
+    const input = await screen.findByRole("textbox");
+    await waitFor(() => expect(input).toHaveValue("화요일 저녁"));
+    fireEvent.change(input, { target: { value: "목요일 저녁" } });
+    fireEvent.click(screen.getByRole("button", { name: "수정 내용 저장" }));
+    await screen.findByText("조건은 저장됐지만 모임 진행 상태를 갱신하지 못했어요.");
+    expect(screen.getByText("조건이 안전하게 저장됐어요.")).toBeInTheDocument();
+    expect(screen.getByText("저장된 입력 #2")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "진행 상태 다시 확인" }));
+    await waitFor(() => expect(screen.queryByText("조건은 저장됐지만 모임 진행 상태를 갱신하지 못했어요.")).not.toBeInTheDocument());
+    expect(save).toHaveBeenCalledTimes(1);
+  });
+
+  it("preserves text edited while saving and labels it unsaved after the earlier request succeeds", async () => {
+    vi.spyOn(api, "getRoom").mockResolvedValue(room);
+    vi.spyOn(api, "getSubmission").mockResolvedValue(submission("화요일 저녁"));
+    let complete!: (value: SavedSubmission) => void;
+    const save = vi.spyOn(api, "saveSubmission").mockImplementation(() => new Promise(resolve => { complete = resolve; }));
+    mount();
+    fireEvent.click(await screen.findByRole("button", { name: "내 조건 수정" }));
+    const input = await screen.findByRole("textbox");
+    await waitFor(() => expect(input).toHaveValue("화요일 저녁"));
+    fireEvent.change(input, { target: { value: "목요일 저녁" } });
+    fireEvent.click(screen.getByRole("button", { name: "수정 내용 저장" }));
+    await waitFor(() => expect(save).toHaveBeenCalledWith(room.invite_code, { raw_text: "목요일 저녁" }));
+    fireEvent.change(input, { target: { value: "금요일 저녁" } });
+    complete(submission("목요일 저녁", 2));
+    await screen.findByText("저장된 입력 #2");
+    expect(input).toHaveValue("금요일 저녁");
+    expect(screen.getByText("수정한 내용이 아직 저장되지 않았어요.")).toBeInTheDocument();
+    expect(screen.queryByText("조건이 안전하게 저장됐어요.")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "수정 취소" })).toBeEnabled();
+    fireEvent.change(input, { target: { value: "목요일 저녁" } });
+    expect(screen.getByRole("textbox")).toBe(input);
+    expect(screen.queryByRole("heading", { name: "조건 제출을 완료했어요" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "수정 취소" }));
+    await screen.findByRole("heading", { name: "조건 제출을 완료했어요" });
+  });
+
+  it("preserves unsaved text when a submission refetch brings a newer saved revision", async () => {
+    vi.spyOn(api, "getRoom").mockResolvedValue(room);
+    vi.spyOn(api, "getSubmission").mockResolvedValueOnce(submission("화요일 저녁")).mockResolvedValue(submission("목요일 저녁", 2));
+    const client = mount();
+    fireEvent.click(await screen.findByRole("button", { name: "내 조건 수정" }));
+    const input = await screen.findByRole("textbox");
+    await waitFor(() => expect(input).toHaveValue("화요일 저녁"));
+    fireEvent.change(input, { target: { value: "금요일 저녁" } });
+    await client.invalidateQueries({ queryKey: ["submission", room.invite_code] });
+    await screen.findByText("저장된 입력 #2");
+    expect(input).toHaveValue("금요일 저녁");
+    expect(screen.getByText("수정한 내용이 아직 저장되지 않았어요.")).toBeInTheDocument();
+  });
+
+  const candidate: Candidate = {
+    candidate_id: "11111111-1111-1111-1111-111111111111", plan_type: "A", meeting_mode: "IN_PERSON", rank: 1,
+    attendance_count: 2, total_participants: 3, place: { display_name: "봉천역 근처", latitude: null, longitude: null }, summary: "화요일 저녁 후보",
+    time_ranges: [{ start_at: "2026-10-06T10:00:00Z", end_at: "2026-10-06T12:00:00Z" }, { start_at: "2026-10-13T10:00:00Z", end_at: "2026-10-13T12:00:00Z" }],
+  };
+
+  it("shows partial coverage and a candidate limitation by the host selection action", async () => {
+    vi.spyOn(api, "getRoom").mockResolvedValue({ ...room, public_status: "READY_WITH_WARNINGS", viewer: { ...room.viewer, role: "HOST" } });
+    vi.spyOn(api, "getCandidates").mockResolvedValue({ quality: "PARTIAL", applied_submissions: 2, total_submissions: 3, unapplied_inputs: 1, candidates: [candidate] });
+    vi.spyOn(api, "getUnappliedInputs").mockResolvedValue([{ participant_display_name: "다른 참여자", raw_text: "조건 원문", reason: "AMBIGUOUS_TIME_CONSTRAINT" }]);
+    mount();
+    await screen.findByRole("heading", { name: "일부 조건으로 만든 후보 플랜이에요" });
+    const select = screen.getByRole("button", { name: "Plan A 선택" });
+    const card = select.closest("article")!;
+    expect(card).toHaveTextContent("2/3개 입력 반영");
+    expect(card).toHaveTextContent("실제 모임 날짜·시간과 상세 장소는 주최자가 따로 공지해요.");
+    expect(screen.getByText(/반영되지 않은 입력 1개 확인/).compareDocumentPosition(select) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(card).toHaveTextContent("후보 지역 · 봉천역 근처");
+    expect(select).toBeEnabled();
+  });
+
+  it("has no selection instruction or action when the candidate list is empty", async () => {
+    vi.spyOn(api, "getRoom").mockResolvedValue({ ...room, public_status: "READY_WITH_WARNINGS" });
+    vi.spyOn(api, "getCandidates").mockResolvedValue({ quality: "PARTIAL", applied_submissions: 2, total_submissions: 3, unapplied_inputs: 1, candidates: [] });
+    const originals = vi.spyOn(api, "getUnappliedInputs");
+    mount();
+    await screen.findByRole("heading", { name: "선택할 수 있는 후보가 없어요" });
+    expect(screen.queryByText(/하나를 골라|플랜 하나를 선택|플랜을 선택하면/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Plan .* 선택/ })).not.toBeInTheDocument();
+    expect(originals).not.toHaveBeenCalled();
+  });
+
+  it("calls the confirmed result a selected plan and retains every candidate time", async () => {
+    vi.spyOn(api, "getRoom").mockResolvedValue({ ...room, public_status: "CONFIRMED" });
+    vi.spyOn(api, "getResult").mockResolvedValue({ candidate, confirmed_at: "2026-10-05T09:00:00Z" });
+    mount();
+    await screen.findByRole("heading", { name: "주최자가 선택한 플랜이에요" });
+    expect(screen.getByText("선택한 플랜", { exact: true })).toBeInTheDocument();
+    expect(document.querySelectorAll(".time-options span")).toHaveLength(2);
+    expect(screen.queryByText(/최종 확정된 일정|우리의 만남이 정해졌어요/)).not.toBeInTheDocument();
   });
 });

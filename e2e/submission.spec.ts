@@ -67,6 +67,7 @@ test("submits and reloads natural language, edits it, and has no input timetable
   await expect(page.getByText("저장된 입력 #1")).toBeVisible();
   expect(api.puts).toEqual([{ raw_text: "월요일  저녁\n봉천역 근처" }]);
   await page.reload();
+  await page.getByRole("button", { name: "내 조건 수정" }).click();
   await expect(input).toHaveValue("월요일  저녁\n봉천역 근처");
   expect(api.puts).toHaveLength(1);
   await input.fill("목요일 저녁 비대면");
@@ -78,6 +79,7 @@ test("submits and reloads natural language, edits it, and has no input timetable
 test("old server fixture accepts new web raw_text-only at 500 codepoints and old manual responses are unused", async ({ page }) => {
   const api = await mockApi(page, { oldServer: true, rawText: "화요일 저녁" });
   await page.goto(`/rooms/${code}`);
+  await page.getByRole("button", { name: "내 조건 수정" }).click();
   const input = page.getByRole("textbox");
   await expect(input).toHaveValue("화요일 저녁");
   await expect(page.getByRole("grid")).toHaveCount(0);
@@ -87,6 +89,7 @@ test("old server fixture accepts new web raw_text-only at 500 codepoints and old
   await expect(page.getByText("저장된 입력 #2")).toBeVisible();
   expect(api.puts).toEqual([{ raw_text: "😀".repeat(500) }]);
   await page.reload();
+  await page.getByRole("button", { name: "내 조건 수정" }).click();
   await expect(input).toHaveValue("😀".repeat(500));
   await input.fill("😀".repeat(501));
   await expect(page.getByRole("button", { name: "수정 내용 저장" })).toBeDisabled();
@@ -107,6 +110,7 @@ test("old server U001C trim difference is visible without silently changing new 
   await page.getByRole("button", { name: "조건 제출하기" }).click();
   await expect(page.getByText("저장된 입력 #1")).toBeVisible();
   await page.reload();
+  await page.getByRole("button", { name: "내 조건 수정" }).click();
   await expect(input).toHaveValue("월요일");
 });
 
@@ -147,6 +151,7 @@ test("loads legacy null without autosaving and supports deliberate natural-langu
 test("failed save keeps the edited text and existing revision", async ({ page }) => {
   const api = await mockApi(page, { rawText: "화요일 저녁", failSave: true });
   await page.goto(`/rooms/${code}`);
+  await page.getByRole("button", { name: "내 조건 수정" }).click();
   const input = page.getByRole("textbox");
   await expect(input).toHaveValue("화요일 저녁");
   await input.fill("목요일 저녁");
@@ -156,6 +161,7 @@ test("failed save keeps the edited text and existing revision", async ({ page })
   await expect(page.getByText("저장된 입력 #1")).toBeVisible();
   expect(api.puts).toEqual([{ raw_text: "목요일 저녁" }]);
   await page.reload();
+  await page.getByRole("button", { name: "내 조건 수정" }).click();
   await expect(input).toHaveValue("화요일 저녁");
 });
 
@@ -178,7 +184,7 @@ for (const status of ["NO_MATCH", "READY_WITH_WARNINGS"]) {
   test(`${status} MEMBER never requests or renders other participants' originals`, async ({ page }) => {
     const api = await mockApi(page, { status, unappliedReason: "UNSUPPORTED_CONDITIONAL_CONSTRAINT" });
     await page.goto(`/rooms/${code}`);
-    await expect(page.getByRole("heading", { name: status === "NO_MATCH" ? "모두에게 맞는 후보를 찾지 못했어요" : "모두에게 가장 좋은 플랜이에요" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: status === "NO_MATCH" ? "모두에게 맞는 후보를 찾지 못했어요" : "일부 조건으로 만든 후보 플랜이에요" })).toBeVisible();
     await expect(page.getByText(/반영되지 않은 입력.*확인/)).toHaveCount(0);
     await expect(page.getByText("비공개 조건 원문")).toHaveCount(0);
     expect(api.unappliedRequests).toHaveLength(0);
@@ -203,7 +209,7 @@ for (const status of ["NO_MATCH", "READY_WITH_WARNINGS"]) {
   test(`${status} MEMBER never fetches ambiguous time originals`, async ({ page }) => {
     const api = await mockApi(page, { status, unappliedReason: "AMBIGUOUS_TIME_CONSTRAINT" });
     await page.goto(`/rooms/${code}`);
-    await expect(page.getByRole("heading", { name: status === "NO_MATCH" ? "모두에게 맞는 후보를 찾지 못했어요" : "모두에게 가장 좋은 플랜이에요" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: status === "NO_MATCH" ? "모두에게 맞는 후보를 찾지 못했어요" : "일부 조건으로 만든 후보 플랜이에요" })).toBeVisible();
     await expect(page.locator(".unapplied")).toHaveCount(0);
     await expect(page.getByText("비공개 조건 원문")).toHaveCount(0);
     expect(api.unappliedRequests).toHaveLength(0);
@@ -215,7 +221,7 @@ for (const status of ["NO_MATCH", "READY_WITH_WARNINGS"]) {
     await page.getByText(/반영되지 않은 입력.*확인/).click();
     await expect(page.getByText(/가능한 시간이 명확하지 않아/)).toBeVisible();
     await expect(page.locator(".candidate-card")).toHaveCount(0);
-    await expect(page.getByRole("button", { name: /Plan .*로 확정/ })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /Plan .* 선택/ })).toHaveCount(0);
     if (status === "READY_WITH_WARNINGS") await expect(page.getByText(/일부 입력이 반영되지 않아/)).toContainText("2/4개 반영");
     else await expect(page.getByRole("heading", { name: "모두에게 맞는 후보를 찾지 못했어요" })).toBeVisible();
     expect(api.puts).toHaveLength(0);
@@ -234,7 +240,7 @@ test("an unknown reason preserves the server code fallback", async ({ page }) =>
 test("confirmed result keeps the read-only candidate time ranges", async ({ page }) => {
   await mockApi(page, { status: "CONFIRMED" });
   await page.goto(`/rooms/${code}`);
-  await expect(page.getByText("최종 확정된 일정")).toBeVisible();
+  await expect(page.getByText("선택한 플랜", { exact: true })).toBeVisible();
   await expect(page.locator(".time-options")).toContainText("오후 7:00");
   await expect(page.locator(".time-options")).toContainText("오후 09:00");
   await expect(page.getByRole("grid")).toHaveCount(0);

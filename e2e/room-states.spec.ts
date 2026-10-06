@@ -80,12 +80,12 @@ test("host sees server-ranked candidates and confirmation action", async ({ page
   await mockRoom(page, "READY", { role: "HOST" });
   await page.goto(`/rooms/${code}`);
   await expect(page.getByText(candidate.summary)).toBeVisible();
-  await expect(page.getByRole("button", { name: "Plan A로 확정" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Plan A 선택" })).toBeVisible();
 });
 
 test("confirmed room renders the final result", async ({ page }) => {
   await mockRoom(page, "CONFIRMED");
   await page.goto(`/rooms/${code}`);
-  await expect(page.getByRole("heading", { name: "우리의 만남이 정해졌어요!" })).toBeVisible();
-  await expect(page.getByText("최종 확정된 일정")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "주최자가 선택한 플랜이에요" })).toBeVisible();
+  await expect(page.getByText("선택한 플랜", { exact: true })).toBeVisible();
 });

@@ -1,5 +1,11 @@
 # Implementation log
 
+## 2026-10-06 — UX #12 CI 확인창 테스트 동기화 보완
+
+- 최초 게시 head `adbf9365f068e7a63230644ac0f63bef5e58b239`의 [CI](https://github.com/meet-me-duo/meet-me-web/actions/runs/37392525132)는 completed/success였지만 전체 E2E는 219 passed·4 flaky·기존 skip 1이었다. 로컬 전체 223 passed·flaky 0과 달라 CI 로그를 조사했다. 같은 조기 마감 사례의 두 dialog handler가 첫 비동기 확인창을 동시에 처리해 `Cannot accept dialog which is already handled`가 발생했다.
+- 테스트에서 취소 확인창의 발생·내용 검증·dismiss 완료를 명시적으로 기다린 뒤 다음 accept handler를 등록한다. 기존 오류/실제 인원·마감 문구·COLLECTING 유지·confirm_early body·MEMBER 권한·외부 요청 없음 assertions는 모두 유지한다. 제품/API 및 CI retry/정책 변경 없음.
+- 해당 회귀를 desktop/mobile 각 1440/320/390에서 5회씩 총 30회, retry 0으로 실행해 전부 통과했다. ignored `test-results/dialog-followup-2026-10-06/`에 증거를 보존한다. lint/diff 검사 통과. 새 head의 전체 verify CI를 다시 추적하고 이 수정은 #13에 부모 병합으로 전달해 #13 diff에 섞이지 않게 한다. Commit/PR: 동일 커밋 예정.
+
 ## 2026-10-06 — UX #12 stacked 코드 로컬 재검증 완료
 
 - 실제 병합 작업 트리에서 API/lint/typecheck/unit **63개**/build/전체 mock E2E **223개 통과 + 기존 skip 1개**를 순차 재실행했다. 모든 명령 exit 0, unexpected/flaky 0. 독립 strictPort 4302와 ignored `test-results/publish-stack-12-2026-10-06/`에 증거를 보존한다.

@@ -60,6 +60,7 @@ for (const width of [1440, 320, 390]) test.describe(`accuracy at ${width}px`, ()
   test("saved, edited, failed, retried and reloaded states match the persisted input", async ({ page }, testInfo) => {
     const api = await fixture(page, { failSave: true });
     await page.goto(`/rooms/${code}`);
+    await page.getByRole("button", { name: "내 조건 수정" }).click();
     const input = page.getByRole("textbox");
     await expect(input).toHaveValue("화요일 저녁");
     await expect(page.getByText("조건이 안전하게 저장됐어요.", { exact: true })).toBeVisible();
@@ -76,9 +77,11 @@ for (const width of [1440, 320, 390]) test.describe(`accuracy at ${width}px`, ()
     await page.getByRole("button", { name: "수정 내용 저장" }).click();
     await expect(page.getByText("저장된 입력 #2")).toBeVisible();
     await expect(page.getByText("조건이 안전하게 저장됐어요.", { exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "내 조건 수정" }).click();
     await input.fill("금요일 저녁");
     await expect(page.getByText("수정한 내용이 아직 저장되지 않았어요.")).toBeVisible();
     await page.reload();
+    await page.getByRole("button", { name: "내 조건 수정" }).click();
     await expect(input).toHaveValue("목요일 저녁");
     expect(api.writes).toEqual([{ raw_text: "목요일 저녁" }, { raw_text: "목요일 저녁" }]);
     expect(api.unexpected).toEqual([]); expect(api.errors).toEqual([]);
@@ -88,6 +91,7 @@ for (const width of [1440, 320, 390]) test.describe(`accuracy at ${width}px`, ()
   test("a failed room refresh cannot turn the successful PUT into a save failure", async ({ page }) => {
     const api = await fixture(page, { failRefresh: true });
     await page.goto(`/rooms/${code}`);
+    await page.getByRole("button", { name: "내 조건 수정" }).click();
     await expect(page.getByRole("textbox")).toHaveValue("화요일 저녁");
     await page.getByRole("textbox").fill("목요일 저녁");
     await page.getByRole("button", { name: "수정 내용 저장" }).click();
@@ -102,6 +106,7 @@ for (const width of [1440, 320, 390]) test.describe(`accuracy at ${width}px`, ()
   test("editing during an in-flight save is preserved and remains unsaved", async ({ page }) => {
     const api = await fixture(page, { holdSave: true });
     await page.goto(`/rooms/${code}`);
+    await page.getByRole("button", { name: "내 조건 수정" }).click();
     const input = page.getByRole("textbox");
     await expect(input).toHaveValue("화요일 저녁");
     await input.fill("목요일 저녁");
@@ -113,7 +118,14 @@ for (const width of [1440, 320, 390]) test.describe(`accuracy at ${width}px`, ()
     await expect(input).toHaveValue("금요일 저녁");
     await expect(page.getByText("수정한 내용이 아직 저장되지 않았어요.")).toBeVisible();
     await expect(page.getByText("조건이 안전하게 저장됐어요.", { exact: true })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "수정 취소" })).toBeEnabled();
+    await input.fill("목요일 저녁");
+    await expect(input).toBeVisible();
+    await expect(page.getByRole("heading", { name: "조건 제출을 완료했어요" })).toHaveCount(0);
+    await page.getByRole("button", { name: "수정 취소" }).click();
+    await expect(page.getByRole("heading", { name: "조건 제출을 완료했어요" })).toBeVisible();
     await page.reload();
+    await page.getByRole("button", { name: "내 조건 수정" }).click();
     await expect(input).toHaveValue("목요일 저녁");
     expect(api.unexpected).toEqual([]); expect(api.errors).toEqual([]);
   });

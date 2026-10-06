@@ -211,12 +211,16 @@ for (const width of [1440, 320, 390]) {
       await expect(page.getByText("마감 처리 실패")).toBeVisible();
       await expect(page.getByRole("heading", { name: "조건 제출을 완료했어요" })).toBeVisible();
       state.failClose = false;
-      page.once("dialog", async dialog => { expect(dialog.message()).toContain("2명 제출 / 목표 4명"); expect(dialog.message()).toContain("마감:"); await dialog.dismiss(); });
-      await page.getByRole("button", { name: "입력 마감하기" }).click();
+      const cancelled = page.waitForEvent("dialog").then(async dialog => {
+        expect(dialog.message()).toContain("2명 제출 / 목표 4명");
+        expect(dialog.message()).toContain("마감:");
+        await dialog.dismiss();
+      });
+      await Promise.all([cancelled, page.getByRole("button", { name: "입력 마감하기" }).click()]);
       await expect(page.getByRole("button", { name: "입력 마감하기" })).toBeEnabled();
       expect(state.status).toBe("COLLECTING");
-      page.once("dialog", dialog => dialog.accept());
-      await page.getByRole("button", { name: "입력 마감하기" }).click();
+      const accepted = page.waitForEvent("dialog").then(dialog => dialog.accept());
+      await Promise.all([accepted, page.getByRole("button", { name: "입력 마감하기" }).click()]);
       await expect(page.getByRole("heading", { name: "모두의 조건을 분석하고 있어요" })).toBeVisible();
       expect(state.writes.at(-1)?.body).toEqual({ confirm_early: true });
       expect(state.unexpected).toEqual([]);

@@ -1,5 +1,14 @@
 # Implementation log
 
+## 2026-10-07 — #17 지연 분석 재시도의 동일 화면 참여자 전환 경합
+
+- 최종 `059f049a4832effb2e2cc844d33f4cdd50b5dc1e`의 읽기 검토에서 `ANALYSIS_DELAYED`가 유지된 채 joined HOST에서 다른 joined MEMBER/context로 바뀌면 DelayedState hook이 재사용되는 경계를 확인했다. 기존 unjoined 복구 회귀는 컴포넌트 unmount만 검증했다. 독립 추가2건이 old retry200의 이전 HOST 복원과 old403의 새 MEMBER private cache 삭제를 실제 assertion RED로 재현했다.
+- 독립 작성자가 unsupported ByRole `exact` 옵션4개를 제거해 타입을 정정했다. literal name strict match와 기능 기대를 유지한 최종 test SHA는 `7445d3a898c867532220fa31f97744500214a3ffb31de06266c8c05b5b88494e`다. 수정한 테스트로 원래059f source에서 assertion RED2를 재확보하고 정상 작업 source bytes를 정확히 복원했다. owner의 최초 재확보 시도는 Corepack cache 환경 누락으로 테스트에 도달하지 못했으며 별도 setup failure log로 보존하고 RED 근거에 포함하지 않았다.
+- DelayedState에 다른 private panel과 동일한 room/viewer context key를 추가했다. 기존 mounted guard가 이전 요청의 늦은 성공/실패를 무시하도록 lifetime을 구분하는 한 줄 변경이다. 분석 재시도 정책·권한 계약·endpoint·correction UUID ledger와 모델 호출 횟수 정책은 바꾸지 않았다. 새 RoomPage SHA는 `8e6b8fe292ad149616a35c44b06a42c67c1585b86d2d258307014cc5f9ca713d`다.
+- 기존121 + 독립55 = unit176, API check/type/lint/build가 통과했다. 새 지연 lifetime fault를 포함한8개 결함 주입은 모두 strict assertion에 탐지됐고 최종 source/test SHA와 정확 복원을 확인했다(`fault-final176-evidence.json`). 기존 독립53/browser24 지문은 유지한다. 새로운 source/dist 전체 browser329통과/기존 skip1/실패·flaky0/errors[]를 확인했다(`e2e-final176-full.log`, `e2e-final176-report.json`). 현재 source/dist는 `browser-final176-build-manifest.json`과 byte 단위로 일치한다. 독립 최종 review는 source8e/helper e415/native22225/schema65629, API/type/lint/build/unit176/fault8/full329를 읽기 확인하고 PASS를 보고했다. 현재 빌드의 mixed-version probe6도 독립 실행 통과했으며 이는 구 클라이언트의 열화/거부를 기대대로 확인하는 근거이고 양방향 기능 호환이나 업데이트 운영 게이트 해소를 뜻하지 않는다.
+- HTTP503은 query 자동 retry 대상이 아니고 mutation 자동 retry는 false다. `ANALYZING`의2초 GET polling과 분석 POST를 구분한다. 서버가 `ANALYSIS_DELAYED`를 반환하면 interval=false이고 HOST의 명시 클릭만 기존 `/analysis/retry`를 요청한다. 수정 라운드 `/analysis`·`/reopen`과 구분하며 delayed 화면에서는 본인 저장 입력을 읽고 재제출을 요구하지 않는다. AMBIGUOUS 사유는 미반영 조회에만 표시한다. 실제 provider503→서버 상태/ledger/persistence는 서버의 별도 회귀 근거이고, 이번 web mock를 실제 공급자/통합 검증으로 주장하지 않는다.
+- 이번 추가 작업의 서버·평가도구 수정, backend/운영/모델 호출, owner의 commit/push/CI/PR 재시도는0이다. 최종 검증과 독립 리뷰 후 부모가 후속 변경을 로컬 커밋으로 기록할 계획이며, 원격에 이미 존재하는 `059f049…`는 이전 검증 상태다. 부모가 보고한 자동 승인 검토의 외부 게시 차단을 유지해 추가 push/PR은 실행하지 않고 별도 사용자 승인 단계로 남긴다. 오래 열린 구 클라이언트의 update/refresh 운영 게이트와 실제 backend/browser 통합·실기기 범위는 그대로 남는다.
+
 ## 2026-10-07 — #17 실제 서버 생성 계약 동기화
 
 - 서버가 실제 OpenAPI endpoint에서 검증·내보낸 최종 파일의 원본 bytes를 저장했다. SHA-256은 `22225ba0db80bf9afb31fa641f8edc385a2dda69abf83f0c063fb18741890ce0`이며 OpenAPI3.1.0, 경로12개다. 운영 snapshot을 조회하지 않았고 생성 `schema.d.ts`는 `corepack pnpm api:generate`로만 갱신했다.

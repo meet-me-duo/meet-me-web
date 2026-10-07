@@ -127,7 +127,7 @@ export default function RoomPage() {
       {room.public_status === "COLLECTING" && correctionOpen(room) && !room.capabilities?.can_edit_own_submission && <StateCard icon={<LockKeyhole />} title="조건을 수정하는 중이에요" body="기존에 입력을 제출한 참여자가 자신의 입력을 수정할 수 있어요." />}
       {room.public_status === "ANALYZING" && <StateCard icon={<LoaderCircle className="spin" />} title="모두의 조건을 분석하고 있어요" body="입력은 안전하게 저장됐어요. 최적의 플랜을 만드는 데 잠시 시간이 걸릴 수 있어요." />}
       {room.public_status === "INSUFFICIENT_PARTICIPANTS" && <StateCard icon={<Users />} title="조율에 필요한 인원이 부족해요" body="최소 두 명의 제출이 필요해 후보를 만들지 않았어요." />}
-      {room.public_status === "ANALYSIS_DELAYED" && <DelayedState room={room} onRetried={setRoom} onAccessDenied={privateAccessDenied} />}
+      {room.public_status === "ANALYSIS_DELAYED" && <DelayedState key={`delayed:${ownerKey}`} room={room} onRetried={setRoom} onAccessDenied={privateAccessDenied} />}
       {room.public_status === "NO_MATCH" && <><StateCard icon={<AlertCircle />} title="모두에게 맞는 후보를 찾지 못했어요" body="반영 가능한 조건에서 함께할 일정을 찾지 못했어요. 일부 입력은 반영되지 않았을 수 있어요. 저장한 조건을 확인하고, 조건 수정을 열 수 있을 때 다시 조율해 보세요." />{room.viewer.role === "HOST" && <UnappliedInputs key={`unapplied:${ownerKey}`} room={room} onAccessDenied={privateAccessDenied} />}</>}
       {(room.public_status === "READY" || room.public_status === "READY_WITH_WARNINGS") && <CandidatesPanel key={`candidates:${ownerKey}`} room={room} onAccessDenied={privateAccessDenied} />}
       {room.public_status === "CONFIRMED" && <ResultPanel key={`result:${ownerKey}`} room={room} onAccessDenied={privateAccessDenied} />}

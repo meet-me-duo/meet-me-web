@@ -1,6 +1,6 @@
 import type { components } from "./schema";
 
-type Complete<T> = { [K in keyof T]-?: Exclude<T[K], undefined> };
+export type Complete<T> = { [K in keyof T]-?: Exclude<T[K], undefined> };
 
 type RawRoom = components["schemas"]["RoomResponse"];
 type RawViewer = components["schemas"]["ViewerParticipationResponse"];
@@ -12,15 +12,24 @@ type RawSavedSubmission = components["schemas"]["SavedSubmissionResponse"];
 
 export type MeetingMode = "IN_PERSON" | "REMOTE" | "EITHER";
 export type PublicStatus = "COLLECTING" | "ANALYZING" | "INSUFFICIENT_PARTICIPANTS" | "ANALYSIS_DELAYED" | "NO_MATCH" | "READY" | "READY_WITH_WARNINGS" | "CONFIRMED";
-export type Viewer = Complete<RawViewer>;
-export type Room = Omit<Complete<RawRoom>, "viewer"> & { viewer: Viewer };
-export type Submission = Omit<Complete<RawSubmission>, "manual_available_times">;
-export type SavedSubmission = Omit<Complete<RawSavedSubmission>, "manual_available_times">;
+// Additive read fields may be absent while the web is served with the previous server.
+// DTO members remain generated; only their backward-read presence is relaxed here.
+type RecoveryKeys = "state_version" | "analysis_id" | "revision_generation" | "revision_round" | "remaining_correction_analyses" | "capabilities";
+type SubmissionKeys = "revision_round_id" | "state_version";
+export type Viewer = Omit<Complete<RawViewer>, "context_id"> & Partial<Pick<Complete<RawViewer>, "context_id">>;
+export type RevisionRound = Complete<components["schemas"]["RevisionRoundResponse"]>;
+export type RoomCapabilities = Complete<components["schemas"]["RoomCapabilitiesResponse"]>;
+export type Room = Omit<Complete<RawRoom>, "viewer" | RecoveryKeys> & {
+  viewer: Viewer;
+  capabilities?: RoomCapabilities;
+} & Partial<Pick<Complete<RawRoom>, Exclude<RecoveryKeys, "capabilities">>>;
+export type Submission = Omit<Complete<RawSubmission>, "manual_available_times" | SubmissionKeys> & Partial<Pick<Complete<RawSubmission>, SubmissionKeys>>;
+export type SavedSubmission = Omit<Complete<RawSavedSubmission>, "manual_available_times" | SubmissionKeys> & Partial<Pick<Complete<RawSavedSubmission>, SubmissionKeys>>;
 export type Candidate = Omit<Complete<RawCandidate>, "time_ranges" | "place"> & {
   time_ranges: Complete<components["schemas"]["CandidateTimeRangeResponse"]>[];
   place: Complete<components["schemas"]["CandidatePlaceResponse"]> | null;
 };
-export type CandidateList = Omit<Complete<RawCandidateList>, "candidates"> & { candidates: Candidate[] };
+export type CandidateList = Omit<Complete<RawCandidateList>, "candidates" | "analysis_id" | "state_version"> & { candidates: Candidate[] } & Partial<Pick<Complete<RawCandidateList>, "analysis_id" | "state_version">>;
 export type ConfirmedResult = Omit<Complete<RawResult>, "candidate"> & { candidate: Candidate };
 export type UnappliedInput = Complete<components["schemas"]["UnappliedInputResponse"]>;
 export type ApiProblem = Complete<components["schemas"]["ApiProblemSchema"]>;
@@ -36,4 +45,4 @@ export interface CreateRoomBody {
   search_end_date: string | null;
 }
 
-export type SaveSubmissionBody = Pick<components["schemas"]["SaveSubmissionRequest"], "raw_text">;
+export type SaveSubmissionBody = Pick<components["schemas"]["SaveSubmissionRequest"], "raw_text" | "revision_round_id" | "expected_revision">;

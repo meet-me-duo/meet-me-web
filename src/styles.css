@@ -229,6 +229,10 @@ fieldset.field legend { margin-bottom: 9px; }
 .room-sidebar { display: grid; gap: 15px; }
 .side-card { padding: 19px; border-radius: 17px; }
 .side-card h3 { margin: 0 0 16px; font-size: .86rem; }
+.analysis-recovery h2 { margin: 0 0 12px; font-size: 1.15rem; line-height: 1.45; }
+.analysis-recovery .button { min-height: 44px; width: 100%; }
+.recovery-force { min-height: 44px; display: flex; align-items: center; gap: 9px; margin-bottom: 10px; color: #526176; font-size: .82rem; line-height: 1.5; }
+.recovery-force input { width: 17px; height: 17px; flex-shrink: 0; accent-color: #0ea5e9; }
 .side-card > p { margin: -5px 0 15px; color: #718096; font-size: .72rem; line-height: 1.55; }
 .status-line { display: flex; gap: 10px; margin-top: 13px; }
 .status-line > span { color: #38bdf8; }

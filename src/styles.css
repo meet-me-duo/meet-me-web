@@ -365,3 +365,34 @@ fieldset.field legend { margin-bottom: 9px; }
 .saved-submission { padding: 20px; }
 .saved-submission summary { min-height: 44px; display: list-item; cursor: pointer; font-weight: 700; overflow-wrap: anywhere; }
 .saved-submission .submitted-text { overflow-wrap: anywhere; }
+
+.recommendation-choices { max-width: 780px; margin-inline: auto; }
+.recommendation-card h3 { margin-top: 0; }
+.recommendation-variants { min-width: 0; margin: 0; padding: 0; border: 0; }
+.recommendation-variants legend { margin-bottom: 10px; color: #475569; font-size: .9rem; }
+.recommendation-variant { display: flex; gap: 10px; align-items: flex-start; min-height: 44px; padding: 13px 10px; margin-block: 8px; border: 1px solid #cbd5e1; border-radius: 12px; cursor: pointer; }
+.recommendation-variant:has(input:checked) { border-color: #0284c7; background: #f0f9ff; }
+.recommendation-variant:focus-within { outline: 3px solid #0f172a; outline-offset: 2px; }
+.recommendation-variant > input { flex: none; width: 18px; height: 18px; margin-top: 3px; accent-color: #0369a1; }
+.recommendation-variant > span { min-width: 0; }
+.recommendation-range { display: flex; gap: 7px; align-items: flex-start; margin-block: 12px; font-size: .94rem; line-height: 1.6; overflow-wrap: anywhere; }
+.recommendation-range svg { flex: none; margin-top: 3px; }
+.recommendation-card .candidate-meta { font-size: .94rem; }
+.recommendation-card .button, .more-times, .actual-time-actions .button { min-height: 44px; }
+.recommendation-card .button.primary, .actual-time-actions .button.primary { background: #0369a1; }
+.recommendation-choices > .field-hint, .actual-time-form .field-hint { color: #475569; font-size: .94rem; line-height: 1.6; }
+.more-times { display: flex; margin: 18px auto 0; }
+.actual-time-form { max-width: 780px; padding: 24px; margin-inline: auto; overflow-wrap: anywhere; }
+.actual-time-form h3 { font-size: 1.15rem; line-height: 1.5; margin-top: 0; }
+.actual-time-form h3:focus { outline: 0; }
+.actual-time-inputs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.actual-time-form .field input, .actual-time-form select { min-width: 0; min-height: 44px; }
+.actual-time-form .field > span { font-size: .94rem; }
+.actual-time-form select { width: 100%; border: 1px solid #94a3b8; padding: 12px; border-radius: 12px; background: white; color: #172033; }
+.actual-time-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
+.selected-time { padding: 12px; background: #f0f9ff; border-radius: 12px; line-height: 1.6; }
+@media (max-width: 540px) {
+  .actual-time-inputs { grid-template-columns: minmax(0, 1fr); }
+  .actual-time-form { padding: 18px; }
+  .actual-time-actions .button, .more-times { width: 100%; }
+}

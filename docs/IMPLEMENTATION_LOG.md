@@ -393,3 +393,23 @@
 - Node 24.19.0 / Corepack pnpm 10.17.1, frozen lockfile 및 기존 cache로 의존성을 설치했다. `api:check`, `lint`, `typecheck`, 단위/컴포넌트/API 121개와 `build`가 통과했다. build의 기존 Zod 순수성 주석 경고는 남아 있다. 전체 desktop/mobile E2E 305개 통과, 기존 조건부 skip 1개, 실패·flaky 0개를 확인했다. 신규 저장 입력 검사는 48개가 모두 통과했다. 1440/390/320px, 7개 마감 상태의 본인 원문 read-only 표시·펼침 전 조회 없음·Web Storage 저장 없음·키보드 열기/닫기를 확인했다. 320px 실제 PNG에서 긴 원문·줄바꿈·revision의 가로 잘림이 없음을 확인했다.
 - E2E는 모든 API가 합성 응답인 로컬 preview에서 실행한다. 기존 환경의 `/usr/bin/chromium`을 사용하는 환경용 config와 로그·JSON·화면은 `/workspace/scratch/meet-me-bootstrap/web17-review/`에 둔다. Playwright 번들 다운로드 차단에 대한 재시도나 우회는 하지 않았다. 운영 API/DB, 실제 Gemini, CI, commit/push/PR/merge/deploy는 실행하지 않았다.
 - 후속 단계: 부모가 요청한 새 작업 인계를 위해 검증한 7파일과 이 기록을 별도 feature 커밋으로 보존한다. 검토 후 제품 파일의 SHA-256 7개가 동일하고 `git diff --check`가 통과함을 재확인했다. 앞 행의 미실행 목록은 검증 시점 기록이며 현재 commit 상태와 SHA는 Git 이력을 따른다. #92 연결은 계속 미완료다. 원시 로그·비밀값·운영 데이터는 커밋하지 않는다.
+
+## 2026-10-07 — #19 다양한 추천 시간 UI 준비
+
+- 이슈 #19 및 서버 #95, PR #18와 웹 README·ARCHITECTURE·BRANCHING·DEPLOYMENT·기존 Worklog, 서버 AGENTS와 관련 development/architecture/documentation/api-documentation/ADR/user-intervention 규칙·project-architecture skill을 확인했다. 웹에 별도 .agents/.codex guard는 없다. 서버 Kotlin guard는 서버 변경에만 적용하며 이 작업에서 서버를 수정하지 않는다.
+- 원격 main `68c41f7619e7f1a28b2b597cb56867e4d3e852bc`를 읽기 전용 fetch하고 사용자가 지정한 PR #18 HEAD `3c403a2667d4a3921ba8a661fb2a4e9758b220ed`에서 독립 `feature/19-diverse-time-recommendations`를 만들었다. main/develop·기존 #18 브랜치는 보존한다.
+- 승인된 화면 동작: 서로 다른 시간 추천 최대 3개, 나머지 다른 가능한 시간 보기, variant별 실제 범위/방식/장소/인원 표시, 선택한 단일 창 내 실제 시작·종료 명시 선택. 옵션을 복제하거나 임의 1시간을 만들지 않는다. 서버 순위/선호 집계를 웹에서 계산하지 않는다.
+- native OpenAPI와 정확 protocol 필드/값은 서버 담당 세션에서 전달 대기다. 내부 presentation model과 독립 테스트를 먼저 준비하며 API DTO·endpoint·mixed-version gate를 독단 확정하지 않는다. 기존 confirmation에 새 JSON을 보내지 않는다. API 연결 전 제품 화면에는 신규 컴포넌트를 활성화하지 않는다.
+- 독립 테스트 설계 역할을 별도 에이전트에 위임했다. 사용자 승인 요구사항에서 1개/3개·variant별 인원·빈 시간 입력·경계·자정·DST gap/overlap·뒤로가기·반복 클릭·권한/context 변경을 도출하며 실제 assertion RED → 구현 → GREEN → 독립 리뷰·의도 결함 검증으로 진행한다.
+- 범위 밖: 유료 모델 호출, 운영 데이터 변경, 권한 설정, 병합, 배포. mock UI 검증·실제 backend/browser 통합·서버 PG 검증은 분리해 보고한다. 최종 Draft PR은 H2 변경사항/검증과 Closes #19를 사용하고 정확 HEAD의 CI 근거를 확인한다.
+
+### #19 UI 준비분 검증·독립 리뷰 완료 (계약 연결 대기)
+
+- 신규 `RecommendationChoices`와 presentation model, 시간 변환 유틸을 준비했다. 기본 추천은 최대3개, overflow/alternatives는 명시 펼침 후 별도 “다른 가능한 시간”으로 표시한다. 각 variant의 인원·방식·장소·가능한 창을 함께 읽고 한 창을 선택한 뒤 공백인 시작·종료를 직접 입력한다. 임의 길이·선호 점수·가짜 추천을 만들지 않는다.
+- 방 IANA timezone으로 입력을 실제 instant로 변환하며 자정 양쪽 날짜와 각 UTC offset을 표시한다. DST gap 거부·overlap 두 instant의 명시 offset 선택, 반시간 DST, 전체 범위 경계와 짧은 사용자 선택을 검증했다. 브라우저 timezone이 방 timezone과 달라도 같은 instant를 보낸다.
+- context 변경·선택 variant 변경/삭제에는 폼을 폐기하고, 무관한 추천/추가 page 변경에는 입력·포커스를 보존한다. 삭제된 radio variant는 현재 존재하는 첫 variant로 복원한다. 확정/추가 조회에는 즉시 반복 클릭 ref lock과 pending 표시를 적용한다. native adapter는 `onConfirm`/`onLoadMore`에 Promise를 반환해 실패 후 입력을 유지하며 busy를 해제하도록 연결한다.
+- 독립 테스트: 컴파일 가능한 skeleton typecheck PASS 후45RED, 독립 리뷰에서추가7건 중6RED/1기존GREEN, 삭제된variant/추가조회반복2RED를 확인했다. 최종 신규54GREEN(컴포넌트34·시간20), 전체230GREEN. 최종 동결 테스트/제품 지문에서 결함6개(범위검사무력화·DST시각유실·context폐기누락·임의1시간·추가조회lock누락·variant복원누락)를 모두 strict assertion으로 탐지했고 원문bytes 정확복원 뒤54GREEN을 재확인했다. 독립 읽기 리뷰 최종 PASS·남은P1/P2 없음이며 전체기능완료 판정과 구분한다.
+- 최종 API 생성정합·lint(경고0)·typecheck·unit230·build·diff check PASS. 기존 App mock browser329PASS/기존skip1/unexpected0/flaky0, 별도 compiled UI Chromium harness18PASS/unexpected0/flaky0. 320/390/1440px, 키보드 Enter 진입/돌아가기 focus, 터치44px·가로잘림없음·15px안내와 대비, 빈종료/경계/자정/DST/반복클릭/context폐기를 확인했다. 기존 App browser는 새 UI 연결 성공 근거가 아니다. CSS는 새 컴포넌트 범위에서만 변경했다.
+- 근거: `docs/verification/issue-19-ui.json`에 최종 소스/테스트SHA-256·검사명령·browser JSON집계·독립fault6근거를 보존한다. 원본 로그는 `test-results/recommendations-19/`, 독립 RED/fault/복원GREEN은 `/workspace/scratch/web19-independent/`, 임시 browser harness 소스는 `/workspace/scratch/web19-component-harness/`다. production build의 기존 Zod 순수성 주석 경고는 남아 있다.
+- RoomPage·API client·snapshot·생성schema는 기준SHA대비불변이다. 실제 protocol discriminator·native DTO를 전달받은 후 정확 지원/unknown/absent gate, generated types, primary/전체alternatives pagination·409 재조회, 방/analysis/viewer stale lifetime·private query purge·권한상실, 새 확정 API와 선택tuple/확정결과를 연결·검증해야 한다. 서버계약을 임의 확정하거나 기존confirmation을 재사용하지 않았다. 본인원문/기존입력/재분석/confirmed 보호는 기존230/329회귀 범위에서 유지했다. 서버 PG·실제 backend/browser·Gemini·운영 검증은 수행하지 않았다.
+- 게시계획: 지정branch의 준비분을 PR #18 위 stacked Draft PR(base `feature/17-analysis-recovery-cloud`)로 보존하고 정확HEAD의 verify CI를 확인한다. Commit/PR은 동일커밋예정이며 실제SHA/URL/CI는 Git 이력과 PR 검증항목을 기준으로 확인한다. API 연결 대기라 #19 전체완료나 ready/merge/deploy로 전환하지 않는다.

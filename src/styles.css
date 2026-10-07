@@ -357,3 +357,7 @@ fieldset.field legend { margin-bottom: 9px; }
   .hero { padding-block: 24px; }
   .hero h1 { font-size: clamp(1.6rem, min(7vw, 10svh), 3rem); }
 }
+
+.saved-submission { padding: 20px; }
+.saved-submission summary { min-height: 44px; display: list-item; cursor: pointer; font-weight: 700; overflow-wrap: anywhere; }
+.saved-submission .submitted-text { overflow-wrap: anywhere; }

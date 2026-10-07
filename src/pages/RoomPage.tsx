@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, CheckCircle2, Clock3, Copy, LoaderCircle, LockKeyhole, RefreshCw, Share2, Sparkles, TriangleAlert, Users } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
@@ -20,10 +20,13 @@ export default function RoomPage() {
   const { inviteCode = "" } = useParams();
   const queryClient = useQueryClient();
   const recent = useRecentRooms();
+  const [accessFailure, setAccessFailure] = useState<{ inviteCode: string; error: Error } | null>(null);
+  const deniedRoom = useRef<string | null>(null);
+  const denyAccess = useCallback((error: ApiError) => { deniedRoom.current = inviteCode; setAccessFailure({ inviteCode, error }); }, [inviteCode]);
   const roomQuery = useQuery({
     queryKey: ["room", inviteCode],
     queryFn: ({ signal }) => api.getRoom(inviteCode, signal),
-    enabled: /^[A-Za-z0-9_-]{22}$/.test(inviteCode),
+    enabled: /^[A-Za-z0-9_-]{22}$/.test(inviteCode) && accessFailure?.inviteCode !== inviteCode,
     refetchInterval: (query) => {
       const room = query.state.data;
       if (room?.public_status === "ANALYZING") return 2_000;
@@ -31,7 +34,42 @@ export default function RoomPage() {
       return false;
     },
   });
-  const setRoom = (room: Room) => queryClient.setQueryData(["room", inviteCode], room);
+  const setRoom = (room: Room) => { if (deniedRoom.current !== inviteCode) queryClient.setQueryData(["room", inviteCode], room); };
+  const restoreAccess = useMutation({
+    mutationKey: ["room", inviteCode],
+    mutationFn: (code: string) => api.getRoom(code),
+    onSuccess: (refreshed, code) => {
+      if (code !== inviteCode) return;
+      deniedRoom.current = null;
+      queryClient.setQueryData(["room", code], refreshed);
+      setAccessFailure(null);
+    },
+    onError: (error, code) => {
+      if (code === inviteCode) setAccessFailure({ inviteCode: code, error: error instanceof Error ? error : new Error("모임을 다시 불러오지 못했어요.") });
+    },
+  });
+
+  useEffect(() => {
+    if (roomQuery.data?.viewer.joined !== false) return;
+    const filters = { predicate: (query: { queryKey: readonly unknown[] }) => query.queryKey[1] === inviteCode && ["submission", "candidates", "unapplied", "result"].includes(String(query.queryKey[0])) };
+    void queryClient.cancelQueries(filters).then(() => queryClient.removeQueries(filters));
+    for (const mutation of queryClient.getMutationCache().getAll()) {
+      if (mutation.options.mutationKey?.[1] === inviteCode) queryClient.getMutationCache().remove(mutation);
+    }
+  }, [roomQuery.data?.viewer.joined, inviteCode, queryClient]);
+  useEffect(() => {
+    if (roomQuery.error instanceof ApiError && [401, 403, 404].includes(roomQuery.error.status)) denyAccess(roomQuery.error);
+  }, [roomQuery.error, denyAccess]);
+  useEffect(() => {
+    if (accessFailure?.inviteCode !== inviteCode) return;
+    const filters = { predicate: (query: { queryKey: readonly unknown[] }) => query.queryKey[1] === inviteCode && ["room", "submission", "candidates", "unapplied", "result"].includes(String(query.queryKey[0])) };
+    void queryClient.cancelQueries(filters).then(() => queryClient.removeQueries(filters));
+    for (const mutation of queryClient.getMutationCache().getAll()) {
+      if (mutation.options.mutationKey?.[1] === inviteCode) queryClient.getMutationCache().remove(mutation);
+    }
+  }, [accessFailure, inviteCode, queryClient]);
+  if (accessFailure?.inviteCode === inviteCode) return <StateCard icon={<AlertCircle />} title="모임을 불러오지 못했어요" body={errorMessage(accessFailure.error)} action={<button className="button secondary" disabled={restoreAccess.isPending} onClick={() => restoreAccess.mutate(inviteCode)}>{restoreAccess.isPending ? "불러오는 중…" : "다시 시도"}</button>} />;
+
 
   if (!/^[A-Za-z0-9_-]{22}$/.test(inviteCode)) return <StateCard icon={<AlertCircle />} title="초대 링크가 올바르지 않아요" body="받은 링크 전체를 다시 확인해 주세요." />;
   if (roomQuery.isPending) return <StateCard icon={<LoaderCircle className="spin" />} title="모임을 불러오는 중이에요" />;
@@ -51,9 +89,34 @@ export default function RoomPage() {
       {room.public_status === "NO_MATCH" && <><StateCard icon={<AlertCircle />} title="모두에게 맞는 후보를 찾지 못했어요" body="반영 가능한 조건에서 함께할 일정을 찾지 못했어요. 일부 입력은 반영되지 않았을 수 있어요. 다음 모임에서는 탐색 기간이나 조건을 조정해 보세요." />{room.viewer.role === "HOST" && <UnappliedInputs room={room} />}</>}
       {(room.public_status === "READY" || room.public_status === "READY_WITH_WARNINGS") && <CandidatesPanel room={room} />}
       {room.public_status === "CONFIRMED" && <ResultPanel room={room} />}
+      {room.public_status !== "COLLECTING" && <SavedSubmissionPanel key={room.invite_code} room={room} onAccessDenied={denyAccess} />}
       <RoomHistoryNotice room={room} />
     </div>
   );
+}
+
+function SavedSubmissionPanel({ room, onAccessDenied }: { room: Room; onAccessDenied: (error: ApiError) => void }) {
+  const [open, setOpen] = useState(false);
+  const submission = useQuery({
+    queryKey: ["submission", room.invite_code],
+    queryFn: async ({ signal }) => {
+      try { return await api.getSubmission(room.invite_code, signal); }
+      catch (error) { if (error instanceof ApiError && error.status === 404 && error.problem.code === "SUBMISSION_NOT_FOUND") return null; throw error; }
+    },
+    enabled: open,
+    retry: false,
+  });
+  useEffect(() => {
+    if (submission.error instanceof ApiError && [401, 403, 404].includes(submission.error.status)) onAccessDenied(submission.error);
+  }, [submission.error, onAccessDenied]);
+  return <details className="saved-submission glass-card" onToggle={event => setOpen(event.currentTarget.open)}>
+    <summary>내 저장 입력 확인</summary>
+    {open && (submission.isPending ? <p role="status">저장한 입력을 불러오는 중…</p> : submission.isError ? <div className="alert error" role="alert">{errorMessage(submission.error)}<button className="button secondary" onClick={() => submission.refetch()} disabled={submission.isFetching}>다시 시도</button></div> : submission.data ? <>
+      <p className="saved-revision">저장된 입력 #{submission.data.revision}</p>
+      <p className="submitted-text">{submission.data.raw_text ?? "기존 시간표만 제출되어 자연어 원문이 없어요."}</p>
+      <p className="field-hint">내가 저장한 입력이에요. 입력 마감 후에는 이 화면에서 수정할 수 없어요.</p>
+    </> : <p>저장한 입력이 없어요.</p>)}
+  </details>;
 }
 
 function RoomHeader({ room }: { room: Room }) {
@@ -102,6 +165,8 @@ function SubmissionPanel({ room, onRoomChanged }: { room: Room; onRoomChanged: (
   const [savedRawText, setSavedRawText] = useState("");
   const [editing, setEditing] = useState(false);
   const latestInput = useRef("");
+  const mounted = useRef(true);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   const submissionQuery = useQuery<Submission | null>({
     queryKey: ["submission", room.invite_code],
     queryFn: async () => { try { return await api.getSubmission(room.invite_code); } catch (error) { if (error instanceof ApiError && error.status === 404) return null; throw error; } },
@@ -114,10 +179,12 @@ function SubmissionPanel({ room, onRoomChanged }: { room: Room; onRoomChanged: (
       setLoadedRevision(submissionQuery.data.revision);
     }
   }, [submissionQuery.data, loadedRevision, savedRawText]);
-  const refreshRoom = useMutation({ mutationFn: () => api.getRoom(room.invite_code), onSuccess: onRoomChanged });
+  const refreshRoom = useMutation({ mutationKey: ["room", room.invite_code], mutationFn: () => api.getRoom(room.invite_code), onSuccess: refreshed => { if (mounted.current) onRoomChanged(refreshed); } });
   const save = useMutation({
+    mutationKey: ["submission", room.invite_code],
     mutationFn: (text: string) => api.saveSubmission(room.invite_code, { raw_text: text }),
     onSuccess: (submission, submittedText) => {
+      if (!mounted.current) return;
       setRawText(current => submissionText(current).text === submittedText ? submission.raw_text : current);
       setSavedRawText(submission.raw_text);
       setLoadedRevision(submission.revision);
@@ -127,9 +194,11 @@ function SubmissionPanel({ room, onRoomChanged }: { room: Room; onRoomChanged: (
     },
   });
   const close = useMutation({
+    mutationKey: ["room", room.invite_code],
     mutationFn: (confirmEarly: boolean) => api.closeRoom(room.invite_code, confirmEarly),
-    onSuccess: onRoomChanged,
+    onSuccess: refreshed => { if (mounted.current) onRoomChanged(refreshed); },
     onError: (error) => {
+      if (!mounted.current) return;
       if (error instanceof ApiError && error.problem.code === "EARLY_CLOSE_CONFIRMATION_REQUIRED") {
         const submitted = error.problem.submitted_participants ?? "현재";
         const expected = error.problem.expected_participants ? ` / 목표 ${error.problem.expected_participants}명` : "";
@@ -176,7 +245,9 @@ function SubmissionPanel({ room, onRoomChanged }: { room: Room; onRoomChanged: (
 }
 
 function DelayedState({ room, onRetried }: { room: Room; onRetried: (room: Room) => void }) {
-  const retry = useMutation({ mutationFn: () => api.retryAnalysis(room.invite_code), onSuccess: onRetried });
+  const mounted = useRef(true);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  const retry = useMutation({ mutationKey: ["room", room.invite_code], mutationFn: () => api.retryAnalysis(room.invite_code), onSuccess: refreshed => { if (mounted.current) onRetried(refreshed); } });
   return <StateCard icon={<TriangleAlert />} title="분석이 잠시 지연되고 있어요" body="모두의 입력은 안전하게 저장되어 있어 다시 제출할 필요가 없어요." action={room.viewer.role === "HOST" ? <button className="button primary" onClick={() => retry.mutate()} disabled={retry.isPending}><RefreshCw size={17} /> {retry.isPending ? "요청 중…" : "분석 다시 요청"}</button> : undefined} error={retry.isError ? errorMessage(retry.error) : undefined} />;
 }
 

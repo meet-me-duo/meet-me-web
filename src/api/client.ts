@@ -59,7 +59,7 @@ export const api = {
   getRoom: (inviteCode: string, signal?: AbortSignal) => request<Room>(`/api/rooms/${encode(inviteCode)}`, { signal }),
   joinRoom: (inviteCode: string, displayName: string) =>
     request<Room>(`/api/rooms/${encode(inviteCode)}/participants`, { method: "POST", body: JSON.stringify({ display_name: displayName }) }),
-  getSubmission: (inviteCode: string) => request<Submission>(`/api/rooms/${encode(inviteCode)}/submission`),
+  getSubmission: (inviteCode: string, signal?: AbortSignal) => request<Submission>(`/api/rooms/${encode(inviteCode)}/submission`, { signal }),
   saveSubmission: (inviteCode: string, body: SaveSubmissionBody) =>
     request<SavedSubmission>(`/api/rooms/${encode(inviteCode)}/submission`, { method: "PUT", body: JSON.stringify(body) }),
   closeRoom: (inviteCode: string, confirmEarly = false) =>

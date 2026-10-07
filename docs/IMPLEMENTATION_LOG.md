@@ -340,3 +340,14 @@
 - 원본 이슈 구현 커밋을 보존한 뒤 `feature/12-submission-share-and-wait`를 병합했다. 부모 이슈의 커밋과 원본 구현 이력을 유지하며 main/develop·서버 사용자 파일은 변경하지 않았다. 공통 작업 기록은 양쪽 기록을 모두 보존했다.
 - 제품/테스트 충돌은 최신 로컬 통합 인계의 파일을 기준으로 해당 이슈 범위에만 해결했다. #13 PR의 base는 `feature/12-submission-share-and-wait`이며 직접 부모 대비 diff에 해당 이슈 변경만 표시한다. #11 → #12 → #13 순서로 별도 승인 후 병합하고 main 전환 시 diff·최신 SHA CI를 다시 확인한다.
 - 이 단계의 검증 결과와 최종 head/PR/CI는 후속 인계와 PR 본문에 기록한다. 기존 원본 및 통합 로컬 검사 결과와 이번 재실행 결과를 구분한다. 운영 배포·auto-merge·운영 데이터 생성 없음.
+
+
+## 2026-10-07 — #17 cloud 인계 복원과 독립 웹 검증
+
+- 최신 원격 `main`과 기준 HEAD `68c41f7619e7f1a28b2b597cb56867e4d3e852bc`를 확인하고 `feature/17-analysis-recovery-cloud` / `/workspace/meet-me-web-17`에 별도 worktree를 만들었다. 원본 `/workspace/meet-me-web`의 `work` checkout과 사용자 파일은 변경하지 않았다.
+- 지원된 메시지 인계 ZIP 28,185 bytes / SHA-256 `0f97aa678bcd1e535804d1292e0fd2a3c74b7b1780d846959eec807a8c601252`의 7파일을 개별 byte count/SHA-256 대조 후 복원했다. 원본과 검증 manifest는 `/workspace/scratch/meet-me-bootstrap/handoff/`에 보존한다. 네 tracked 파일의 CRLF만 LF로 정리해 전체파일 diff와 `git diff --check` 오류를 제거했다. 의미 변경은 없으며 전후 지문은 `/workspace/scratch/meet-me-bootstrap/web17-review/eol-normalization.json`에 기록했다.
+- 인계된 제품 동작은 마감 후 참여자가 본인 저장 입력을 펼쳐 읽는 기능이다. 기존 GET `/submission`과 AbortSignal을 사용하며 원문·줄바꿈·revision을 표시하고 쓰기 요청을 만들지 않는다. `SUBMISSION_NOT_FOUND`만 빈 입력으로 처리하며 그 밖의 401/403/404는 해당 방의 비공개 query/mutation 캐시를 제거하고 화면 접근을 차단한다. 다른 방의 캐시는 유지한다. 지연된 저장/재시도 응답은 unmount 이후 화면을 갱신하지 않는다.
+- `AnalysisRecoveryPanel`은 HOST/MEMBER 및 pending 상태를 표현하는 독립 presentation component로만 보존했다. 현재 RoomPage에는 연결되지 않는다. 새 reopen/analyze endpoint·round/capability·stale response 계약이 저장된 OpenAPI에 없으며 기존 `/analysis/retry`는 지연 고정 배치 재시도이므로 새 재분석으로 사용하지 않는다. 서버 #92의 확정·생성 명세에 맞춘 연결, 409 재조회, 후보 캐시 무효화, 새 결과 polling, 구 서버 호환 fixture는 미완료다. #17 완료 또는 배포 가능으로 보고하지 않는다.
+- Node 24.19.0 / Corepack pnpm 10.17.1, frozen lockfile 및 기존 cache로 의존성을 설치했다. `api:check`, `lint`, `typecheck`, 단위/컴포넌트/API 121개와 `build`가 통과했다. build의 기존 Zod 순수성 주석 경고는 남아 있다. 전체 desktop/mobile E2E 305개 통과, 기존 조건부 skip 1개, 실패·flaky 0개를 확인했다. 신규 저장 입력 검사는 48개가 모두 통과했다. 1440/390/320px, 7개 마감 상태의 본인 원문 read-only 표시·펼침 전 조회 없음·Web Storage 저장 없음·키보드 열기/닫기를 확인했다. 320px 실제 PNG에서 긴 원문·줄바꿈·revision의 가로 잘림이 없음을 확인했다.
+- E2E는 모든 API가 합성 응답인 로컬 preview에서 실행한다. 기존 환경의 `/usr/bin/chromium`을 사용하는 환경용 config와 로그·JSON·화면은 `/workspace/scratch/meet-me-bootstrap/web17-review/`에 둔다. Playwright 번들 다운로드 차단에 대한 재시도나 우회는 하지 않았다. 운영 API/DB, 실제 Gemini, CI, commit/push/PR/merge/deploy는 실행하지 않았다.
+- 후속 단계: 부모가 요청한 새 작업 인계를 위해 검증한 7파일과 이 기록을 별도 feature 커밋으로 보존한다. 검토 후 제품 파일의 SHA-256 7개가 동일하고 `git diff --check`가 통과함을 재확인했다. 앞 행의 미실행 목록은 검증 시점 기록이며 현재 commit 상태와 SHA는 Git 이력을 따른다. #92 연결은 계속 미완료다. 원시 로그·비밀값·운영 데이터는 커밋하지 않는다.

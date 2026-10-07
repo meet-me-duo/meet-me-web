@@ -308,4 +308,28 @@ describe("#19 actual meeting selection", () => {
     expect(screen.getByRole("button", { name: "일정 확정" })).toBeDisabled();
     expect(onConfirm).not.toHaveBeenCalled();
   });
+  it("explicitly selects and previews the whole offered microsecond range without truncating either boundary", () => {
+    const preciseOptions = options.map(option => option.id === "oct8" ? {
+      ...option, variants: option.variants.map(variant => ({ ...variant, startAt: "2026-10-08T01:00:00.000001Z", endAt: "2026-10-08T01:00:00.000002Z" })),
+    } : option);
+    const { onConfirm } = setup({ options: preciseOptions }); selectOption();
+    expect(screen.getByLabelText("시작 시간")).toHaveValue("");
+    expect(screen.getByLabelText("종료 시간")).toHaveValue("");
+    expect(screen.getByRole("button", { name: "일정 확정" })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "가능한 범위 전체 선택" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "가능한 범위 전체 선택" }));
+    expect(screen.getByText(/확정할 일정/)).toHaveTextContent(/10:00:00\.000001.*10:00:00\.000002/);
+    fireEvent.click(screen.getByRole("button", { name: "일정 확정" }));
+    expect(onConfirm).toHaveBeenCalledWith({ optionId: "oct8", variantId: "seoul", startAt: "2026-10-08T01:00:00.000001Z", endAt: "2026-10-08T01:00:00.000002Z" });
+  });
+  it("drops the whole-range selection when the user manually edits a time outside the offered range", () => {
+    const { onConfirm } = setup(); selectOption();
+    expect(screen.queryByRole("button", { name: "가능한 범위 전체 선택" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "가능한 범위 전체 선택" }));
+    expect(screen.getByRole("button", { name: "일정 확정" })).toBeEnabled();
+    fireEvent.change(screen.getByLabelText("시작 시간"), { target: { value: "2026-10-08T09:00" } });
+    const confirm = screen.getByRole("button", { name: "일정 확정" });
+    expect(confirm).toBeDisabled(); fireEvent.click(confirm);
+    expect(onConfirm).not.toHaveBeenCalled();
+  });
 });

@@ -20,10 +20,18 @@ export function localDateTimeInstants(value: string, timeZone: string): string[]
 }
 
 export function validateSelection(startAt: string, endAt: string, variant: RecommendationVariantView): boolean {
-  const [start, end, availableStart, availableEnd] = [startAt, endAt, variant.startAt, variant.endAt].map(value => new Date(value).getTime());
+  const [start, end, availableStart, availableEnd] = [startAt, endAt, variant.startAt, variant.endAt].map(instantMicros);
   return start !== undefined && end !== undefined && availableStart !== undefined && availableEnd !== undefined
-    && [start, end, availableStart, availableEnd].every(Number.isFinite)
     && availableStart <= start && start < end && end <= availableEnd;
+}
+
+function instantMicros(value: string): bigint | undefined {
+  const match = /^(?:\d{4}-\d{2}-\d{2})T\d{2}:\d{2}:\d{2}(?:\.(\d+))?(?:Z|[+-]\d{2}:\d{2})$/.exec(value);
+  const millis = new Date(value).getTime();
+  if (!match || !Number.isFinite(millis)) return undefined;
+  const fraction = match[1] ?? "";
+  if (/[1-9]/.test(fraction.slice(6))) return undefined;
+  return BigInt(millis) * 1_000n + BigInt(fraction.slice(0, 6).padEnd(6, "0")) % 1_000n;
 }
 
 export function formatRecommendationRange(startAt: string, endAt: string, timeZone: string): string {
@@ -41,6 +49,16 @@ export function formatRecommendationInstant(value: string, timeZone: string): st
   const wall = wallTime(instant, timeZone);
   const minutes = Math.round((new Date(`${wall}Z`).getTime() - instant) / 60_000);
   const offset = `${minutes < 0 ? "-" : "+"}${String(Math.floor(Math.abs(minutes) / 60)).padStart(2, "0")}:${String(Math.abs(minutes) % 60).padStart(2, "0")}`;
-  const seconds = wall.endsWith(":00") ? "" : wall.slice(16);
+  const fraction = /\.(\d+)(?:Z|[+-]\d{2}:\d{2})$/.exec(value)?.[1]?.replace(/0+$/, "") ?? "";
+  const seconds = fraction ? `${wall.slice(16)}.${fraction}` : wall.endsWith(":00") ? "" : wall.slice(16);
   return `${wall.slice(0, 10)} ${wall.slice(11, 16)}${seconds} (UTC${offset})`;
+}
+
+export function recommendationInputValue(value: string, timeZone: string): string {
+  return wallTime(new Date(value).getTime(), timeZone);
+}
+
+export function sameRecommendationInstant(first: string, second: string): boolean {
+  const instant = instantMicros(first);
+  return instant !== undefined && instant === instantMicros(second);
 }

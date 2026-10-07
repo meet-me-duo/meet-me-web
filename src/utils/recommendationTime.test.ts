@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatRecommendationRange, localDateTimeInstants, validateSelection } from "./recommendationTime";
+import { formatRecommendationRange, localDateTimeInstants, sameRecommendationInstant, validateSelection } from "./recommendationTime";
 
 // #19: actual meeting instants must be chosen inside one offered variant.
 const range = {
@@ -52,6 +52,10 @@ describe("#19 available range validation", () => {
   it("compares instants rather than the lexical strings of different offsets", () => {
     expect(validateSelection("2026-10-08T10:30:00+09:00", "2026-10-08T12:00:00+09:00", range)).toBe(true);
   });
+  it("rejects a whole-second start that precedes a microsecond-precision offered boundary", () => {
+    const preciseRange = { ...range, startAt: "2026-10-08T01:00:00.000001Z" };
+    expect(validateSelection("2026-10-08T01:00:00Z", "2026-10-08T02:00:00Z", preciseRange)).toBe(false);
+  });
 });
 
 describe("#19 recommendation range display", () => {
@@ -68,5 +72,26 @@ describe("#19 recommendation range display", () => {
     expect(label).toContain("01:30");
     expect(label).toMatch(/UTC-0?4(?::00)?/);
     expect(label).toMatch(/UTC-0?5(?::00)?/);
+  });
+  it("preserves both microsecond boundaries when displaying a saved selected interval", () => {
+    const label = formatRecommendationRange("2026-10-08T01:00:00.000001Z", "2026-10-08T01:00:00.000002Z", "Asia/Seoul");
+    expect(label).toContain("10:00:00.000001");
+    expect(label).toContain("10:00:00.000002");
+  });
+});
+
+describe("#19 full selection tuple instant equality", () => {
+  it("accepts equivalent millisecond and microsecond ISO representations", () => {
+    expect(sameRecommendationInstant("2026-10-08T01:30:00.000Z", "2026-10-08T01:30:00.000000Z")).toBe(true);
+  });
+  it("accepts equivalent ISO timestamps with different timezone offsets", () => {
+    expect(sameRecommendationInstant("2026-10-08T01:30:00.000Z", "2026-10-08T10:30:00+09:00")).toBe(true);
+  });
+  it("distinguishes actual instants that differ by one microsecond", () => {
+    expect(sameRecommendationInstant("2026-10-08T01:30:00.000001Z", "2026-10-08T01:30:00.000002Z")).toBe(false);
+  });
+  it("never treats two invalid or missing timestamps as the same instant", () => {
+    expect(sameRecommendationInstant("", "")).toBe(false);
+    expect(sameRecommendationInstant("invalid", "invalid")).toBe(false);
   });
 });

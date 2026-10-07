@@ -6,6 +6,8 @@ import { api, ApiError, errorMessage } from "../api/client";
 import type { Submission } from "../api/types";
 import { correctionOpen, currentRoom, viewerContext, type RecoveryRoom as Room, type ReopenResponse, type ReanalyzeResponse } from "../api/recovery";
 import AnalysisRecoveryPanel from "../components/AnalysisRecoveryPanel";
+import { RecommendationsPanel, RECOMMENDATION_PROTOCOL } from "../components/RecommendationsPanel";
+import { formatRecommendationRange } from "../utils/recommendationTime";
 import { CandidateCard } from "../components/CandidateCard";
 import { formatDate, formatDateTime } from "../utils/time";
 import { submissionText, SUBMISSION_TEXT_LIMIT } from "../utils/submission";
@@ -40,7 +42,7 @@ export default function RoomPage() {
         accessEpoch.current++;
         const contextEpoch = accessEpoch.current;
         setDraft(null);
-        const filters = { predicate: (query: { queryKey: readonly unknown[] }) => query.queryKey[1] === inviteCode && ["submission", "candidates", "unapplied", "result"].includes(String(query.queryKey[0])) };
+        const filters = { predicate: (query: { queryKey: readonly unknown[] }) => query.queryKey[1] === inviteCode && ["submission", "candidates", "recommendations", "unapplied", "result"].includes(String(query.queryKey[0])) };
         await queryClient.cancelQueries(filters);
         if (signal.aborted || contextEpoch !== accessEpoch.current) return queryClient.getQueryData<Room>(["room", inviteCode]) ?? incoming;
         queryClient.removeQueries(filters);
@@ -62,7 +64,7 @@ export default function RoomPage() {
     if (previous && viewerContext(previous) !== viewerContext(room)) {
       accessEpoch.current++;
       setDraft(null);
-      const filters = { predicate: (query: { queryKey: readonly unknown[] }) => query.queryKey[1] === inviteCode && ["submission", "candidates", "unapplied", "result"].includes(String(query.queryKey[0])) };
+      const filters = { predicate: (query: { queryKey: readonly unknown[] }) => query.queryKey[1] === inviteCode && ["submission", "candidates", "recommendations", "unapplied", "result"].includes(String(query.queryKey[0])) };
       void queryClient.cancelQueries(filters);
       queryClient.removeQueries(filters);
     }
@@ -87,7 +89,7 @@ export default function RoomPage() {
   useEffect(() => {
     if (roomQuery.data?.viewer.joined !== false) return;
     const purgeEpoch = accessEpoch.current;
-    const filters = { predicate: (query: { queryKey: readonly unknown[] }) => query.queryKey[1] === inviteCode && ["submission", "candidates", "unapplied", "result"].includes(String(query.queryKey[0])) };
+    const filters = { predicate: (query: { queryKey: readonly unknown[] }) => query.queryKey[1] === inviteCode && ["submission", "candidates", "recommendations", "unapplied", "result"].includes(String(query.queryKey[0])) };
     void queryClient.cancelQueries(filters).then(() => { if (purgeEpoch === accessEpoch.current) queryClient.removeQueries(filters); });
     for (const mutation of queryClient.getMutationCache().getAll()) {
       if (mutation.options.mutationKey?.[1] === inviteCode) queryClient.getMutationCache().remove(mutation);
@@ -99,7 +101,7 @@ export default function RoomPage() {
   useEffect(() => {
     if (accessFailure?.inviteCode !== inviteCode) return;
     const purgeEpoch = accessEpoch.current;
-    const filters = { predicate: (query: { queryKey: readonly unknown[] }) => query.queryKey[1] === inviteCode && ["room", "submission", "candidates", "unapplied", "result"].includes(String(query.queryKey[0])) };
+    const filters = { predicate: (query: { queryKey: readonly unknown[] }) => query.queryKey[1] === inviteCode && ["room", "submission", "candidates", "recommendations", "unapplied", "result"].includes(String(query.queryKey[0])) };
     void queryClient.cancelQueries(filters).then(() => { if (purgeEpoch === accessEpoch.current && deniedRoom.current === inviteCode) queryClient.removeQueries(filters); });
     for (const mutation of queryClient.getMutationCache().getAll()) {
       if (mutation.options.mutationKey?.[1] === inviteCode) queryClient.getMutationCache().remove(mutation);
@@ -194,7 +196,7 @@ function RecoveryActions({ room, onRoomChanged, onAccessDenied, blocked = false 
       operation.current = null;
       const previous = queryClient.getQueryData<Room>(["room", room.invite_code]);
       if (previous?.state_version !== undefined && response.room.state_version !== undefined && response.room.state_version < previous.state_version) return;
-      const filters = { predicate: (query: { queryKey: readonly unknown[] }) => query.queryKey[1] === room.invite_code && ["candidates", "unapplied", "result"].includes(String(query.queryKey[0])) };
+      const filters = { predicate: (query: { queryKey: readonly unknown[] }) => query.queryKey[1] === room.invite_code && ["candidates", "recommendations", "unapplied", "result"].includes(String(query.queryKey[0])) };
       await queryClient.cancelQueries(filters);
       queryClient.removeQueries(filters);
       if (!mounted.current) return;
@@ -354,6 +356,12 @@ function DelayedState({ room, onRetried, onAccessDenied }: { room: Room; onRetri
 }
 
 function CandidatesPanel({ room, onAccessDenied }: { room: Room; onAccessDenied: (error: ApiError) => void }) {
+  if (room.recommendation_protocol == null) return <LegacyCandidatesPanel room={room} onAccessDenied={onAccessDenied} />;
+  if (room.recommendation_protocol !== RECOMMENDATION_PROTOCOL) return <StateCard icon={<RefreshCw />} title="추천 화면 업데이트가 필요해요" body="새로고침해 최신 화면을 확인해 주세요." />;
+  return <><RecommendationsPanel key={`${room.analysis_id}:${viewerContext(room)}`} room={room} onAccessDenied={onAccessDenied} />{room.public_status === "READY_WITH_WARNINGS" && room.viewer.role === "HOST" && <UnappliedInputs room={room} onAccessDenied={onAccessDenied} />}</>;
+}
+
+function LegacyCandidatesPanel({ room, onAccessDenied }: { room: Room; onAccessDenied: (error: ApiError) => void }) {
   const mounted = useRef(true);
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   const queryClient = useQueryClient();
@@ -369,7 +377,7 @@ function CandidatesPanel({ room, onAccessDenied }: { room: Room; onAccessDenied:
     <div className="section-heading centered"><span className="eyebrow subtle"><Sparkles size={15} /> 후보 계산 완료</span><h2>{!hasCandidates ? "선택할 수 있는 후보가 없어요" : partial ? "일부 조건으로 만든 후보 플랜이에요" : "함께할 수 있는 후보 플랜이에요"}</h2><p>{hasCandidates ? <>계산된 우선순위대로 보여드려요. {room.viewer.role === "HOST" ? "가능한 시간과 지역을 확인하고 플랜 하나를 선택해 주세요." : "주최자가 플랜을 선택하면 결과를 볼 수 있어요."}</> : "반영 가능한 조건에서 함께할 일정을 찾지 못했어요. 다음 모임에서는 탐색 기간이나 조건을 조정해 보세요."}</p></div>
     {partial && <div className="alert warning"><TriangleAlert size={18} /> 일부 입력이 반영되지 않아 반영 가능한 조건으로 만든 결과예요. ({candidates.data.applied_submissions}/{candidates.data.total_submissions}개 반영)</div>}
     {room.public_status === "READY_WITH_WARNINGS" && room.viewer.role === "HOST" && <UnappliedInputs room={room} count={candidates.data.unapplied_inputs} onAccessDenied={onAccessDenied} />}
-    <div className="candidate-list">{candidates.data.candidates.map((candidate) => <CandidateCard key={candidate.candidate_id} candidate={candidate} canConfirm={room.viewer.role === "HOST" && (!room.capabilities || room.capabilities.can_confirm)} pending={confirm.isPending} selectionWarning={partial ? `${candidates.data.applied_submissions}/${candidates.data.total_submissions}개 입력 반영 · 일부 입력을 제외하고 만든 후보예요.` : undefined} onConfirm={() => { if (window.confirm(`Plan ${candidate.plan_type}을 선택할까요? 실제 모임 날짜·시간은 따로 정해 공지해 주세요.`)) confirm.mutate(candidate.candidate_id); }} />)}</div>
+    <div className="candidate-list">{candidates.data.candidates.map((candidate) => <CandidateCard key={candidate.candidate_id} candidate={candidate} canConfirm={room.viewer.role === "HOST" && (!room.capabilities || room.capabilities.can_confirm)} pending={confirm.isPending} selectionWarning={partial ? `${candidates.data.applied_submissions}/${candidates.data.total_submissions}개 입력 반영 · 일부 입력을 제외하고 만든 후보예요.` : undefined} onConfirm={() => { if (candidate.candidate_id && window.confirm(`Plan ${candidate.plan_type}을 선택할까요? 실제 모임 날짜·시간은 따로 정해 공지해 주세요.`)) confirm.mutate(candidate.candidate_id); }} />)}</div>
     {confirm.isError && <div className="alert error">{errorMessage(confirm.error)}</div>}
   </section>;
 }
@@ -385,6 +393,12 @@ function ResultPanel({ room, onAccessDenied }: { room: Room; onAccessDenied: (er
   useEffect(() => { if (result.error instanceof ApiError && [401, 403, 404].includes(result.error.status)) onAccessDenied(result.error); }, [result.error, onAccessDenied]);
   if (result.isPending) return <StateCard icon={<LoaderCircle className="spin" />} title="선택한 플랜을 불러오는 중이에요" />;
   if (result.isError) return <StateCard icon={<AlertCircle />} title="결과를 불러오지 못했어요" body={errorMessage(result.error)} />;
+  const saved = result.data.selection;
+  if (saved) {
+    if (saved.protocol !== RECOMMENDATION_PROTOCOL) return <StateCard icon={<RefreshCw />} title="추천 화면 업데이트가 필요해요" body="새로고침해 최신 화면을 확인해 주세요." />;
+    const candidate = result.data.candidate;
+    return <section className="results-section"><div className="section-heading centered"><span className="eyebrow success"><CheckCircle2 size={15} /> 일정 확정 완료</span><h2>실제 모임 일정이 확정됐어요</h2></div><div className="candidate-list single"><article className="candidate-card recommendation-card" aria-label="확정된 모임 일정"><h3>확정된 모임 일정</h3><p>{formatRecommendationRange(saved.start_at, saved.end_at, room.time_zone_id)}</p><p>{candidate.attendance_count}/{candidate.total_participants}명 참석 가능 · {candidate.meeting_mode === "REMOTE" ? "온라인 · 접속 정보 별도 공지" : `대면 · ${candidate.place?.display_name ?? "장소 협의"}`}</p></article></div><CopyRoomLink room={room} result /></section>;
+  }
   return <section className="results-section"><div className="section-heading centered"><span className="eyebrow success"><CheckCircle2 size={15} /> 플랜 선택 완료</span><h2>주최자가 선택한 플랜이에요</h2><p>{formatDateTime(result.data.confirmed_at)}에 주최자가 Plan {result.data.candidate.plan_type}을 선택했어요.</p></div><div className="candidate-list single"><CandidateCard candidate={result.data.candidate} canConfirm={false} confirmed /></div><CopyRoomLink room={room} result /></section>;
 }
 

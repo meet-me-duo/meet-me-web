@@ -4,6 +4,9 @@ import type {
   ConfirmedResult,
   CreateRoomBody,
   Room,
+  RecommendationList,
+  RecommendationConfirmationBody,
+  RecommendationAlternativeQuery,
   SaveSubmissionBody,
   SavedSubmission,
   Submission,
@@ -73,6 +76,13 @@ export const api = {
   confirmCandidate: (inviteCode: string, candidateId: string) =>
     request<ConfirmedResult>(`/api/rooms/${encode(inviteCode)}/candidates/${encode(candidateId)}/confirmation`, { method: "POST" }),
   getResult: (inviteCode: string) => request<ConfirmedResult>(`/api/rooms/${encode(inviteCode)}/result`),
+  getRecommendations: (inviteCode: string, signal?: AbortSignal) => request<RecommendationList>(`/api/rooms/${encode(inviteCode)}/recommendations`, { signal }),
+  getRecommendationAlternatives: (inviteCode: string, query: RecommendationAlternativeQuery, signal?: AbortSignal): Promise<RecommendationList> => {
+    const params = new URLSearchParams({ analysis_id: query.analysis_id, limit: String(query.limit ?? 20) });
+    if (query.cursor !== undefined) params.set("cursor", query.cursor);
+    return request<RecommendationList>(`/api/rooms/${encode(inviteCode)}/recommendations/alternatives?${params}`, { signal });
+  },
+  confirmRecommendation: (inviteCode: string, optionId: string, body: RecommendationConfirmationBody) => request<ConfirmedResult>(`/api/rooms/${encode(inviteCode)}/recommendations/${encode(optionId)}/confirmation`, { method: "POST", body: JSON.stringify(body) }),
 };
 
 export function errorMessage(error: unknown): string {

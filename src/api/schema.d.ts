@@ -56,6 +56,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/rooms/{inviteCode}/recommendations/{optionId}/confirmation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 추천 창 안의 실제 모임 시작·종료 확정
+         * @description 전체 선택 튜플만 멱등. legacy candidate 확정 URL과 별도
+         */
+        post: operations["confirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rooms/{inviteCode}/participants": {
         parameters: {
             query?: never;
@@ -100,7 +120,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** 주최자 후보 확정 */
-        post: operations["confirm"];
+        post: operations["confirm_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -175,6 +195,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/rooms/{inviteCode}/recommendations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 다양한 날짜·시간 추천 최대 세 안 조회 */
+        get: operations["primary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rooms/{inviteCode}/recommendations/alternatives": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 현재 분석의 다른 가능한 시간 전체 페이지 조회 */
+        get: operations["alternatives"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rooms/{inviteCode}/candidates": {
         parameters: {
             query?: never;
@@ -214,19 +268,10 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         JsonNode: {
-            array?: boolean;
-            empty?: boolean;
-            null?: boolean;
-            float?: boolean;
-            container?: boolean;
-            number?: boolean;
             missingNode?: boolean;
             valueNode?: boolean;
-            /** @enum {string} */
-            nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
             object?: boolean;
             pojo?: boolean;
-            integralNumber?: boolean;
             floatingPointNumber?: boolean;
             short?: boolean;
             int?: boolean;
@@ -238,7 +283,16 @@ export interface components {
             textual?: boolean;
             boolean?: boolean;
             binary?: boolean;
+            /** @enum {string} */
+            nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
+            integralNumber?: boolean;
+            array?: boolean;
+            empty?: boolean;
+            null?: boolean;
+            float?: boolean;
+            container?: boolean;
             string?: boolean;
+            number?: boolean;
             embeddedValue?: boolean;
         };
         /** @description 현재 익명 참여자의 자연어 제출 또는 수정 요청 */
@@ -515,6 +569,8 @@ export interface components {
              * @description 방의 조율 상태를 정렬하는 단조 증가 버전
              */
             state_version?: number;
+            /** @description 활성 분석의 실제 시각 선택 protocol; legacy 또는 분석 전에는 null */
+            recommendation_protocol?: string | null;
         };
         /** @description 현재 브라우저 세션의 방 참여 상태 */
         ViewerParticipationResponse: {
@@ -558,18 +614,28 @@ export interface components {
             /** @description 이 요청에 기록된 라운드. 재시도 시 현재 라운드와 다를 수 있음 */
             round?: components["schemas"]["RevisionRoundResponse"];
         };
-        /** @description 익명 참여 요청 */
-        JoinRoomRequest: {
+        /** @description 추천 창 안에서 실제 모임 시작·종료 선택 */
+        RecommendationConfirmationRequest: {
             /**
-             * @description 참여자 표시 이름, 최초 참여에만 사용
-             * @example 지수
+             * Format: uuid
+             * @description 현재 분석 UUID
              */
-            display_name: string;
-        };
-        /** @description 수동 마감 요청 */
-        CloseRoomRequest: {
-            /** @description 자동 조건 충족 전 조기 마감을 재확인했는지 여부 */
-            confirm_early?: boolean;
+            analysis_id: string;
+            /**
+             * Format: uuid
+             * @description 해당 option의 variant UUID
+             */
+            variant_id: string;
+            /**
+             * Format: date-time
+             * @description 포함 시작; option.start 이상이며 end_at보다 이른 시각; 마이크로초까지
+             */
+            start_at: string;
+            /**
+             * Format: date-time
+             * @description 배타적 종료; option.end 이하; 마이크로초까지
+             */
+            end_at: string;
         };
         /** @description 후보 대표 장소 */
         CandidatePlaceResponse: {
@@ -599,9 +665,9 @@ export interface components {
             summary?: string;
             /**
              * Format: uuid
-             * @description 후보 식별자
+             * @description legacy 후보 식별자; 실제 시각 선택 확정에는 null
              */
-            candidate_id?: string;
+            candidate_id: string | null;
             /**
              * @description 후보 플랜 A, B 또는 C
              * @enum {string}
@@ -631,22 +697,67 @@ export interface components {
              * Format: date-time
              * @description 포함 시작 절대 시각
              */
-            start_at?: string;
+            start_at: string;
             /**
              * Format: date-time
              * @description 배타적 종료 절대 시각
              */
-            end_at?: string;
+            end_at: string;
         };
         /** @description 주최자가 확정한 최종 결과 */
         ConfirmedResultResponse: {
             /** @description 확정 후보 */
-            candidate?: components["schemas"]["CandidateResponse"];
+            candidate: components["schemas"]["CandidateResponse"];
+            /** @description 실제 시각 확정 선택; legacy 확정은 null */
+            selection: components["schemas"]["RecommendationSelectionResponse"] | null;
             /**
              * Format: date-time
              * @description 확정 시각
              */
-            confirmed_at?: string;
+            confirmed_at: string;
+        };
+        /** @description 실제 확정된 typed 선택; legacy candidate FK와 별도 */
+        RecommendationSelectionResponse: {
+            /** @description 확정 프로토콜 diverse-time-v1 */
+            protocol: string;
+            /**
+             * Format: uuid
+             * @description 확정 분석 UUID
+             */
+            analysis_id: string;
+            /**
+             * Format: uuid
+             * @description 확정 시간안 UUID
+             */
+            option_id: string;
+            /**
+             * Format: uuid
+             * @description 확정 방식·장소·참석 조합 UUID
+             */
+            variant_id: string;
+            /**
+             * Format: date-time
+             * @description 실제 모임 포함 시작
+             */
+            start_at: string;
+            /**
+             * Format: date-time
+             * @description 실제 모임 배타적 종료
+             */
+            end_at: string;
+        };
+        /** @description 익명 참여 요청 */
+        JoinRoomRequest: {
+            /**
+             * @description 참여자 표시 이름, 최초 참여에만 사용
+             * @example 지수
+             */
+            display_name: string;
+        };
+        /** @description 수동 마감 요청 */
+        CloseRoomRequest: {
+            /** @description 자동 조건 충족 전 조기 마감을 재확인했는지 여부 */
+            confirm_early?: boolean;
         };
         /** @description 저장된 최신 입력을 다시 조율하는 명령. 저장만으로 분석하지 않음 */
         AnalyzeRevisionRequest: {
@@ -719,6 +830,83 @@ export interface components {
              * @description 응답 snapshot의 방 조율 상태 버전
              */
             state_version?: number;
+        };
+        /** @description 분석에 고정된 날짜·시간 추천 또는 대안 페이지 */
+        RecommendationListResponse: {
+            /** @description diverse-time-v1 지원 시 실제 시각 선택 가능; null은 legacy 분석 */
+            protocol: string | null;
+            /**
+             * Format: uuid
+             * @description 현재 분석 UUID; 대안 요청·확정 시 동일 값 필수
+             */
+            analysis_id: string;
+            /**
+             * Format: int64
+             * @description 방 snapshot 버전
+             */
+            state_version: number;
+            /**
+             * @description 입력 반영 품질
+             * @enum {string}
+             */
+            quality: "COMPLETE" | "PARTIAL";
+            /**
+             * Format: int32
+             * @description 전체 시간안 수; primary와 대안 포함
+             */
+            total_options: number;
+            /** @description primary 최대3 또는 요청한 대안 페이지 */
+            options: components["schemas"]["RecommendationOptionResponse"][];
+            /** @description primary 외 대안이 하나 이상 있음 */
+            has_alternatives: boolean;
+            /** @description 다음 대안 페이지 cursor; null은 끝. 다른 분석에 재사용 불가 */
+            next_cursor: string | null;
+        };
+        /** @description 실제로 가능한 하나의 연속 시간안 */
+        RecommendationOptionResponse: {
+            /**
+             * Format: uuid
+             * @description 분석에 고정된 시간안 UUID
+             */
+            option_id: string;
+            /**
+             * Format: int32
+             * @description primary 표시 순서1~3; 대안은 null
+             */
+            rank: number | null;
+            /** @description 사용자가 실제 시작·종료를 고를 수 있는 전체 연속 창 */
+            time_range: components["schemas"]["CandidateTimeRangeResponse"];
+            /** @description 같은 시간의 모든 유효 방식·장소·참석 조합 */
+            variants: components["schemas"]["RecommendationVariantResponse"][];
+            /** @description 실제 지역 날짜와 양쪽 종료 경계를 보존한 시간 설명 */
+            summary: string;
+        };
+        /** @description 시간안의 방식·장소·참석 조합 */
+        RecommendationVariantResponse: {
+            /**
+             * Format: uuid
+             * @description 선택에 필요한 variant UUID
+             */
+            variant_id: string;
+            /**
+             * @description 대면 또는 온라인 방식
+             * @enum {string}
+             */
+            meeting_mode: "IN_PERSON" | "REMOTE";
+            /**
+             * Format: int32
+             * @description 참석 인원
+             */
+            attendance_count: number;
+            /**
+             * Format: int32
+             * @description 고정 배치 전체 인원
+             */
+            total_participants: number;
+            /** @description 전체 인원 중 일부 참석 여부 */
+            partial_attendance: boolean;
+            /** @description 대면 대표 지역; 온라인은 null */
+            place: components["schemas"]["CandidatePlaceResponse"] | null;
         };
         /** @description 후보 생성 결과 */
         CandidateListResponse: {
@@ -1050,6 +1238,98 @@ export interface operations {
             };
         };
     };
+    confirm: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                inviteCode: string;
+                optionId: string;
+            };
+            cookie?: {
+                meet_me_guest?: string;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecommendationConfirmationRequest"];
+            };
+        };
+        responses: {
+            /** @description 조회 또는 동일 선택 멱등 확정 성공 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConfirmedResultResponse"];
+                };
+            };
+            /** @description 잘못된 입력·cursor·범위·정밀도; PostgreSQL 지원 마이크로초까지 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 세션 누락 또는 무효 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 참여 또는 HOST 권한 없음 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 방 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 분석 준비 전·수정 라운드 OPEN·STALE_ANALYSIS·다른 선택 확정 충돌 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 기존 주최자 명령 요청 제한 초과 */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 기존 요청 제한 저장소 사용 불가 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
     join: {
         parameters: {
             query?: never;
@@ -1205,7 +1485,7 @@ export interface operations {
             };
         };
     };
-    confirm: {
+    confirm_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -1537,6 +1817,158 @@ export interface operations {
             };
             /** @description 방 또는 확정 결과 없음 */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 분석 준비 전 또는 수정 라운드 OPEN */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
+    primary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                inviteCode: string;
+            };
+            cookie?: {
+                meet_me_guest?: string;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 조회 또는 동일 선택 멱등 확정 성공 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecommendationListResponse"];
+                };
+            };
+            /** @description 잘못된 입력·cursor·범위·정밀도; PostgreSQL 지원 마이크로초까지 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 세션 누락 또는 무효 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 참여 또는 HOST 권한 없음 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 방 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 분석 준비 전·수정 라운드 OPEN·STALE_ANALYSIS·다른 선택 확정 충돌 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
+    alternatives: {
+        parameters: {
+            query: {
+                analysis_id: string;
+                cursor?: string;
+                /** @description 페이지 크기1~100 */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                inviteCode: string;
+            };
+            cookie?: {
+                meet_me_guest?: string;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 조회 또는 동일 선택 멱등 확정 성공 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecommendationListResponse"];
+                };
+            };
+            /** @description 잘못된 입력·cursor·범위·정밀도; PostgreSQL 지원 마이크로초까지 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 세션 누락 또는 무효 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 참여 또는 HOST 권한 없음 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 방 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 분석 준비 전·수정 라운드 OPEN·STALE_ANALYSIS·다른 선택 확정 충돌 */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

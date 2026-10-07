@@ -1,0 +1,146 @@
+{
+  "issue": "https://github.com/meet-me-duo/meet-me-web/issues/19",
+  "base_sha": "3c403a2667d4a3921ba8a661fb2a4e9758b220ed",
+  "branch": "feature/19-diverse-time-recommendations",
+  "scope": "Standalone presentation UI only; native OpenAPI and RoomPage integration pending.",
+  "checks": [
+    {
+      "command": "corepack pnpm api:check",
+      "exit_code": 0,
+      "log": "test-results/recommendations-19/api-check-final.log"
+    },
+    {
+      "command": "corepack pnpm lint",
+      "exit_code": 0,
+      "log": "test-results/recommendations-19/lint-final.log"
+    },
+    {
+      "command": "corepack pnpm typecheck",
+      "exit_code": 0,
+      "log": "test-results/recommendations-19/typecheck-final.log"
+    },
+    {
+      "command": "corepack pnpm test",
+      "exit_code": 0,
+      "log": "test-results/recommendations-19/test-final.log"
+    },
+    {
+      "command": "corepack pnpm build",
+      "exit_code": 0,
+      "log": "test-results/recommendations-19/build-final.log"
+    }
+  ],
+  "unit": {
+    "passed": 230,
+    "new_independent": 54
+  },
+  "browser": {
+    "baseline-browser": {
+      "stats": {
+        "startTime": "2026-10-07T05:34:40.858Z",
+        "duration": 288119.891,
+        "expected": 329,
+        "skipped": 1,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "report": "test-results/recommendations-19/test-results/recommendations-19/baseline-browser.json",
+      "scope": "Existing application synthetic API regressions"
+    },
+    "component-browser": {
+      "stats": {
+        "startTime": "2026-10-07T05:40:46.357Z",
+        "duration": 19950.09,
+        "expected": 18,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "report": "test-results/recommendations-19/test-results/recommendations-19/component-browser.json",
+      "scope": "Standalone UI compiled local harness; no API connection"
+    }
+  },
+  "independent_review": "Foundation scope PASS; no unresolved P1/P2.",
+  "fault_verification": {
+    "faults": [
+      {
+        "fault": "accept-invalid-range",
+        "test_title": "rejects invalid or out-of-range",
+        "exit": 1,
+        "assertion_failed": true,
+        "restored_exact": true,
+        "source_sha256": "c3739c13194169c051d36a1758fc89e365c19a8b9b0fb05a1a913619ca14992d"
+      },
+      {
+        "fault": "lose-dst-overlap",
+        "test_title": "returns both real instants",
+        "exit": 1,
+        "assertion_failed": true,
+        "restored_exact": true,
+        "source_sha256": "c3739c13194169c051d36a1758fc89e365c19a8b9b0fb05a1a913619ca14992d"
+      },
+      {
+        "fault": "reuse-stale-context",
+        "test_title": "discards stale selection when analysis/viewer",
+        "exit": 1,
+        "assertion_failed": true,
+        "restored_exact": true,
+        "source_sha256": "080d79307f295410b8187089fe2f020a5b72a51e8f86b86b9edd1e0457941cbc"
+      },
+      {
+        "fault": "invent-one-hour",
+        "test_title": "does not fill an assumed end",
+        "exit": 1,
+        "assertion_failed": true,
+        "restored_exact": true,
+        "source_sha256": "080d79307f295410b8187089fe2f020a5b72a51e8f86b86b9edd1e0457941cbc"
+      },
+      {
+        "fault": "remove-more-lock",
+        "test_title": "blocks an immediate duplicate alternatives request",
+        "exit": 1,
+        "assertion_failed": true,
+        "restored_exact": true,
+        "source_sha256": "080d79307f295410b8187089fe2f020a5b72a51e8f86b86b9edd1e0457941cbc"
+      },
+      {
+        "fault": "remove-variant-fallback",
+        "test_title": "falls back to an available variant",
+        "exit": 1,
+        "assertion_failed": true,
+        "restored_exact": true,
+        "source_sha256": "080d79307f295410b8187089fe2f020a5b72a51e8f86b86b9edd1e0457941cbc"
+      }
+    ],
+    "test_sha256": {
+      "src/components/RecommendationChoices.test.tsx": "bc83e2ee74a69b2a0c2f90b80fe5c2d8e15eddbd99da402834864ebdf115e157",
+      "src/utils/recommendationTime.test.ts": "a65890ef8c7bfc899c17923ab31c1db056e145ee768d533c4ce1d7cd727c619d"
+    },
+    "recorded_at": "2026-10-07T05:42:44.925157+00:00",
+    "final_green": {
+      "exit": 0,
+      "passed": 54,
+      "failed": 0,
+      "log": "final-green-post-fault54.log"
+    },
+    "final_source_sha256": {
+      "src/components/RecommendationChoices.tsx": "080d79307f295410b8187089fe2f020a5b72a51e8f86b86b9edd1e0457941cbc",
+      "src/utils/recommendationTime.ts": "c3739c13194169c051d36a1758fc89e365c19a8b9b0fb05a1a913619ca14992d"
+    },
+    "tests_unchanged": true
+  },
+  "files_sha256": {
+    "src/components/RecommendationChoices.tsx": "080d79307f295410b8187089fe2f020a5b72a51e8f86b86b9edd1e0457941cbc",
+    "src/components/recommendationView.ts": "3f13f9639a13aa0aeb6106cb5400af3bbdc0e813fc35aa16325d23744ed3aa3b",
+    "src/utils/recommendationTime.ts": "c3739c13194169c051d36a1758fc89e365c19a8b9b0fb05a1a913619ca14992d",
+    "src/components/RecommendationChoices.test.tsx": "bc83e2ee74a69b2a0c2f90b80fe5c2d8e15eddbd99da402834864ebdf115e157",
+    "src/utils/recommendationTime.test.ts": "a65890ef8c7bfc899c17923ab31c1db056e145ee768d533c4ce1d7cd727c619d",
+    "src/styles.css": "e79198e3a3cf25d2b417dc31af4eab82f04c9d53a94333bbbac1098af64803d4"
+  },
+  "blocked": [
+    "Reviewed server #95 native OpenAPI and exact protocol discriminator have not been delivered.",
+    "Generated DTO/API/RoomPage integration, protocol gates, pagination and confirmation boundary tests remain pending.",
+    "Actual backend/browser and server PostgreSQL integration are not included."
+  ],
+  "ci": "Exact commit CI must be read from the draft PR; local checks do not assert CI success."
+}

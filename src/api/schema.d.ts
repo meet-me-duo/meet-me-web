@@ -39,6 +39,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/rooms/{inviteCode}/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 주최자가 미확정 NO_MATCH 또는 PARTIAL 결과의 조건 수정 시작 */
+        post: operations["reopen"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rooms/{inviteCode}/participants": {
         parameters: {
             query?: never;
@@ -84,6 +101,23 @@ export interface paths {
         put?: never;
         /** 주최자 후보 확정 */
         post: operations["confirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rooms/{inviteCode}/analysis": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 주최자가 현재 라운드의 최신 저장 입력으로 다시 조율 */
+        post: operations["analyze"];
         delete?: never;
         options?: never;
         head?: never;
@@ -184,27 +218,27 @@ export interface components {
             empty?: boolean;
             null?: boolean;
             float?: boolean;
-            string?: boolean;
             container?: boolean;
             number?: boolean;
-            floatingPointNumber?: boolean;
             missingNode?: boolean;
-            int?: boolean;
+            valueNode?: boolean;
             /** @enum {string} */
             nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
+            object?: boolean;
+            pojo?: boolean;
+            integralNumber?: boolean;
+            floatingPointNumber?: boolean;
+            short?: boolean;
+            int?: boolean;
+            long?: boolean;
             double?: boolean;
             bigDecimal?: boolean;
             bigInteger?: boolean;
-            integralNumber?: boolean;
-            short?: boolean;
-            pojo?: boolean;
-            valueNode?: boolean;
-            object?: boolean;
-            long?: boolean;
-            boolean?: boolean;
             /** @deprecated */
             textual?: boolean;
+            boolean?: boolean;
             binary?: boolean;
+            string?: boolean;
             embeddedValue?: boolean;
         };
         /** @description 현재 익명 참여자의 자연어 제출 또는 수정 요청 */
@@ -216,6 +250,16 @@ export interface components {
              * @description 호환 필드: 생략·[]·null만 허용. Nonempty 배열은 SUBMISSION_MANUAL_AVAILABILITY_UNSUPPORTED
              */
             manual_available_times?: unknown[] | null;
+            /**
+             * Format: uuid
+             * @description 조건 수정 중 필수인 현재 라운드 UUID
+             */
+            revision_round_id?: string | null;
+            /**
+             * Format: int32
+             * @description 조건 수정 중 필수인 읽은 자기 입력 revision
+             */
+            expected_revision?: number | null;
         };
         /** @description RFC 9457 기반 공통 오류 응답 */
         ApiProblemSchema: {
@@ -294,6 +338,16 @@ export interface components {
              * @description 현재 revision 저장 시각
              */
             created_at?: string;
+            /**
+             * Format: uuid
+             * @description 수정 가능할 때의 현재 조건 수정 라운드
+             */
+            revision_round_id?: string | null;
+            /**
+             * Format: int64
+             * @description 응답 snapshot의 방 조율 상태 버전
+             */
+            state_version?: number;
         };
         /** @description 익명 모임 방 생성 요청 */
         CreateRoomRequest: {
@@ -336,12 +390,45 @@ export interface components {
              */
             search_end_date?: string | null;
         };
+        /** @description 조건 수정 라운드. 과거 operation 결과와 현재 활성 라운드는 별개 */
+        RevisionRoundResponse: {
+            /**
+             * Format: uuid
+             * @description 수정 라운드 UUID
+             */
+            id: string;
+            /**
+             * Format: int64
+             * @description 방의 단조 증가 라운드 번호
+             */
+            generation: number;
+            /**
+             * @description OPEN 또는 CONSUMED
+             * @enum {string}
+             */
+            status: "OPEN" | "CONSUMED";
+        };
+        /** @description 현재 익명 세션의 명령 권한 */
+        RoomCapabilitiesResponse: {
+            /** @description 자기 입력 수정 가능 */
+            can_edit_own_submission?: boolean;
+            /** @description 주최자가 수정 라운드를 열 수 있음 */
+            can_open_revision?: boolean;
+            /** @description 주최자가 현재 라운드를 다시 조율할 수 있음 */
+            can_analyze_revision?: boolean;
+            /** @description 현재 결과 후보 확정 가능 */
+            can_confirm?: boolean;
+            /** @description 변경 없는 입력도 새 분석 실행으로 처리할 수 있음 */
+            can_force_reparse?: boolean;
+        };
         /** @description 민감 식별자를 제외한 공개 방 정보 */
         RoomResponse: {
             /** @description 모임 목적 */
             purpose?: string;
             /** @description 현재 브라우저 세션의 참여 정보 */
             viewer?: components["schemas"]["ViewerParticipationResponse"];
+            /** @description 현재 세션 권한 */
+            capabilities?: components["schemas"]["RoomCapabilitiesResponse"];
             /** @description 공개 방 초대 코드 */
             invite_code?: string;
             /**
@@ -406,6 +493,28 @@ export interface components {
              * @enum {string}
              */
             input_disclosure_policy?: "HOST_ON_PARTIAL_RESULT";
+            /**
+             * Format: uuid
+             * @description 현재 활성 분석 UUID
+             */
+            analysis_id?: string | null;
+            /**
+             * Format: int64
+             * @description 지금까지 열린 수정 라운드 번호
+             */
+            revision_generation?: number;
+            /** @description 현재 OPEN 수정 라운드 */
+            revision_round?: components["schemas"]["RevisionRoundResponse"] | null;
+            /**
+             * Format: int32
+             * @description 새 수정 분석 실행의 남은 횟수. 방 수명 동안 총 3회
+             */
+            remaining_correction_analyses?: number;
+            /**
+             * Format: int64
+             * @description 방의 조율 상태를 정렬하는 단조 증가 버전
+             */
+            state_version?: number;
         };
         /** @description 현재 브라우저 세션의 방 참여 상태 */
         ViewerParticipationResponse: {
@@ -418,6 +527,36 @@ export interface components {
             role?: "HOST" | "MEMBER" | null;
             /** @description 현재 세션 참여자의 표시 이름 */
             display_name?: string | null;
+            /**
+             * Format: uuid
+             * @description 현재 세션의 본인 room-scoped opaque 참여자 UUID. 자기 원문 캐시 분리 hint이며 권한 증명은 아님
+             */
+            context_id?: string | null;
+        };
+        /** @description 현재 미확정 결과의 조건 수정 라운드를 여는 명령 */
+        ReopenInputRequest: {
+            /**
+             * Format: uuid
+             * @description 동일 요청 재시도에 유지할 UUID
+             */
+            request_id: string;
+            /**
+             * Format: uuid
+             * @description 수정하려는 현재 활성 분석 UUID
+             */
+            source_analysis_id: string;
+            /**
+             * Format: int64
+             * @description 읽은 현재 revision_generation
+             */
+            expected_generation: number;
+        };
+        /** @description 수정 라운드 operation 결과와 현재 방 snapshot */
+        ReopenedInputResponse: {
+            /** @description 현재 방 snapshot */
+            room?: components["schemas"]["RoomResponse"];
+            /** @description 이 요청에 기록된 라운드. 재시도 시 현재 라운드와 다를 수 있음 */
+            round?: components["schemas"]["RevisionRoundResponse"];
         };
         /** @description 익명 참여 요청 */
         JoinRoomRequest: {
@@ -509,6 +648,44 @@ export interface components {
              */
             confirmed_at?: string;
         };
+        /** @description 저장된 최신 입력을 다시 조율하는 명령. 저장만으로 분석하지 않음 */
+        AnalyzeRevisionRequest: {
+            /**
+             * Format: uuid
+             * @description 현재 OPEN 수정 라운드 UUID
+             */
+            revision_round_id: string;
+            /**
+             * Format: uuid
+             * @description 동일 요청 재시도에 유지할 UUID
+             */
+            request_id: string;
+            /**
+             * @description true면 입력 변경이 없어도 비용을 수반하는 새 분석 실행
+             * @default false
+             */
+            force_reparse: boolean;
+        };
+        /** @description 다시 조율 operation 결과와 현재 방 snapshot */
+        RevisionAnalysisResponse: {
+            /**
+             * @description QUEUED 새 분석 또는 REUSED 기존 결과
+             * @enum {string}
+             */
+            outcome?: "QUEUED" | "REUSED";
+            /** @description 현재 방 snapshot. operation 이후 새 라운드가 열렸을 수도 있음 */
+            room?: components["schemas"]["RoomResponse"];
+            /**
+             * Format: uuid
+             * @description 이 요청이 생성하거나 재사용한 분석 UUID
+             */
+            analysis_id?: string;
+            /**
+             * Format: uuid
+             * @description 이 요청이 소비한 라운드 UUID
+             */
+            revision_round_id?: string;
+        };
         /** @description 현재 익명 참여자의 최신 제출 */
         SubmissionResponse: {
             /**
@@ -532,6 +709,16 @@ export interface components {
              * @description 현재 revision 저장 시각
              */
             created_at?: string;
+            /**
+             * Format: uuid
+             * @description 수정 가능할 때의 현재 조건 수정 라운드
+             */
+            revision_round_id?: string | null;
+            /**
+             * Format: int64
+             * @description 응답 snapshot의 방 조율 상태 버전
+             */
+            state_version?: number;
         };
         /** @description 후보 생성 결과 */
         CandidateListResponse: {
@@ -557,6 +744,16 @@ export interface components {
              * @description 반영되지 않은 입력 수
              */
             unapplied_inputs?: number;
+            /**
+             * Format: uuid
+             * @description 목록을 생성한 활성 분석 UUID
+             */
+            analysis_id: string;
+            /**
+             * Format: int64
+             * @description 후보 응답의 방 조율 상태 snapshot 버전
+             */
+            state_version?: number;
         };
         /** @description 주최자에게만 공개되는 미반영 입력 */
         UnappliedInputResponse: {
@@ -689,7 +886,7 @@ export interface operations {
                     "*/*": components["schemas"]["ApiProblemSchema"];
                 };
             };
-            /** @description 입력 수집 종료 또는 배치 상한 초과 */
+            /** @description 입력 수집 종료, 배치 상한 초과 또는 수정 라운드·revision 충돌(REVISION_CONFLICT) */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -743,6 +940,97 @@ export interface operations {
                 };
             };
             /** @description 방 생성 요청 제한 초과 */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 요청 제한 저장소 사용 불가 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
+    reopen: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                inviteCode: string;
+            };
+            cookie?: {
+                meet_me_guest?: string;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReopenInputRequest"];
+            };
+        };
+        responses: {
+            /** @description 새 라운드 또는 동일 요청 재시도 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ReopenedInputResponse"];
+                };
+            };
+            /** @description 요청 형식 오류 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 익명 세션 누락 또는 무효 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 주최자 권한 또는 Origin 없음 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 방 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description REVISION_CONFLICT: 상태 또는 요청 precondition 충돌 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description HOST 요청 제한. Retry-After 제공 */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -992,6 +1280,106 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
+    analyze: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                inviteCode: string;
+            };
+            cookie?: {
+                meet_me_guest?: string;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnalyzeRevisionRequest"];
+            };
+        };
+        responses: {
+            /** @description 변경 없는 입력의 REUSED 결과 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RevisionAnalysisResponse"];
+                };
+            };
+            /** @description 새 QUEUED 분석 또는 같은 요청 재시도 */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RevisionAnalysisResponse"];
+                };
+            };
+            /** @description 요청 형식 오류 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 익명 세션 누락 또는 무효 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 주최자 권한 또는 Origin 없음 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 방 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description REVISION_CONFLICT 또는 영구 CORRECTION_ANALYSIS_LIMIT_REACHED */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description HOST 요청 제한. Retry-After 제공 */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 요청 제한 저장소 사용 불가 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
                 };
             };
         };

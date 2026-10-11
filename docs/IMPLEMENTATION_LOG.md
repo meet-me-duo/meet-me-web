@@ -427,3 +427,11 @@
 
 - 후속 확정 인계: 부모가 서버 HEAD `627e0b717a7f4f72dfc27b2ff580b2ed9f46c24a`와 전체 CI 성공을 전달했다. git fetch/read 및 fcde6ca 대비 diff에서 native OpenAPI·web handoff·API/DTO 제품의 변경0과 동일 bytes/SHA를 직접 확인했다. 새 파일은 결함 검증 근거와 #95/#96 병렬 V9 충돌 통합 인계이며 번호 재배분은 제안으로만 남아 있다. 정확 서버 HEAD의 CI run37582706551 success를 read-only 조회로 확인했다. 웹 검증은 이 새 계약 HEAD를 기준으로 기록한다.
 - 최종 연결 검증: API 생성정합 guard·lint(경고0)·typecheck·전체 unit277·build·diff check PASS. 독립101(Room31/UI36/시간26/API8) GREEN, compiled 추가 RED(µ 선택·await 이탈·전체 tuple·일반 background 입력 유지·동시 권한 오류 우선순위) 후 보완했다. 최종 소스에서 결함14/14 strict assertion 탐지, 원문bytes/소스·동결 테스트 지문 복원 후101GREEN을 확인했다. 독립 정적 리뷰 PASS·남은P1/P2 없음이다. 전체 mock Chromium browser371PASS/기존skip1/실패·flaky0(신규native42+기존329), 320/390/1440px desktop/mobile·LA browser/서울 방 timezone 및 실제 µ 선택 결과까지 확인했다. 신규42 전부 외부/미정의 API·page error0이다. 이것은 실제 backend/운영 통합 성공 근거가 아니다. source변경 없이 새 커밋의 정확 verify CI를 Draft PR20에 기록한다.
+
+
+## 2026-10-11 — 운영 API base를 사용하는 복구 URL 검사 수정
+
+- PR20 통합 main `f4bf1f6257c68f33e747c4625ee18a846f669f66`의 Deploy production38145700130은 운영 `VITE_API_BASE_URL=https://api.meet-me.co.kr`에서 복구 테스트의 상대 URL 기대값 두 개가 실패했다. unit275 PASS/2 FAIL이며 AWS 인증·S3 upload·CloudFront invalidation은 모두 skipped라 운영 웹 자산은 교체되지 않았다. 같은 main의 별도 CI38145700138은 성공했다.
+- main Git tree의84개 blob과 일치하는 격리 소스에서 운영 주소를 설정해 기존 복구31검사의2개 assertion RED를 재현했다. 기대 URL에 설정된 API base를 포함하도록 수정하며 요청 경로·본문·호출 횟수·구 명령 금지 검사는 유지했다. 앱·workflow·운영 환경변수·권한·인증 설정은 바꾸지 않는다.
+- 상대 주소, 운영 주소, 끝에 slash가 붙은 운영 주소의 복구31검사가 각각 GREEN이다. 운영 주소 환경에서 전체 unit277, lint, API 생성 정합, typecheck와 production build도 PASS다. 외부 API는 mock이고 공급자/운영 데이터 호출은 없다. 기존 Zod annotation build 경고는 남아 있다.
+- 수정 PR의 required CI와 후속 실제 S3/CloudFront 게시·읽기 검증은 위 로컬 GREEN과 구분해 확인한다. 서버의 기존 게시 release 및 전환 gate는 변경하지 않는다.

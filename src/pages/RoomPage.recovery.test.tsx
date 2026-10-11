@@ -9,6 +9,7 @@ import type { Candidate, Room, Submission } from "../api/types";
 import RoomPage from "./RoomPage";
 
 const code = "abcdefghijklmnopqrstuv";
+const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
 const a0 = "11111111-1111-4111-8111-111111111111";
 const a1 = "22222222-2222-4222-8222-222222222222";
 const c1 = "33333333-3333-4333-8333-333333333333";
@@ -95,7 +96,7 @@ describe("correction contracts and same-room recovery", () => {
     fireEvent.click(await screen.findByRole("button", { name: "조건 수정 열기" }));
     await screen.findByRole("button", { name: "수정한 조건으로 다시 분석" });
     expect(fetch).toHaveBeenCalledTimes(1);
-    expect(fetch.mock.calls[0]?.[0]).toBe(`/api/rooms/${code}/reopen`);
+    expect(fetch.mock.calls[0]?.[0]).toBe(`${apiBaseUrl}/api/rooms/${code}/reopen`);
     expect(payload(fetch)).toEqual({ request_id: expect.stringMatching(uuid), source_analysis_id: a0, expected_generation: 0 });
     expect(save).not.toHaveBeenCalled();
     expect(screen.queryByRole("button", { name: "입력 마감하기" })).not.toBeInTheDocument();
@@ -163,7 +164,7 @@ describe("correction contracts and same-room recovery", () => {
     fireEvent.click(await screen.findByRole("button", { name: "수정한 조건으로 다시 분석" }));
     await screen.findByRole("heading", { name: "모두의 조건을 분석하고 있어요" });
     expect(fetch).toHaveBeenCalledTimes(1);
-    expect(fetch.mock.calls[0]?.[0]).toBe(`/api/rooms/${code}/analysis`);
+    expect(fetch.mock.calls[0]?.[0]).toBe(`${apiBaseUrl}/api/rooms/${code}/analysis`);
     expect(payload(fetch)).toEqual({ revision_round_id: c1, request_id: expect.stringMatching(uuid), force_reparse: false });
     expect(save).not.toHaveBeenCalled(); expect(close).not.toHaveBeenCalled(); expect(retry).not.toHaveBeenCalled();
   });

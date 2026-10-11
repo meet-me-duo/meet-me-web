@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { api, ApiError } from "../api/client";
@@ -21,8 +21,8 @@ function submission(raw_text: string | null, revision = 1): Submission {
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
-function mount() {
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 }, mutations: { retry: false } } });
+function mount(gcTime = 0) {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime }, mutations: { retry: false } } });
   render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[`/rooms/${room.invite_code}`]}><Routes><Route path="/rooms/:inviteCode" element={<RoomPage />} /></Routes></MemoryRouter></QueryClientProvider>);
   return client;
 }
@@ -280,5 +280,161 @@ describe("saved conditions and plan accuracy", () => {
     expect(screen.getByText("선택한 플랜", { exact: true })).toBeInTheDocument();
     expect(document.querySelectorAll(".time-options span")).toHaveLength(2);
     expect(screen.queryByText(/최종 확정된 일정|우리의 만남이 정해졌어요/)).not.toBeInTheDocument();
+  });
+});
+
+describe("own saved input after collection closes", () => {
+  const closedRoom = (public_status: Room["public_status"], role: "HOST" | "MEMBER" = "MEMBER"): Room => ({ ...room, public_status, collection_status: "CLOSED", viewer: { ...room.viewer, role } });
+  const candidate: Candidate = { candidate_id: "11111111-1111-1111-1111-111111111111", plan_type: "A", meeting_mode: "REMOTE", rank: 1, attendance_count: 2, total_participants: 2, place: null, summary: "합성 후보", time_ranges: [{ start_at: "2026-10-07T10:00:00Z", end_at: "2026-10-07T12:00:00Z" }] };
+  function openSaved(open = true) {
+    const details = screen.getByText("내 저장 입력 확인", { exact: true }).closest("details")!;
+    details.open = open;
+    fireEvent(details, new Event("toggle"));
+  }
+  function mockResult() {
+    vi.spyOn(api, "getCandidates").mockResolvedValue({ quality: "COMPLETE", applied_submissions: 2, total_submissions: 2, unapplied_inputs: 0, candidates: [candidate] });
+    vi.spyOn(api, "getResult").mockResolvedValue({ candidate, confirmed_at: "2026-10-07T13:00:00Z" });
+  }
+  it.each(["ANALYZING", "INSUFFICIENT_PARTICIPANTS", "ANALYSIS_DELAYED", "NO_MATCH", "READY", "READY_WITH_WARNINGS", "CONFIRMED"] as const)("reads only own saved input without editing in %s", async status => {
+    vi.spyOn(api, "getRoom").mockResolvedValue(closedRoom(status));
+    const text = "화요일  저녁\n목요일은 8시부터";
+    const own = vi.spyOn(api, "getSubmission").mockResolvedValue({ ...submission(text, 7), editable: false });
+    const save = vi.spyOn(api, "saveSubmission");
+    const others = vi.spyOn(api, "getUnappliedInputs");
+    mockResult();
+    mount();
+    await screen.findByText("내 저장 입력 확인");
+    expect(own).not.toHaveBeenCalled();
+    openSaved();
+    await screen.findByText(text, { exact: true, normalizer: value => value });
+    expect(screen.getByText("저장된 입력 #7")).toBeInTheDocument();
+    expect(own).toHaveBeenCalledTimes(1);
+    expect(own.mock.calls[0]![0]).toBe(room.invite_code);
+    expect(own.mock.calls[0]![1]).toBeInstanceOf(AbortSignal);
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "내 조건 수정" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "조건 수정 열기" })).not.toBeInTheDocument();
+    expect(save).not.toHaveBeenCalled();
+    expect(others).not.toHaveBeenCalled();
+    openSaved(false);
+    await waitFor(() => expect(screen.queryByText(text, { exact: true, normalizer: value => value })).not.toBeInTheDocument());
+  });
+  it.each(["legacy", "missing"] as const)("handles %s saved input without creating a new revision", async kind => {
+    vi.spyOn(api, "getRoom").mockResolvedValue(closedRoom("NO_MATCH"));
+    const own = vi.spyOn(api, "getSubmission");
+    if (kind === "legacy") own.mockResolvedValue(submission(null));
+    else own.mockRejectedValue(new ApiError(404, { code: "SUBMISSION_NOT_FOUND" }));
+    const save = vi.spyOn(api, "saveSubmission");
+    mount();
+    await screen.findByText("내 저장 입력 확인"); openSaved();
+    await screen.findByText(kind === "legacy" ? "기존 시간표만 제출되어 자연어 원문이 없어요." : "저장한 입력이 없어요.");
+    expect(save).not.toHaveBeenCalled();
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+  });
+  it.each([401, 403, 404])("purges only this room's private caches on room read %s", async status => {
+    const getRoom = vi.spyOn(api, "getRoom").mockResolvedValue(closedRoom("ANALYSIS_DELAYED", "HOST"));
+    vi.spyOn(api, "getSubmission").mockResolvedValue(submission("합성 개인 입력"));
+    const client = mount(60_000);
+    client.setQueryData(["submission", "another-room"], { raw_text: "다른 모임 입력" });
+    for (const key of ["candidates", "unapplied", "result"]) client.setQueryData([key, room.invite_code], { private: "합성 캐시" });
+    await screen.findByText("내 저장 입력 확인"); openSaved();
+    await screen.findByText("합성 개인 입력");
+    getRoom.mockRejectedValue(new ApiError(status, { code: "GUEST_SESSION_INVALID" }));
+    await client.invalidateQueries({ queryKey: ["room", room.invite_code] });
+    await screen.findByRole("heading", { name: "모임을 불러오지 못했어요" });
+    await waitFor(() => { for (const key of ["room", "submission", "candidates", "unapplied", "result"]) expect(client.getQueryData([key, room.invite_code])).toBeUndefined(); });
+    expect(screen.queryByText("합성 개인 입력")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "분석 다시 요청" })).not.toBeInTheDocument();
+    expect(client.getQueryData(["submission", "another-room"])).toEqual({ raw_text: "다른 모임 입력" });
+    client.clear();
+  });
+  it.each([401, 403, 404])("hides host tools when own saved-input read returns %s", async status => {
+    vi.spyOn(api, "getRoom").mockResolvedValue(closedRoom("ANALYSIS_DELAYED", "HOST"));
+    vi.spyOn(api, "getSubmission").mockRejectedValue(new ApiError(status, { code: status === 404 ? "ROOM_NOT_FOUND" : "GUEST_SESSION_INVALID" }));
+    const client = mount(60_000);
+    await screen.findByRole("button", { name: "분석 다시 요청" }); openSaved();
+    await screen.findByRole("heading", { name: "모임을 불러오지 못했어요" });
+    expect(screen.queryByRole("button", { name: "분석 다시 요청" })).not.toBeInTheDocument();
+    await waitFor(() => expect(client.getQueryData(["room", room.invite_code])).toBeUndefined());
+    client.clear();
+  });
+  it("retries a temporary own-input read failure without changing the room", async () => {
+    vi.spyOn(api, "getRoom").mockResolvedValue(closedRoom("NO_MATCH"));
+    const own = vi.spyOn(api, "getSubmission").mockRejectedValue(new ApiError(503, { detail: "합성 읽기 장애" }));
+    const save = vi.spyOn(api, "saveSubmission");
+    mount(); await screen.findByText("내 저장 입력 확인"); openSaved();
+    await screen.findByText("합성 읽기 장애");
+    own.mockResolvedValue(submission("복원한 본인 입력"));
+    fireEvent.click(screen.getByRole("button", { name: "다시 시도" }));
+    await screen.findByText("복원한 본인 입력");
+    expect(own).toHaveBeenCalledTimes(2);
+    expect(screen.getByRole("heading", { name: "모두에게 맞는 후보를 찾지 못했어요" })).toBeInTheDocument();
+    expect(save).not.toHaveBeenCalled();
+  });
+  it.each([new ApiError(503, { detail: "합성 서버 장애" }), new TypeError("합성 네트워크 장애")])("shows the latest failed access retry (%s)", async error => {
+    const getRoom = vi.spyOn(api, "getRoom").mockRejectedValue(new ApiError(401, { detail: "합성 세션 만료" }));
+    mount(); await screen.findByRole("heading", { name: "모임을 불러오지 못했어요" });
+    getRoom.mockRejectedValue(error);
+    fireEvent.click(screen.getByRole("button", { name: "다시 시도" }));
+    await screen.findByText(error.message);
+    expect(screen.getByRole("button", { name: "다시 시도" })).toBeEnabled();
+  });
+  it("cancels a pending original read and discards its late response after denial", async () => {
+    const getRoom = vi.spyOn(api, "getRoom").mockResolvedValue(closedRoom("NO_MATCH"));
+    let release!: (value: Submission) => void;
+    let signal: AbortSignal | undefined;
+    vi.spyOn(api, "getSubmission").mockImplementation((_code, requestSignal) => new Promise(resolve => { release = resolve; signal = requestSignal; }));
+    const client = mount(60_000);
+    await screen.findByText("내 저장 입력 확인"); openSaved();
+    await waitFor(() => expect(signal).toBeInstanceOf(AbortSignal));
+    getRoom.mockRejectedValue(new ApiError(401, { code: "GUEST_SESSION_INVALID" }));
+    await client.invalidateQueries({ queryKey: ["room", room.invite_code] });
+    await screen.findByRole("heading", { name: "모임을 불러오지 못했어요" });
+    await waitFor(() => expect(signal?.aborted).toBe(true));
+    await act(async () => { release(submission("뒤늦게 도착한 원문")); });
+    expect(client.getQueryData(["submission", room.invite_code])).toBeUndefined();
+    expect(screen.queryByText("뒤늦게 도착한 원문")).not.toBeInTheDocument();
+    client.clear();
+  });
+  it("removes mutation originals and ignores a save that completes after denial", async () => {
+    const getRoom = vi.spyOn(api, "getRoom").mockResolvedValue({ ...room, viewer: { ...room.viewer, role: "HOST" } });
+    vi.spyOn(api, "getSubmission").mockResolvedValue(submission("기존 저장 입력"));
+    let release!: (value: SavedSubmission) => void;
+    const save = vi.spyOn(api, "saveSubmission").mockImplementation(() => new Promise(resolve => { release = resolve; }));
+    const client = mount(60_000);
+    fireEvent.click(await screen.findByRole("button", { name: "내 조건 수정" }));
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "저장 요청 원문" } });
+    fireEvent.click(screen.getByRole("button", { name: "수정 내용 저장" }));
+    await waitFor(() => expect(save).toHaveBeenCalledTimes(1));
+    expect(client.getMutationCache().getAll().some(mutation => mutation.state.variables === "저장 요청 원문")).toBe(true);
+    getRoom.mockRejectedValue(new ApiError(401, { code: "GUEST_SESSION_INVALID" }));
+    await client.invalidateQueries({ queryKey: ["room", room.invite_code] });
+    await screen.findByRole("heading", { name: "모임을 불러오지 못했어요" });
+    await waitFor(() => expect(client.getMutationCache().getAll().filter(mutation => mutation.options.mutationKey?.[1] === room.invite_code)).toHaveLength(0));
+    await act(async () => { release(submission("저장 요청 원문", 2)); });
+    expect(client.getQueryData(["submission", room.invite_code])).toBeUndefined();
+    expect(screen.queryByText("저장 요청 원문")).not.toBeInTheDocument();
+    expect(getRoom).toHaveBeenCalledTimes(2);
+    client.clear();
+  });
+  it("ignores an old host retry after access restores as an unjoined viewer", async () => {
+    const getRoom = vi.spyOn(api, "getRoom").mockResolvedValue(closedRoom("ANALYSIS_DELAYED", "HOST"));
+    let release!: (value: Room) => void;
+    vi.spyOn(api, "retryAnalysis").mockImplementation(() => new Promise(resolve => { release = resolve; }));
+    const client = mount(60_000);
+    fireEvent.click(await screen.findByRole("button", { name: "분석 다시 요청" }));
+    await screen.findByRole("button", { name: "요청 중…" });
+    getRoom.mockRejectedValue(new ApiError(401, { code: "GUEST_SESSION_INVALID" }));
+    await client.invalidateQueries({ queryKey: ["room", room.invite_code] });
+    await screen.findByRole("heading", { name: "모임을 불러오지 못했어요" });
+    const restored: Room = { ...closedRoom("CONFIRMED"), viewer: { joined: false, role: null, display_name: null } };
+    getRoom.mockResolvedValue(restored);
+    fireEvent.click(screen.getByRole("button", { name: "다시 시도" }));
+    await screen.findByRole("heading", { name: "입력이 마감된 모임이에요" });
+    await act(async () => { release(closedRoom("ANALYZING", "HOST")); });
+    expect(client.getQueryData<Room>(["room", room.invite_code])?.viewer.joined).toBe(false);
+    expect(screen.getByRole("heading", { name: "입력이 마감된 모임이에요" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "분석 다시 요청" })).not.toBeInTheDocument();
+    client.clear();
   });
 });

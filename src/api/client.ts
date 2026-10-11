@@ -4,11 +4,15 @@ import type {
   ConfirmedResult,
   CreateRoomBody,
   Room,
+  RecommendationList,
+  RecommendationConfirmationBody,
+  RecommendationAlternativeQuery,
   SaveSubmissionBody,
   SavedSubmission,
   Submission,
   UnappliedInput,
 } from "./types";
+import type { ReanalyzeBody, ReanalyzeResponse, ReopenBody, ReopenResponse } from "./recovery";
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
 
@@ -59,17 +63,26 @@ export const api = {
   getRoom: (inviteCode: string, signal?: AbortSignal) => request<Room>(`/api/rooms/${encode(inviteCode)}`, { signal }),
   joinRoom: (inviteCode: string, displayName: string) =>
     request<Room>(`/api/rooms/${encode(inviteCode)}/participants`, { method: "POST", body: JSON.stringify({ display_name: displayName }) }),
-  getSubmission: (inviteCode: string) => request<Submission>(`/api/rooms/${encode(inviteCode)}/submission`),
+  getSubmission: (inviteCode: string, signal?: AbortSignal) => request<Submission>(`/api/rooms/${encode(inviteCode)}/submission`, { signal }),
   saveSubmission: (inviteCode: string, body: SaveSubmissionBody) =>
     request<SavedSubmission>(`/api/rooms/${encode(inviteCode)}/submission`, { method: "PUT", body: JSON.stringify(body) }),
   closeRoom: (inviteCode: string, confirmEarly = false) =>
     request<Room>(`/api/rooms/${encode(inviteCode)}/close`, { method: "POST", body: JSON.stringify({ confirm_early: confirmEarly }) }),
   retryAnalysis: (inviteCode: string) => request<Room>(`/api/rooms/${encode(inviteCode)}/analysis/retry`, { method: "POST" }),
+  reopenRoom: (inviteCode: string, body: ReopenBody) => request<ReopenResponse>(`/api/rooms/${encode(inviteCode)}/reopen`, { method: "POST", body: JSON.stringify(body) }),
+  analyzeRevision: (inviteCode: string, body: ReanalyzeBody) => request<ReanalyzeResponse>(`/api/rooms/${encode(inviteCode)}/analysis`, { method: "POST", body: JSON.stringify(body) }),
   getCandidates: (inviteCode: string) => request<CandidateList>(`/api/rooms/${encode(inviteCode)}/candidates`),
   getUnappliedInputs: (inviteCode: string) => request<UnappliedInput[]>(`/api/rooms/${encode(inviteCode)}/candidates/unapplied-inputs`),
   confirmCandidate: (inviteCode: string, candidateId: string) =>
     request<ConfirmedResult>(`/api/rooms/${encode(inviteCode)}/candidates/${encode(candidateId)}/confirmation`, { method: "POST" }),
   getResult: (inviteCode: string) => request<ConfirmedResult>(`/api/rooms/${encode(inviteCode)}/result`),
+  getRecommendations: (inviteCode: string, signal?: AbortSignal) => request<RecommendationList>(`/api/rooms/${encode(inviteCode)}/recommendations`, { signal }),
+  getRecommendationAlternatives: (inviteCode: string, query: RecommendationAlternativeQuery, signal?: AbortSignal): Promise<RecommendationList> => {
+    const params = new URLSearchParams({ analysis_id: query.analysis_id, limit: String(query.limit ?? 20) });
+    if (query.cursor !== undefined) params.set("cursor", query.cursor);
+    return request<RecommendationList>(`/api/rooms/${encode(inviteCode)}/recommendations/alternatives?${params}`, { signal });
+  },
+  confirmRecommendation: (inviteCode: string, optionId: string, body: RecommendationConfirmationBody) => request<ConfirmedResult>(`/api/rooms/${encode(inviteCode)}/recommendations/${encode(optionId)}/confirmation`, { method: "POST", body: JSON.stringify(body) }),
 };
 
 export function errorMessage(error: unknown): string {
@@ -88,7 +101,7 @@ export function errorMessage(error: unknown): string {
       CANDIDATES_NOT_READY: "후보를 아직 준비하고 있습니다.",
       CANDIDATE_ALREADY_CONFIRMED: "다른 후보가 이미 확정되었습니다.",
     };
-    return (error.problem.code && fallback[error.problem.code]) || error.problem.detail || error.message;
+    return error.problem.detail || (error.problem.code && fallback[error.problem.code]) || error.message;
   }
   return error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.";
 }

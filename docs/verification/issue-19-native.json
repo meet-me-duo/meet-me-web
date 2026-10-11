@@ -1,0 +1,295 @@
+{
+  "issue": "https://github.com/meet-me-duo/meet-me-web/issues/19",
+  "base_sha": "3c403a2667d4a3921ba8a661fb2a4e9758b220ed",
+  "branch": "feature/19-diverse-time-recommendations",
+  "scope": "Native non-D2 recommendation adapter and RoomPage integration, with synthetic API frontend verification.",
+  "server_contract": {
+    "head": "627e0b717a7f4f72dfc27b2ff580b2ed9f46c24a",
+    "native_path": "docs/openapi/issue-95.openapi.json",
+    "sha256": "56a8ddfa3bc7bd1c562ddb31a6ea8c39806abb86eef727381992678f2e9b42f2",
+    "protocol": "diverse-time-v1",
+    "compared_to_initial_head": "fcde6ca716357cfc923786669c944ca3fc48d734",
+    "native_and_web_handoff_bytes_unchanged": true,
+    "ci_read_only_confirmed": "https://github.com/meet-me-duo/meet-me-server/actions/runs/37582706551",
+    "D2": "Pending; no preference reasoning or scores fabricated."
+  },
+  "checks": [
+    {
+      "command": "corepack pnpm api:check",
+      "exit_code": 0,
+      "log": "test-results/recommendations-19/native-api-check-final.log"
+    },
+    {
+      "command": "corepack pnpm lint",
+      "exit_code": 0,
+      "log": "test-results/recommendations-19/native-lint-final.log"
+    },
+    {
+      "command": "corepack pnpm typecheck",
+      "exit_code": 0,
+      "log": "test-results/recommendations-19/native-typecheck-final.log"
+    },
+    {
+      "command": "corepack pnpm test",
+      "exit_code": 0,
+      "log": "test-results/recommendations-19/native-test-final.log"
+    },
+    {
+      "command": "corepack pnpm build",
+      "exit_code": 0,
+      "log": "test-results/recommendations-19/native-build-final.log"
+    }
+  ],
+  "unit": {
+    "passed": 277,
+    "independent_targeted": 101,
+    "others": 176
+  },
+  "browser": {
+    "command": "corepack pnpm exec playwright test -c test-results/recommendations-19/playwright.native-final.config.ts",
+    "report": "test-results/recommendations-19/test-results/recommendations-19/native-all-browser.json",
+    "stats": {
+      "startTime": "2026-10-07T06:57:14.704Z",
+      "duration": 317907.93799999997,
+      "expected": 371,
+      "skipped": 1,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "native_passed": 42,
+    "existing_passed": 329,
+    "scope": "All API responses are synthetic; all native cases reject external/undefined requests and page errors. Chromium desktop/mobile at 320/390/1440px; LA browser and Seoul room timezone."
+  },
+  "independent_red": {
+    "recorded_at": "2026-10-07T06:38:56.785800+00:00",
+    "native_contract_sha256": "56a8ddfa3bc7bd1c562ddb31a6ea8c39806abb86eef727381992678f2e9b42f2",
+    "typecheck_exit": 0,
+    "lint_exit": 0,
+    "red": {
+      "API": {
+        "failed": 8,
+        "passed": 0,
+        "log": "native-api-red.log"
+      },
+      "RoomPage": {
+        "failed": 20,
+        "passed": 2,
+        "log": "native-room-red-final.log",
+        "source_sha256": "737acc9b0a478301cc985f61259bbfb58e5006d0a866663bcdb29959f9cecce1"
+      },
+      "microseconds": {
+        "failed": 2,
+        "passed": 20,
+        "log": "native-microsecond-red.log",
+        "source_sha256": "c3739c13194169c051d36a1758fc89e365c19a8b9b0fb05a1a913619ca14992d"
+      }
+    },
+    "test_sha256": {
+      "src/pages/RoomPage.recommendations.test.tsx": "81ed8ed065c5ed27eb8d8f2bae942a4501bf79480e8334000f2ce8ff12e70735",
+      "src/api/client.recommendations.test.ts": "dc8d32e711665c07307b6b468515fedb61a0e6f84ce63251cb41a89d3943c29d",
+      "src/utils/recommendationTime.test.ts": "ee511f49dd7164b60012b7c5ab712bfec6b4cfd261913ecf727c89847a83e602"
+    },
+    "scope": "mock frontend native-contract tests only; D2 not claimed; no paid/operational calls"
+  },
+  "additional_red_logs": [
+    "native-refinement-red.log",
+    "native-tuple-red.log",
+    "native-background-red.log"
+  ],
+  "independent_final": {
+    "recorded_at": "2026-10-07T06:56:24.996500+00:00",
+    "native_sha256": "56a8ddfa3bc7bd1c562ddb31a6ea8c39806abb86eef727381992678f2e9b42f2",
+    "test_sha256": {
+      "src/pages/RoomPage.recommendations.test.tsx": "060195f49e91867f17d6b13841fb22c89188e35fd9e5746abd31c28c5ed2023e",
+      "src/api/client.recommendations.test.ts": "dc8d32e711665c07307b6b468515fedb61a0e6f84ce63251cb41a89d3943c29d",
+      "src/utils/recommendationTime.test.ts": "2765d77c9cd3e1a3e0e618e798e58233a9bc2d14d3247b302b4ff5b842af8fe4",
+      "src/components/RecommendationChoices.test.tsx": "4fdd33e4308cab0abb3e2ee79f5242e59af2e4af73c0c209a0b9f0f02c6da692"
+    },
+    "source_sha256": {
+      "src/pages/RoomPage.tsx": "6cac1358cae74e669031f076b70e4063b55eb74cbc6e96fb46e00f0f996654e1",
+      "src/components/RecommendationsPanel.tsx": "16eb1fcaf60b125ac4811ac1efeb16a0a0ef447c7c3d6baab4b1ad3c787f94cc",
+      "src/api/client.ts": "b3fc4889d82e0632a02557ad159a33191c4011da6530c0b15f633e9bf530288d",
+      "src/components/RecommendationChoices.tsx": "62d3e734f0079a2f2fb7569ac8d172518b4a775bb3e04d2be117e74b6ea657fe",
+      "src/utils/recommendationTime.ts": "fdc847ef644f10232a827b44467e93fc94bfd9dedd9cebde83f3c4471738c28a"
+    },
+    "green": {
+      "exit": 0,
+      "tests": 101,
+      "failed": 0,
+      "log": "native-final-green-post-fault101.log"
+    },
+    "faults_count": 14,
+    "faults_all_assertion_detected": true,
+    "sources_restored_and_final_matching": true,
+    "tests_unchanged": true,
+    "typecheck_exit": 0,
+    "test_lint_exit": 0,
+    "scope": "Mock frontend native contract verification only; D2 and production integration not claimed.",
+    "latest_server_head_reported_by_parent": "627e0b717a7f4f72dfc27b2ff580b2ed9f46c24a",
+    "latest_server_native_bytes_unchanged_reported_by_parent": true
+  },
+  "fault_verification": {
+    "recorded_at": "2026-10-07T06:55:39.457580+00:00",
+    "faults": [
+      {
+        "fault": "accept-unknown-room-protocol",
+        "test_title": "blocks an unknown room protocol",
+        "exit": 1,
+        "assertion_failed": true,
+        "restored_exact": true,
+        "source_sha256": "6cac1358cae74e669031f076b70e4063b55eb74cbc6e96fb46e00f0f996654e1"
+      },
+      {
+        "fault": "accept-other-analysis",
+        "test_title": "never renders a primary response from a different analysis",
+        "exit": 1,
+        "assertion_failed": true,
+        "restored_exact": true,
+        "source_sha256": "16eb1fcaf60b125ac4811ac1efeb16a0a0ef447c7c3d6baab4b1ad3c787f94cc"
+      },
+      {
+        "fault": "send-option-as-variant",
+        "test_title": "sends the exact analysis/variant/user-selected instants",
+        "exit": 1,
+        "assertion_failed": true,
+        "restored_exact": true,
+        "source_sha256": "16eb1fcaf60b125ac4811ac1efeb16a0a0ef447c7c3d6baab4b1ad3c787f94cc"
+      },
+      {
+        "fault": "page-after-null-cursor",
+        "test_title": "starts without a cursor, passes the opaque next cursor",
+        "exit": 1,
+        "assertion_failed": true,
+        "restored_exact": true,
+        "source_sha256": "16eb1fcaf60b125ac4811ac1efeb16a0a0ef447c7c3d6baab4b1ad3c787f94cc"
+      },
+      {
+        "fault": "retain-private-recommendations",
+        "test_title": "treats primary 403 as loss of room access",
+        "exit": 1,
+        "assertion_failed": true,
+        "restored_exact": true,
+        "source_sha256": "6cac1358cae74e669031f076b70e4063b55eb74cbc6e96fb46e00f0f996654e1"
+      },
+      {
+        "fault": "accept-unmounted-response",
+        "test_title": "does not invalidate current room/result data",
+        "exit": 1,
+        "assertion_failed": true,
+        "restored_exact": true,
+        "source_sha256": "16eb1fcaf60b125ac4811ac1efeb16a0a0ef447c7c3d6baab4b1ad3c787f94cc"
+      },
+      {
+        "fault": "send-confirmation-to-legacy-url",
+        "test_title": "sends the four required selection fields",
+        "exit": 1,
+        "assertion_failed": true,
+        "restored_exact": true,
+        "source_sha256": "b3fc4889d82e0632a02557ad159a33191c4011da6530c0b15f633e9bf530288d"
+      },
+      {
+        "fault": "round-whole-range-before-send",
+        "test_title": "explicitly selects and previews the whole offered microsecond range",
+        "exit": 1,
+        "assertion_failed": true,
+        "restored_exact": true,
+        "source_sha256": "62d3e734f0079a2f2fb7569ac8d172518b4a775bb3e04d2be117e74b6ea657fe"
+      },
+      {
+        "fault": "retain-edited-whole-range-override",
+        "test_title": "drops the whole-range selection when the user manually edits",
+        "exit": 1,
+        "assertion_failed": true,
+        "restored_exact": true,
+        "source_sha256": "62d3e734f0079a2f2fb7569ac8d172518b4a775bb3e04d2be117e74b6ea657fe"
+      },
+      {
+        "fault": "omit-post-cancellation-lifetime-guard",
+        "test_title": "stops a stale-analysis reload that was waiting",
+        "exit": 1,
+        "assertion_failed": true,
+        "restored_exact": true,
+        "source_sha256": "16eb1fcaf60b125ac4811ac1efeb16a0a0ef447c7c3d6baab4b1ad3c787f94cc"
+      },
+      {
+        "fault": "omit-confirmed-tuple-instants",
+        "test_title": "returned .* differs",
+        "exit": 1,
+        "assertion_failed": true,
+        "restored_exact": true,
+        "source_sha256": "16eb1fcaf60b125ac4811ac1efeb16a0a0ef447c7c3d6baab4b1ad3c787f94cc"
+      },
+      {
+        "fault": "compare-iso-spellings-as-instants",
+        "test_title": "accepts equivalent",
+        "exit": 1,
+        "assertion_failed": true,
+        "restored_exact": true,
+        "source_sha256": "fdc847ef644f10232a827b44467e93fc94bfd9dedd9cebde83f3c4471738c28a"
+      },
+      {
+        "fault": "mask-page-authorization-with-primary-error",
+        "test_title": "does not let a background primary",
+        "exit": 1,
+        "assertion_failed": true,
+        "restored_exact": true,
+        "source_sha256": "16eb1fcaf60b125ac4811ac1efeb16a0a0ef447c7c3d6baab4b1ad3c787f94cc"
+      },
+      {
+        "fault": "discard-inputs-on-transient-background-error",
+        "test_title": "preserves the current selection, inputs and focus after a background",
+        "exit": 1,
+        "assertion_failed": true,
+        "restored_exact": true,
+        "source_sha256": "16eb1fcaf60b125ac4811ac1efeb16a0a0ef447c7c3d6baab4b1ad3c787f94cc"
+      }
+    ],
+    "final_sources_restored_exact": true,
+    "source_sha256": {
+      "src/pages/RoomPage.tsx": "6cac1358cae74e669031f076b70e4063b55eb74cbc6e96fb46e00f0f996654e1",
+      "src/components/RecommendationsPanel.tsx": "16eb1fcaf60b125ac4811ac1efeb16a0a0ef447c7c3d6baab4b1ad3c787f94cc",
+      "src/api/client.ts": "b3fc4889d82e0632a02557ad159a33191c4011da6530c0b15f633e9bf530288d",
+      "src/components/RecommendationChoices.tsx": "62d3e734f0079a2f2fb7569ac8d172518b4a775bb3e04d2be117e74b6ea657fe",
+      "src/utils/recommendationTime.ts": "fdc847ef644f10232a827b44467e93fc94bfd9dedd9cebde83f3c4471738c28a"
+    },
+    "test_sha256": {
+      "src/pages/RoomPage.recommendations.test.tsx": "060195f49e91867f17d6b13841fb22c89188e35fd9e5746abd31c28c5ed2023e",
+      "src/api/client.recommendations.test.ts": "dc8d32e711665c07307b6b468515fedb61a0e6f84ce63251cb41a89d3943c29d",
+      "src/utils/recommendationTime.test.ts": "2765d77c9cd3e1a3e0e618e798e58233a9bc2d14d3247b302b4ff5b842af8fe4",
+      "src/components/RecommendationChoices.test.tsx": "4fdd33e4308cab0abb3e2ee79f5242e59af2e4af73c0c209a0b9f0f02c6da692"
+    },
+    "final_green": {
+      "exit": 0,
+      "tests": 101,
+      "failed": 0,
+      "log": "native-final-green-post-fault101.log"
+    },
+    "source_still_matches": true,
+    "tests_still_matches": true,
+    "typecheck_exit": 0,
+    "test_lint_exit": 0,
+    "scope": "Mock frontend native contract verification only; D2 and production integration not claimed."
+  },
+  "independent_review": "Final static PASS; no unresolved P1/P2. Sources match the 101 GREEN / 14 fault restoration record; all required frontend checks completed.",
+  "files_sha256": {
+    "src/pages/RoomPage.tsx": "6cac1358cae74e669031f076b70e4063b55eb74cbc6e96fb46e00f0f996654e1",
+    "src/components/RecommendationsPanel.tsx": "16eb1fcaf60b125ac4811ac1efeb16a0a0ef447c7c3d6baab4b1ad3c787f94cc",
+    "src/api/client.ts": "b3fc4889d82e0632a02557ad159a33191c4011da6530c0b15f633e9bf530288d",
+    "src/components/RecommendationChoices.tsx": "62d3e734f0079a2f2fb7569ac8d172518b4a775bb3e04d2be117e74b6ea657fe",
+    "src/utils/recommendationTime.ts": "fdc847ef644f10232a827b44467e93fc94bfd9dedd9cebde83f3c4471738c28a",
+    "src/pages/RoomPage.recommendations.test.tsx": "060195f49e91867f17d6b13841fb22c89188e35fd9e5746abd31c28c5ed2023e",
+    "src/api/client.recommendations.test.ts": "dc8d32e711665c07307b6b468515fedb61a0e6f84ce63251cb41a89d3943c29d",
+    "src/utils/recommendationTime.test.ts": "2765d77c9cd3e1a3e0e618e798e58233a9bc2d14d3247b302b4ff5b842af8fe4",
+    "src/components/RecommendationChoices.test.tsx": "4fdd33e4308cab0abb3e2ee79f5242e59af2e4af73c0c209a0b9f0f02c6da692",
+    "src/api/types.ts": "aa18abc317ebead9712f405212bb6e2175edf4736f84ae0af0a0cc110e3a885a",
+    "src/api/schema.d.ts": "97fb4408602138753dd9f37026e5d84aea411425be0b0b3c9fc05d13746211e2",
+    "openapi/meet-me.openapi.json": "56a8ddfa3bc7bd1c562ddb31a6ea8c39806abb86eef727381992678f2e9b42f2",
+    "e2e/diverse-recommendations.spec.ts": "81cc05eaacaad970f4f15bfee5639e76a84a7faa36d8410631d407e58e6c805d"
+  },
+  "remaining": [
+    "D2 product decision/implementation is pending on the server.",
+    "Server #95/#96 V9 conflict, shared atomic publication and integrated HEAD/PG upgrade verification remain separate work.",
+    "Actual backend/browser, HTTPS cookie/CORS, real devices, Gemini and operational verification not run."
+  ],
+  "ci": "Read Draft PR20 verification section for the exact new commit SHA and its verify result; the earlier UI-only commit CI is not reused."
+}

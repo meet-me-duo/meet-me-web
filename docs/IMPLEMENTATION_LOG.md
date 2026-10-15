@@ -435,3 +435,30 @@
 - main Git tree의84개 blob과 일치하는 격리 소스에서 운영 주소를 설정해 기존 복구31검사의2개 assertion RED를 재현했다. 기대 URL에 설정된 API base를 포함하도록 수정하며 요청 경로·본문·호출 횟수·구 명령 금지 검사는 유지했다. 앱·workflow·운영 환경변수·권한·인증 설정은 바꾸지 않는다.
 - 상대 주소, 운영 주소, 끝에 slash가 붙은 운영 주소의 복구31검사가 각각 GREEN이다. 운영 주소 환경에서 전체 unit277, lint, API 생성 정합, typecheck와 production build도 PASS다. 외부 API는 mock이고 공급자/운영 데이터 호출은 없다. 기존 Zod annotation build 경고는 남아 있다.
 - 수정 PR의 required CI와 후속 실제 S3/CloudFront 게시·읽기 검증은 위 로컬 GREEN과 구분해 확인한다. 서버의 기존 게시 release 및 전환 gate는 변경하지 않는다.
+
+## 2026-10-15 — #22 / JIN-71 방 생성 후 주최자 조건 입력 (로컬)
+
+- [GitHub #22](https://github.com/meet-me-duo/meet-me-web/issues/22) / [Linear JIN-71](https://linear.app/jinhyeongpark/issue/JIN-71) 범위다. 웹 원격 main `7b95951aba1a8fafb28a4df7e93f4e6faa9ba221`, 서버 원격 main과 사용자 제공 배포 기준 `91eb2505ddf6b4db549a5bc2b8b07f11e514d0b0`을 읽었다. 두 작업 트리는 깨끗했고 웹은 최신 main에서 `feature/22-host-input-after-creation`을 만들었다. 서버 AGENTS·개발/문서/API/아키텍처/ADR/사용자 개입 규칙, 양쪽 README·브랜치/PR/CI 지침과 Worklog를 확인했다.
+- 실제 결합 확인: 웹 생성 폼과 `POST /api/rooms`는 이미 자연어를 요구하지 않으며 생성과 `PUT /submission`은 별도다. 서버는 생성 시 HOST만 등록하고 제출을 만들지 않는다. 같은 세션 재참여는 같은 HOST, 제출은 기존 participant 기준이며 동일 원문은 revision을 늘리지 않는다. 공개 방 응답에 제출 수 필드는 없으므로 웹에서 숫자를 만들지 않는다. API client·OpenAPI snapshot·생성 타입·서버 제품 코드·스키마는 유지한다.
+- 생성 후 본인 제출 없음이 확인된 HOST에게 방 생성 완료·먼저 공유·내 조건 입력·나중에 입력 동선을 제공한다. 미제출과 예상 인원/제출 인원의 차이, 같은 브라우저에서 마감 전 재방문 가능함을 안내한다. 입력 중에는 나중에 입력 링크를 숨겨 해당 동선으로 미저장 원문을 버리지 않는다. MEMBER/미참여자·수정 라운드에는 생성 안내를 표시하지 않는다.
+- 생성 성공 응답을 방 query cache에 먼저 넣어 후속 GET의 일시 실패에도 생성된 방과 공유 링크를 보존한다. 생성과 저장 각각에 즉시 ref 잠금을 두며, 저장 실패는 원문을 유지하고 같은 방의 조건 저장만 재시도한다. 기존 세션/권한과 캐시 무효화, 마감·분석·확정 후 수정 제한, 추천 선택·재분석 흐름을 재사용한다. 추가 원문·권한·토큰을 localStorage나 URL에 넣지 않는다.
+- 웹 신규 단위 5개와 전체 282개 PASS. 최종 테스트 지문으로 원본 baseline의 요구사항 assertion 3개 RED/2개 기존 GREEN을 재확인했다. 생성 잠금/저장 잠금/생성 응답 캐시/HOST 표시 제한을 각각 제거한 결함 4개를 strict assertion으로 탐지하고 원문 bytes로 복원한 뒤 5개 GREEN을 재확인했다. 신규 mock Chromium desktop/mobile 4개 PASS, 외부·미정의 API 요청 0. 최종 API 생성 정합·lint·typecheck·build·unit282 PASS. 전체 mock Chromium desktop/mobile browser375 PASS/기존skip1/실패0/flaky0이다. 첫 전체 실행의 모바일 추천 이동·새로고침 2건은 동시 dist 재빌드(00:47:26~29 UTC)의 HTTP 응답 오류였다. 빌드를 고정해 전체를 재실행했고 해당 2건도 PASS했다. 테스트 기대값이나 추천 제품 코드는 변경하지 않았다. 고정 build SHA와 최종 source/test SHA는 `docs/verification/issue-22-local.json`에 기록한다.
+- 서버는 별도 `feature/22-host-input-contract-tests`에서 격리 PostgreSQL 추가 회귀만 작성했다. 대상 32개(신규 9개) PASS로 HOST 재사용·실패 후 재시도·동일 원문 순차/동시 제출, HOST 미제출 수동/시간 마감 0·1·2명과 인원 목표를 확인했다. 기존 계약은 HOST를 무조건 제출로 세지 않으며 고유 제출 2개 미만이면 인원 부족, 다른 2명 이상이면 분석 가능하다. 마감 후 HOST 최초 입력도 거부한다. 새로운 마감 정책을 정하지 않았다.
+- 실제 backend/browser 연결·운영 사용 흐름·HTTPS cookie/CORS·실기기·유료 AI 검증은 별도 작업이다. 생성 응답 자체를 네트워크에서 잃은 요청의 서버 멱등 재생 계약은 현재 API에 없으며 이번 변경으로 추가하지 않는다. 성공 응답을 받은 방과 제출 실패를 분리하는 범위다. 소셜 로그인·계정·아카이브·선택 암호·모호성 질문 및 연관 이슈 구현은 제외한다.
+- commit/push/PR/merge/배포/운영 데이터/보안 설정 변경 없음. Gradle·JDK·캐시 및 프로세스 한정 proxy/truststore는 작업공간의 로컬 실행 준비로만 사용했고 저장소 설정은 바꾸지 않았다. 원시 검증 로그는 `/workspace/scratch/issue-22/`, browser artifact는 `test-results/`에 둔다. 웹 자체 리뷰에서 HOST 표시·권한 캐시·조건 제출 잠금·원문/토큰 비저장·기존 마감/추천/재분석 gate를 확인했다. 독립 에이전트 리뷰를 수행했다고 주장하지 않는다. 서버 최종 `ktlintCheck assemble test`도 exit0/PASS다. 실제 전체663 중659 PASS/기존skip4/실패0/오류0이며, 신규9를 포함한다. 첫 gate의 chain 서식8건을 고친 뒤 전체를 재실행했고 기대값은 바꾸지 않았다. 최종 source/test 지문과 집계는 `docs/verification/issue-22-local.json`을 따른다. 현재 차단 없음. 실제 운영·브라우저/backend 종단 검증과 생성 응답 유실의 서버 멱등 재생은 위 범위 밖이다.
+
+### 같은 날 후속 — 독립 리뷰와 응답 유실·최초 draft 경계
+
+- 위 282/375 결과와 자체 리뷰는 첫 단계의 이력이다. 후속 `review_contract`, `review_web` 독립 read-only 검토로 소스·테스트·SHA·원시 XML/log를 직접 대조했고, 최종 소스8파일 지문 묶음 `ecea54680f84953585bc7e3366f562f3d1feb15666ca62304c22bc1091649953`를 reviewer가 재계산했다. 변경 코드에 추가 필수 수정은 없다. 기존 서버 위험은 아래와 별개로 남긴다.
+- 필수 발견4건을 수정했다. 최초 HOST 임시 원문도 마감·분석 전환 시 현재 owner 메모리에 읽기 전용으로 보존한다. 네트워크/5xx/408은 생성·저장 결과 미확인으로 안내한다. 저장 시도 뒤 미제출 확정 안내를 숨기고, 본인 GET이 시도한 원문과 일치하면 미확인 오류를 해소하되 그동안 입력한 새 draft는 남긴다. 저장 성공은 해당 draft를 정리한다. 자동 재제출이나 마감 이후 권한을 추가하지 않았다.
+- 독립 수용26개는 첫 구현 exact bytes에서19 RED/기존7 GREEN→최종26 GREEN이다. 추가 결함5종을 각각 strict assertion으로 탐지하고 정확 복원 후26 GREEN을 확인했다. 초기 기능 결함4종도 최종 소스로 다시 탐지·복원했다. 공백 원문, 마감 상태4종, 접근 거부401/403/404 후 실제 재접근, viewer 교체, 방 이동·실제 remount, 응답 유실 retry/GET 복구를 포함한다.
+- 최종 웹 단위308 PASS(18파일), 집중 mock Chromium desktop/mobile12 PASS, API 생성 정합·lint·build(tsc 포함) PASS다. 고정 build의 전체 mock browser383 PASS/기존skip1/실패0/flaky0/retries0(4.8분)이며 실행 전후 source8파일·dist 지문이 같다. browser skip은 기존 모바일 전용 검사의 desktop 제외이며 모바일은 통과했다. 임시 실행 설정은 증거 폴더에 보존 후 저장소에서 제거했다. 최종 결과와 SHA는 `docs/verification/issue-22-local.json`의 최신 `checks`를 따른다. 서버 source/test는 전체 gate 이후 같아 기존659 PASS/skip4를 재실행으로 중복 집계하지 않았다. skip4의 정확한 이름·opt-in 조건과 범위는 [독립 리뷰 기록](verification/issue-22-independent-review.md)을 따른다.
+- 기존 P2 정정: 위 "마감 후 거부"는 서버가 CLOSED로 전환한 이후다. PRD Rule4는 deadline 도달 전까지만 수정을 허용하나 현재 서버는 scheduler 기본60초 scan 전 경과 deadline의 PUT을 접수할 수 있다. 새 시간 회귀는 합성 deadline 경과 후 scheduler를 직접 호출하므로 정확한 pre-scan 시각 경계는 입증하지 않는다. 현재 로컬 웹 범위를 유지하고 후속으로 남기거나 원격 반영 전 별도 서버 수정/TDD로 기존 PRD를 강제하는 선택지를 기록했다. 임의 정책·제품 서버 수정은 하지 않았다. 최종 검토의 "추가 필수 수정 없음"을 이 기존 위험까지 해결했다는 의미로 사용하지 않는다.
+- 생성 POST 응답 유실 후 서버 멱등 재생, 실제 backend/browser 종단·운영 검증은 별도다. 이번 변경의 ref 잠금은 진행 중 중복 클릭을 막고 성공 응답 cache는 이미 확인된 방을 보존하며, 새로고침을 포함한 모든 POST 재시도의 중복 방 방지를 주장하지 않는다. 로컬 문서/코드/검증만 유지하고 commit/push/PR/merge/배포/운영 데이터/보안 변경은 없다.
+
+### 같은 날 게시 승인 — 커밋·PR·원격 CI
+
+- 사용자 2026-10-15 10:30 KST 승인으로 검증된 변경의 commit/push/PR/원격 CI 확인까지 진행한다. merge·배포·운영 데이터·보안 변경은 제외한다. 로컬 단계의 미커밋/승인 대기 기록은 당시 이력이며 현재 승인 범위로 갱신한다.
+- 원격 재조회로 web main7b95951·server developdd8e07d/main91eb250 및 두 저장소 open PR0을 확인했다. 검증한 source8 SHA 묶음ecea5468…는 그대로다. 웹main 대상 PR, 서버develop 대상 테스트 전용 PR을 준비한다. 서버 CI의 열린 이슈 연결을 위한 보조 이슈는 같은 JIN-71/웹22의 계약 회귀만 다룬다.
+- 계산 오류 별도 실행을 추정하지 않는다. 조회한 기존 JIN-25(추천 로직·프롬프트)와 JIN-33(결과·저장 상태)은 Done이고 현재 새 계산 오류 수정 세션/브랜치는 미확인이다. 이번 source는 계산 로직을 변경하지 않는다.
+- Commit/PR: 동일 커밋 예정. 정확한 커밋 SHA·PR URL·원격 CI 결과는 게시 후 PR 본문/Linear에 확인한다. 로컬 단위308/browser383/서버659 및 기존skip의 결과와 한계는 앞 기록을 유지한다.

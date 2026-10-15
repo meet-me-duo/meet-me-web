@@ -125,9 +125,9 @@ export default function RoomPage() {
       <RoomHeader room={room} />
       {roomQuery.isError && <div className="alert warning room-refresh-warning" role="status"><span>모임 상태를 갱신하지 못했어요. 마지막으로 확인한 상태를 보여드려요.</span><button className="button secondary" disabled={roomQuery.isFetching} onClick={() => roomQuery.refetch()}>진행 상태 다시 확인</button></div>}
       {showEditor && <SubmissionPanel key={`submission:${ownerKey}`} room={room} onRoomChanged={setRoom} onAccessDenied={privateAccessDenied} draft={currentDraft} onDraftChanged={updateDraft} />}
-      {!showEditor && currentDraft !== null && <section className="glass-card side-card"><h2>저장하지 않은 수정 내용</h2><p>저장하지 않은 수정 내용은 분석에 포함되지 않아요. 이 화면에 임시로 보관했고, 조건 수정을 다시 열 수 있을 때 이어서 편집할 수 있어요. 새로고침하거나 다른 모임으로 이동하면 사라져요.</p><label className="field"><span>내 임시 수정 내용</span><textarea readOnly value={currentDraft} rows={4} /></label><button className="button secondary" onClick={() => setDraft(null)}>임시 수정 버리기</button></section>}
+      {!showEditor && currentDraft !== null && <section className="glass-card side-card"><h2>서버 반영을 확인하지 않은 임시 입력</h2><p>저장하지 않은 내용은 분석에 포함되지 않아요. 이 화면에만 임시로 보관했어요. 저장 여부는 내 저장된 입력에서 확인해 주세요. 새로고침하거나 다른 모임으로 이동하면 사라져요.</p><label className="field"><span>내 임시 조건</span><textarea readOnly value={currentDraft} rows={4} /></label><button className="button secondary" onClick={() => setDraft(null)}>임시 수정 버리기</button></section>}
       {room.public_status === "COLLECTING" && correctionOpen(room) && !room.capabilities?.can_edit_own_submission && <StateCard icon={<LockKeyhole />} title="조건을 수정하는 중이에요" body="기존에 입력을 제출한 참여자가 자신의 입력을 수정할 수 있어요." />}
-      {room.public_status === "ANALYZING" && <StateCard icon={<LoaderCircle className="spin" />} title="모두의 조건을 분석하고 있어요" body="입력은 안전하게 저장됐어요. 최적의 플랜을 만드는 데 잠시 시간이 걸릴 수 있어요." />}
+      {room.public_status === "ANALYZING" && <StateCard icon={<LoaderCircle className="spin" />} title="모두의 조건을 분석하고 있어요" body="접수된 조건으로 최적의 플랜을 만드는 중이에요. 잠시 시간이 걸릴 수 있어요." />}
       {room.public_status === "INSUFFICIENT_PARTICIPANTS" && <StateCard icon={<Users />} title="조율에 필요한 인원이 부족해요" body="최소 두 명의 제출이 필요해 후보를 만들지 않았어요." />}
       {room.public_status === "ANALYSIS_DELAYED" && <DelayedState key={`delayed:${ownerKey}`} room={room} onRetried={setRoom} onAccessDenied={privateAccessDenied} />}
       {room.public_status === "NO_MATCH" && <><StateCard icon={<AlertCircle />} title="모두에게 맞는 후보를 찾지 못했어요" body="반영 가능한 조건에서 함께할 일정을 찾지 못했어요. 일부 입력은 반영되지 않았을 수 있어요. 저장한 조건을 확인하고, 조건 수정을 열 수 있을 때 다시 조율해 보세요." />{room.viewer.role === "HOST" && <UnappliedInputs key={`unapplied:${ownerKey}`} room={room} onAccessDenied={privateAccessDenied} />}</>}
@@ -261,6 +261,8 @@ function SubmissionPanel({ room, onRoomChanged, onAccessDenied, draft, onDraftCh
   const [savedRawText, setSavedRawText] = useState("");
   const [editing, setEditing] = useState(false);
   const latestInput = useRef("");
+  const conditionInput = useRef<HTMLTextAreaElement>(null);
+  const saving = useRef(false);
   const mounted = useRef(true);
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   const submissionQuery = useQuery<Submission | null>({
@@ -288,8 +290,10 @@ function SubmissionPanel({ room, onRoomChanged, onAccessDenied, draft, onDraftCh
       setLoadedRevision(submission.revision);
       queryClient.setQueryData(ownSubmissionKey(room), submission);
       setEditing(latestInput.current !== submittedText);
+      onDraftChanged(room, latestInput.current !== submittedText ? (conditionInput.current?.value ?? rawText) : null);
       refreshRoom.mutate();
     },
+    onSettled: () => { saving.current = false; },
   });
   const close = useMutation({
     mutationKey: ["room", room.invite_code],
@@ -312,13 +316,22 @@ function SubmissionPanel({ room, onRoomChanged, onAccessDenied, draft, onDraftCh
   }, [submissionQuery.error, save.error, onAccessDenied, queryClient, room.invite_code]);
   const { text, length, valid } = submissionText(rawText);
   const dirty = text !== savedRawText;
-  useEffect(() => { if (loadedRevision !== null) onDraftChanged(room, dirty ? rawText : null); }, [room, rawText, dirty, loadedRevision, onDraftChanged]);
+  useEffect(() => { onDraftChanged(room, dirty ? rawText : null); }, [room, rawText, dirty, onDraftChanged]);
   const legacyManualOnly = submissionQuery.data?.raw_text === null;
 
   const completed = !!submissionQuery.data?.raw_text && !editing && !dirty;
   const host = room.viewer.role === "HOST";
+  const saveUncertain = !(save.error instanceof ApiError) || save.error.status >= 500 || save.error.status === 408;
+  const saveConfirmedByRead = save.variables !== undefined && submissionQuery.data?.raw_text === save.variables;
 
   return <div className="submission-layout"><section className={"glass-card submission-card " + (completed ? "submission-complete" : "")}>
+    {host && !correcting && save.isIdle && submissionQuery.isSuccess && submissionQuery.data === null && loadedRevision === null && <div className="submission-next">
+      <span className="eyebrow success"><CheckCircle2 size={15} /> 방 생성 완료</span>
+      <h2>모임이 만들어졌어요</h2>
+      <p>위의 초대 링크를 먼저 공유해도 좋아요. 아직 내 조건은 제출하지 않았어요. 주최자도 예상 인원에 포함되며, 조건을 제출해야 제출 인원으로 집계돼요.</p>
+      <div className="actions"><button className="button secondary" onClick={() => conditionInput.current?.focus()}>내 조건 입력하기</button>{!dirty && <Link className="button secondary" to="/">나중에 입력하기</Link>}</div>
+      <p className="field-hint">마감 전까지 이 브라우저에서 같은 링크로 돌아와 입력할 수 있어요.</p>
+    </div>}
     {completed ? <>
       <div className="section-heading"><span className="eyebrow success"><CheckCircle2 size={15} /> 제출 완료</span><h2>조건 제출을 완료했어요</h2><p>조건이 안전하게 저장됐어요.</p></div>
       {!correcting && <div className="submission-next"><h3>{host ? "초대 링크를 공유해 주세요" : "입력 마감을 기다려 주세요"}</h3><p>{host ? "참여자에게 링크를 보내 조건을 모아 주세요. 입력이 마감되면 분석을 시작해요." : "입력이 마감되면 분석을 시작해요. 진행 상태는 자동으로 갱신돼요."}</p>{host && <CopyRoomLink room={room} primary />}</div>}
@@ -328,16 +341,16 @@ function SubmissionPanel({ room, onRoomChanged, onAccessDenied, draft, onDraftCh
       <p id="submission-privacy" className="submission-privacy">반영된 조건은 다른 참여자에게 공개되지 않아요. 분석에 반영하지 못한 원문은 주최자에게 공개될 수 있어요.</p>
       {submissionQuery.isPending ? <div className="inline-loading"><LoaderCircle className="spin" /> 기존 입력 확인 중…</div> : submissionQuery.isError ? <div className="alert error">{errorMessage(submissionQuery.error)}</div> : <>
         {legacyManualOnly && <div className="alert warning" role="status">기존 시간표 입력은 보존되어 있어요. 가능한 시간을 자연어로 다시 입력하고 저장해 주세요.</div>}
-        <label className="field"><span>시간·장소 조건 <small>필수</small></span><textarea autoFocus={editing} aria-describedby="submission-count submission-hint submission-privacy" aria-invalid={length > SUBMISSION_TEXT_LIMIT} rows={4} value={rawText} onChange={(event) => { latestInput.current = submissionText(event.target.value).text; setRawText(event.target.value); }} placeholder="예: 화요일과 목요일 저녁, 봉천역 근처면 좋아요. 비대면도 가능해요." /><small id="submission-count" className={"character-count " + (length > SUBMISSION_TEXT_LIMIT ? "field-error" : "")}>{length}/{SUBMISSION_TEXT_LIMIT}</small></label>
+        <label className="field"><span>시간·장소 조건 <small>필수</small></span><textarea ref={conditionInput} autoFocus={editing} aria-describedby="submission-count submission-hint submission-privacy" aria-invalid={length > SUBMISSION_TEXT_LIMIT} rows={4} value={rawText} onChange={(event) => { latestInput.current = submissionText(event.target.value).text; setRawText(event.target.value); }} placeholder="예: 화요일과 목요일 저녁, 봉천역 근처면 좋아요. 비대면도 가능해요." /><small id="submission-count" className={"character-count " + (length > SUBMISSION_TEXT_LIMIT ? "field-error" : "")}>{length}/{SUBMISSION_TEXT_LIMIT}</small></label>
         <p id="submission-hint" className="field-hint">앞뒤 공백을 제외하고 1~500자로 입력해 주세요.</p>
-        <div className="submission-footer"><div>{loadedRevision ? <span className="saved-revision"><CheckCircle2 size={16} /> 저장된 입력 #{loadedRevision}</span> : <span className="field-hint">조건은 마감 전까지 수정할 수 있어요.</span>}</div><div className="submission-actions">{editing && <button className="button secondary" disabled={save.isPending} onClick={() => { setRawText(submissionQuery.data?.raw_text ?? ""); save.reset(); setEditing(false); }}>수정 취소</button>}<button className="button primary" onClick={() => { latestInput.current = text; save.mutate(text); }} disabled={!valid || !dirty || save.isPending || submissionQuery.data?.editable === false || (correcting && !room.capabilities?.can_edit_own_submission)}>{save.isPending ? "저장 중…" : loadedRevision ? "수정 내용 저장" : "조건 제출하기"}</button></div></div>
+        <div className="submission-footer"><div>{loadedRevision ? <span className="saved-revision"><CheckCircle2 size={16} /> 저장된 입력 #{loadedRevision}</span> : <span className="field-hint">조건은 마감 전까지 수정할 수 있어요.</span>}</div><div className="submission-actions">{editing && <button className="button secondary" disabled={save.isPending} onClick={() => { setRawText(submissionQuery.data?.raw_text ?? ""); save.reset(); setEditing(false); }}>수정 취소</button>}<button className="button primary" onClick={() => { if (saving.current) return; saving.current = true; latestInput.current = text; save.mutate(text); }} disabled={!valid || !dirty || save.isPending || submissionQuery.data?.editable === false || (correcting && !room.capabilities?.can_edit_own_submission)}>{save.isPending ? "저장 중…" : loadedRevision ? "수정 내용 저장" : "조건 제출하기"}</button></div></div>
       </>}
     </>}
     {!completed && dirty && loadedRevision !== null && <div className="alert warning" role="status">수정한 내용이 아직 저장되지 않았어요.</div>}
     {!completed && loadedRevision !== null && !dirty && !legacyManualOnly && <div className="alert success" role="status">조건이 안전하게 저장됐어요.</div>}
     <p className="submission-privacy">{correcting ? "저장은 분석 완료를 뜻하지 않아요. 주최자가 다시 분석하면 저장한 조건을 사용해요." : "저장은 분석 완료를 뜻하지 않아요. 입력 마감 후 조건을 분석해요."}</p>
     {refreshRoom.isError && <div className="alert warning refresh-warning" role="status"><span>조건은 저장됐지만 모임 진행 상태를 갱신하지 못했어요.</span><button className="button secondary" onClick={() => refreshRoom.mutate()}>진행 상태 다시 확인</button></div>}
-    {save.isError && <div className="alert error">{errorMessage(save.error)}</div>}
+    {save.isError && !saveConfirmedByRead && <div className="alert error"><p>{saveUncertain ? "조건 저장 결과를 확인하지 못했어요. 모임을 다시 만들 필요는 없어요. 저장 여부를 확인한 뒤 이 방에서 다시 시도해 주세요." : "조건 저장 요청이 거절됐어요. 아래 내용을 확인해 주세요."}</p>{errorMessage(save.error)}</div>}
   </section><aside className="room-sidebar">{correcting ? <RecoveryActions room={room} onRoomChanged={onRoomChanged} onAccessDenied={onAccessDenied} blocked={dirty || save.isPending} /> : <><div className="glass-card side-card"><h3>마감 조건</h3>
     {room.manual_only ? <StatusLine icon={<Users />} label="마감 방식" value="주최자 직접 마감" /> : <>
       {room.expected_participants != null && <StatusLine icon={<Users />} label="자동 마감 목표 · 주최자 포함" value={"목표 " + room.expected_participants + "명 제출 시"} />}
@@ -352,7 +365,7 @@ function DelayedState({ room, onRetried, onAccessDenied }: { room: Room; onRetri
   const mounted = useRef(true);
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   const retry = useMutation({ mutationKey: ["room", room.invite_code], mutationFn: () => api.retryAnalysis(room.invite_code), onSuccess: refreshed => { if (mounted.current) onRetried(refreshed); }, onError: error => { if (mounted.current && error instanceof ApiError && [401, 403, 404].includes(error.status)) onAccessDenied(error); } });
-  return <StateCard icon={<TriangleAlert />} title="분석이 잠시 지연되고 있어요" body="모두의 입력은 안전하게 저장되어 있어 다시 제출할 필요가 없어요." action={room.viewer.role === "HOST" ? <button className="button primary" onClick={() => retry.mutate()} disabled={retry.isPending}><RefreshCw size={17} /> {retry.isPending ? "요청 중…" : "분석 다시 요청"}</button> : undefined} error={retry.isError ? errorMessage(retry.error) : undefined} />;
+  return <StateCard icon={<TriangleAlert />} title="분석이 잠시 지연되고 있어요" body="이미 접수된 입력은 안전하게 저장되어 있어 다시 제출할 필요가 없어요." action={room.viewer.role === "HOST" ? <button className="button primary" onClick={() => retry.mutate()} disabled={retry.isPending}><RefreshCw size={17} /> {retry.isPending ? "요청 중…" : "분석 다시 요청"}</button> : undefined} error={retry.isError ? errorMessage(retry.error) : undefined} />;
 }
 
 function CandidatesPanel({ room, onAccessDenied }: { room: Room; onAccessDenied: (error: ApiError) => void }) {

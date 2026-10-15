@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, CalendarRange, Clock3, Link2, Sparkles, Users } from "lucide-react";
-import { api, errorMessage } from "../api/client";
+import { api, ApiError, errorMessage } from "../api/client";
 import type { MeetingMode } from "../api/types";
 import { createRoomBody, createRoomSchema, defaultSearchDates, type CreateRoomValues } from "../utils/createRoom";
 import { LandingStory } from "../components/LandingStory";
@@ -23,12 +23,15 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
   const [now, setNow] = useState(() => new Date());
   const heading = useRef<HTMLHeadingElement>(null);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const creatingRoom = useRef(false);
   const recent = useRecentRooms();
   const form = useForm<CreateRoomValues>({
     resolver: zodResolver(createRoomSchema),
     defaultValues: { hostName: "", purpose: "", meetingMode: "EITHER", customSearch: false, searchStart: "", searchEnd: "", useExpected: true, expectedParticipants: "4", useDeadline: false, deadline: "", manualOnly: false },
   });
   const mutation = useMutation({ mutationFn: api.createRoom });
+  const creationUncertain = !(mutation.error instanceof ApiError) || mutation.error.status >= 500 || mutation.error.status === 408;
   const values = form.watch();
   const defaultDates = defaultSearchDates(now);
   const count = Number(values.expectedParticipants);
@@ -56,8 +59,15 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
     if (await form.trigger(["hostName", "purpose", "meetingMode", "searchStart", "searchEnd"])) setStep(2);
   };
   const submit = form.handleSubmit((value) => {
+    if (creatingRoom.current) return;
+    creatingRoom.current = true;
     mutation.mutate(createRoomBody(value), {
-      onSuccess: (room) => { rememberRoom(room); navigate(`/rooms/${room.invite_code}`, { replace: true }); },
+      onSuccess: (room) => {
+        queryClient.setQueryData(["room", room.invite_code], room);
+        rememberRoom(room);
+        navigate(`/rooms/${room.invite_code}`, { replace: true });
+      },
+      onSettled: () => { creatingRoom.current = false; },
     });
   });
 
@@ -103,7 +113,7 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
           </div>
         ) : (
           <form className="form-step" onSubmit={submit}>
-            <div className="section-heading"><h1 ref={heading} tabIndex={-1}>언제 입력을 마감할까요?</h1><p>마감 방식을 선택해 주세요.</p></div>
+            <div className="section-heading"><h1 ref={heading} tabIndex={-1}>언제 입력을 마감할까요?</h1><p>마감 방식을 선택해 주세요. 내 시간·장소 조건은 방을 만든 뒤 입력해요.</p></div>
             <fieldset className="field" disabled={mutation.isPending}><legend>입력 마감 방식</legend><div className="create-choice"><label><input type="radio" name="closure-mode" checked={!values.manualOnly} onChange={() => { form.setValue("manualOnly", false); form.clearErrors(["manualOnly", "expectedParticipants", "deadline"]); }} /><span>자동 마감</span></label><label><input type="radio" name="closure-mode" checked={values.manualOnly} onChange={() => { form.setValue("manualOnly", true); form.clearErrors(["manualOnly", "expectedParticipants", "deadline"]); }} /><span>직접 마감</span></label></div></fieldset>
             {!values.manualOnly && <fieldset className="field automatic-policies" disabled={mutation.isPending}><legend>자동 마감 조건 <small>하나 이상 선택</small></legend>
               <Policy icon={<Users />} checked={values.useExpected} title="목표 인원이 모두 제출하면" detail="주최자를 포함한 제출 인원 기준" onChange={checked => form.setValue("useExpected", checked)}>{values.useExpected && <Field label="예상 참여 인원" error={form.formState.errors.expectedParticipants?.message}><input type="number" min={2} max={50} step={1} aria-invalid={Boolean(form.formState.errors.expectedParticipants)} {...form.register("expectedParticipants")} /></Field>}</Policy>
@@ -111,7 +121,7 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
               <ErrorText text={form.formState.errors.manualOnly?.message} />
             </fieldset>}
             <div className="closure-summary" role="status"><strong>적용되는 마감</strong><p>{values.manualOnly ? "자동 마감 없이 주최자가 직접 마감해요." : values.useExpected && values.useDeadline ? `주최자를 포함해 ${expectedLabel} 제출 또는 지정 시각 중 먼저 충족되면 마감해요.` : values.useExpected ? `주최자를 포함한 ${expectedLabel}이 모두 제출하면 마감해요.` : values.useDeadline ? "지정 시각이 되면 마감해요." : "자동 마감 조건을 선택해 주세요."}{!values.manualOnly && values.useDeadline && values.deadline && ` (${values.deadline.replace("T", " ")} 한국 시간)`}</p></div>
-            {mutation.isError && <div className="alert error" role="alert">{errorMessage(mutation.error)}</div>}
+            {mutation.isError && <div className="alert error" role="alert"><p>{creationUncertain ? "방 생성 결과를 확인하지 못했어요. 이미 만들어졌을 수 있어요. 다시 시도하면 새 모임이 추가될 수 있어요." : "방 생성 요청이 거절됐어요."}</p>{errorMessage(mutation.error)}</div>}
             <div className="actions between"><button type="button" className="button secondary" disabled={mutation.isPending} onClick={() => { setStep(1); window.setTimeout(() => form.setFocus("hostName"), 0); }}><ArrowLeft size={18} /> 이전</button><button className="button primary" disabled={mutation.isPending}>{mutation.isPending ? "방 만드는 중…" : "방 만들기"}</button></div>
           </form>
         )}

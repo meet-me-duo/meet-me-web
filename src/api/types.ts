@@ -43,7 +43,6 @@ export type ApiProblem = Complete<components["schemas"]["ApiProblemSchema"]>;
 export interface CreateRoomBody {
   purpose: string;
   meeting_mode: MeetingMode;
-  host_display_name: string;
   expected_participants: number | null;
   submission_deadline: string | null;
   manual_only: boolean;

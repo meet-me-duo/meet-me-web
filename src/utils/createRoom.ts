@@ -56,7 +56,7 @@ export type CreateRoomValues = z.infer<typeof createRoomSchema>;
 
 export function createRoomBody(value: CreateRoomValues): CreateRoomBody {
   return {
-    host_display_name: value.hostName.trim(), purpose: value.purpose.trim(), meeting_mode: value.meetingMode,
+    purpose: value.purpose.trim(), meeting_mode: value.meetingMode,
     expected_participants: !value.manualOnly && value.useExpected ? Number(value.expectedParticipants) : null,
     submission_deadline: !value.manualOnly && value.useDeadline ? localSeoulToIso(value.deadline) : null,
     manual_only: value.manualOnly,

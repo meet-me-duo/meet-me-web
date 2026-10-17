@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { fulfillAccountRefresh } from "./accountFixture";
 
 const code = "abcdefghijklmnopqrstuv";
 const candidate = {
@@ -24,6 +25,7 @@ async function fixture(page: Page, options: { status?: string; role?: string; pa
     const request = route.request();
     const url = new URL(request.url());
     if (url.protocol !== "http:" || url.hostname !== "127.0.0.1") { unexpected.push(request.url()); return route.abort(); }
+    if (await fulfillAccountRefresh(route, options.role === "HOST" ? "검증 참여자" : null)) return;
     if (!url.pathname.startsWith("/api/")) return route.continue();
     const suffix = url.pathname.replace(`/api/rooms/${code}`, "");
     if (suffix === "/submission") {

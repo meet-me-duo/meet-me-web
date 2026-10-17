@@ -1,0 +1,26 @@
+{
+  "workItem": "issue-109-web-expired-session",
+  "role": "Independent auth contract test designer /root/auth_tests; production modules implemented by /root",
+  "authority": "User #109 member authentication and ownership boundary: an expired account cannot silently act as guest; private data must not be reused across accounts",
+  "testFile": "src/api/client.expired-session.test.ts",
+  "publicContracts": [
+    "Restore real in-memory account using synthetic refresh transport, preserve visible account after Access exact expiry, private GET and PUT must reject ApiError401 AUTH_ACCESS_EXPIRED before fetching with guest cookies",
+    "A valid account private submission GET must use fetch cache=no-store, credentials=include, current Bearer",
+    "No real session/client module mocks; Date and fetch transport alone are synthetic",
+    "Existing session default-expired-token null semantics and existing frozen API mock tests remain unchanged"
+  ],
+  "red": {
+    "status": "PASS_VALID_RED",
+    "tests": 3,
+    "failures": 3,
+    "runtimeSetupErrors": 0,
+    "evidence": ".tdd/red/issue-109-web-expired-session.json",
+    "rawLog": ".codex/tdd-evidence/issue-109-web-expired-session.log",
+    "rawJson": ".codex/tdd-evidence/issue-109-web-expired-session-red.json"
+  },
+  "implementation": "Root authorized strict optional token read at API boundary and typed401 mapping plus no-store; test author does not implement production behavior",
+  "status": "PASS: original three tests GREEN, two deliberate faults detected as three assertion failures, exact client source restored and final3GREEN",
+  "recordedAt": "2026-10-17T15:10:39.907427Z",
+  "verification": ".tdd/verification/issue-109-web-expired-session.json",
+  "independentOracleReview": ".tdd/reviews/issue-109-web-expired-session-cross-review.json"
+}

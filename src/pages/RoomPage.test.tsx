@@ -5,6 +5,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { api, ApiError } from "../api/client";
 import type { Candidate, Room, SavedSubmission, Submission } from "../api/types";
 import RoomPage from "./RoomPage";
+import { mockRoomAccount } from "../test/roomAccountFixture";
 
 const room: Room = {
   invite_code: "abcdefghijklmnopqrstuv", purpose: "조건 제출 테스트", meeting_mode: "EITHER", time_zone_id: "Asia/Seoul",
@@ -21,7 +22,8 @@ function submission(raw_text: string | null, revision = 1): Submission {
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
-function mount(gcTime = 0) {
+function mount(gcTime = 0, role: "HOST" | "MEMBER" = "MEMBER") {
+  mockRoomAccount({ viewer: { ...room.viewer, role } });
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime }, mutations: { retry: false } } });
   render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[`/rooms/${room.invite_code}`]}><Routes><Route path="/rooms/:inviteCode" element={<RoomPage />} /></Routes></MemoryRouter></QueryClientProvider>);
   return client;
@@ -31,7 +33,7 @@ describe("natural-language conditions screen", () => {
   it.each([401, 403, 404])("hides cached host actions when a subsequent room read returns %s", async status => {
     const getRoom = vi.spyOn(api, "getRoom").mockResolvedValue({ ...room, viewer: { ...room.viewer, role: "HOST" } });
     vi.spyOn(api, "getSubmission").mockResolvedValue(submission("화요일 저녁"));
-    const client = mount();
+    const client = mount(0, "HOST");
     await screen.findByRole("button", { name: "입력 마감하기" });
     getRoom.mockRejectedValue(new ApiError(status, { detail: "접근할 수 없는 모임" }));
     await client.invalidateQueries({ queryKey: ["room", room.invite_code] });
@@ -44,7 +46,7 @@ describe("natural-language conditions screen", () => {
     vi.spyOn(api, "getRoom").mockResolvedValue({ ...room, viewer: { ...room.viewer, role } });
     vi.spyOn(api, "getSubmission").mockResolvedValue(submission("화요일 저녁"));
     const save = vi.spyOn(api, "saveSubmission");
-    mount();
+    mount(0, role);
     await screen.findByRole("heading", { name: "조건 제출을 완료했어요" });
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
     expect(screen.getByText(role === "HOST" ? "초대 링크를 공유해 주세요" : "입력 마감을 기다려 주세요")).toBeInTheDocument();
@@ -250,7 +252,7 @@ describe("saved conditions and plan accuracy", () => {
     vi.spyOn(api, "getRoom").mockResolvedValue({ ...room, public_status: "READY_WITH_WARNINGS", viewer: { ...room.viewer, role: "HOST" } });
     vi.spyOn(api, "getCandidates").mockResolvedValue({ quality: "PARTIAL", applied_submissions: 2, total_submissions: 3, unapplied_inputs: 1, candidates: [candidate] });
     vi.spyOn(api, "getUnappliedInputs").mockResolvedValue([{ participant_display_name: "다른 참여자", raw_text: "조건 원문", reason: "AMBIGUOUS_TIME_CONSTRAINT" }]);
-    mount();
+    mount(0, "HOST");
     await screen.findByRole("heading", { name: "일부 조건으로 만든 후보 플랜이에요" });
     const select = screen.getByRole("button", { name: "Plan A 선택" });
     const card = select.closest("article")!;
@@ -334,7 +336,7 @@ describe("own saved input after collection closes", () => {
   it.each([401, 403, 404])("purges only this room's private caches on room read %s", async status => {
     const getRoom = vi.spyOn(api, "getRoom").mockResolvedValue(closedRoom("ANALYSIS_DELAYED", "HOST"));
     vi.spyOn(api, "getSubmission").mockResolvedValue(submission("합성 개인 입력"));
-    const client = mount(60_000);
+    const client = mount(60_000, "HOST");
     client.setQueryData(["submission", "another-room"], { raw_text: "다른 모임 입력" });
     for (const key of ["candidates", "unapplied", "result"]) client.setQueryData([key, room.invite_code], { private: "합성 캐시" });
     await screen.findByText("내 저장 입력 확인"); openSaved();
@@ -351,7 +353,7 @@ describe("own saved input after collection closes", () => {
   it.each([401, 403, 404])("hides host tools when own saved-input read returns %s", async status => {
     vi.spyOn(api, "getRoom").mockResolvedValue(closedRoom("ANALYSIS_DELAYED", "HOST"));
     vi.spyOn(api, "getSubmission").mockRejectedValue(new ApiError(status, { code: status === 404 ? "ROOM_NOT_FOUND" : "GUEST_SESSION_INVALID" }));
-    const client = mount(60_000);
+    const client = mount(60_000, "HOST");
     await screen.findByRole("button", { name: "분석 다시 요청" }); openSaved();
     await screen.findByRole("heading", { name: "모임을 불러오지 못했어요" });
     expect(screen.queryByRole("button", { name: "분석 다시 요청" })).not.toBeInTheDocument();
@@ -401,7 +403,7 @@ describe("own saved input after collection closes", () => {
     vi.spyOn(api, "getSubmission").mockResolvedValue(submission("기존 저장 입력"));
     let release!: (value: SavedSubmission) => void;
     const save = vi.spyOn(api, "saveSubmission").mockImplementation(() => new Promise(resolve => { release = resolve; }));
-    const client = mount(60_000);
+    const client = mount(60_000, "HOST");
     fireEvent.click(await screen.findByRole("button", { name: "내 조건 수정" }));
     fireEvent.change(screen.getByRole("textbox"), { target: { value: "저장 요청 원문" } });
     fireEvent.click(screen.getByRole("button", { name: "수정 내용 저장" }));
@@ -421,7 +423,7 @@ describe("own saved input after collection closes", () => {
     const getRoom = vi.spyOn(api, "getRoom").mockResolvedValue(closedRoom("ANALYSIS_DELAYED", "HOST"));
     let release!: (value: Room) => void;
     vi.spyOn(api, "retryAnalysis").mockImplementation(() => new Promise(resolve => { release = resolve; }));
-    const client = mount(60_000);
+    const client = mount(60_000, "HOST");
     fireEvent.click(await screen.findByRole("button", { name: "분석 다시 요청" }));
     await screen.findByRole("button", { name: "요청 중…" });
     getRoom.mockRejectedValue(new ApiError(401, { code: "GUEST_SESSION_INVALID" }));

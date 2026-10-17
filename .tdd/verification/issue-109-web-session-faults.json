@@ -1,0 +1,62 @@
+{
+  "workItem": "issue-109-web-session",
+  "sourceRevision": "9b183978d5987f8fa8a5f02d542b17181e4929b4",
+  "boundary": "Memory-only service sessions and stale refresh generation across explicit logout and replacement login",
+  "sourceFiles": [
+    {
+      "path": "src/auth/session.ts",
+      "sha256": "b4c9cedd6132ebf497348b2e7c34baa7a2f8bb86ae7e0db4462e9f2a692ba18b"
+    },
+    {
+      "path": "src/auth/authCookieLock.ts",
+      "sha256": "0436f72645a38d1c540758f0515469c199d9b0ca91c2cddada2f1a91db00bde1"
+    }
+  ],
+  "testFiles": [
+    {
+      "path": "src/auth/session.test.ts",
+      "sha256": "55a33015887915098cc749e8df301111165daddd770671ad2ca936c262149b17"
+    }
+  ],
+  "injections": [
+    {
+      "fault": "omit generation checks before and after refresh body parsing",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "src/auth/session.test.ts",
+        "--configLoader",
+        "runner",
+        "--pool",
+        "threads",
+        "--maxWorkers",
+        "1",
+        "--reporter=json",
+        "--outputFile=/tmp/meetme-109-web-session-fault-stale-refresh.json"
+      ],
+      "detectedBy": "src/auth/session.test.ts#does not revive a logged out account when an older refresh finishes later",
+      "result": "DETECTED"
+    },
+    {
+      "fault": "write service access token to browser localStorage",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "src/auth/session.test.ts",
+        "--configLoader",
+        "runner",
+        "--pool",
+        "threads",
+        "--maxWorkers",
+        "1",
+        "--reporter=json",
+        "--outputFile=/tmp/meetme-109-web-session-fault-web-storage.json"
+      ],
+      "detectedBy": "src/auth/session.test.ts#keeps credentials and the profile in memory without reading or writing Web Storage",
+      "result": "DETECTED"
+    }
+  ],
+  "recordedAt": "2026-10-17T15:11:24Z"
+}

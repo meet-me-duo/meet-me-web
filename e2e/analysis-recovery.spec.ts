@@ -1,4 +1,5 @@
 // Draft placement: e2e/analysis-recovery.spec.ts. Not executed.
+import { fulfillAccountRefresh } from "./accountFixture";
 import { expect, test, type Page } from "@playwright/test";
 
 const code = "abcdefghijklmnopqrstuv";
@@ -37,6 +38,7 @@ async function fixture(page: Page, baseURL: string, options: { role?: "HOST" | "
   await page.route("**/*", async route => {
     const request = route.request(); const url = new URL(request.url()); const method = request.method();
     if (url.origin !== origin) { unexpected.push(method + " " + request.url()); return route.abort(); }
+    if (await fulfillAccountRefresh(route, joined && role === "HOST" ? "합성 참여자" : null)) return;
     if (!url.pathname.startsWith("/api/")) {
       if (method === "GET") return route.continue();
       unexpected.push(method + " " + url.pathname); return route.abort();

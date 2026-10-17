@@ -1,13 +1,15 @@
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
+import { fulfillAccountRefresh } from "./accountFixture";
 
 const code = "abcdefghijklmnopqrstuv";
 const room = { invite_code: code, purpose: "생성 폼 로컬 검증", meeting_mode: "EITHER", time_zone_id: "Asia/Seoul", search_start_date: "2026-10-05", search_end_date: "2026-10-19", search_range_source: "DEFAULTED", expected_participants: 4, submission_deadline: null, manual_only: false, collection_status: "COLLECTING", closure_reason: null, closed_at: null, public_status: "COLLECTING", viewer: { joined: true, role: "HOST", display_name: "주최자" }, input_disclosure_policy: "HOST_ON_PARTIAL_RESULT" };
 
 async function fixture(context: BrowserContext, failFirst = false) {
   const bodies: Record<string, unknown>[] = [], external: string[] = [];
-  await context.route("**/*", route => {
+  await context.route("**/*", async route => {
     const request = route.request(), url = new URL(request.url());
     if (url.hostname !== "127.0.0.1") { external.push(url.origin); return route.abort(); }
+    if (await fulfillAccountRefresh(route, "주최자")) return;
     if (url.pathname === "/api/rooms" && request.method() === "POST") {
       bodies.push(request.postDataJSON());
       if (failFirst && bodies.length === 1) return route.fulfill({ status: 503, json: { code: "TEMPORARY_FAILURE", detail: "잠시 후 다시 시도해 주세요." } });
@@ -22,7 +24,7 @@ async function fixture(context: BrowserContext, failFirst = false) {
 }
 async function firstStep(page: Page) {
   await page.goto("/create");
-  await page.getByLabel("주최자 이름").fill("주최자");
+  await expect(page.getByLabel("주최자 이름")).toHaveCount(0);
   await page.getByLabel("모임 목적 / 이름").fill(room.purpose);
 }
 async function next(page: Page) {
@@ -49,7 +51,7 @@ test("default 14 dates use Seoul today and submit the existing null/null contrac
   await page.clock.fastForward(31_000);
   await expect(page.getByText("2026-10-06 ~ 2026-10-19")).toBeVisible();
   await next(page); await submit(page);
-  expect(bodies).toEqual([{ host_display_name: "주최자", purpose: room.purpose, meeting_mode: "EITHER", expected_participants: 4, submission_deadline: null, manual_only: false, search_start_date: null, search_end_date: null }]);
+  expect(bodies).toEqual([{ purpose: room.purpose, meeting_mode: "EITHER", expected_participants: 4, submission_deadline: null, manual_only: false, search_start_date: null, search_end_date: null }]);
   expect(external).toEqual([]);
 });
 
@@ -64,7 +66,7 @@ test("automatic/manual switching and previous step preserve inputs and apply onl
   await expect(page.getByRole("checkbox")).toHaveCount(0);
   await expect(page.getByRole("status")).toContainText("자동 마감 없이 주최자가 직접 마감");
   await page.getByRole("button", { name: "이전", exact: true }).click();
-  await expect(page.getByLabel("주최자 이름")).toBeFocused();
+  await expect(page.getByLabel("모임 목적 / 이름")).toBeFocused();
   await expect(page.getByLabel("모임 목적 / 이름")).toHaveValue(room.purpose);
   await next(page);
   await expect(page.getByRole("radio", { name: "직접 마감", exact: true })).toBeChecked();
@@ -194,7 +196,7 @@ for (const timezoneId of ["UTC", "America/Los_Angeles", "Asia/Seoul"]) test(`dat
   await page.clock.install({ time: new Date("2026-12-31T15:00:00Z") });
   await page.goto("/create");
   await expect(page.getByText("2027-01-01 ~ 2027-01-14")).toBeVisible();
-  await page.getByLabel("주최자 이름").fill("주최자");
+  await expect(page.getByLabel("주최자 이름")).toHaveCount(0);
   await page.getByLabel("모임 목적 / 이름").fill(room.purpose);
   await page.getByRole("button", { name: "기간 변경", exact: true }).click();
   await expect(page.getByLabel("시작일", { exact: true })).toHaveValue("2027-01-01");

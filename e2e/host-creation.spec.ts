@@ -1,4 +1,5 @@
 import { expect, test, type BrowserContext } from "@playwright/test";
+import { fulfillAccountRefresh } from "./accountFixture";
 import type { Room } from "../src/api/types";
 
 const code = "abcdefghijklmnopqrstuv";
@@ -10,6 +11,7 @@ async function fixture(context: BrowserContext, failSave: boolean | "after-save"
   await context.route("**/*", async route => {
     const request = route.request(), url = new URL(request.url());
     if (url.origin !== "http://127.0.0.1:4173") { calls.unexpected.push(url.origin); return route.abort(); }
+    if (await fulfillAccountRefresh(route, "합성 주최자")) return;
     if (url.pathname === "/api/rooms" && request.method() === "POST") {
       calls.create++;
       expect(request.postDataJSON()).not.toHaveProperty("raw_text");
@@ -37,9 +39,9 @@ test("create, share before submission, defer, refresh and return to the same HOS
   const calls = await fixture(context);
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/create");
-  await page.getByLabel("주최자 이름").fill("합성 주최자");
+  await expect(page.getByLabel("주최자 이름")).toHaveCount(0);
   await page.getByLabel("모임 목적 / 이름").fill(room.purpose);
-  await expect(page.getByRole("textbox")).toHaveCount(2);
+  await expect(page.getByRole("textbox")).toHaveCount(1);
   await page.getByRole("button", { name: /다음 단계/ }).click();
   await expect(page.getByText(/내 시간·장소 조건은 방을 만든 뒤 입력/)).toBeVisible();
   await page.getByRole("button", { name: "방 만들기", exact: true }).click();
@@ -104,7 +106,7 @@ test("an unacknowledged create response does not claim that creation failed", as
   let attempts = 0;
   await context.route("**/api/rooms", route => { attempts++; return route.abort("failed"); });
   await page.goto("/create");
-  await page.getByLabel("주최자 이름").fill("합성 주최자");
+  await expect(page.getByLabel("주최자 이름")).toHaveCount(0);
   await page.getByLabel("모임 목적 / 이름").fill(room.purpose);
   await page.getByRole("button", { name: /다음 단계/ }).click();
   await page.getByRole("button", { name: "방 만들기", exact: true }).click();

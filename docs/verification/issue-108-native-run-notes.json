@@ -1,0 +1,141 @@
+{
+  "issue": 108,
+  "status": "PASS",
+  "productSourceChanged": false,
+  "credentialValuesRecorded": false,
+  "apiMocks": 0,
+  "externalRequests": 0,
+  "publicScenarioExpectationsChanged": false,
+  "attempts": [
+    {
+      "script": "verify-guest-reaccess-native.mjs",
+      "status": "HARNESS_FAILURE",
+      "reason": "A pending response waiter timed out before it was awaited and escaped through Node unhandled rejection. The local output was immediately replaced by a fixed safe classification.",
+      "safeLocalLog": "/tmp/issue108-native/guest-browser-safe.log"
+    },
+    {
+      "script": "verify-guest-reaccess-native.mjs",
+      "status": "FAIL",
+      "passedChecks": 1,
+      "failedCheck": "real-google-login-and-host-room-creation",
+      "reason": "Shared OAuth login did not complete; no participant password-attempt retry occurred."
+    },
+    {
+      "script": "verify-account-native.mjs",
+      "status": "FAIL",
+      "passedChecks": 1,
+      "failedCheck": "google-oidc-cookie-refresh-bearer-profile-create",
+      "reason": "The pre-existing account scenario independently stopped at the same shared OAuth login boundary."
+    },
+    {
+      "script": "verify-guest-reaccess-native.mjs",
+      "status": "FAIL",
+      "passedChecks": 11,
+      "failedCheck": "expired-signed-bearer-rejected-despite-valid-guest-cookie",
+      "reason": "The synthetic live control JWT omitted the mandatory public name claim; it could not be accepted as a live token. Parent confirmed this fixture contract."
+    },
+    {
+      "script": "verify-guest-reaccess-native.mjs",
+      "status": "FAIL",
+      "passedChecks": 10,
+      "failedCheck": "explicit-claim-conflict-preserves-existing-account-record",
+      "reason": "Stopped before the third provider callback. The same scenario passed in the prior run; parent is checking actual endpoint statuses, room lifecycle and rate-limit state before retry."
+    }
+  ],
+  "parentObservedSafeServerEvidence": {
+    "oauthCallbackStatus": 503,
+    "confirmedCause": "Native runtime inherited test resources with Flyway disabled. The isolated database had zero schema tables. The parent is restarting the same immutable application bytecode with explicit Flyway enablement.",
+    "ipv6HypothesisConfirmed": false
+  },
+  "harnessSafetyCorrections": [
+    "Attach a rejection handler when every response waiter is created, before awaiting any UI action.",
+    "Record only fixed check and action identifiers and numeric auth-response counters.",
+    "Never serialize a caught Playwright error, response body, URL, DOM, cookie, token, password or raw submission."
+  ],
+  "scriptSha256": {
+    "verify-guest-reaccess-native.mjs": "e64f99197b1e36656166e80ca0c53a2eecd1d4247bb305485f239423d52e3255",
+    "verify-account-native.mjs": "db1d53551ce61f2bf1183f296b7424ec312f80599c0297147d99b0e5b07272f3"
+  },
+  "extraDiagnostic": {
+    "loginAttempts": 1,
+    "additionalRetries": 0,
+    "status": "STOPPED_FOR_PARENT_RUNTIME_RESTART",
+    "publicObservations": [
+      {
+        "endpoint": "AUTH_START",
+        "status": 302
+      },
+      {
+        "endpoint": "AUTH_CALLBACK",
+        "status": 503,
+        "code": "AUTH_UNAVAILABLE"
+      },
+      {
+        "endpoint": "AUTH_REFRESH",
+        "status": 401
+      }
+    ],
+    "apiRouteMocks": 0,
+    "externalRequests": 0,
+    "scope": "Separate temporary loopback-only script, no existing scenario or product changes."
+  },
+  "jwtFixtureCorrection": {
+    "publicContractSource": "Parent confirmation of the access-token contract: name must be nonblank and at most 50 Unicode code points.",
+    "before": "Live and expired synthetic tokens included sub, issuer, audience and time claims, but omitted name.",
+    "after": "Both tokens include the same actual synthetic login account displayName as name; lifetime remains the sole intended difference.",
+    "expectationsPreserved": [
+      "Live signed sibling returns 200 and the member original.",
+      "Expired signed sibling returns 401 despite a valid guest cookie and leaks no original.",
+      "A cookie-only control still returns the original guest owner submission."
+    ],
+    "expiredStatusWeakened": false,
+    "fixedFailureActionResetPerCheck": true
+  },
+  "safeDiagnosticExtension": {
+    "expectationsChanged": false,
+    "fields": "Fixed guest-join action IDs and HTTP status-only write counters; no bodies, URLs, IDs, credentials or input values.",
+    "additionalFields": "On failure only: record-number match count, textbox count, readonly and disabled boolean arrays; no actual values or DOM."
+  },
+  "manualCloseContractCorrection": {
+    "reason": "Public close protocol may require EARLY_CLOSE_CONFIRMATION_REQUIRED 409 and explicit dialog consent before a second POST succeeds.",
+    "expectation": "Either direct 200 or exact early-confirmation code plus explicit consent and second 200; no acceptance of other failures.",
+    "productSourceChanged": false
+  },
+  "finalVerification": {
+    "issue108Native": {
+      "status": "PASS",
+      "checksPassed": 16,
+      "apiRouteMocks": 0,
+      "externalRequests": 0,
+      "result": "docs/verification/issue-108-native.json",
+      "safeLocalLog": "/tmp/issue108-native/guest-browser-safe.log"
+    },
+    "issue109Regression": {
+      "status": "PASS",
+      "checksPassed": 12,
+      "apiRouteMocks": 0,
+      "externalRequests": 0,
+      "result": "docs/verification/issue-109-after-108-native.json",
+      "safeLocalLog": "/tmp/issue108-native/account-browser-safe.log"
+    },
+    "manualCloseObserved": {
+      "firstStatus": 409,
+      "code": "EARLY_CLOSE_CONFIRMATION_REQUIRED",
+      "explicitDialogConsentVerified": true,
+      "finalStatus": 200,
+      "safeServerObservationAt": [
+        "2026-10-17T16:37:27.576Z",
+        "2026-10-17T16:37:27.699Z"
+      ]
+    },
+    "priorGuestPreparationFailure": "Did not reproduce in the final fresh run after the full mock-browser load ended. Backend join success had been independently confirmed; no product expectation or timeout was relaxed.",
+    "productSourceChangedByTestAuthor": false
+  },
+  "postUnicodeFinalRuntimeRecheck": {
+    "status": "PASS",
+    "issue108Checks": 16,
+    "issue109RegressionChecks": 12,
+    "immutableManifestSha256": "b72e40fada1b6906e2a9dd39f07e2c99031c23119dedf2baea0d021c31f38b64",
+    "receipt": "docs/verification/issue-108-final-runtime-recheck.json"
+  }
+}

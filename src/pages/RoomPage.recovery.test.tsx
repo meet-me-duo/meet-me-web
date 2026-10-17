@@ -7,6 +7,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { api, ApiError } from "../api/client";
 import type { Candidate, Room, Submission } from "../api/types";
 import RoomPage from "./RoomPage";
+import { mockRoomAccount } from "../test/roomAccountFixture";
 
 const code = "abcdefghijklmnopqrstuv";
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
@@ -37,6 +38,7 @@ function own(raw_text = "평일 19시부터 21시", revision = 7, editable = tru
 const candidate: Candidate = { candidate_id: a1, plan_type: "A", meeting_mode: "REMOTE", rank: 1, attendance_count: 2, total_participants: 2, place: null, summary: "새 합성 결과", time_ranges: [{ start_at: "2026-10-08T11:00:00Z", end_at: "2026-10-08T12:00:00Z" }] };
 const clients: QueryClient[] = [];
 function mount(snapshot: Room) {
+  mockRoomAccount(snapshot);
   const reads = vi.spyOn(api, "getRoom").mockResolvedValue(snapshot);
   vi.spyOn(api, "getSubmission").mockResolvedValue(own());
   vi.spyOn(api, "getUnappliedInputs").mockResolvedValue([]);

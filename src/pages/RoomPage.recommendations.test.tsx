@@ -5,6 +5,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { api, ApiError } from "../api/client";
 import type { Candidate, Room } from "../api/types";
 import RoomPage from "./RoomPage";
+import { mockRoomAccount } from "../test/roomAccountFixture";
 
 // Public native #95 contract, not the UI model or backend ranking implementation.
 const code = "abcdefghijklmnopqrstuv";
@@ -52,6 +53,7 @@ function deferred<T>() {
 }
 const clients: QueryClient[] = [];
 function mount(snapshot: Room = ready, primary: RecommendationList = list()) {
+  mockRoomAccount(snapshot);
   const reads = vi.spyOn(api, "getRoom").mockResolvedValue(snapshot);
   const recommendations = vi.spyOn(api, "getRecommendations").mockResolvedValue(primary);
   const alternatives = vi.spyOn(api, "getRecommendationAlternatives").mockResolvedValue(list([], { total_options: 1, has_alternatives: true }));

@@ -1,0 +1,56 @@
+{
+  "stage": "implementation-focused-handoff",
+  "base_web_head": "95f09c0a98c6538b0f19ed381fdf11a2f5b844d9",
+  "unit_focused": {
+    "total": 36,
+    "passed": 36,
+    "failed": 0,
+    "log": "/tmp/issue108-web-guest-final-focused.log"
+  },
+  "existing_boundary_regression": {
+    "total": 70,
+    "passed": 70,
+    "failed": 0,
+    "log": "/tmp/issue108-web-fixed-boundaries.log"
+  },
+  "browser_first_attempt": {
+    "total": 62,
+    "passed": 56,
+    "failed": 6,
+    "reason": "legacy blanket textbox expectation superseded after independent approval",
+    "log": "/tmp/issue108-web-browser-focused.log"
+  },
+  "browser_closed_final": {
+    "total": 6,
+    "passed": 6,
+    "failed": 0,
+    "retries": 0,
+    "bundle": "index-BFAmp3oO.js",
+    "log": "/tmp/issue108-web-browser-closed-final.log"
+  },
+  "checks": {
+    "typecheck": "PASS",
+    "changed_file_lint": "PASS: 0 errors, 0 warnings",
+    "build": "PASS"
+  },
+  "pending": [
+    "native real-server browser",
+    "generated OpenAPI/schema synchronization",
+    "single final artifact complete gates",
+    "independent final review"
+  ],
+  "remote_actions": [],
+  "source_sha256": {
+    "src/api/client.ts": "8df2df98362fc50aa372d4af19a089e2fbb0d9dbc3434db2edea259061faa7ac",
+    "src/pages/RoomPage.tsx": "b1f010ea2abcf02da0c92d5a90ec526c9304a5027a9b1bfb8062378984330ab9",
+    "src/components/GuestAccessPanel.tsx": "e63c19382b23f904fcde8780f097d77f74044963baa4682c7797c507356cdbed",
+    "src/components/GuestParticipation.tsx": "9447fe7d59c2a0e389837fe43284a936c039401fb5864a57f5c8299d8a58c714",
+    "src/styles.css": "686f3f53e7a4d7117c8300dcc91706d799c739f7c890750931077a5e2881ac04",
+    "e2e/analysis-recovery.spec.ts": "f2e02aaf169e17317ed0d60d513ec9cca7b00ee0be65465ffe0a245c95058f3e",
+    "e2e/host-creation.spec.ts": "ef2222ba2d6f83d4d0acdc4e24167ed0737cfe59cf6006b91f8d78c3d72032a5",
+    "e2e/recent-rooms.spec.ts": "c253d414e8dc81ae5c87761b807378ece551324d295b0b7f21ef98e0e92a8869",
+    "e2e/room-states.spec.ts": "0942149ace741a1881f0fbeed21d515bb8dc07ba69ad72c91ca206d48a2232df",
+    "src/components/GuestParticipation.test.tsx": "41134954949bc58a23191cb9d5528eb5ca6315d59a55d457b3ddd6586ea03c97",
+    "src/pages/RoomPage.guest-reaccess.test.tsx": "846821503dd4c3750c6cff5c63f5708a40f291fbfdfa7cecefb592b3a113b0c5"
+  }
+}

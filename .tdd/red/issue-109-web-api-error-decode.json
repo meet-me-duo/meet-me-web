@@ -1,0 +1,29 @@
+{
+  "workItem": "issue-109-web-api-error-decode",
+  "sourceRevision": "9b183978d5987f8fa8a5f02d542b17181e4929b4",
+  "testFiles": [
+    {
+      "path": "src/api/client.account-error-decode.test.ts",
+      "sha256": "bc1af75c6ad8c01b4946f6a635a3f485a18f23c987d48567af22e343293e327d"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/api/client.account-error-decode.test.ts",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1",
+    "--reporter=json",
+    "--outputFile=/tmp/meetme-109-web-api-error-red.json"
+  ],
+  "failedTests": [
+    "#109 rejects an old-account problem after the account changes during error JSON decoding"
+  ],
+  "expectedFailureCategory": "MISSING_BEHAVIOR",
+  "recordedAt": "2026-10-17T14:41:32.932868Z"
+}

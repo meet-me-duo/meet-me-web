@@ -1,0 +1,96 @@
+{
+  "scope": "Five full-browser failures: harness diagnosis and focused repair",
+  "product_source_changed": false,
+  "changed_files": [
+    "e2e/create-form.spec.ts",
+    "e2e/recent-rooms.spec.ts",
+    "e2e/ux-integration.spec.ts"
+  ],
+  "original_full_run": {
+    "total": 384,
+    "passed": 378,
+    "skipped": 1,
+    "failed": 5,
+    "json": "/tmp/issue108-browser-results.json",
+    "log": "/tmp/issue108-browser.log"
+  },
+  "unchanged_focused_reproduction": {
+    "total": 8,
+    "passed": 5,
+    "failed": 3,
+    "json": "/tmp/issue108-five-repro-results.json",
+    "log": "/tmp/issue108-five-repro.log",
+    "trace_directory": "/tmp/issue108-five-repro-artifacts"
+  },
+  "diagnoses": [
+    {
+      "failures": 2,
+      "test": "default 14 dates",
+      "cause": "Clock starts at Seoul 23:59:59 and keeps advancing while page setup exceeds one second. Failure snapshot correctly shows the next Seoul date.",
+      "repair": "Install + setFixedTime before midnight, assert original dates, setFixedTime 15:00:30Z, fastForward 31000 to fire the original refresh timer. Date, null/null payload and external[] assertions unchanged."
+    },
+    {
+      "failures": 1,
+      "test": "mobile 1440px keyboard/compact/touch",
+      "cause": "Reproduced cumulative 30000ms budget exhaustion. Trace screenshots consume approximately 5285+2533+8046ms, with mobile DPR2.625 rasterizing 3780px-wide PNGs.",
+      "repair": "Keep viewport/DPR, keyboard/focus/44px/overflow and all four full-page screenshots; capture screenshots at CSS pixel scale."
+    },
+    {
+      "failures": 1,
+      "test": "mobile ten long titles",
+      "cause": "Full-run timeout during the final buttons of sequential layout RPCs. Unchanged focused desktop/mobile pass at 18.8/19.8 seconds.",
+      "repair": "At each of three widths, batch all 30 buttons; check count30, all computed minHeight >=44 and all actual heights rounded to 1/1000 >=44. Preserve all three screenshot scopes at CSS scale."
+    },
+    {
+      "failures": 1,
+      "test": "mobile 1440px member candidate flow",
+      "cause": "Full-only candidate visibility wait expires with room-loading state. Unchanged focused desktop/mobile pass; no deterministic product or authorization failure found.",
+      "repair": "Keep every behavior, response, privacy and 5000ms visibility assertion; only capture the two existing full-page screenshots at CSS scale to reduce raster load."
+    }
+  ],
+  "unchanged_budgets": {
+    "test_timeout_ms": 30000,
+    "expect_timeout_ms": 5000,
+    "workers": 2,
+    "retries": 0
+  },
+  "independent_review": "Parent relayed independent author approval for deterministic clock, CSS screenshots and complete batched geometry checks before changes.",
+  "fixed_focused": {
+    "total": 16,
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "repeat_each": 2,
+    "duration_ms": 101933.448,
+    "json": "/tmp/issue108-five-fixed-results.json",
+    "log": "/tmp/issue108-five-fixed.log"
+  },
+  "checks": {
+    "changed_file_eslint": "PASS: 0 errors, 0 warnings"
+  },
+  "changed_file_sha256": {
+    "e2e/create-form.spec.ts": "a15fc157d22d55023135def9bf9481203a26b6060ad2a001773a6acf54615adc",
+    "e2e/recent-rooms.spec.ts": "e2b4b3a9157cd14e21f23eef9e5acfa8234bb4f360531adec6c84dd2d18434c9",
+    "e2e/ux-integration.spec.ts": "3870798eec7589b38d34d6cde4a025ad8c9e87a9fafb61e193e11536a0e830cb"
+  },
+  "unchanged_product_samples": {
+    "src/pages/RoomPage.tsx": "b1f010ea2abcf02da0c92d5a90ec526c9304a5027a9b1bfb8062378984330ab9",
+    "src/components/GuestAccessPanel.tsx": "e63c19382b23f904fcde8780f097d77f74044963baa4682c7797c507356cdbed"
+  },
+  "frozen_tests": {
+    "src/components/GuestParticipation.test.tsx": "41134954949bc58a23191cb9d5528eb5ca6315d59a55d457b3ddd6586ea03c97",
+    "src/pages/RoomPage.guest-reaccess.test.tsx": "846821503dd4c3750c6cff5c63f5708a40f291fbfdfa7cecefb592b3a113b0c5"
+  },
+  "source_fingerprint": {
+    "file": "docs/verification/issue-108-browser-harness-source-fingerprint.json",
+    "sha256": "9f7320749d3391e98ba9cdc5e725c28fd2bfb14e197c86f4f2414cd9a05b050b",
+    "count": 100
+  },
+  "unchanged_runtime_artifact": {
+    "name": "index-BFAmp3oO.js",
+    "sha256": "23874e3ebbf2d1210f1414fd1928a9073ee543cfc0a30d49198771a863bad96c"
+  },
+  "pending": "Parent single final full-browser gate. Focused passes do not replace the full run.",
+  "remote_actions": []
+}

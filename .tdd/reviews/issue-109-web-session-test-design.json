@@ -1,0 +1,43 @@
+{
+  "workItem": "issue-109-web-session",
+  "role": "independent-test-designer",
+  "basis": [
+    "delegated issue-109 account/auth product contract",
+    "root public src/auth/session.ts API contract",
+    "service Access 15min in memory; refresh rotating HttpOnly cookie; explicit device/all logout"
+  ],
+  "tests": {
+    "count": 19,
+    "publicBoundary": "getSession/getAccessToken/subscribeSession/restoreSession/endSession/getSessionVersion",
+    "security": [
+      "memory only including no Web Storage reads/writes",
+      "credentialed POST refresh singleflight without automatic retry",
+      "failclosed network/HTTP/malformed/expired refresh response",
+      "Access exact expiry excluded from Bearer",
+      "device/all logout exact route, current Bearer and cookies; local clear before async completion",
+      "server logout failure surfaced without reviving state",
+      "obsolete refresh after logout cannot revive an account",
+      "obsolete successful or denied refresh cannot overwrite or erase a newer login",
+      "privacy epoch increments on identity change/logout; pure reads stable",
+      "subscribers observe changes; unsubscribe stops notifications"
+    ]
+  },
+  "status": "VALIDATED: frozen RED tests unchanged; 19/19 GREEN; obsolete refresh generation omission and Web Storage persistence both detected; exact source bytes restored and 19/19 restored GREEN.",
+  "intentionalFaultPlan": [
+    {
+      "fault": "remove stale refresh epoch check",
+      "detector": "obsolete successful/denied refresh must not overwrite/erase newer login"
+    },
+    {
+      "fault": "persist service token to Web Storage",
+      "detector": "no Web Storage reads/writes and fresh module has no session"
+    }
+  ],
+  "verification": ".tdd/verification/issue-109-web-session-faults.json",
+  "localLogs": [
+    ".codex/tdd-evidence/issue-109-web-session.log",
+    ".codex/tdd-evidence/issue-109-web-session-fault-stale-refresh.log",
+    ".codex/tdd-evidence/issue-109-web-session-fault-web-storage.log",
+    ".codex/tdd-evidence/issue-109-web-session-restored-green.log"
+  ]
+}

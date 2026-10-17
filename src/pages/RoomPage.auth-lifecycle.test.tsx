@@ -6,6 +6,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { api, ApiError } from "../api/client";
 import type { Candidate, Room, Submission } from "../api/types";
 import RoomPage from "./RoomPage";
+import { mockRoomAccount } from "../test/roomAccountFixture";
 
 const code = "abcdefghijklmnopqrstuv";
 const a0 = "11111111-1111-4111-8111-111111111111";
@@ -26,6 +27,7 @@ function own(raw_text = "합성 저장 입력", revision = 7): Submission {
 }
 const clients: QueryClient[] = [];
 function mount(snapshot: Room) {
+  mockRoomAccount(snapshot);
   const reads = vi.spyOn(api, "getRoom").mockResolvedValue(snapshot);
   vi.spyOn(api, "getSubmission").mockResolvedValue(own());
   vi.spyOn(api, "getCandidates").mockResolvedValue({ analysis_id: a0, quality: "PARTIAL", applied_submissions: 1, total_submissions: 2, unapplied_inputs: 1, candidates: [candidate] } as Awaited<ReturnType<typeof api.getCandidates>>);

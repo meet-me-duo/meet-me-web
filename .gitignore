@@ -8,6 +8,7 @@ test-results/
 .env.*
 !.env.example
 *.log
+/.codex/tdd-evidence/
 .DS_Store
 .terraform/
 *.tfplan

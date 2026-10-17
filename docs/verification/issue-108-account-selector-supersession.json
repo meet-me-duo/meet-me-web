@@ -1,0 +1,44 @@
+{
+  "issue": 108,
+  "file": "scripts/verify-account-native.mjs",
+  "baseline": "95f09c0a98c6538b0f19ed381fdf11a2f5b844d9",
+  "checkIdsPreserved": 12,
+  "existingExpectationsPreserved": 27,
+  "selectorSupersession": [
+    {
+      "before": "내 이름",
+      "after": "이름",
+      "scope": "Guest display-name entry and account absence assertion",
+      "meaning": "The same name field remains required only for guests."
+    },
+    {
+      "before": "모임 참여하기",
+      "after": "참여하기",
+      "scope": "Guest join actions",
+      "meaning": "The same anonymous participant command is explicitly clicked."
+    },
+    {
+      "before": "모임 참여하기",
+      "after": "계정으로 참여",
+      "scope": "Authenticated member join action",
+      "meaning": "The same account participant command is explicitly clicked without guest name entry."
+    }
+  ],
+  "safetyCorrection": {
+    "previousRisk": "Playwright Error.message could include private DOM, input values or response data; replacing URLs alone did not redact those values.",
+    "finalBehavior": "Failure evidence and stderr contain only fixed check IDs and numeric counters, never Error, stack, request URL, cookie, token, password or raw submission.",
+    "browserStartupGuarded": true,
+    "optionalScreenshotRemoved": true,
+    "apiMocksAdded": false,
+    "scenariosRemoved": false,
+    "pendingResponsePromisesHandledImmediately": true
+  },
+  "syntaxCheck": "PASS",
+  "runtime": "PASS",
+  "sha256": "db1d53551ce61f2bf1183f296b7424ec312f80599c0297147d99b0e5b07272f3",
+  "runtimeOutput": "docs/verification/issue-109-after-108-native.json",
+  "originalIssue109EvidencePreserved": true,
+  "runtimeChecksPassed": 12,
+  "runtimeEvidence": "docs/verification/issue-109-after-108-native.json",
+  "safeLocalLog": "/tmp/issue108-native/account-browser-safe.log"
+}

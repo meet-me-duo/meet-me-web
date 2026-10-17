@@ -1,0 +1,37 @@
+{
+  "workItem": "issue-109-web-account-authority",
+  "status": "PASS",
+  "role": "Independent public-contract test author /root/auth_tests; production implementation by root",
+  "testFiles": [
+    {
+      "path": "src/utils/createRoom.account-authority.test.ts",
+      "sha256": "7aa054ff6e9d91f1340ce41a3410ac8a174c51ac0aa8465f59de9bee90a45c07"
+    }
+  ],
+  "fault": {
+    "name": "fault-restore-legacy-name",
+    "exitCode": 1,
+    "tests": 2,
+    "failedTests": [
+      "issue #109 member HOST profile authority omits ignored legacy host name for normal account name while preserving the room form",
+      "issue #109 member HOST profile authority omits ignored legacy host name for 50 Unicode emoji account name while preserving the room form"
+    ],
+    "rawLog": ".codex/tdd-evidence/issue-109-web-account-authority-fault-restore-legacy-name.log",
+    "rawJson": "/tmp/meetme-109-web-account-authority-fault-restore-legacy-name.json",
+    "freshReport": true
+  },
+  "restored": {
+    "name": "restored-green",
+    "exitCode": 0,
+    "tests": 2,
+    "failedTests": [],
+    "rawLog": ".codex/tdd-evidence/issue-109-web-account-authority-restored-green.log",
+    "rawJson": "/tmp/meetme-109-web-account-authority-restored-green.json",
+    "freshReport": true
+  },
+  "sourceFile": "src/utils/createRoom.ts",
+  "sourceSha256": "1b845f9ef42dcff212d000328d8470da00c4b30bb6ca20c50f90e610e1d264c7",
+  "sourceRestoredExact": true,
+  "faultReplacement": "Re-add host_display_name: value.hostName.trim() to real createRoomBody return object",
+  "recordedAt": "2026-10-17T15:24:22.138663Z"
+}

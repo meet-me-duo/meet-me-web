@@ -1,5 +1,14 @@
 # Frontend architecture
 
+## #110 운영 요약 경계
+
+- `/operations`는 일반 모임 화면과 독립된 읽기 전용 화면이다. HOST·일반 회원·게스트를 운영자로 간주하지 않는다. 서버의 명시적 allowlist만 접근을 허용하며, 실제 운영자 등록과 공통 인증 연결 전에는 기본 거부다.
+- 운영 응답은 페이지 메모리에서만 유지한다. 공유 QueryClient·Web Storage·URL에 응답이나 인증을 저장하지 않는다. 화면 이동·조회 실패 시 기존 응답을 제거하고, 취소된 이전 요청의 늦은 결과를 무시한다. 자동 polling이나 쓰기 명령은 없다.
+- 세 GET API만 사용하며 20개 단위의 서버 cursor를 전달한다. 요청은 `cache: no-store`다. 허용 필드만 runtime 검증하고 고정된 오류 안내를 사용하며, 원문·이름·초대 코드·공급자 응답·비밀값을 렌더링하지 않는다. 서버 응답의 성공·오류 `Cache-Control: no-store`는 서버 계약이다.
+- 방 요약은 현재 설정이다. 실행의 종료·winner와 최종 결과 게시를 동일시하지 않는다. 기록된 경과 시간은 저장 시각 차이며 HTTP 지연 측정값이 아니다. 시도는 기록된 admission의 INITIAL/RETRY/FALLBACK 분류이며 parser dispatch·HTTP 횟수는 미상이다.
+- 알려진 사용량만 소계로 표시한다. 미상 null과 알려진 0을 구별하고, coverage 분모는 기록된 admission이다. 소계를 전체 사용량이나 실제 과금으로 해석하지 않는다. REUSED 라운드는 신규 provider 시도로 합산하지 않는다.
+- #109 공통 인증은 `createOperationsApi(getAccessToken)`에 메모리 토큰 공급자를 주입하고, 로그인·로그아웃·계정 전환마다 `OperationsPage`의 `authRevision`을 변경한다. 안정적인 API 인스턴스를 유지한다. revision은 권한·사용자 ID가 아닌 화면 수명 경계이며 전송·표시·보관하지 않는다. 요청 전후 토큰과 취소 상태도 확인한다. 기본 App에는 실제 공급자가 없어 운영 조회는 서버의 기본 거부에 머문다. 공통 store와 연결한 실인증·만료 흐름은 아직 통합 검증 전이다.
+
 ## 범위
 
 제출 MVP는 비로그인 익명 세션으로 방 생성·참여·조건 제출·분석 대기·후보 확정·결과 공유를 제공한다. Google/Kakao 로그인, Google Calendar, 지도 선택과 실시간 소켓은 포함하지 않는다.
@@ -54,3 +63,8 @@
 - quota 0에서 수정 전 새 분석 불가를 안내한다. 원문을 되돌려 다시 저장해도 새 입력 version이 생기므로 기존 결과를 재사용할 수 없다. 변경 없이 원래 version 집합을 유지한 요청만 기존 결과를 재사용한다.
 
 본인 제출 cache는 새 서버의 `viewer.context_id`가 있으면 `[submission, invite_code, context_id]`로 격리한다. 방 snapshot 없이 이전 본인 cache만 남은 첫 조회에서도 다른 참여자의 원문이나 높은 revision을 복원하지 않는다. context가 없는 기존 서버는 기존 key를 사용하며 본인 구분은 관찰 가능한 viewer context 전환과 권한 실패 정리에 한정된다.
+
+
+### #110 로컬 client call 관측 후속
+
+운영 요약은 승인 시도와 로컬 client call을 별도로 표시한다. 관측 부재 null, 확인된 무호출 빈 배열, 부분 관측의 알려진 호출 소계를 구분한다. HTTP 상태와 단조 경과 ns는 로컬 lifecycle 사실이며 수신·청구 보장이 아니다. actual local OpenAPI에서 operations3 경로와 참조 DTO만 기존 snapshot에 병합했다. #109 메모리 token supplier/authRevision 실제 주입은 통합 대기이며 기본 App은 운영 인증을 제공하지 않는다. 최종 로컬 근거는 docs/verification/issue-110-web-final.json이다.

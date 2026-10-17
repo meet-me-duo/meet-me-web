@@ -1,0 +1,18 @@
+{
+  "reviewed_at": "2026-10-17T16:25:13.641804+00:00",
+  "checks": {
+    "src/App.tsx": true,
+    "src/auth/session.ts": true,
+    "src/auth/AccountBoundary.tsx": true,
+    "src/auth/authCookieLock.ts": true,
+    "shared_request_exact": true,
+    "native_paths_equal_union_of_published_contracts": true
+  },
+  "native_openapi_sha256": "ccb1da582cbdc8bd5fc2d7f3ee400f2a1a09993c06a6a1ebb0505d5315cd24be",
+  "native_path_counts": {
+    "account_pr25": 23,
+    "clarifications_published": 17,
+    "combined_native": 25
+  },
+  "limits": "Static source/path equivalence, HTTP/App35, combined unit466, and final fixed-bundle browser391+1intentional skip passed. Synthetic transport does not replace actual server ownership/provider/native browser tests. Integrated-source FI not performed in this phase."
+}

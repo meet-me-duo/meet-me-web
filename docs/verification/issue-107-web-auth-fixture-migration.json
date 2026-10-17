@@ -1,0 +1,46 @@
+{
+  "recorded_at": "2026-10-17T16:05:24.490824+00:00",
+  "reason": "#109 explicitly requires account login for HOST while guest MEMBER remains supported; original #107 HOST fixtures were anonymous.",
+  "authority": "Published #109 PR25 account contract; same independent author migrated their #107 fixtures in separate integration worktree. Original published worktree and test files unchanged.",
+  "selected_before_log": "/tmp/issue107-web-auth-host-fixture-before.log",
+  "records": [
+    {
+      "path": "src/pages/RoomPage.clarifications.test.tsx",
+      "published_sha256": "cc4c85f6b8bfc49345c16adbe66842edcd23b79b69619c8e02c9f89e6443926a",
+      "integration_sha256": "284e97557aa45b0d464068be2e9c81363347733f85008a36d53f3132f7388f12",
+      "changes": "Only import/call to the published #109 account fixture; all public assertions and existing scenario data unchanged.",
+      "reversible_to_published_exactly": true
+    },
+    {
+      "path": "src/pages/RoomPage.time-guidance.test.tsx",
+      "published_sha256": "b82d1f610488c9bd1d094a35a37c202adf070f9ba7ee7cdcd414bcda69ceac96",
+      "integration_sha256": "80ad23f5ab11b3f71a58871c69e02ef3d7a3299721e90241068aaf4602203483",
+      "changes": "Only import/call to the published #109 account fixture; all public assertions and existing scenario data unchanged.",
+      "reversible_to_published_exactly": true
+    },
+    {
+      "path": "e2e/clarifications.spec.ts",
+      "published_sha256": "b7f281f2c837533d1eb1c7853cf7c0ee8a8ba599fce9dc5fb55020b9550d6dba",
+      "integration_sha256": "6b89bed1589c4bcf0564fa156b14432459fbfcfa4d1981ebbf8ff67cd9864e56",
+      "changes": "Only import/call to the published #109 account fixture; all public assertions and existing scenario data unchanged.",
+      "reversible_to_published_exactly": true
+    },
+    {
+      "path": "e2e/host-creation.spec.ts",
+      "published_account_pr25_sha256": "7285cee3339262e2f08309c77eb951dd5ce88ff8853cc988826ecc0e22ab8614",
+      "integration_sha256": "1da1a3e3357a318566f9d32265340483a6680ba007a06b19211e68b27e9a4212",
+      "changes": "Derive exact allowed origin and exact clipboard URL from the existing test baseURL. Origin rejection and product assertions remain strict. Only integration fixture changes, original published source unchanged.",
+      "reason": "Separate integration port4175 is mandatory to avoid validating original dist on4173. The fixture hardcoded4173 and aborted all six desktop navigations.",
+      "original_run": {
+        "exit": 130,
+        "passed": 200,
+        "failed": 6,
+        "interrupted": 2,
+        "skipped": 1,
+        "not_run": 183,
+        "raw_log": "/tmp/issue107-web-auth-browser-initial-origin-failure.log"
+      }
+    }
+  ],
+  "limits": "mockRoomAccount and fulfillAccountRefresh are synthetic unit/browser preparation. New real-session App HTTP35 assertions and actual server native verification cover different boundaries."
+}

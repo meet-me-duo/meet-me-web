@@ -409,3 +409,9 @@ fieldset.field legend { margin-bottom: 9px; }
 .archive-list small { opacity: .72; }
 .claim-card { max-width: 620px; margin: 1.5rem auto; padding: 1.5rem; }
 @media (max-width: 600px) { .account-navigation { gap: .5rem; max-width: 60%; font-size: .75rem; } .account-controls { gap: .4rem; } .account-card { padding: 1.25rem; } }
+
+.clarification-panel fieldset { border: 0; padding: 0; margin: 1rem 0; display: grid; gap: .75rem; min-width: 0; }
+.clarification-panel legend { font-weight: 700; margin-bottom: .75rem; }
+.clarification-panel fieldset > label { display: flex; align-items: baseline; gap: .5rem; overflow-wrap: anywhere; }
+.clarification-panel fieldset > .field { display: grid; }
+.clarification-panel input[type="radio"] { flex: 0 0 auto; accent-color: #0284c7; }

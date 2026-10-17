@@ -31,7 +31,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** 로그인 없이 방과 주최자 참여 생성 */
+        /** 로그인 계정으로 방과 주최자 참여 생성 */
         post: operations["create"];
         delete?: never;
         options?: never;
@@ -85,7 +85,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** 익명 세션으로 방 참여 */
+        /** 로그인 계정 또는 게스트 세션으로 방 참여 */
         post: operations["join"];
         delete?: never;
         options?: never;
@@ -102,8 +102,25 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** 주최자 세션으로 입력 수집 수동 마감 */
+        /** 로그인한 주최자가 입력 수집 수동 마감 */
         post: operations["close"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rooms/{inviteCode}/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 유효한 게스트 참여를 로그인 계정에 명시적으로 연결 */
+        post: operations["claim"];
         delete?: never;
         options?: never;
         head?: never;
@@ -155,6 +172,57 @@ export interface paths {
         put?: never;
         /** 주최자 세션으로 지연된 고정 배치 재분석 요청 */
         post: operations["retry"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Refresh 회전과 15분 Access Token 발급 */
+        post: operations["refresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 현재 기기 Refresh 패밀리 로그아웃. Access는 최대 15분 유효 */
+        post: operations["logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/logout-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 현재 로그인 계정의 모든 기기 로그아웃. Access는 최대 15분 유효 */
+        post: operations["logoutAll"];
         delete?: never;
         options?: never;
         head?: never;
@@ -263,15 +331,88 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/{provider}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Google 또는 Kakao 로그인 시작 */
+        get: operations["start"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/{provider}/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 로그인 검증 후 토큰 없는 고정 웹 콜백으로 이동 */
+        get: operations["callback"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Bearer Access Token 계정 조회 */
+        get: operations["me"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/account/rooms": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 현재 계정이 주최자인 보관 방 목록 */
+        get: operations["accountRooms"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         JsonNode: {
+            string?: boolean;
+            array?: boolean;
+            empty?: boolean;
+            null?: boolean;
+            float?: boolean;
+            number?: boolean;
             missingNode?: boolean;
-            valueNode?: boolean;
-            object?: boolean;
             pojo?: boolean;
+            integralNumber?: boolean;
             floatingPointNumber?: boolean;
             short?: boolean;
             int?: boolean;
@@ -283,16 +424,11 @@ export interface components {
             textual?: boolean;
             boolean?: boolean;
             binary?: boolean;
+            valueNode?: boolean;
             /** @enum {string} */
             nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
-            integralNumber?: boolean;
-            array?: boolean;
-            empty?: boolean;
-            null?: boolean;
-            float?: boolean;
+            object?: boolean;
             container?: boolean;
-            string?: boolean;
-            number?: boolean;
             embeddedValue?: boolean;
         };
         /** @description 현재 익명 참여자의 자연어 제출 또는 수정 요청 */
@@ -403,7 +539,7 @@ export interface components {
              */
             state_version?: number;
         };
-        /** @description 익명 모임 방 생성 요청 */
+        /** @description 로그인한 계정의 모임 방 생성 요청 */
         CreateRoomRequest: {
             /**
              * @description 모임 목적
@@ -415,11 +551,8 @@ export interface components {
              * @enum {string}
              */
             meeting_mode?: "IN_PERSON" | "REMOTE" | "EITHER";
-            /**
-             * @description 주최자 표시 이름, 공백 제거 후 1~50자
-             * @example 민수
-             */
-            host_display_name: string;
+            /** @description 호환용 입력. 로그인 계정의 표시 이름을 사용하므로 생략 가능하며 사용하지 않음 */
+            host_display_name?: string | null;
             /**
              * Format: int32
              * @description 자동 마감할 고유 제출 참여자 목표, 설정하면 2 이상
@@ -749,10 +882,10 @@ export interface components {
         /** @description 익명 참여 요청 */
         JoinRoomRequest: {
             /**
-             * @description 참여자 표시 이름, 최초 참여에만 사용
+             * @description 게스트 최초 참여 때 필요한 표시 이름. 회원은 계정 이름을 사용하여 생략 가능
              * @example 지수
              */
-            display_name: string;
+            display_name?: string | null;
         };
         /** @description 수동 마감 요청 */
         CloseRoomRequest: {
@@ -796,6 +929,25 @@ export interface components {
              * @description 이 요청이 소비한 라운드 UUID
              */
             revision_round_id?: string;
+        };
+        /** @description 로그인 계정. 이메일과 공급자 토큰은 포함하지 않는다 */
+        AccountResponse: {
+            /** @description 계정 UUID */
+            id?: string;
+            /** @description 계정 표시 이름 */
+            displayName?: string;
+        };
+        /** @description 15분 Access Token. 브라우저 메모리에만 보관한다 */
+        AuthResponse: {
+            /** @description RS256 Bearer Access Token */
+            accessToken?: string;
+            /**
+             * Format: date-time
+             * @description Access Token 만료 시각
+             */
+            expiresAt?: string;
+            /** @description 로그인 계정 */
+            account?: components["schemas"]["AccountResponse"];
         };
         /** @description 현재 익명 참여자의 최신 제출 */
         SubmissionResponse: {
@@ -951,6 +1103,28 @@ export interface components {
             participant_display_name?: string;
             /** @description 후보에 반영되지 않은 원문. 구 슬롯 전용 입력은 null */
             raw_text?: string | null;
+        };
+        /** @description 30일 보관 정책의 본인 주최 방 */
+        AccountRoomResponse: {
+            /** @description 모임 목적 */
+            purpose?: string;
+            /** @description 방 초대 코드 */
+            invite_code?: string;
+            /**
+             * Format: date-time
+             * @description 방 생성 시각
+             */
+            created_at?: string;
+            /**
+             * Format: date-time
+             * @description 마감된 방은 마감 시각, 수집 중 방은 생성 시각에서 30일 후 정리 기준 시각
+             */
+            expires_at?: string;
+        };
+        /** @description 본인 주최 방 보관 목록 */
+        AccountRoomsResponse: {
+            /** @description 만료되지 않은 본인 주최 방 */
+            rooms?: components["schemas"]["AccountRoomResponse"][];
         };
     };
     responses: never;
@@ -1120,6 +1294,15 @@ export interface operations {
             };
             /** @description 입력 검증 실패 */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 로그인 필요 */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1374,6 +1557,24 @@ export interface operations {
                     "*/*": components["schemas"]["ApiProblemSchema"];
                 };
             };
+            /** @description 제공한 Access Token이 무효 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description Origin 또는 게스트 참여 조회 증명 범위 부족 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
             /** @description 방 없음 */
             404: {
                 headers: {
@@ -1429,7 +1630,7 @@ export interface operations {
                     "*/*": components["schemas"]["RoomResponse"];
                 };
             };
-            /** @description 게스트 세션 누락 또는 무효 */
+            /** @description 로그인 누락 또는 무효 */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -1475,6 +1676,75 @@ export interface operations {
                 };
             };
             /** @description 요청 제한 저장소 사용 불가 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
+    claim: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                inviteCode: string;
+            };
+            cookie?: {
+                meet_me_guest?: string;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 동일 참여자 보존 후 연결 성공 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RoomResponse"];
+                };
+            };
+            /** @description 계정 또는 게스트 증명 누락/무효 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description Origin 또는 게스트 소유 증명 범위 부족 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 방 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 이미 계정 참여 존재 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 인증 검증 키 사용 불가 */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -1742,6 +2012,143 @@ export interface operations {
             };
         };
     };
+    refresh: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Access와 계정 반환. Refresh는 Set-Cookie로만 전달 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AuthResponse"];
+                };
+            };
+            /** @description Refresh 누락/만료/재사용 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 정확한 Origin 불일치 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 인증 저장소/서명 키 사용 불가 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
+    logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 현재 패밀리 폐기와 쿠키 만료 */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 잘못된 Refresh 형식 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 정확한 Origin 불일치 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 인증 저장소 사용 불가 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
+    logoutAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 현재 계정의 모든 Refresh 패밀리 폐기와 쿠키 만료 */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Access 누락/검증 실패 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 정확한 Origin 불일치 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 인증 저장소 사용 불가 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
     get_1: {
         parameters: {
             query?: never;
@@ -1762,6 +2169,24 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["RoomResponse"];
+                };
+            };
+            /** @description 제공한 Access Token이 무효 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 참여 소유 증명 범위 부족 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
                 };
             };
             /** @description 방 없음 */
@@ -2094,6 +2519,163 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
+    start: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 공급자 인증 화면 이동 */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 유효하지 않은 로그인 요청 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 공급자 또는 서명 키 설정/저장소 사용 불가 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
+    callback: {
+        parameters: {
+            query?: {
+                code?: string;
+                state?: string;
+            };
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: {
+                meetme_oauth_browser?: string;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Refresh 쿠키 발급과 고정 웹 이동 */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 공급자 거절 또는 state/브라우저/ID Token 검증 실패 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 인증 공급자/저장소 사용 불가 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
+    me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 현재 계정 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AccountResponse"];
+                };
+            };
+            /** @description Access 누락/검증 실패 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 검증 키 사용 불가 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
+    accountRooms: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 30일 보관 범위 내 본인 방 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AccountRoomsResponse"];
+                };
+            };
+            /** @description 로그인 필요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 인증 검증 키 사용 불가 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
                 };
             };
         };

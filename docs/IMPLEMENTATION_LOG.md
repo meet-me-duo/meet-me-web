@@ -1,5 +1,13 @@
 # Implementation log
 
+## 2026-10-17 — 서버 #109 연결 웹 로그인·본인 방 아카이브
+
+- 최신 원격 main `9b183978d5987f8fa8a5f02d542b17181e4929b4`의 clean 트리에서 local `feature/issue-109-account-archive`로 분리했다. 원격 develop이 없는 웹 저장소 지침을 따른 것이며 서버 기준 develop3232128과 구분한다. 기존 미커밋 작업을 가져오지 않았다.
+- Google/Kakao 로그인, 로그인 필수 생성, 회원 이름 생략, 게스트 참여, 명시적 게스트 연결·409충돌, 본인 HOST 아카이브와 정리 예정 시각을 구현했다. 계정별 메모리/cache·지연 응답 격리, HttpOnly cookie Refresh 회전, 탭 간 cookie 요청 직렬화 및 만료 Access의 게스트 우회 차단을 포함한다.
+- 독립 frozen RED/GREEN·결함 주입과 교차 검토는 `.tdd`에 기록한다. ClaimConflict 최초 typed fixture 오류는 INVALIDATED 이력으로 보존하고 수정 후 독립 회귀 GREEN으로 구분했다. 실제 운영 OAuth 성공을 주장하지 않는다.
+- 최신 unit364/364, typecheck/lint/api:check/build, 최종동일source/dist browser383PASS+기존skip1/실패0, 실제격리서버native12PASS를 확인했다. 정확지문은 verification manifest, 결과는 `docs/ISSUE_109_HANDOFF.md`에 기록한다. 추가사용자승인으로독립리뷰뒤commit/push/DraftPR/정확headCI를 진행하며 merge/deploy/운영DB/실제secret변경은제외한다.
+
+
 ## 2026-10-07 — #17 지연 분석 재시도의 동일 화면 참여자 전환 경합
 
 - 최종 `059f049a4832effb2e2cc844d33f4cdd50b5dc1e`의 읽기 검토에서 `ANALYSIS_DELAYED`가 유지된 채 joined HOST에서 다른 joined MEMBER/context로 바뀌면 DelayedState hook이 재사용되는 경계를 확인했다. 기존 unjoined 복구 회귀는 컴포넌트 unmount만 검증했다. 독립 추가2건이 old retry200의 이전 HOST 복원과 old403의 새 MEMBER private cache 삭제를 실제 assertion RED로 재현했다.

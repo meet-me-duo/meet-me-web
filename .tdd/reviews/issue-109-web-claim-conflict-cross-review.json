@@ -1,0 +1,26 @@
+{
+  "workItem": "issue-109-web-claim-conflict-cross-review",
+  "reviewer": "/root/identity_db_tests",
+  "independence": "Did not author the claim conflict test or production account claim UI",
+  "verdict": "APPROVED_CORRECTED_REGRESSION_DESIGN",
+  "testFiles": [
+    {
+      "path": "src/auth/ClaimConflictView.test.tsx",
+      "sha256": "212053e3092e5326bcdb32384000a53ad19ac2d70afd27333e12a1f70096bb91"
+    }
+  ],
+  "checks": [
+    "Authenticated account already has MEMBER participation with public opaque context_id, display name and role in room cache",
+    "Disclosure is explicitly opened before clicking claim; login/load/disclosure alone never triggers claim",
+    "409 detail shown with exactly one explicit claim and no ordinary join",
+    "Cached viewer context hint, display name and role remain exactly unchanged after conflict",
+    "No successful ownership-link message fabricated",
+    "context_id is an opaque cache hint, not identity authorization proof; server independently verifies account and guest ownership"
+  ],
+  "scopeLimits": [
+    "This unit case checks post-click state preservation; optional disclosure expansion and browser visibility must be verified by native browser tests",
+    "Database participant/submission preservation and conflicting-claim race remain server PostgreSQL tests"
+  ],
+  "recordedAt": "2026-10-17T14:58:53Z",
+  "finding": "Initial review missed fixture participant_id was outside the public Viewer contract. This review withdraws the original approval, validates corrected context_id and disclosure interaction, and treats it as an added GREEN regression rather than claiming pre-implementation TDD."
+}

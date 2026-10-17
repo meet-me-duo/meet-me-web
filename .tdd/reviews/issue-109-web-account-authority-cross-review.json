@@ -1,0 +1,23 @@
+{
+  "workItem": "issue-109-web-account-authority-cross-review",
+  "reviewer": "/root/identity_db_tests",
+  "independence": "Reviewer did not author new frozen account authority test or production change; independently owns affected existing fixtures.",
+  "verdict": "APPROVED_TEST_DESIGN",
+  "testFiles": [
+    {
+      "path": "src/utils/createRoom.account-authority.test.ts",
+      "sha256": "7aa054ff6e9d91f1340ce41a3410ac8a174c51ac0aa8465f59de9bee90a45c07"
+    }
+  ],
+  "checks": [
+    "Normal and 50 Unicode emoji account profiles are valid 1..50 codepoints, exercised at public createRoomBody boundary.",
+    "Key absence explicitly asserted, then all remaining room payload fields asserted exactly; undefined/empty-name transmission cannot pass.",
+    "Profile originates from authenticated server identity; legacy ignored client field is unnecessary and its UTF16 validation can reject valid profiles.",
+    "Frozen fingerprint matches valid two-case RED before production fix.",
+    "Existing schema tests separately preserve trim and 1..50 Unicode boundaries; old serialization expectation explicitly superseded, not silently relaxed."
+  ],
+  "scopeLimits": [
+    "No operational OAuth claim. This pure serialization test is supplemented by full UI unit/browser runs and parent actual-backend native harness."
+  ],
+  "recordedAt": "2026-10-17T15:26:05.372451Z"
+}

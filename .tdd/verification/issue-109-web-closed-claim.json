@@ -1,0 +1,24 @@
+{
+  "workItem": "issue-109-web-closed-claim",
+  "sourceRevision": "9b183978d5987f8fa8a5f02d542b17181e4929b4",
+  "testFiles": [
+    {
+      "path": "src/auth/ClosedGuestClaim.test.tsx",
+      "sha256": "78fef1238ef9014f76812ff4782b5090bfb1b8366488dd2e5c4031f6cd3323b5"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "src/pages/RoomPage.tsx",
+      "sha256": "15e702c59de9cafbf43afac0cf9aa754c9fb45cda123f550284751bbbe21d1cb"
+    }
+  ],
+  "green": {
+    "tests": 1,
+    "failed": 0,
+    "rawLog": ".codex/tdd-evidence/issue-109-web-closed-claim-green.log"
+  },
+  "crossReview": ".tdd/reviews/issue-109-web-closed-claim-cross-review.json",
+  "browserIntegration": "Pending actual browser server/provider flow; this result is component/router integration only",
+  "recordedAt": "2026-10-17T14:47:31.879313Z"
+}

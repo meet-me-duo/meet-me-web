@@ -1,13 +1,32 @@
 import { expect, test } from "@playwright/test";
+import { installAccountRefresh } from "./accountFixture";
+
+test.beforeEach(async ({ page }) => { await installAccountRefresh(page, null); });
+
+async function keyboardToHero(page: import("@playwright/test").Page) {
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("link", { name: "Meet me 홈" })).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("link", { name: "내가 만든 모임", exact: true })).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("link", { name: "로그인", exact: true })).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("button", { name: "로그아웃", exact: true })).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("button", { name: "모든 기기 로그아웃", exact: true })).toBeFocused();
+  await page.keyboard.press("Tab");
+}
+
 
 
 test("landing page starts the two-step room flow", async ({ page }) => {
+  await installAccountRefresh(page, "민수");
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /조건만 말하세요/ })).toBeVisible();
   await page.getByRole("button", { name: "모임 만들기" }).click();
   await expect(page).toHaveURL(/\/create$/);
   await expect(page.getByText("Step 1 of 2")).toBeVisible();
-  await page.getByLabel("주최자 이름").fill("민수");
+  await expect(page.getByLabel("주최자 이름")).toHaveCount(0);
   await page.getByLabel("모임 목적 / 이름").fill("프로젝트 킥오프");
   await page.getByRole("button", { name: /다음 단계/ }).click();
   await expect(page.getByRole("heading", { name: "언제 입력을 마감할까요?" })).toBeVisible();
@@ -75,6 +94,7 @@ for (const [width, height] of [[320, 568], [360, 640], [390, 844], [430, 932], [
 }
 
 test("landing supports keyboard navigation and viewport height changes", async ({ page }) => {
+  await installAccountRefresh(page, "민수");
   await page.setViewportSize({ width: 390, height: 664 });
   await page.goto("/");
   await page.setViewportSize({ width: 390, height: 844 });
@@ -82,16 +102,15 @@ test("landing supports keyboard navigation and viewport height changes", async (
   await expect(action).toBeInViewport({ ratio: 1 });
   await page.setViewportSize({ width: 390, height: 564 });
   await expect(action).toBeInViewport({ ratio: 1 });
-  await page.keyboard.press("Tab");
-  await expect(page.getByRole("link", { name: "Meet me 홈" })).toBeFocused();
-  await page.keyboard.press("Tab");
+  await keyboardToHero(page);
   await expect(action).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/create$/);
-  await expect(page.getByLabel("주최자 이름")).toBeFocused();
+  await expect(page.getByLabel("모임 목적 / 이름")).toBeFocused();
 });
 
 test("hero action has strong contrast, keyboard focus and subtle pointer feedback", async ({ page }) => {
+  await installAccountRefresh(page, "민수");
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
   const action = page.getByRole("button", { name: "모임 만들기" });
@@ -110,8 +129,7 @@ test("hero action has strong contrast, keyboard focus and subtle pointer feedbac
   });
   expect(contrast).toBeGreaterThanOrEqual(4.5);
   await expect(action).toHaveCSS("background-image", "none");
-  await page.keyboard.press("Tab");
-  await page.keyboard.press("Tab");
+  await keyboardToHero(page);
   await expect(action).toBeFocused();
   expect(await action.evaluate((element) => element.matches(":focus-visible"))).toBe(true);
   await expect(action).toHaveCSS("outline-width", "3px");
@@ -124,7 +142,7 @@ test("hero action has strong contrast, keyboard focus and subtle pointer feedbac
   await page.mouse.up();
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/create$/);
-  await expect(page.getByLabel("주최자 이름")).toBeFocused();
+  await expect(page.getByLabel("모임 목적 / 이름")).toBeFocused();
 });
 
 test("hero action stays still for reduced motion", async ({ page }) => {

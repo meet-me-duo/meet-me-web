@@ -1,0 +1,238 @@
+{
+  "workItem": "issue-109-e2e-account-fixtures",
+  "role": "independent legacy browser fixture migration; no production changes",
+  "status": "PASS on final account-authority compiled boundary:384 scheduled desktop/mobile cases;383 passed,1 pre-existing desktop-only mobile-layout skip,0 failed;4.5min",
+  "scope": [
+    "Only HOST scenarios obtain synthetic service account refresh; ordinary MEMBER/guest join remain anonymous401",
+    "Bootstrap POST/api/auth/refresh intercepted before business-write/unexpected counters; methodPOST and exact frame origin asserted; existing external-origin guards retained",
+    "Synthetic access expiry15minutes from browser clock preserves fake-clock/timezone scenario behavior",
+    "Removed manual host name input interactions replaced with absence/profile-default purpose form interactions; previous-step focus now purpose",
+    "Landing keyboard traversal explicitly verifies the new account navigation/logout controls before reaching hero; original focus/contrast/layout assertions retained",
+    "Static homepage and local-history-only scenarios intercept anonymous refresh to avoid real proxy/backend traffic",
+    "Original duplicate-write, exact payload, privacy, drafts, expired storage, guest proof and touch/layout assertions retained"
+  ],
+  "testFiles": [
+    {
+      "path": "e2e/analysis-recovery.spec.ts",
+      "sha256": "86b0ed23fbbd073d826a2c54d467a05e3178377768e56571c7dfb13201c11ce1"
+    },
+    {
+      "path": "e2e/create-form.spec.ts",
+      "sha256": "81ff3593ffa4425df0d359b90da04c28672f14c393cd0902c472a284e9096e6c"
+    },
+    {
+      "path": "e2e/diverse-recommendations.spec.ts",
+      "sha256": "c18b4851224d26c75bd3f209c6c645cdc1e0bb94870432bfec5e282a7e52334a"
+    },
+    {
+      "path": "e2e/host-creation.spec.ts",
+      "sha256": "7285cee3339262e2f08309c77eb951dd5ce88ff8853cc988826ecc0e22ab8614"
+    },
+    {
+      "path": "e2e/landing.spec.ts",
+      "sha256": "95d5416d0fe1f36fcc240943e7544f5dd5c867c80c368bf29443f876c2949b76"
+    },
+    {
+      "path": "e2e/plan-accuracy.spec.ts",
+      "sha256": "82af1a56b3118dfaefe90041fe835196d83224850069caeed03f76e5f1fbacbc"
+    },
+    {
+      "path": "e2e/recent-rooms.spec.ts",
+      "sha256": "669e6e52dfbc1ef760df8e95a8a80acf60669c574dda62b4a0dc9a0796b8e423"
+    },
+    {
+      "path": "e2e/room-states.spec.ts",
+      "sha256": "01cb6cc69173ff9c004c9d43630b0990ba09e4a5325becc186749940a7d72ec0"
+    },
+    {
+      "path": "e2e/saved-input.spec.ts",
+      "sha256": "0ecb5c56a3369cddadce9c49836e4aec343f9476e51d88bff00eac9545bc76d7"
+    },
+    {
+      "path": "e2e/submission-flow.spec.ts",
+      "sha256": "d0ae765cf9961a691dded56f01cd7409db11de7ac53c16e6ab194457a745c624"
+    },
+    {
+      "path": "e2e/submission.spec.ts",
+      "sha256": "300a9ace3bcb193e8cfc29ddfcde98006166586da0e9a787d5a6aebc6006dab7"
+    },
+    {
+      "path": "e2e/ux-integration.spec.ts",
+      "sha256": "49653ea1d79286655af40d9af7fb407ee80d15888250b8b2f5f725e96d53a5db"
+    },
+    {
+      "path": "e2e/accountFixture.ts",
+      "sha256": "fe372124e74f01a72379e7b894571eb7a1aa3eec2f8903ae86ddfb9e14c9b100"
+    }
+  ],
+  "environment": {
+    "browser": "system /usr/bin/chromium via temporary /tmp/meetme-109-e2e.config.mjs",
+    "configuration": "desktop+mobile projects inherited; retries0 workers4; repository CI/browser policy unchanged",
+    "target": "local http://127.0.0.1:4173 production preview; all business APIs mocked; no real OAuth or external call claimed"
+  },
+  "evidence": [
+    {
+      "command": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config=/tmp/meetme-109-e2e.config.mjs",
+        "--list"
+      ],
+      "result": "384 cases in12files",
+      "log": "/tmp/meetme-109-e2e-list.log"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/eslint/bin/eslint.js",
+        "e2e/accountFixture.ts",
+        "e2e/*.spec.ts"
+      ],
+      "result": "PASS",
+      "log": "/tmp/meetme-109-e2e-fixtures-lint.log"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config=/tmp/meetme-109-e2e.config.mjs"
+      ],
+      "result": "376 PASS,7 test-fixture navigation errors,1 existing desktop skip before fixture correction; no production assertions relaxed",
+      "log": "/tmp/meetme-109-e2e-full.log"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "e2e/host-creation.spec.ts",
+        "e2e/recent-rooms.spec.ts",
+        "--config=/tmp/meetme-109-e2e.config.mjs",
+        "--grep",
+        "create, share before|opening a 404|opening a 503|clipboard failure",
+        "--workers=2",
+        "--output=/tmp/meetme-109-e2e-focused-final"
+      ],
+      "result": "8/8 PASS desktop+mobile,10s after fixture correction",
+      "log": "/tmp/meetme-109-e2e-focused-final.log"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config=/tmp/meetme-109-e2e.config.mjs",
+        "--output=/tmp/meetme-109-e2e-final-results"
+      ],
+      "result": "383 PASS +1 existing intentional desktop skip,0 FAIL,4.2min; entire final corrected fixture source",
+      "log": "/tmp/meetme-109-e2e-final.log",
+      "artifacts": "/tmp/meetme-109-e2e-final-results"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config=/tmp/meetme-109-e2e.config.mjs",
+        "--output=/tmp/meetme-109-e2e-r10906-results"
+      ],
+      "result": "383 PASS +1 existing intentional desktop skip,0 FAIL,5.0min after R109-06; latest strict-token/no-store source",
+      "log": "/tmp/meetme-109-e2e-r10906-final.log",
+      "artifacts": "/tmp/meetme-109-e2e-r10906-results"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config=/tmp/meetme-109-e2e.config.mjs",
+        "--output=/tmp/meetme-109-e2e-account-authority-results"
+      ],
+      "result": "383 PASS +1 existing intentional desktop skip,0 FAIL,4.5min after final account-authority payload fix; final source/dist fingerprints unchanged throughout run",
+      "log": "/tmp/meetme-109-e2e-account-authority-final.log",
+      "artifacts": "/tmp/meetme-109-e2e-account-authority-results"
+    }
+  ],
+  "recordedAt": "2026-10-17T15:31:16.505284Z",
+  "build": {
+    "command": [
+      "node node_modules/typescript/bin/tsc -b --pretty false",
+      "node node_modules/vite/bin/vite.js build --configLoader runner"
+    ],
+    "result": "PASS after final account-authority host-field omission; includes final generated API schema and R109-06",
+    "log": "/tmp/meetme-109-web-account-authority-build.log",
+    "artifacts": [
+      {
+        "path": "dist/assets/favicon-DjtCOTlh.svg",
+        "sha256": "cf1f8ed7dc4da2af8250d48bf63bab813aa9e855d86edda6f833b24db91742bd"
+      },
+      {
+        "path": "dist/assets/index-By9lmPRX.js",
+        "sha256": "16b756899fa639b18911800f2388c32542dd86a4ec5222dbaf34d23c7d42f9b3"
+      },
+      {
+        "path": "dist/assets/index-DfMJutKC.css",
+        "sha256": "3b0662cb0de9ccdfc609dc2e9a0b6c2d1d62137a2023d13a54c5cce6b09b5c38"
+      },
+      {
+        "path": "dist/index.html",
+        "sha256": "1714df01b96c2859fe85b424f9f56bebea5898ddca946fc34878112fca9a3b0c"
+      }
+    ]
+  },
+  "fixtureCorrection": "Reading fake browser clock in intercepted HOST refresh raced immediate reload/navigation. Corrected helper aborts only the obsolete request on exact Execution context was destroyed error, rethrows all other errors, and does not retry any HTTP request. Original assertions retained. Local-history seed now awaits the existing visible hero after reload so the required auth bootstrap completes before the original writes==0 listener starts; no request exclusions or expectation changes.",
+  "finalCommand": [
+    "node",
+    "node_modules/@playwright/test/cli.js",
+    "test",
+    "--config=/tmp/meetme-109-e2e.config.mjs",
+    "--output=/tmp/meetme-109-e2e-account-authority-results"
+  ],
+  "finalLog": "/tmp/meetme-109-e2e-account-authority-final.log",
+  "operationalOAuthVerified": false,
+  "sourceChanges": "Only browser fixtures/assertions adapting mandatory account HOST profile and removed editable name; production files unchanged by this work",
+  "additionalCycle": "Independent R109-06 tests detect anonymous fallback on expired in-memory account and absent no-store fetch policy. Parent production fix requires fresh build/browser gate; earlier383PASS result retained as honest prior-boundary evidence. A later independent P2 found ignored legacy host field UTF16 validation could reject a valid 50-codepoint emoji account. Parent removed field, three serialization-only existing expectations explicitly superseded, and whole364 unit/fresh384 browser gate repeated. Earlier383PASS histories remain valid for prior boundaries.",
+  "buildHistory": [
+    {
+      "command": [
+        "node node_modules/typescript/bin/tsc -b --pretty false",
+        "node node_modules/vite/bin/vite.js build --configLoader runner"
+      ],
+      "result": "PASS",
+      "log": "/tmp/meetme-109-web-e2e-build.log",
+      "artifacts": [
+        {
+          "path": "dist/assets/index-Cwxw5d6O.js",
+          "sha256": "dca6a34f025d7030c80b3c43265b2dc28e7ddbbea0ba01ecb05bc556c35b0dbe"
+        }
+      ]
+    },
+    {
+      "command": [
+        "node node_modules/typescript/bin/tsc -b --pretty false",
+        "node node_modules/vite/bin/vite.js build --configLoader runner"
+      ],
+      "result": "PASS after R109-06 strict expired-session API/cache boundary",
+      "log": "/tmp/meetme-109-web-r10906-build.log",
+      "artifacts": [
+        {
+          "path": "dist/assets/index-DWM7P9ZD.js",
+          "sha256": "7d56bce47862746d288533715fe177ec24d61154df656fd4bcf918c00b79943b"
+        }
+      ]
+    }
+  ],
+  "postSchemaBuild": {
+    "log": "/tmp/meetme-109-web-post-schema-build.log",
+    "typecheck": "PASS",
+    "build": "PASS",
+    "distUnchanged": true,
+    "manifest": "docs/verification/issue-109-web-final-manifest.json",
+    "latestFinalBuild": "/tmp/meetme-109-web-account-authority-build.log",
+    "latestFinalDistManifest": "docs/verification/issue-109-web-final-manifest.json"
+  },
+  "sourceDistUnchangedThroughoutFinalBrowserGate": true,
+  "accountAuthoritySupersession": "e2e/create-form.spec.ts exact creation payload omits legacy host_display_name; every remaining field still asserted exactly. Purpose focus/account name waiver and all non-auth/guest assertions preserved. See docs/verification/issue-109-unit-fixture-migration.json and independent .tdd/red/issue-109-web-account-authority.json."
+}

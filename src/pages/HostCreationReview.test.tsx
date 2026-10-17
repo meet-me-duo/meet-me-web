@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, useNavigate } from "react-router-dom";
 import { api, ApiError } from "../api/client";
 import type { Candidate, Room, SavedSubmission } from "../api/types";
+import * as accountHook from "../auth/useAccount";
+import * as accountSession from "../auth/session";
 import App from "../App";
 
 const code = "abcdefghijklmnopqrstuv", otherCode = "zyxwvutsrqponmlkjihgfe";
@@ -24,6 +26,10 @@ function Navigation() {
   return <><button onClick={() => navigate(`/rooms/${otherCode}`)}>합성 다른 방</button><button onClick={() => navigate(`/rooms/${code}`)}>합성 원래 방</button></>;
 }
 function setup(path = `/rooms/${code}`) {
+  // Every initial room snapshot in this file is HOST; later ownership changes remain server-driven.
+  const session = { accessToken: "synthetic-host-access", expiresAt: new Date(Date.now() + 900_000).toISOString(), account: { id: "11111111-2222-4333-8444-555555555555", displayName: "합성 주최자" } };
+  vi.spyOn(accountSession, "getSession").mockReturnValue(session);
+  vi.spyOn(accountHook, "useAccountSession").mockReturnValue(session);
   const reads = vi.spyOn(api, "getRoom").mockResolvedValue(host);
   const own = vi.spyOn(api, "getSubmission").mockRejectedValue(new ApiError(404, { code: "SUBMISSION_NOT_FOUND" }));
   const save = vi.spyOn(api, "saveSubmission"); const create = vi.spyOn(api, "createRoom"); const join = vi.spyOn(api, "joinRoom");
@@ -48,8 +54,11 @@ async function advance(client: QueryClient, reads: ReturnType<typeof setup>["rea
   await act(async () => { await client.invalidateQueries({ queryKey: ["room", code] }); });
 }
 async function submitCreation() {
-  fireEvent.change(screen.getByLabelText("주최자 이름"), { target: { value: "합성 주최자" } });
-  fireEvent.change(screen.getByLabelText("모임 목적 / 이름"), { target: { value: host.purpose } });
+  const purpose = await screen.findByLabelText("모임 목적 / 이름");
+  expect(purpose).toHaveFocus();
+  expect(screen.queryByLabelText("주최자 이름")).not.toBeInTheDocument();
+  expect(screen.getByText("합성 주최자 님의 모임으로 만들어져요.")).toBeInTheDocument();
+  fireEvent.change(purpose, { target: { value: host.purpose } });
   fireEvent.click(screen.getByRole("button", { name: /다음 단계/ }));
   fireEvent.click(await screen.findByRole("button", { name: "방 만들기" }));
 }

@@ -1,0 +1,31 @@
+{
+  "workItem": "issue-109-web-expired-session",
+  "sourceRevision": "9b183978d5987f8fa8a5f02d542b17181e4929b4",
+  "testFiles": [
+    {
+      "path": "src/api/client.expired-session.test.ts",
+      "sha256": "8d723636f28ffd6368d9946b01d12cfac65be1ccec4d6bbae239a688ed47f896"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/api/client.expired-session.test.ts",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1",
+    "--reporter=json",
+    "--outputFile=/tmp/meetme-109-web-expired-session-targeted-red.json"
+  ],
+  "failedTests": [
+    "#109 expired local account cannot fall back to guest cookies rejects private GET before any guest-capable fetch at the exact Access expiry",
+    "#109 expired local account cannot fall back to guest cookies rejects submission PUT before any guest-capable fetch at the exact Access expiry",
+    "#109 expired local account cannot fall back to guest cookies bypasses browser HTTP cache when fetching private submission data for a valid account"
+  ],
+  "expectedFailureCategory": "MISSING_BEHAVIOR",
+  "recordedAt": "2026-10-17T15:09:39.276003Z"
+}

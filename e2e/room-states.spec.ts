@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { installAccountRefresh } from "./accountFixture";
 
 const code = "abcdefghijklmnopqrstuv";
 
@@ -36,6 +37,7 @@ const candidate = {
 };
 
 async function mockRoom(page: Page, status: string, options: { joined?: boolean; role?: "HOST" | "MEMBER" } = {}) {
+  await installAccountRefresh(page, options.role === "HOST" && options.joined !== false ? "지수" : null);
   await page.route("**/api/rooms/**", async (route) => {
     const url = route.request().url();
     if (url.endsWith("/submission")) return route.fulfill({ status: 404, contentType: "application/problem+json", body: JSON.stringify({ code: "SUBMISSION_NOT_FOUND", detail: "제출 없음" }) });

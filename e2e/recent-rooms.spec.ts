@@ -1,4 +1,7 @@
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
+import { fulfillAccountRefresh, installAccountRefresh } from "./accountFixture";
+
+test.beforeEach(async ({ context }) => { await installAccountRefresh(context, null); });
 
 const code = "abcdefghijklmnopqrstuv", key = "meet-me:recent-rooms:v1";
 const room = {
@@ -10,8 +13,9 @@ const room = {
 
 async function fixture(context: BrowserContext, options: { joined?: boolean; role?: string; status?: string; error?: number } = {}) {
   let joined = options.joined ?? true, role = options.role ?? "HOST";
-  await context.route("**/api/**", route => {
+  await context.route("**/api/**", async route => {
     const request = route.request(), pathname = new URL(request.url()).pathname;
+    if (await fulfillAccountRefresh(route, joined && role === "HOST" ? "로컬 사용자" : null)) return;
     const response = () => ({ ...room, public_status: options.status ?? room.public_status, viewer: { joined, role: joined ? role : null, display_name: joined ? "로컬 사용자" : null } });
     if (pathname === "/api/rooms" && request.method() === "POST") { joined = true; role = "HOST"; return route.fulfill({ status: 201, json: response() }); }
     if (pathname.endsWith("/participants") && request.method() === "POST") { joined = true; role = "MEMBER"; return route.fulfill({ status: 201, json: response() }); }
@@ -24,12 +28,14 @@ async function seed(page: Page, lastOpenedAt = Date.now()) {
   await page.goto("/");
   await page.evaluate(({ key, code, lastOpenedAt }) => localStorage.setItem(key, JSON.stringify({ version: 1, rooms: [{ inviteCode: code, title: "다시 찾을 모임", lastOpenedAt }] })), { key, code, lastOpenedAt });
   await page.reload();
+  // Begin local-history assertions only after the new page's required auth bootstrap settles.
+  await expect(page.getByRole("heading", { name: /조건만 말하세요/ })).toBeVisible();
 }
 
 test("creation is recorded before opening and a new tab returns to a selectable home", async ({ page, context }) => {
   await fixture(context);
   await page.goto("/create");
-  await page.getByLabel("주최자 이름").fill("로컬 사용자");
+  await expect(page.getByLabel("주최자 이름")).toHaveCount(0);
   await page.getByLabel("모임 목적 / 이름").fill(room.purpose);
   await page.getByRole("button", { name: /다음 단계/ }).click();
   await page.getByRole("button", { name: "방 만들기", exact: true }).click();
@@ -85,7 +91,7 @@ test("storage rejection preserves successful creation and explains link preserva
   await fixture(context);
   await page.addInitScript(() => { Storage.prototype.setItem = () => { throw new DOMException("denied", "QuotaExceededError"); }; });
   await page.goto("/create");
-  await page.getByLabel("주최자 이름").fill("로컬 사용자");
+  await expect(page.getByLabel("주최자 이름")).toHaveCount(0);
   await page.getByLabel("모임 목적 / 이름").fill(room.purpose);
   await page.getByRole("button", { name: /다음 단계/ }).click();
   await page.getByRole("button", { name: "방 만들기", exact: true }).click();

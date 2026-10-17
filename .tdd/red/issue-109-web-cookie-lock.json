@@ -1,0 +1,32 @@
+{
+  "workItem": "issue-109-web-cookie-lock",
+  "sourceRevision": "9b183978d5987f8fa8a5f02d542b17181e4929b4",
+  "testFiles": [
+    {
+      "path": "src/auth/authCookieLock.test.ts",
+      "sha256": "9277f2d4dca3924a9ba04698aa445b396d0b72f8adb7c03a86eb7c900999c621"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/auth/authCookieLock.test.ts",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1",
+    "--reporter=json",
+    "--outputFile=/tmp/meetme-109-web-cookie-lock-red.json"
+  ],
+  "failedTests": [
+    "issue #109 shared-browser auth cookie serialization calls the action exactly once when Web Locks are unavailable",
+    "issue #109 shared-browser auth cookie serialization requests the shared lock and waits for its grant before invoking the cookie action",
+    "issue #109 shared-browser auth cookie serialization keeps the lock callback pending until the entire supplied async action completes",
+    "issue #109 shared-browser auth cookie serialization propagates a cookie action failure once without retrying inside or outside the lock"
+  ],
+  "expectedFailureCategory": "TDD_TODO_REACHED",
+  "recordedAt": "2026-10-17T14:46:15Z"
+}

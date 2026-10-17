@@ -12,6 +12,8 @@ import { CandidateCard } from "../components/CandidateCard";
 import { formatDate, formatDateTime } from "../utils/time";
 import { submissionText, SUBMISSION_TEXT_LIMIT } from "../utils/submission";
 import { useRecentRooms } from "../hooks/useRecentRooms";
+import { useAccountSession } from "../auth/useAccount";
+import { ClaimGuestParticipation, LoginGate } from "../auth/AccountViews";
 import { rememberRoom, roomLink } from "../utils/recentRooms";
 
 const UNAPPLIED_REASON_MESSAGES: Record<string, string> = {
@@ -22,6 +24,7 @@ const UNAPPLIED_REASON_MESSAGES: Record<string, string> = {
 
 export default function RoomPage() {
   const { inviteCode = "" } = useParams();
+  const accountSession = useAccountSession();
   const queryClient = useQueryClient();
   const recent = useRecentRooms();
   const [draft, setDraft] = useState<{ inviteCode: string; viewer: string; rawText: string } | null>(null);
@@ -118,11 +121,14 @@ export default function RoomPage() {
   const currentDraft = draft?.inviteCode === room.invite_code && draft.viewer === viewerContext(room) ? draft.rawText : null;
   const showEditor = room.public_status === "COLLECTING" && (!correctionOpen(room) || room.capabilities?.can_edit_own_submission);
 
-  if (!room.viewer.joined) return room.public_status === "COLLECTING" && room.collection_status === "COLLECTING" ? <JoinRoom room={room} onJoined={setRoom} previouslySaved={recent.rooms.some(item => item.inviteCode === inviteCode)} /> : <StateCard icon={<LockKeyhole />} title="입력이 마감된 모임이에요" body="참여했던 브라우저에서 다시 열어 주세요. 참여 정보가 삭제되거나 만료되면 보관한 링크만으로 기존 권한이나 결과를 복구할 수 없어요." />;
+  if (!room.viewer.joined) return <>{room.public_status === "COLLECTING" && room.collection_status === "COLLECTING" ? <JoinRoom room={room} onJoined={setRoom} previouslySaved={recent.rooms.some(item => item.inviteCode === inviteCode)} /> : <StateCard icon={<LockKeyhole />} title="입력이 마감된 모임이에요" body="참여했던 브라우저에서 다시 열어 주세요. 참여 정보가 삭제되거나 만료되면 보관한 링크만으로 기존 권한이나 결과를 복구할 수 없어요." />}{accountSession && <ClaimGuestParticipation inviteCode={inviteCode} onClaimed={setRoom} />}</>;
+
+  if (!accountSession && room.viewer.role === "HOST") return <div className="room-page page-width"><RoomHeader room={room} /><LoginGate returnTo={`/rooms/${inviteCode}`} /><p className="privacy-note">기존 기록은 그대로 있어요. 로그인한 뒤 이 브라우저의 참여를 명시적으로 연결하면 주최자 기능을 사용할 수 있어요.</p></div>;
 
   return (
     <div className="room-page page-width">
       <RoomHeader room={room} />
+      {accountSession && <details className="claim-disclosure"><summary>이 브라우저의 이전 참여 연결</summary><ClaimGuestParticipation inviteCode={inviteCode} onClaimed={setRoom} /></details>}
       {roomQuery.isError && <div className="alert warning room-refresh-warning" role="status"><span>모임 상태를 갱신하지 못했어요. 마지막으로 확인한 상태를 보여드려요.</span><button className="button secondary" disabled={roomQuery.isFetching} onClick={() => roomQuery.refetch()}>진행 상태 다시 확인</button></div>}
       {showEditor && <SubmissionPanel key={`submission:${ownerKey}`} room={room} onRoomChanged={setRoom} onAccessDenied={privateAccessDenied} draft={currentDraft} onDraftChanged={updateDraft} />}
       {!showEditor && currentDraft !== null && <section className="glass-card side-card"><h2>서버 반영을 확인하지 않은 임시 입력</h2><p>저장하지 않은 내용은 분석에 포함되지 않아요. 이 화면에만 임시로 보관했어요. 저장 여부는 내 저장된 입력에서 확인해 주세요. 새로고침하거나 다른 모임으로 이동하면 사라져요.</p><label className="field"><span>내 임시 조건</span><textarea readOnly value={currentDraft} rows={4} /></label><button className="button secondary" onClick={() => setDraft(null)}>임시 수정 버리기</button></section>}
@@ -248,9 +254,10 @@ function RoomHistoryNotice({ room }: { room: Room }) {
 }
 
 function JoinRoom({ room, onJoined, previouslySaved }: { room: Room; onJoined: (room: Room) => void; previouslySaved: boolean }) {
+  const accountSession = useAccountSession();
   const [name, setName] = useState("");
-  const mutation = useMutation({ mutationFn: () => api.joinRoom(room.invite_code, name.trim()), onSuccess: joinedRoom => { rememberRoom(joinedRoom); onJoined(joinedRoom); } });
-  return <div className="form-page page-width narrow"><div className="glass-card join-card"><div className="large-icon"><Users /></div><span className="eyebrow subtle">초대받은 모임</span><h1>{room.purpose}</h1>{previouslySaved && <p className="previous-participation">이 브라우저의 이전 참여 정보를 확인하지 못했어요. 참여했던 브라우저에서 다시 열어 주세요. 같은 이름으로 새로 참여해도 기존 주최자 권한이나 입력은 복구되지 않아요.</p>}<p>참여할 이름을 입력해 주세요. 다른 참여자에게 표시되는 이름이에요.</p><form onSubmit={(event) => { event.preventDefault(); if (name.trim()) mutation.mutate(); }}><label className="field"><span>내 이름</span><input autoFocus maxLength={50} value={name} onChange={(event) => setName(event.target.value)} placeholder="예: 지수" /></label>{mutation.isError && <div className="alert error">{errorMessage(mutation.error)}</div>}<button className="button primary wide" disabled={!name.trim() || mutation.isPending}>{mutation.isPending ? "참여 중…" : "모임 참여하기"}</button></form><p className="privacy-note"><LockKeyhole size={15} /> 내 입력은 후보가 나오기 전까지 다른 사람에게 공개되지 않아요.</p></div></div>;
+  const mutation = useMutation({ mutationFn: () => api.joinRoom(room.invite_code, accountSession ? undefined : name.trim()), onSuccess: joinedRoom => { rememberRoom(joinedRoom); onJoined(joinedRoom); } });
+  return <div className="form-page page-width narrow"><div className="glass-card join-card"><div className="large-icon"><Users /></div><span className="eyebrow subtle">초대받은 모임</span><h1>{room.purpose}</h1>{previouslySaved && <p className="previous-participation">이 브라우저의 이전 참여 정보를 확인하지 못했어요. 참여했던 브라우저에서 다시 열어 주세요. 같은 이름으로 새로 참여해도 기존 주최자 권한이나 입력은 복구되지 않아요.</p>}<p>{accountSession ? `${accountSession.account.displayName} 님의 계정으로 참여해요.` : "참여할 이름을 입력해 주세요. 다른 참여자에게 표시되는 이름이에요."}</p><form onSubmit={(event) => { event.preventDefault(); if (accountSession || name.trim()) mutation.mutate(); }}>{!accountSession && <label className="field"><span>내 이름</span><input autoFocus maxLength={50} value={name} onChange={(event) => setName(event.target.value)} placeholder="예: 지수" /></label>}{mutation.isError && <div className="alert error">{errorMessage(mutation.error)}</div>}<button className="button primary wide" disabled={(!accountSession && !name.trim()) || mutation.isPending}>{mutation.isPending ? "참여 중…" : "모임 참여하기"}</button></form><p className="privacy-note"><LockKeyhole size={15} /> 내 입력은 후보가 나오기 전까지 다른 사람에게 공개되지 않아요.</p></div></div>;
 }
 
 function SubmissionPanel({ room, onRoomChanged, onAccessDenied, draft, onDraftChanged }: { room: Room; onRoomChanged: (room: Room) => void; onAccessDenied: (error: ApiError) => void; draft: string | null; onDraftChanged: (room: Room, rawText: string | null) => void }) {

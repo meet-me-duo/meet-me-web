@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:18.6@sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336
+    environment:
+      POSTGRES_DB: meetme
+      POSTGRES_USER: meetme
+      POSTGRES_PASSWORD: local-integration-only
+    tmpfs:
+      - /var/lib/postgresql
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U meetme -d meetme"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+    networks: [isolated]
+  api:
+    image: eclipse-temurin:17-jdk-jammy@sha256:73ed442231ec66cfe48cae0b263ce619a75ab96d162ab325f38fc0a269ee3aab
+    entrypoint: [/opt/java/openjdk/bin/java, -jar, /app/server.jar]
+    user: "1000:1000"
+    read_only: true
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    tmpfs: [/tmp]
+    volumes:
+      - ${HOST_INTEGRATION_JAR:?Run scripts/run-host-integration.mjs}:/app/server.jar:ro
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/meetme
+      DATABASE_USERNAME: meetme
+      DATABASE_PASSWORD: local-integration-only
+      GEMINI_API_KEY: ""
+      OPENAI_API_KEY: ""
+      RELIABILITY_ENABLED: "false"
+      RATE_LIMIT_ENABLED: "false"
+      DATA_RETENTION_ENABLED: "false"
+      MANAGEMENT_HEALTH_REDIS_ENABLED: "false"
+      APP_ALLOWED_ORIGINS: https://localhost:8443
+      ANONYMOUS_COOKIE_SECURE: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [isolated]
+networks:
+  isolated:
+    internal: true

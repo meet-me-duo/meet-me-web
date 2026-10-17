@@ -1,0 +1,74 @@
+{
+  "work_item": "issue-107-web-question-identity",
+  "recorded_at": "2026-10-17T15:13:18.628066+00:00",
+  "public_contract": "An explicit answer, retry intent and result belong to question_id, source_revision and editing round; the same identity refetch preserves its draft.",
+  "git_base_revision": "9b183978d5987f8fa8a5f02d542b17181e4929b4",
+  "working_tree_uncommitted": true,
+  "test_files": [
+    {
+      "path": "src/components/ClarificationPanel.identity.test.tsx",
+      "sha256": "bb0846240ff4f4c7fdb58dd9783d62a2a3c0aabdfd62ae37a5154dd1b9047b47"
+    },
+    {
+      "path": "src/components/ClarificationPanel.test.tsx",
+      "sha256": "0dc404816a85504b9700de81c494b80ad1937a8fbdcb6b692e54677fbfd28a32"
+    },
+    {
+      "path": "src/pages/RoomPage.clarifications.test.tsx",
+      "sha256": "cc4c85f6b8bfc49345c16adbe66842edcd23b79b69619c8e02c9f89e6443926a"
+    }
+  ],
+  "baseline_source": {
+    "path": "src/components/ClarificationPanel.tsx",
+    "pre_identity_review_sha256": "c1254e628747b23866390b5ecec0fd34210326634575076cbe67b9262b2dc6ac",
+    "evidence": "Source hash recorded by the preceding independent review and exact-restoration verification before identity implementation."
+  },
+  "red": {
+    "executed_at": "2026-10-17T15:11:02Z",
+    "command": "node node_modules/vitest/vitest.mjs run src/components/ClarificationPanel.identity.test.tsx --configLoader runner --pool threads --maxWorkers 1",
+    "exit": 1,
+    "total": 11,
+    "failed": 10,
+    "passed": 1,
+    "expected_failure_classification": "Missing public question/round identity isolation; all 11 tests collected and executed, without compile or load failure.",
+    "failure_categories": {
+      "previous_choice_or_direct_intent_survives_new_identity": 4,
+      "previous_success_notice_hides_new_question": 2,
+      "previous_409_block_and_error_survive_new_question_or_round": 2,
+      "previous_pending_request_blocks_new_question_editing": 2
+    },
+    "failed_tests": [
+      "#107 explicit answer intent belongs to its question identity > drops Q1 A selection when Q2 replaces it, requiring a new explicit choice",
+      "#107 explicit answer intent belongs to its question identity > drops Q1 DIRECT selection when Q2 replaces it, requiring a new explicit choice",
+      "#107 explicit answer intent belongs to its question identity > also requires a fresh choice if a source revision changes while the question ID is reused",
+      "#107 explicit answer intent belongs to its question identity > does not let a previous ANSWERED success notice hide Q2",
+      "#107 explicit answer intent belongs to its question identity > does not let a previous CANCELLED success notice hide Q2",
+      "#107 explicit answer intent belongs to its question identity > clears Q1's 409 block for Q2 and gives Q2 a new operation UUID and source revision",
+      "#107 explicit answer intent belongs to its question identity > starts the same source question fresh in a new editing round after the previous round's 409",
+      "#107 explicit answer intent belongs to its question identity > ignores Q1's late SUCCESS after Q2 has its own direct draft",
+      "#107 explicit answer intent belongs to its question identity > ignores Q1's late DENIAL after Q2 has its own direct draft",
+      "#107 explicit answer intent belongs to its question identity > discards Q1 intent across Q1→none→Q2 and ignores Q1's still pending success"
+    ],
+    "passed_test": "#107 explicit answer intent belongs to its question identity > keeps an unanswered direct draft and selection across a refetch of the identical question",
+    "raw_log": "/tmp/issue107-web-identity-red.log",
+    "raw_log_sha256": "73629d04d9b0e939f877ef7d34d171d19e4884df180a542bfb6c0f0252686ef1"
+  },
+  "implementation_followup": {
+    "reviewed_source_sha256": "6eeaf9bdf8e3f56e048f97b4cae6024b74ec5fcbe346023d9bd02c9af908f587",
+    "design": "Owner component owns query/cache and notification; keyed question child owns draft, operation, pending, blocked/error and liveness. Key includes question_id, source_revision and editing round.",
+    "green_log": "/tmp/issue107-web-identity-green.log",
+    "observed_total": 52,
+    "observed_passed": 52,
+    "review": "No blocking finding in the reviewed identity separation. Original 32, RoomPage 9 and new identity 11 test fingerprints remain unchanged.",
+    "verification_owner": "Implementation parent executed GREEN; independent reviewer read logs only."
+  },
+  "limits": [
+    "Synthetic UI/API tests do not prove real provider interpretation, server authorization or database transaction behavior.",
+    "The full browser 391 pass / 1 intentional skip result in /tmp/issue107-web-e2e-before-identity.log predates this identity change.",
+    "Final source-wide gates and four fault injections are being executed by the parent; this record does not claim their completion."
+  ],
+  "actions_in_this_review": [
+    "Read production source/diff and existing logs.",
+    "Write this evidence JSON only. No production/test changes, build, tests or fault injection executed."
+  ]
+}

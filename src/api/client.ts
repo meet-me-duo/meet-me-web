@@ -1,3 +1,4 @@
+import { getAccessToken, getSessionVersion } from "../auth/session";
 import type {
   ApiProblem,
   CandidateList,
@@ -13,6 +14,7 @@ import type {
   UnappliedInput,
 } from "./types";
 import type { ReanalyzeBody, ReanalyzeResponse, ReopenBody, ReopenResponse } from "./recovery";
+import type { ClarificationAnswer, ClarificationAnswerResult, ClarificationList } from "./clarifications";
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
 
@@ -28,17 +30,27 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const startedEpoch = getSessionVersion();
+  let token: string | null;
+  try { token = getAccessToken(true); } catch (error) {
+    if (error instanceof Error && error.message === "AUTH_ACCESS_EXPIRED") throw new ApiError(401, { code: "AUTH_ACCESS_EXPIRED", detail: "로그인이 만료됐어요. 페이지를 새로고침해 로그인 상태를 다시 확인해 주세요." });
+    throw error;
+  }
+  const ensureCurrentAccount = () => { if (getSessionVersion() !== startedEpoch) throw new ApiError(409, { code: "AUTH_CONTEXT_CHANGED", detail: "로그인 계정이 바뀌었어요. 현재 계정으로 다시 확인해 주세요." }); };
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
     credentials: "include",
+    cache: "no-store",
     headers: {
       Accept: "application/json, application/problem+json",
       "Accept-Language": "ko-KR",
       ...(init.body ? { "Content-Type": "application/json" } : {}),
       ...init.headers,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   });
 
+  ensureCurrentAccount();
   if (!response.ok) {
     let problem: Partial<ApiProblem> = {};
     try {
@@ -46,6 +58,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     } catch {
       problem = { detail: response.statusText };
     }
+    ensureCurrentAccount();
     const headerDelay = Number(response.headers.get("Retry-After"));
     throw new ApiError(
       response.status,
@@ -53,16 +66,22 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
       problem.retry_after_seconds ?? (Number.isFinite(headerDelay) ? headerDelay : undefined),
     );
   }
-  return (await response.json()) as T;
+  const body = (await response.json()) as T;
+  ensureCurrentAccount();
+  return body;
 }
 
 const encode = encodeURIComponent;
 
 export const api = {
+  getAccountRooms: () => request<{ rooms: { invite_code: string; purpose: string; created_at: string; expires_at: string }[] }>("/api/account/rooms"),
+  claimGuestRoom: (code: string) => request<Room>(`/api/rooms/${encode(code)}/claim`, { method: "POST" }),
+  getClarifications: (inviteCode: string, signal?: AbortSignal) => request<ClarificationList>(`/api/rooms/${encode(inviteCode)}/submission/clarifications`, { signal }),
+  answerClarification: (inviteCode: string, questionId: string, body: ClarificationAnswer) => request<ClarificationAnswerResult>(`/api/rooms/${encode(inviteCode)}/submission/clarifications/${encode(questionId)}/answer`, { method: "POST", body: JSON.stringify(body) }),
   createRoom: (body: CreateRoomBody) => request<Room>("/api/rooms", { method: "POST", body: JSON.stringify(body) }),
   getRoom: (inviteCode: string, signal?: AbortSignal) => request<Room>(`/api/rooms/${encode(inviteCode)}`, { signal }),
-  joinRoom: (inviteCode: string, displayName: string) =>
-    request<Room>(`/api/rooms/${encode(inviteCode)}/participants`, { method: "POST", body: JSON.stringify({ display_name: displayName }) }),
+  joinRoom: (inviteCode: string, displayName?: string) =>
+    request<Room>(`/api/rooms/${encode(inviteCode)}/participants`, { method: "POST", body: JSON.stringify(displayName === undefined ? {} : { display_name: displayName }) }),
   getSubmission: (inviteCode: string, signal?: AbortSignal) => request<Submission>(`/api/rooms/${encode(inviteCode)}/submission`, { signal }),
   saveSubmission: (inviteCode: string, body: SaveSubmissionBody) =>
     request<SavedSubmission>(`/api/rooms/${encode(inviteCode)}/submission`, { method: "PUT", body: JSON.stringify(body) }),

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { fulfillAccountRefresh } from "./accountFixture";
 
 const code = "abcdefghijklmnopqrstuv";
 const localOrigin = () => new URL(test.info().project.use.baseURL!).origin;
@@ -24,6 +25,7 @@ async function fixture(page: Page, role: "HOST" | "MEMBER", initial = "COLLECTIN
     const request = route.request();
     const url = new URL(request.url());
     if (url.origin !== localOrigin()) { state.unexpected.push(request.url()); return route.abort(); }
+    if (await fulfillAccountRefresh(route, role === "HOST" ? "지수" : null)) return;
     if (!url.pathname.startsWith("/api/")) return route.continue();
     const path = url.pathname;
     if (request.method() !== "GET") state.writes.push({ path, body: request.postDataJSON() });

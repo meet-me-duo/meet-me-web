@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { fulfillAccountRefresh } from "./accountFixture";
 
 const code = "abcdefghijklmnopqrstuv";
 const candidate = {
@@ -28,6 +29,7 @@ for (const width of [1440, 320, 390]) test(`create, save, share, partial selecti
     await target.route("**/*", async route => {
       const request = route.request(), url = new URL(request.url());
       if (url.origin !== origin) { state.unexpected.push(request.url()); return route.abort(); }
+      if (await fulfillAccountRefresh(route, role === "HOST" ? "주최자" : null)) return;
       if (!url.pathname.startsWith("/api/")) return request.method() === "GET" ? route.continue() : route.abort();
       const suffix = url.pathname.replace(`/api/rooms/${code}`, "");
       if (url.pathname === "/api/rooms" && request.method() === "POST" && role === "HOST") {
@@ -57,7 +59,7 @@ for (const width of [1440, 320, 390]) test(`create, save, share, partial selecti
   await fixture(page, "HOST");
   await page.addInitScript(() => { Object.defineProperty(navigator, "clipboard", { value: { writeText: async () => {} }, configurable: true }); });
   await page.goto("/create");
-  await page.getByLabel("주최자 이름").fill("주최자");
+  await expect(page.getByLabel("주최자 이름")).toHaveCount(0);
   await page.getByLabel("모임 목적 / 이름").fill("통합 흐름 검증");
   await page.getByRole("button", { name: /다음 단계/ }).click();
   await page.getByRole("checkbox", { name: /정해진 시간이 되면/ }).check();

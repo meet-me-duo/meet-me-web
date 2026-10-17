@@ -1,0 +1,156 @@
+{
+  "work_item": "issue-107-web-visible-time-input-guidance",
+  "recorded_at": "2026-10-17T15:32:07.425180+00:00",
+  "git_base_revision": "9b183978d5987f8fa8a5f02d542b17181e4929b4",
+  "public_contract": {
+    "visible_guide": "시간은 오전·오후를 함께 적어 주세요. 24시간 표현 19~20시도 허용한다.",
+    "remote_example": "내일 오후 7~8시, 비대면으로 가능해요",
+    "in_person_or_either_example": "내일 오후 7~8시, 강남 근처가 좋아요",
+    "accessibility": "The persistent guide is visible and linked to the textarea accessible description; the explicit example is a placeholder.",
+    "non_mutation": "Showing the guide and typing 7-8시쯤 do not rewrite, save, analyze or make additional API requests."
+  },
+  "test_files": [
+    {
+      "path": "src/pages/RoomPage.time-guidance.test.tsx",
+      "sha256": "b82d1f610488c9bd1d094a35a37c202adf070f9ba7ee7cdcd414bcda69ceac96"
+    },
+    {
+      "path": "src/components/ClarificationPanel.time-guidance.test.tsx",
+      "sha256": "1af8ec43a25a2547f05f9d1048a95daaba896bcfdc03fc31642d41caed554564"
+    }
+  ],
+  "coverage": {
+    "room_page": {
+      "tests": 12,
+      "matrix": "3 meeting modes x HOST/MEMBER x initial/OPEN correction editor"
+    },
+    "clarification_direct": {
+      "tests": 3,
+      "matrix": "3 meeting modes x complete DIRECT replacement"
+    }
+  },
+  "red": {
+    "executed_at": "2026-10-17T15:29:05Z",
+    "command": "node node_modules/vitest/vitest.mjs run src/pages/RoomPage.time-guidance.test.tsx src/components/ClarificationPanel.time-guidance.test.tsx --configLoader runner --pool threads --maxWorkers 1",
+    "exit": 1,
+    "total": 15,
+    "failed": 15,
+    "passed": 0,
+    "failure_classification": "Expected missing persistent time-input guide after the editor or DIRECT input rendered; all 15 tests collected and executed, without compile/load errors.",
+    "failed_tests": [
+      {
+        "path": "src/components/ClarificationPanel.time-guidance.test.tsx",
+        "name": "#107 time guidance for clarification DIRECT input > keeps an accessible AM/PM hint and mode-appropriate example visible for REMOTE"
+      },
+      {
+        "path": "src/components/ClarificationPanel.time-guidance.test.tsx",
+        "name": "#107 time guidance for clarification DIRECT input > keeps an accessible AM/PM hint and mode-appropriate example visible for IN_PERSON"
+      },
+      {
+        "path": "src/components/ClarificationPanel.time-guidance.test.tsx",
+        "name": "#107 time guidance for clarification DIRECT input > keeps an accessible AM/PM hint and mode-appropriate example visible for EITHER"
+      },
+      {
+        "path": "src/pages/RoomPage.time-guidance.test.tsx",
+        "name": "#107 time guidance in own initial and correction editors > keeps visible AM/PM and 24-hour guidance plus an appropriate example for initial 'HOST'/'REMOTE'"
+      },
+      {
+        "path": "src/pages/RoomPage.time-guidance.test.tsx",
+        "name": "#107 time guidance in own initial and correction editors > keeps visible AM/PM and 24-hour guidance plus an appropriate example for initial 'MEMBER'/'REMOTE'"
+      },
+      {
+        "path": "src/pages/RoomPage.time-guidance.test.tsx",
+        "name": "#107 time guidance in own initial and correction editors > keeps visible AM/PM and 24-hour guidance plus an appropriate example for initial 'HOST'/'IN_PERSON'"
+      },
+      {
+        "path": "src/pages/RoomPage.time-guidance.test.tsx",
+        "name": "#107 time guidance in own initial and correction editors > keeps visible AM/PM and 24-hour guidance plus an appropriate example for initial 'MEMBER'/'IN_PERSON'"
+      },
+      {
+        "path": "src/pages/RoomPage.time-guidance.test.tsx",
+        "name": "#107 time guidance in own initial and correction editors > keeps visible AM/PM and 24-hour guidance plus an appropriate example for initial 'HOST'/'EITHER'"
+      },
+      {
+        "path": "src/pages/RoomPage.time-guidance.test.tsx",
+        "name": "#107 time guidance in own initial and correction editors > keeps visible AM/PM and 24-hour guidance plus an appropriate example for initial 'MEMBER'/'EITHER'"
+      },
+      {
+        "path": "src/pages/RoomPage.time-guidance.test.tsx",
+        "name": "#107 time guidance in own initial and correction editors > keeps the same guidance available while editing saved input in an OPEN round for 'HOST'/'REMOTE'"
+      },
+      {
+        "path": "src/pages/RoomPage.time-guidance.test.tsx",
+        "name": "#107 time guidance in own initial and correction editors > keeps the same guidance available while editing saved input in an OPEN round for 'MEMBER'/'REMOTE'"
+      },
+      {
+        "path": "src/pages/RoomPage.time-guidance.test.tsx",
+        "name": "#107 time guidance in own initial and correction editors > keeps the same guidance available while editing saved input in an OPEN round for 'HOST'/'IN_PERSON'"
+      },
+      {
+        "path": "src/pages/RoomPage.time-guidance.test.tsx",
+        "name": "#107 time guidance in own initial and correction editors > keeps the same guidance available while editing saved input in an OPEN round for 'MEMBER'/'IN_PERSON'"
+      },
+      {
+        "path": "src/pages/RoomPage.time-guidance.test.tsx",
+        "name": "#107 time guidance in own initial and correction editors > keeps the same guidance available while editing saved input in an OPEN round for 'HOST'/'EITHER'"
+      },
+      {
+        "path": "src/pages/RoomPage.time-guidance.test.tsx",
+        "name": "#107 time guidance in own initial and correction editors > keeps the same guidance available while editing saved input in an OPEN round for 'MEMBER'/'EITHER'"
+      }
+    ],
+    "raw_log": "/tmp/issue107-web-time-guidance-red.log",
+    "raw_log_sha256": "c44c311b5cde349e42c6954f824f97db59ffb4d918c4e88d0ae1058f7a20d6cd"
+  },
+  "green_followup": {
+    "new_tests": {
+      "total": 15,
+      "passed": 15,
+      "raw_log": "/tmp/issue107-web-time-guidance-green.log"
+    },
+    "focused": {
+      "total": 67,
+      "passed": 67,
+      "raw_log": "/tmp/issue107-web-guidance-focused-green.log"
+    },
+    "execution_owner": "Implementation parent executed GREEN; independent reviewer read logs only."
+  },
+  "reviewed_sources": [
+    {
+      "path": "src/utils/submissionGuidance.ts",
+      "sha256": "bc3742eeae7944a02ce03dd1f497ad01878b19c9bcaac5a1a5e9569a7370b1d3"
+    },
+    {
+      "path": "src/pages/RoomPage.tsx",
+      "sha256": "5bf7436ee8c9872c11f3d5e68c19dd5d87854455ce4717c1e44edfddd9196f09"
+    },
+    {
+      "path": "src/components/ClarificationPanel.tsx",
+      "sha256": "088e3370051a584fd94c1b1c116e26a7b2e624d5f4713aebb8f3f1a3d7846cd7"
+    }
+  ],
+  "independent_review": "Shared constant and mode-only example helper are pure. Input handlers, raw text, validation, identity key, retry operation and request methods remain unchanged by the guidance markup. Both textarea surfaces reference visible static guide IDs. No additional blocking UI finding.",
+  "limits": [
+    "Synthetic UI assertions do not prove real model AM/PM interpretation.",
+    "Prior 360 unit and 391 pass/1 intentional skip browser results predate this guidance change.",
+    "Latest full source-wide gates and final browser execution are being handled by the parent; this evidence does not claim their completion."
+  ],
+  "actions": [
+    "Read source markup/helper and existing RED/GREEN logs.",
+    "Write documentation only. No source/test changes, builds, test runs or fault injection."
+  ],
+  "latest_source_fault_review": {
+    "source_sha256": "088e3370051a584fd94c1b1c116e26a7b2e624d5f4713aebb8f3f1a3d7846cd7",
+    "faults_killed": 4,
+    "assertion_failure_counts": [
+      1,
+      1,
+      2,
+      7
+    ],
+    "exact_source_restoration": true,
+    "restored_focused_passed": 67,
+    "evidence": "docs/verification/issue-107-web-faults.json and its four raw reports; /tmp/issue107-web-restored-final.log",
+    "execution_owner": "Parent executed; independent reviewer read existing outputs only."
+  }
+}

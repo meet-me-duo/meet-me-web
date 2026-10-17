@@ -1,0 +1,28 @@
+{
+  "workItem": "issue-109-web-api",
+  "role": "independent test author /root/final_review; no production implementation",
+  "basis": [
+    "ADR-029 Access in response body and Authorization Bearer only",
+    "issue-109 account ownership precedence and private data isolation",
+    "public API contract ApiError/problem codes and AbortSignal"
+  ],
+  "contract": [
+    "Every API request snapshots the current Bearer and privacy epoch; guests omit Authorization",
+    "Account changes before response or JSON decode completes reject AUTH_CONTEXT_CHANGED instead of returning obsolete data or errors",
+    "Mutation 401/503 never auto retries or falls back to guest",
+    "Existing AbortSignal is forwarded; abort errors are not retried"
+  ],
+  "red": {
+    "tests": 12,
+    "failed": 11,
+    "passed": 1,
+    "failureKind": "Expected missing Bearer attachments and late-response privacy rejection; no compilation/setup errors",
+    "rawLog": ".codex/tdd-evidence/issue-109-web-api.log"
+  },
+  "plannedFaults": [
+    "Remove Authorization attachment",
+    "Remove response epoch comparison",
+    "Remove post-JSON-decode epoch comparison"
+  ],
+  "crossReview": "Requested identity_db_tests because this author also performs final source review"
+}

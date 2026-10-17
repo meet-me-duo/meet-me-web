@@ -1,15 +1,18 @@
 import { expect, test, type BrowserContext } from "@playwright/test";
+import { fulfillAccountRefresh } from "./accountFixture";
 import type { Room } from "../src/api/types";
 
 const code = "abcdefghijklmnopqrstuv";
 const room: Room = { invite_code: code, purpose: "방 생성과 주최자 제출 분리", meeting_mode: "EITHER", time_zone_id: "Asia/Seoul", search_start_date: "2026-10-15", search_end_date: "2026-10-29", search_range_source: "DEFAULTED", expected_participants: 4, submission_deadline: null, manual_only: false, collection_status: "COLLECTING", closure_reason: null, closed_at: null, public_status: "COLLECTING", viewer: { joined: true, role: "HOST", display_name: "합성 주최자", context_id: "synthetic-host" }, input_disclosure_policy: "HOST_ON_PARTIAL_RESULT" };
 
-async function fixture(context: BrowserContext, failSave: boolean | "after-save" = false, currentRoom: () => Room = () => room) {
+async function fixture(context: BrowserContext, baseURL: string, failSave: boolean | "after-save" = false, currentRoom: () => Room = () => room) {
+  const origin = new URL(baseURL).origin;
   const calls = { create: 0, join: 0, save: 0, unexpected: [] as string[] };
   let stored: null | { raw_text: string; revision: number; locale: string; created_at: string; editable: boolean } = null;
   await context.route("**/*", async route => {
     const request = route.request(), url = new URL(request.url());
-    if (url.origin !== "http://127.0.0.1:4173") { calls.unexpected.push(url.origin); return route.abort(); }
+    if (url.origin !== origin) { calls.unexpected.push(url.origin); return route.abort(); }
+    if (await fulfillAccountRefresh(route, "합성 주최자")) return;
     if (url.pathname === "/api/rooms" && request.method() === "POST") {
       calls.create++;
       expect(request.postDataJSON()).not.toHaveProperty("raw_text");
@@ -33,13 +36,13 @@ async function fixture(context: BrowserContext, failSave: boolean | "after-save"
   return calls;
 }
 
-test("create, share before submission, defer, refresh and return to the same HOST", async ({ page, context }, testInfo) => {
-  const calls = await fixture(context);
+test("create, share before submission, defer, refresh and return to the same HOST", async ({ page, context, baseURL }, testInfo) => {
+  const calls = await fixture(context, baseURL!);
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/create");
-  await page.getByLabel("주최자 이름").fill("합성 주최자");
+  await expect(page.getByLabel("주최자 이름")).toHaveCount(0);
   await page.getByLabel("모임 목적 / 이름").fill(room.purpose);
-  await expect(page.getByRole("textbox")).toHaveCount(2);
+  await expect(page.getByRole("textbox")).toHaveCount(1);
   await page.getByRole("button", { name: /다음 단계/ }).click();
   await expect(page.getByText(/내 시간·장소 조건은 방을 만든 뒤 입력/)).toBeVisible();
   await page.getByRole("button", { name: "방 만들기", exact: true }).click();
@@ -47,7 +50,7 @@ test("create, share before submission, defer, refresh and return to the same HOS
   await expect(page.getByText(/아직 내 조건은 제출하지 않았어요/)).toBeVisible();
   await page.getByRole("button", { name: "초대 링크 복사" }).click();
   await expect(page.getByText("링크를 복사했어요.")).toBeVisible();
-  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(`http://127.0.0.1:4173/rooms/${code}`);
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(`${new URL(baseURL!).origin}/rooms/${code}`);
   await page.screenshot({ path: testInfo.outputPath("host-before-submission.png"), fullPage: true });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.getByRole("link", { name: "나중에 입력하기" }).click();
@@ -58,8 +61,8 @@ test("create, share before submission, defer, refresh and return to the same HOS
   expect(calls).toEqual({ create: 1, join: 0, save: 0, unexpected: [] });
 });
 
-test("failed conditions preserve the room and retry only the original submission", async ({ page, context }) => {
-  const calls = await fixture(context, true);
+test("failed conditions preserve the room and retry only the original submission", async ({ page, context, baseURL }) => {
+  const calls = await fixture(context, baseURL!, true);
   await page.goto(`/rooms/${code}`);
   await page.getByRole("button", { name: "내 조건 입력하기" }).click();
   const input = page.getByRole("textbox");
@@ -80,9 +83,9 @@ test("failed conditions preserve the room and retry only the original submission
 });
 
 
-test("a first HOST draft survives deadline closure only in the current owner page", async ({ page, context }) => {
+test("a first HOST draft survives deadline closure only in the current owner page", async ({ page, context, baseURL }) => {
   let current = room;
-  const calls = await fixture(context, false, () => current);
+  const calls = await fixture(context, baseURL!, false, () => current);
   await page.clock.install();
   await page.goto(`/rooms/${code}`);
   const raw = "  화요일 저녁의 미저장 합성 조건  ";
@@ -99,12 +102,12 @@ test("a first HOST draft survives deadline closure only in the current owner pag
   expect(calls).toEqual({ create: 0, join: 0, save: 0, unexpected: [] });
 });
 
-test("an unacknowledged create response does not claim that creation failed", async ({ page, context }) => {
-  const calls = await fixture(context);
+test("an unacknowledged create response does not claim that creation failed", async ({ page, context, baseURL }) => {
+  const calls = await fixture(context, baseURL!);
   let attempts = 0;
   await context.route("**/api/rooms", route => { attempts++; return route.abort("failed"); });
   await page.goto("/create");
-  await page.getByLabel("주최자 이름").fill("합성 주최자");
+  await expect(page.getByLabel("주최자 이름")).toHaveCount(0);
   await page.getByLabel("모임 목적 / 이름").fill(room.purpose);
   await page.getByRole("button", { name: /다음 단계/ }).click();
   await page.getByRole("button", { name: "방 만들기", exact: true }).click();
@@ -114,8 +117,8 @@ test("an unacknowledged create response does not claim that creation failed", as
   expect(attempts).toBe(1); expect(calls).toEqual({ create: 0, join: 0, save: 0, unexpected: [] });
 });
 
-test("a lost save acknowledgement retries the same mock participant without another revision", async ({ page, context }) => {
-  const calls = await fixture(context, "after-save");
+test("a lost save acknowledgement retries the same mock participant without another revision", async ({ page, context, baseURL }) => {
+  const calls = await fixture(context, baseURL!, "after-save");
   await page.goto(`/rooms/${code}`);
   await page.getByRole("textbox").fill("화요일 저녁 온라인 가능");
   await page.getByRole("button", { name: "조건 제출하기" }).click();
@@ -129,8 +132,8 @@ test("a lost save acknowledgement retries the same mock participant without anot
   expect(calls).toEqual({ create: 0, join: 0, save: 2, unexpected: [] });
 });
 
-test("a trusted own read resolves a lost acknowledgement without another PUT", async ({ page, context }) => {
-  const calls = await fixture(context, "after-save");
+test("a trusted own read resolves a lost acknowledgement without another PUT", async ({ page, context, baseURL }) => {
+  const calls = await fixture(context, baseURL!, "after-save");
   await page.clock.install();
   await page.goto(`/rooms/${code}`);
   await page.getByRole("textbox").fill("화요일 저녁 온라인 가능");

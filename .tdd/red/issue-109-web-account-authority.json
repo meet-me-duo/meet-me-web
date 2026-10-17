@@ -1,0 +1,30 @@
+{
+  "workItem": "issue-109-web-account-authority",
+  "sourceRevision": "9b183978d5987f8fa8a5f02d542b17181e4929b4",
+  "testFiles": [
+    {
+      "path": "src/utils/createRoom.account-authority.test.ts",
+      "sha256": "7aa054ff6e9d91f1340ce41a3410ac8a174c51ac0aa8465f59de9bee90a45c07"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/utils/createRoom.account-authority.test.ts",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1",
+    "--reporter=json",
+    "--outputFile=/tmp/meetme-109-web-account-authority-red.json"
+  ],
+  "failedTests": [
+    "issue #109 member HOST profile authority omits ignored legacy host name for normal account name while preserving the room form",
+    "issue #109 member HOST profile authority omits ignored legacy host name for 50 Unicode emoji account name while preserving the room form"
+  ],
+  "expectedFailureCategory": "MISSING_BEHAVIOR",
+  "recordedAt": "2026-10-17T15:23:25.994883Z"
+}

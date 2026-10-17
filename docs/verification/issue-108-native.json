@@ -1,0 +1,40 @@
+{
+  "issue": 108,
+  "status": "PASS",
+  "scope": "actual-browser-to-isolated-Spring-PostgreSQL-Redis-loopback-OIDC",
+  "productionLogin": false,
+  "realCredentialsChanged": false,
+  "apiRouteMocks": 0,
+  "externalRequests": 0,
+  "blockedNonFixtureRequests": 0,
+  "checks": [
+    "loopback-oidc-probe-and-ephemeral-key-required",
+    "real-google-login-and-host-room-creation",
+    "name-only-join-explicit-unprotected-warning-and-record-number",
+    "password-join-allows-duplicate-name-with-distinct-record-number",
+    "same-device-valid-owner-session-retains-original-access",
+    "other-device-wrong-password-generic-error-without-original-read",
+    "other-device-password-proof-restores-server-viewer-and-original",
+    "other-device-no-password-blank-replacement-with-zero-original-gets",
+    "replacement-is-persisted-without-granting-replacer-read-access",
+    "real-kakao-member-join-without-name-or-password-inputs",
+    "explicit-claim-conflict-preserves-existing-account-record",
+    "expired-signed-bearer-rejected-despite-valid-guest-cookie",
+    "manual-close-with-one-submission-enters-insufficient-state-without-ai",
+    "closed-room-blocks-new-joins-but-password-proof-keeps-lazy-original-read",
+    "no-raw-password-or-token-in-browser-web-storage",
+    "no-external-or-nonfixture-browser-requests-and-no-api-mocks"
+  ],
+  "limitations": [
+    "Confirmed-state and transactional write-race coverage belongs to the separate HTTP integration suite.",
+    "The expired signed Bearer check uses a real local API request with a valid guest cookie; account-expiry UI behavior belongs to the independent unit suite.",
+    "External request counts cover this browser and this script, not unrelated server processes."
+  ],
+  "at": "2026-10-17T17:00:12.152Z",
+  "finalRuntimeRecheck": {
+    "immutableManifestSha256": "b72e40fada1b6906e2a9dd39f07e2c99031c23119dedf2baea0d021c31f38b64",
+    "immutableFiles": 1051,
+    "includesFinalUnicodeAnnotationFix": true,
+    "receipt": "docs/verification/issue-108-final-runtime-recheck.json"
+  }
+}

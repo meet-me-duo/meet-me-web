@@ -1,0 +1,67 @@
+{
+  "status": "PASS",
+  "immutableManifestSha256": "b72e40fada1b6906e2a9dd39f07e2c99031c23119dedf2baea0d021c31f38b64",
+  "immutableFiles": 1051,
+  "sourceAnnotationFix": "Final backend immutable classes include the Unicode guest-password validation annotation correction. Browser scenario expectations remain unchanged.",
+  "originalReceiptsPreserved": [
+    "docs/verification/issue-108-native-before-final-unicode.json",
+    "docs/verification/issue-109-after-108-before-final-unicode.json"
+  ],
+  "roomBudgetBeforeRun": {
+    "createdInPastHour": 6,
+    "hourlyLimit": 10,
+    "plannedCreates": 4,
+    "limitResetOrBypass": false
+  },
+  "order": [
+    "issue108-native16",
+    "issue109-regression12"
+  ],
+  "scripts": {
+    "verify-guest-reaccess-native.mjs": "e64f99197b1e36656166e80ca0c53a2eecd1d4247bb305485f239423d52e3255",
+    "verify-account-native.mjs": "db1d53551ce61f2bf1183f296b7424ec312f80599c0297147d99b0e5b07272f3"
+  },
+  "productSourceModified": false,
+  "at": "2026-10-17",
+  "issue108": {
+    "status": "PASS",
+    "checksPassed": 16,
+    "apiRouteMocks": 0,
+    "externalRequests": 0,
+    "safeLog": "/tmp/issue108-native/guest-final-runtime-browser-safe.log"
+  },
+  "roomBudgetBeforeAccountRegression": {
+    "createdInPastHour": 8,
+    "remaining": 2,
+    "plannedCreates": 2,
+    "limitResetOrBypass": false
+  },
+  "issue109": {
+    "status": "PASS",
+    "checksPassed": 12,
+    "apiRouteMocks": 0,
+    "externalRequests": 0,
+    "safeLog": "/tmp/issue108-native/account-final-runtime-browser-safe.log"
+  },
+  "roomBudgetAfterRun": {
+    "createdInPastHour": 10,
+    "hourlyLimit": 10,
+    "limitResetOrBypass": false
+  },
+  "finishedAt": "2026-10-17T17:01:36.536752+00:00",
+  "noScriptExpectationChanges": true,
+  "noProducerSourceChanges": true,
+  "postRunFormattingOnly": {
+    "file": "src/main/kotlin/com/meetme/server/meetingroom/adapter/input/web/RoomLifecycleDtos.kt",
+    "scope": "JoinRoomRequest Schema annotation layout only: expand one long line to four lines to satisfy ktlint max-line-length and argument layout.",
+    "annotationValuesChanged": false,
+    "descriptionExampleNullableValuesPreserved": true,
+    "runtimeBehaviorChanged": false,
+    "nativeManifestPredatesFormattingChange": true,
+    "originalImmutableManifestPreserved": "b72e40fada1b6906e2a9dd39f07e2c99031c23119dedf2baea0d021c31f38b64",
+    "nativeReexecutedAfterFormatting": false,
+    "additionalTestsProcessesOrRoomsStarted": false,
+    "evidenceScope": "The native results apply to the recorded immutable runtime artifact. The later source-only formatting change preserves the same annotation values and runtime behavior; it is not a new native execution.",
+    "independentReviewAcknowledgedByParent": true
+  }
+}

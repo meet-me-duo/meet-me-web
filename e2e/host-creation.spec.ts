@@ -55,7 +55,7 @@ test("create, share before submission, defer, refresh and return to the same HOS
   await page.getByRole("link", { name: "나중에 입력하기" }).click();
   await page.goto(`/rooms/${code}`); await page.reload();
   await expect(page.getByRole("heading", { name: "모임이 만들어졌어요" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "모임 참여하기" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "참여하기" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "입력 마감하기" })).toBeVisible();
   expect(calls).toEqual({ create: 1, join: 0, save: 0, unexpected: [] });
 });

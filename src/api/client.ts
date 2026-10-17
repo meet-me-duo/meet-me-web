@@ -77,8 +77,11 @@ export const api = {
   claimGuestRoom: (code: string) => request<Room>(`/api/rooms/${encode(code)}/claim`, { method: "POST" }),
   createRoom: (body: CreateRoomBody) => request<Room>("/api/rooms", { method: "POST", body: JSON.stringify(body) }),
   getRoom: (inviteCode: string, signal?: AbortSignal) => request<Room>(`/api/rooms/${encode(inviteCode)}`, { signal }),
-  joinRoom: (inviteCode: string, displayName?: string) =>
-    request<Room>(`/api/rooms/${encode(inviteCode)}/participants`, { method: "POST", body: JSON.stringify(displayName === undefined ? {} : { display_name: displayName }) }),
+  joinRoom: (inviteCode: string, displayName?: string, password?: string) =>
+    request<Room>(`/api/rooms/${encode(inviteCode)}/participants`, { method: "POST", body: JSON.stringify(displayName === undefined ? {} : { display_name: displayName, ...(password !== undefined ? { password } : {}) }) }),
+  getGuestRecords: (inviteCode: string, signal?: AbortSignal) => request<{ records: { participant_id: string; display_name: string }[] }>(`/api/rooms/${encode(inviteCode)}/guest-records`, { signal }),
+  reaccessGuest: (inviteCode: string, body: { participant_id: string; password?: string }) => request<{ participant_id: string; level: "VERIFIED_GUEST" | "REPLACE_ONLY" }>(`/api/rooms/${encode(inviteCode)}/guest-records/reaccess`, { method: "POST", body: JSON.stringify(body) }),
+  replaceGuestSubmission: (inviteCode: string, participantId: string, body: { raw_text: string }) => request<{ replaced: true }>(`/api/rooms/${encode(inviteCode)}/guest-records/${encode(participantId)}/submission`, { method: "PUT", body: JSON.stringify(body) }),
   getSubmission: (inviteCode: string, signal?: AbortSignal) => request<Submission>(`/api/rooms/${encode(inviteCode)}/submission`, { signal }),
   saveSubmission: (inviteCode: string, body: SaveSubmissionBody) =>
     request<SavedSubmission>(`/api/rooms/${encode(inviteCode)}/submission`, { method: "PUT", body: JSON.stringify(body) }),

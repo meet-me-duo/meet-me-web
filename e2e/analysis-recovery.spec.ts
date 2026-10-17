@@ -47,6 +47,7 @@ async function fixture(page: Page, baseURL: string, options: { role?: "HOST" | "
       if (queued) { queued = false; status = "READY"; stamp++; }
       return route.fulfill({ json: snapshot() });
     }
+    if (method === "GET" && url.pathname === root + "/guest-records") return route.fulfill({ json: { records: [] } });
     if (method === "GET" && url.pathname === root + "/submission") return route.fulfill({ json: own() });
     if (method === "GET" && url.pathname === root + "/candidates/unapplied-inputs" && role === "HOST") return route.fulfill({ json: [] });
     if (method === "GET" && url.pathname === root + "/candidates") return route.fulfill({ json: {
@@ -129,8 +130,12 @@ for (const width of [1440, 390, 320]) test.describe(`same-room correction at ${w
     const unjoined = await fixture(page, baseURL!, { open: true, joined: false });
     await page.reload();
     await expect(page.getByRole("heading", { name: "입력이 마감된 모임이에요" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "모임 참여하기" })).toHaveCount(0);
-    await expect(page.getByRole("textbox")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "참여하기" })).toHaveCount(0);
+    await expect(page.getByLabel("이름", { exact: true })).toHaveCount(0);
+    await expect(page.getByLabel("새 참여 조건")).toHaveCount(0);
+    await expect(page.getByLabel(/시간·장소 조건/)).toHaveCount(0);
+    await expect(page.getByRole("combobox", { name: "다시 접근할 참여 기록" })).toBeVisible();
+    await expect(page.getByLabel("기록 암호 (선택)")).toBeVisible();
     expect(unjoined.writes).toHaveLength(0); expect(unjoined.unexpected).toEqual([]); expect(unjoined.errors).toEqual([]);
   });
 

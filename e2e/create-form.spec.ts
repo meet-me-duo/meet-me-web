@@ -40,14 +40,18 @@ async function capture(page: Page, path: string) {
     await Promise.all(card.getAnimations({ subtree: true }).map(animation => animation.finished.catch(() => {})));
     window.scrollTo(0, 0);
   });
-  await page.screenshot({ path, fullPage: true, animations: "disabled" });
+  await page.screenshot({ path, fullPage: true, animations: "disabled", scale: "css" });
 }
 
 test("default 14 dates use Seoul today and submit the existing null/null contract", async ({ page, context }) => {
   const { bodies, external } = await fixture(context);
-  await page.clock.install({ time: new Date("2026-10-05T14:59:59Z") });
+  const beforeMidnight = new Date("2026-10-05T14:59:59Z");
+  await page.clock.install({ time: beforeMidnight });
+  // Page setup must not race the one real second before Seoul midnight.
+  await page.clock.setFixedTime(beforeMidnight);
   await firstStep(page);
   await expect(page.getByText("2026-10-05 ~ 2026-10-18")).toBeVisible();
+  await page.clock.setFixedTime(new Date("2026-10-05T15:00:30Z"));
   await page.clock.fastForward(31_000);
   await expect(page.getByText("2026-10-06 ~ 2026-10-19")).toBeVisible();
   await next(page); await submit(page);

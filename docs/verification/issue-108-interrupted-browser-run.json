@@ -1,0 +1,17 @@
+{
+  "status": "INTERRUPTED_NOT_A_FINAL_GATE",
+  "reason": "Stopped after one initial-room-loading visibility timeout while server compilation competed for CPU. Final suite will run with one worker after compilation and mutation checks finish. No expectations or time budgets changed.",
+  "stats": {
+    "startTime": "2026-10-17T16:41:52.830Z",
+    "duration": 405197.49,
+    "expected": 205,
+    "skipped": 178,
+    "unexpected": 1,
+    "flaky": 0
+  },
+  "notRunIsNotProductSkip": true,
+  "reportSha256": "528ee9d90bb9f8603910bafb4c0bf616453db61932c382d55f11825d78c7d913",
+  "rawReport": "/tmp/issue108-final-browser-results.json",
+  "rawLog": "/tmp/issue108-final-browser.log",
+  "recordedAt": "2026-10-17T16:49:00.225526+00:00"
+}

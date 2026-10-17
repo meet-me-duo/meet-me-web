@@ -77,7 +77,7 @@ for (const width of [1440, 320, 390]) test(`create, save, share, partial selecti
   await page.locator(".submission-complete").getByRole("button", { name: "초대 링크 복사" }).click();
   await expect(page.locator(".submission-complete [role=status]")).toHaveText("링크를 복사했어요.");
   await page.evaluate(() => window.scrollTo(0, 0));
-  await page.screenshot({ path: info.outputPath(`host-complete-${width}.png`), fullPage: true });
+  await page.screenshot({ path: info.outputPath(`host-complete-${width}.png`), fullPage: true, scale: "css" });
   await page.getByRole("button", { name: "내 조건 수정" }).click();
   await page.getByRole("textbox").fill("목요일 저녁"); holdSave = true;
   await page.getByRole("button", { name: "수정 내용 저장" }).click();
@@ -103,7 +103,7 @@ for (const width of [1440, 320, 390]) test(`create, save, share, partial selecti
   await expect(member.locator(".time-options span")).toHaveCount(2);
   for (const target of [page, member]) expect(await target.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await member.evaluate(() => window.scrollTo(0, 0));
-  await member.screenshot({ path: info.outputPath(`member-selected-${width}.png`), fullPage: true });
+  await member.screenshot({ path: info.outputPath(`member-selected-${width}.png`), fullPage: true, scale: "css" });
   expect(state.writes).toEqual([{ raw_text: "화요일 저녁" }, { raw_text: "목요일 저녁" }]);
   expect(state.originals).toEqual(["HOST"]); expect(state.unexpected).toEqual([]); expect(state.errors).toEqual([]);
   await member.close();

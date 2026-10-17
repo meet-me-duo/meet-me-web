@@ -22,6 +22,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/rooms/{inviteCode}/guest-records/{participantId}/submission": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** 암호 없는 기록을 원문 조회 없이 대체; 선택 당시 revision 경합이면409 */
+        put: operations["replace"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rooms": {
         parameters: {
             query?: never;
@@ -87,6 +104,23 @@ export interface paths {
         put?: never;
         /** 로그인 계정 또는 게스트 세션으로 방 참여 */
         post: operations["join"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rooms/{inviteCode}/guest-records/reaccess": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 선택 암호 검증 후 기기 세션에 제한된 게스트 재접근 부여; 초기화나 HOST 우회 없음 */
+        post: operations["reaccess"];
         delete?: never;
         options?: never;
         head?: never;
@@ -297,6 +331,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/rooms/{inviteCode}/guest-records": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 재접근할 게스트 기록 선택 목록; 같은 이름도 기록 번호로 구분 */
+        get: operations["records"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rooms/{inviteCode}/candidates": {
         parameters: {
             query?: never;
@@ -404,15 +455,15 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         JsonNode: {
-            string?: boolean;
-            array?: boolean;
-            empty?: boolean;
-            null?: boolean;
-            float?: boolean;
-            number?: boolean;
+            valueNode?: boolean;
+            container?: boolean;
             missingNode?: boolean;
-            pojo?: boolean;
+            object?: boolean;
+            /** @enum {string} */
+            nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
+            string?: boolean;
             integralNumber?: boolean;
+            pojo?: boolean;
             floatingPointNumber?: boolean;
             short?: boolean;
             int?: boolean;
@@ -424,11 +475,11 @@ export interface components {
             textual?: boolean;
             boolean?: boolean;
             binary?: boolean;
-            valueNode?: boolean;
-            /** @enum {string} */
-            nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
-            object?: boolean;
-            container?: boolean;
+            array?: boolean;
+            empty?: boolean;
+            null?: boolean;
+            float?: boolean;
+            number?: boolean;
             embeddedValue?: boolean;
         };
         /** @description 현재 익명 참여자의 자연어 제출 또는 수정 요청 */
@@ -538,6 +589,16 @@ export interface components {
              * @description 응답 snapshot의 방 조율 상태 버전
              */
             state_version?: number;
+        };
+        /** @description 기존 원문을 제공하지 않는 전체 대체 입력 */
+        GuestReplacementRequest: {
+            /** @description 새 전체 입력; ECMAScript trim 후 1~500 Unicode 코드 포인트 */
+            raw_text?: string | null;
+        };
+        /** @description 원문과 버전을 포함하지 않는 대체 성공 응답 */
+        GuestReplacementResponse: {
+            /** @description 대체 입력 저장 성공 */
+            replaced?: boolean;
         };
         /** @description 로그인한 계정의 모임 방 생성 요청 */
         CreateRoomRequest: {
@@ -721,6 +782,11 @@ export interface components {
              * @description 현재 세션의 본인 room-scoped opaque 참여자 UUID. 자기 원문 캐시 분리 hint이며 권한 증명은 아님
              */
             context_id?: string | null;
+            /**
+             * Format: uuid
+             * @description 현재 유효한 게스트의 기록 번호. 재접근 선택 보조용이며 권한 증명이 아님. 회원·미참여는 null
+             */
+            participant_id?: string | null;
         };
         /** @description 현재 미확정 결과의 조건 수정 라운드를 여는 명령 */
         ReopenInputRequest: {
@@ -881,11 +947,36 @@ export interface components {
         };
         /** @description 익명 참여 요청 */
         JoinRoomRequest: {
+            /** @description 게스트 최초 참여의 선택 암호. 공백·대소문자를 보존하며 1~128 Unicode 코드 포인트. 회원은 사용하지 않음 */
+            password?: string | null;
             /**
-             * @description 게스트 최초 참여 때 필요한 표시 이름. 회원은 계정 이름을 사용하여 생략 가능
+             * @description 게스트 최초 참여 때 필요한 표시 이름. 앞뒤 공백 제거 후 1~50 Unicode 코드 포인트. 회원은 계정 이름을 사용하여 생략 가능
              * @example 지수
              */
             display_name?: string | null;
+        };
+        /** @description 재접근 검증 요청 */
+        GuestReaccessRequest: {
+            /** @description 설정한 경우 필요한 암호. 공백과 대소문자를 보존하며 1~128 Unicode 코드 포인트 */
+            password?: string | null;
+            /**
+             * Format: uuid
+             * @description 목록에서 명시적으로 선택한 기록 번호
+             */
+            participant_id?: string;
+        };
+        /** @description 쿠키에 부여된 재접근 범위; 자체 권한 증명으로 사용할 수 없음 */
+        GuestReaccessResponse: {
+            /**
+             * @description VERIFIED_GUEST: 본인 읽기/수정, REPLACE_ONLY: 원문 없는 대체 입력만
+             * @enum {string}
+             */
+            level?: "VERIFIED_GUEST" | "REPLACE_ONLY";
+            /**
+             * Format: uuid
+             * @description 선택한 기록 번호
+             */
+            participant_id?: string;
         };
         /** @description 수동 마감 요청 */
         CloseRoomRequest: {
@@ -1059,6 +1150,21 @@ export interface components {
             partial_attendance: boolean;
             /** @description 대면 대표 지역; 온라인은 null */
             place: components["schemas"]["CandidatePlaceResponse"] | null;
+        };
+        /** @description 동명 기록을 구분하는 공개 선택 정보 */
+        GuestRecordResponse: {
+            /**
+             * Format: uuid
+             * @description 방별 기록 번호; 권한 증명이 아님
+             */
+            participant_id?: string;
+            /** @description 중복 가능한 게스트 표시 이름 */
+            display_name?: string;
+        };
+        /** @description 공개 게스트 선택 목록 */
+        GuestRecordsResponse: {
+            /** @description 계정 소유 기록을 제외한 공개 게스트 이름과 번호 */
+            records?: components["schemas"]["GuestRecordResponse"][];
         };
         /** @description 후보 생성 결과 */
         CandidateListResponse: {
@@ -1259,6 +1365,98 @@ export interface operations {
             };
             /** @description 제출 요청 제한 초과 */
             429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
+    replace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                inviteCode: string;
+                participantId: string;
+            };
+            cookie?: {
+                meet_me_guest?: string;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GuestReplacementRequest"];
+            };
+        };
+        responses: {
+            /** @description 성공 여부만 반환; 기존 원문과 제출 버전은 반환하지 않음 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GuestReplacementResponse"];
+                };
+            };
+            /** @description 잘못된 입력 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 무효 인증 또는 만료된 세션 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 소유 증명 또는 Origin 거부 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 방 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 참여 또는 제출 경합, 마감 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 암호 시도 제한; Retry-After 초 */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 검증 또는 시도 제한 저장소 사용 불가 */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1595,6 +1793,97 @@ export interface operations {
             };
             /** @description 방 참여 요청 제한 초과 */
             429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
+    reaccess: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                inviteCode: string;
+            };
+            cookie?: {
+                meet_me_guest?: string;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GuestReaccessRequest"];
+            };
+        };
+        responses: {
+            /** @description VERIFIED_GUEST는 본인 읽기, REPLACE_ONLY는 빈 입력으로 대체만 가능 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GuestReaccessResponse"];
+                };
+            };
+            /** @description 잘못된 입력 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 무효 인증 또는 만료된 세션 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 소유 증명 또는 Origin 거부 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 방 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 참여 또는 제출 경합, 마감 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 암호 시도 제한; Retry-After 초 */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 검증 또는 시도 제한 저장소 사용 불가 */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2399,6 +2688,91 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
+    records: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                inviteCode: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 공개 이름과 기록 번호만 반환 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GuestRecordsResponse"];
+                };
+            };
+            /** @description 잘못된 입력 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 무효 인증 또는 만료된 세션 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 소유 증명 또는 Origin 거부 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 방 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 참여 또는 제출 경합, 마감 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 암호 시도 제한; Retry-After 초 */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 검증 또는 시도 제한 저장소 사용 불가 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
                 };
             };
         };

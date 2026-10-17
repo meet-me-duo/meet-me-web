@@ -142,9 +142,9 @@ footer { padding: 28px 16px; color: #94a3b8; font-size: .75rem; text-align: cent
 .field { min-width: 0; display: grid; gap: 8px; color: #334155; font-size: .78rem; font-weight: 750; }
 .field > span, .field legend { letter-spacing: .02em; }
 .field small { color: #94a3b8; font-weight: 500; }
-.field input, .field textarea { width: 100%; border: 1px solid #d5e0eb; border-radius: 12px; padding: 12px 14px; background: rgb(255 255 255 / .82); color: #172033; outline: 0; font-size: .88rem; font-weight: 500; transition: border .15s, box-shadow .15s; }
+.field input, .field textarea, .field select { min-width: 0; width: 100%; border: 1px solid #d5e0eb; border-radius: 12px; padding: 12px 14px; background: rgb(255 255 255 / .82); color: #172033; outline: 0; font-size: .88rem; font-weight: 500; transition: border .15s, box-shadow .15s; }
 .field textarea { resize: vertical; line-height: 1.65; }
-.field input:focus, .field textarea:focus { border-color: #38bdf8; box-shadow: 0 0 0 3px rgb(56 189 248 / .13); background: white; }
+.field input:focus, .field textarea:focus, .field select:focus { border-color: #38bdf8; box-shadow: 0 0 0 3px rgb(56 189 248 / .13); background: white; }
 .field-error { color: #dc2626 !important; font-size: .72rem !important; }
 .character-count { margin-top: -3px; text-align: right; }
 fieldset.field { margin: 0; border: 0; padding: 0; }
@@ -409,3 +409,5 @@ fieldset.field legend { margin-bottom: 9px; }
 .archive-list small { opacity: .72; }
 .claim-card { max-width: 620px; margin: 1.5rem auto; padding: 1.5rem; }
 @media (max-width: 600px) { .account-navigation { gap: .5rem; max-width: 60%; font-size: .75rem; } .account-controls { gap: .4rem; } .account-card { padding: 1.25rem; } }
+
+.guest-record-notice { overflow-wrap: anywhere; }

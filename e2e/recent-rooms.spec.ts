@@ -17,6 +17,7 @@ async function fixture(context: BrowserContext, options: { joined?: boolean; rol
     const request = route.request(), pathname = new URL(request.url()).pathname;
     if (await fulfillAccountRefresh(route, joined && role === "HOST" ? "로컬 사용자" : null)) return;
     const response = () => ({ ...room, public_status: options.status ?? room.public_status, viewer: { joined, role: joined ? role : null, display_name: joined ? "로컬 사용자" : null } });
+    if (pathname === `/api/rooms/${code}/guest-records` && request.method() === "GET") return route.fulfill({ json: { records: [] } });
     if (pathname === "/api/rooms" && request.method() === "POST") { joined = true; role = "HOST"; return route.fulfill({ status: 201, json: response() }); }
     if (pathname.endsWith("/participants") && request.method() === "POST") { joined = true; role = "MEMBER"; return route.fulfill({ status: 201, json: response() }); }
     if (pathname.endsWith("/submission")) return route.fulfill({ status: 404, json: { code: "SUBMISSION_NOT_FOUND" } });
@@ -53,10 +54,10 @@ test("creation is recorded before opening and a new tab returns to a selectable 
 test("a plain invitation is not recorded until joining, then persists through reload", async ({ page, context }) => {
   await fixture(context, { joined: false });
   await page.goto(`/rooms/${code}`);
-  await expect(page.getByRole("button", { name: "모임 참여하기" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "참여하기" })).toBeVisible();
   expect(await page.evaluate(key => localStorage.getItem(key), key)).toBeNull();
-  await page.getByLabel("내 이름").fill("참여자");
-  await page.getByRole("button", { name: "모임 참여하기" }).click();
+  await page.getByLabel("이름", { exact: true }).fill("참여자");
+  await page.getByRole("button", { name: "참여하기" }).click();
   await expect(page.getByText(/홈의.*이 기기의 최근 모임/)).toBeVisible();
   await page.goto("/"); await page.reload();
   await expect(page.getByRole("link", { name: "다시 찾을 모임 다시 열기" })).toBeVisible();
@@ -81,8 +82,8 @@ test("a saved address never supplies authority after participation is lost", asy
   await page.getByRole("link", { name: "다시 찾을 모임 다시 열기" }).click();
   await expect(page.getByText(/같은 이름으로 새로 참여해도/)).toBeVisible();
   await expect(page.getByRole("heading", { name: "주최자 도구" })).toHaveCount(0);
-  await page.getByLabel("내 이름").fill("로컬 사용자");
-  await page.getByRole("button", { name: "모임 참여하기" }).click();
+  await page.getByLabel("이름", { exact: true }).fill("로컬 사용자");
+  await page.getByRole("button", { name: "참여하기" }).click();
   await expect(page.getByRole("button", { name: "초대 링크 복사" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "주최자 도구" })).toHaveCount(0);
 });
@@ -148,12 +149,16 @@ test("ten long titles remain usable on narrow mobile and desktop", async ({ page
     await page.setViewportSize({ width, height: 844 });
     await page.getByRole("link", { name: /이 기기의 최근 모임 10개 보기/ }).click();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
-    for (const button of await page.locator(".recent-actions .button").all()) {
-      expect(await button.evaluate(element => Number.parseFloat(getComputedStyle(element).minHeight))).toBeGreaterThanOrEqual(44);
+    const buttons = await page.locator(".recent-actions .button").evaluateAll(elements => elements.map(element => ({
+      minHeight: Number.parseFloat(getComputedStyle(element).minHeight),
+      height: element.getBoundingClientRect().height,
+    })));
+    expect(buttons).toHaveLength(30);
+    for (const button of buttons) {
+      expect(button.minHeight).toBeGreaterThanOrEqual(44);
       // Chromium can report 43.999969px for a 44px box at a fractional scroll position.
-      const height = (await button.boundingBox())!.height;
-      expect(Math.round(height * 1_000) / 1_000).toBeGreaterThanOrEqual(44);
+      expect(Math.round(button.height * 1_000) / 1_000).toBeGreaterThanOrEqual(44);
     }
-    await page.screenshot({ path: testInfo.outputPath(`recent-${width}.png`) });
+    await page.screenshot({ path: testInfo.outputPath(`recent-${width}.png`), scale: "css" });
   }
 });

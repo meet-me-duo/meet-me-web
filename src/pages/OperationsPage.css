@@ -1,0 +1,25 @@
+.operations-page { max-width: 1100px; padding-block: 32px 48px; color: #172033; line-height: 1.65; overflow-wrap: anywhere; }
+.operations-page h1 { margin: 12px 0; }
+.operations-page h2 { margin: 0 0 12px; font-size: 1.25rem; }
+.operations-page p { color: #475569; }
+.operations-nav { display: flex; gap: 10px; flex-wrap: wrap; margin: 24px 0; }
+.operations-page .button { min-height: 44px; max-width: 100%; white-space: normal; overflow-wrap: anywhere; text-align: left; }
+.operations-card { min-width: 0; margin-block: 20px; padding: 24px; border: 1px solid #dbe4ef; border-radius: 18px; background: #fff; }
+.operations-fields { display: grid; grid-template-columns: minmax(140px, 1fr) minmax(0, 3fr); gap: 8px 20px; margin: 20px 0 0; }
+.operations-fields dt { font-weight: 700; color: #475569; }
+.operations-fields dd { margin: 0; min-width: 0; }
+.operations-list { list-style: none; margin: 16px 0; padding: 0; }
+.operations-list li { display: grid; gap: 8px; padding: 16px 0; border-top: 1px solid #dbe4ef; }
+.operations-list span { color: #475569; }
+.operations-table { max-width: 100%; overflow-x: auto; border-radius: 8px; }
+.operations-table table { width: 100%; border-collapse: collapse; text-align: left; font-size: .95rem; }
+.operations-table caption { text-align: left; padding: 8px; font-weight: 700; }
+.operations-table th, .operations-table td { padding: 12px; min-width: 100px; border: 1px solid #dbe4ef; vertical-align: top; }
+.operations-table th { background: #f1f5f9; }
+.operations-attempt { border-top: 1px solid #dbe4ef; margin-top: 24px; padding-top: 8px; }
+@media (max-width: 540px) {
+  .operations-page { font-size: .95rem; }
+  .operations-card { padding: 16px; }
+  .operations-fields { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .operations-fields dd { margin-bottom: 10px; }
+}

@@ -1,0 +1,233 @@
+{
+  "scope": "#110 independent local web implementation; actual #109 memory-store wiring pending",
+  "sealedAt": "2026-10-17T15:33:00.754998+00:00",
+  "unit": {
+    "passed": 353,
+    "failed": 0
+  },
+  "browser": {
+    "startTime": "2026-10-17T15:27:03.891Z",
+    "duration": 266366.28400000004,
+    "expected": 395,
+    "skipped": 1,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "fixedSourceAndDist": true,
+  "mutations": {
+    "faultsDetected": 7,
+    "results": {
+      "allowlist-validation-bypass": {
+        "tests": 10,
+        "failed": 2,
+        "passed": 8
+      },
+      "null-to-zero": {
+        "tests": 12,
+        "failed": 1,
+        "passed": 11
+      },
+      "deny-retains-stale-summary": {
+        "tests": 12,
+        "failed": 4,
+        "passed": 8
+      },
+      "control": {
+        "tests": 32,
+        "failed": 0,
+        "passed": 32
+      },
+      "known-subtotal-called-total": {
+        "tests": 12,
+        "failed": 2,
+        "passed": 10
+      },
+      "transport-unknown-zero": {
+        "tests": 8,
+        "failed": 2,
+        "passed": 6
+      },
+      "transport-status-success": {
+        "tests": 8,
+        "failed": 1,
+        "passed": 7
+      },
+      "unsafe-field-echo": {
+        "tests": 12,
+        "failed": 1,
+        "passed": 11
+      }
+    },
+    "realSourceUnchanged": true,
+    "sourceHashes": {
+      "src/api/operations.ts": "bcaf3df80c83701e107ac39239390f6ca02a7d878e3d30250a9af59d1fdfc897",
+      "src/pages/OperationsPage.tsx": "7776de1330c96542e35dbb14c95c348cb3810c6efde8d9a314485d941424cfd9",
+      "src/pages/OperationsPage.css": "9068468c2fd211b46ef987253e886735e5f7e17a59b6f512f3bd91f58ded7111"
+    },
+    "rawReportSha256": "a7e01fbca3740e36b5bdc52def68c587ad780fbb836294bdef2f1e614af67dc3"
+  },
+  "openapi": {
+    "actualLocalExportSha256": "cf5d2988e4ffc94586210ada888f61ab89c40c8b0b9a75ea01055c631e9b8e5f",
+    "webSnapshotBeforeSha256": "56a8ddfa3bc7bd1c562ddb31a6ea8c39806abb86eef727381992678f2e9b42f2",
+    "webSnapshotAfterSha256": "0f075b740148a04b232e5ec12915630a1fa96b9d0ba543a92533963b2f3b3863",
+    "paths": [
+      "/api/operations/invocations/{invocationId}",
+      "/api/operations/rooms",
+      "/api/operations/rooms/{roomId}"
+    ],
+    "referencedComponents": [
+      "#/components/schemas/AttemptSummaryResponse",
+      "#/components/schemas/InvocationSummaryResponse",
+      "#/components/schemas/LocalClientCallResponse",
+      "#/components/schemas/OperatorInvocationDetailResponse",
+      "#/components/schemas/OperatorProblemResponse",
+      "#/components/schemas/OperatorRoomDetailResponse",
+      "#/components/schemas/OperatorRoomPageResponse",
+      "#/components/schemas/ProviderUsageResponse",
+      "#/components/schemas/RevisionCountsResponse",
+      "#/components/schemas/RoomSummaryResponse"
+    ],
+    "unrelatedPathsAndSchemasPreserved": true
+  },
+  "gates": [
+    {
+      "label": "web-v2-typecheck",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "node_modules/typescript/bin/tsc",
+        "-b",
+        "--pretty",
+        "false"
+      ],
+      "startedAt": "2026-10-17T15:21:59.557736+00:00",
+      "finishedAt": "2026-10-17T15:22:05.731199+00:00",
+      "exitCode": 0
+    },
+    {
+      "label": "web-v2-lint",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "node_modules/eslint/bin/eslint.js",
+        ".",
+        "--max-warnings=0"
+      ],
+      "startedAt": "2026-10-17T15:22:05.777135+00:00",
+      "finishedAt": "2026-10-17T15:22:14.801628+00:00",
+      "exitCode": 0
+    },
+    {
+      "label": "web-v2-unit",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--configLoader",
+        "runner",
+        "--pool",
+        "threads",
+        "--maxWorkers",
+        "1",
+        "--reporter=json"
+      ],
+      "startedAt": "2026-10-17T15:22:14.888057+00:00",
+      "finishedAt": "2026-10-17T15:24:28.835088+00:00",
+      "exitCode": 0
+    },
+    {
+      "label": "web-v2-build",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "node_modules/vite/bin/vite.js",
+        "build",
+        "--configLoader",
+        "runner"
+      ],
+      "startedAt": "2026-10-17T15:24:28.885265+00:00",
+      "finishedAt": "2026-10-17T15:24:45.855309+00:00",
+      "exitCode": 0
+    },
+    {
+      "label": "web-v2-api-generate",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "node_modules/openapi-typescript/bin/cli.js",
+        "openapi/meet-me.openapi.json",
+        "-o",
+        "src/api/schema.d.ts"
+      ],
+      "startedAt": "2026-10-17T15:25:21.277087+00:00",
+      "finishedAt": "2026-10-17T15:25:31.080024+00:00",
+      "exitCode": 0
+    },
+    {
+      "label": "web-v2-api-api-check",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts/check-openapi-generated.mjs"
+      ],
+      "startedAt": "2026-10-17T15:25:31.161305+00:00",
+      "finishedAt": "2026-10-17T15:25:33.320889+00:00",
+      "exitCode": 0
+    },
+    {
+      "label": "web-final-assets-typecheck",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "node_modules/typescript/bin/tsc",
+        "-b",
+        "--pretty",
+        "false"
+      ],
+      "startedAt": "2026-10-17T15:25:52.088846+00:00",
+      "finishedAt": "2026-10-17T15:25:58.743754+00:00",
+      "exitCode": 0
+    },
+    {
+      "label": "web-final-assets-build",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "node_modules/vite/bin/vite.js",
+        "build",
+        "--configLoader",
+        "runner"
+      ],
+      "startedAt": "2026-10-17T15:25:58.810227+00:00",
+      "finishedAt": "2026-10-17T15:26:08.362078+00:00",
+      "exitCode": 0
+    },
+    {
+      "label": "web-v2-browser-browser",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--workers=2",
+        "--retries=0",
+        "--reporter=json"
+      ],
+      "startedAt": "2026-10-17T15:27:02.796029+00:00",
+      "finishedAt": "2026-10-17T15:31:30.299883+00:00",
+      "exitCode": 0
+    }
+  ],
+  "files": {
+    "e2e/operations.acceptance.spec.ts": "7109ed2f0bfc8baa0b7ed7426cbadaccd887c18db8ecc30da2054d9025ba821c",
+    "e2e/operations.transport.spec.ts": "023381776d8306ebb541f343384354d9e29e4f110c3ffdc2e06a1632bbcfba30",
+    "openapi/meet-me.openapi.json": "0f075b740148a04b232e5ec12915630a1fa96b9d0ba543a92533963b2f3b3863",
+    "src/api/operations.acceptance.test.ts": "25e1a43b375f4624345f2005983f7ee33556dd3da19aa72acc3b94e2c7292da8",
+    "src/api/operations.auth-boundary.test.ts": "10d8ab180809cc59e2e0d8bd205ff22205d92c6acc9b7195e9233f933a5f0371",
+    "src/api/operations.transport.test.ts": "e5a974749bce6e5c879a5e3c285b6bec83a14c8cdd01e9ff35c8cddd9815003b",
+    "src/api/operations.ts": "bcaf3df80c83701e107ac39239390f6ca02a7d878e3d30250a9af59d1fdfc897",
+    "src/api/schema.d.ts": "844945b2ea01c8a7e9bec1a812ef2c010cbbb40b993458b49d576a1de612abfd",
+    "src/App.tsx": "4f6780903d715ece63cb47f615df8205749beb503db3cd957973f2b5b1d34188",
+    "src/pages/OperationsPage.acceptance.test.tsx": "e9778259f6c6159daf2112e409a397392c99e227609fe4b1ee5680bbdeacb8d9",
+    "src/pages/OperationsPage.auth-lifecycle.test.tsx": "11f606499d7b7a4f1a713e72f802b39f44f8648dc37f8e5d440a5a1424db27cb",
+    "src/pages/OperationsPage.css": "9068468c2fd211b46ef987253e886735e5f7e17a59b6f512f3bd91f58ded7111",
+    "src/pages/OperationsPage.transport.test.tsx": "b09c0041ef511714f9601e322d446fa28e28ff61007af7f1940cdfb01501d528",
+    "src/pages/OperationsPage.tsx": "7776de1330c96542e35dbb14c95c348cb3810c6efde8d9a314485d941424cfd9"
+  },
+  "rawLogsLocalOnly": true,
+  "actualBackendBrowserIntegration": false,
+  "actual109Integration": false,
+  "productionOrPaidProviderAccess": false
+}

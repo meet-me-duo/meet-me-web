@@ -1,5 +1,21 @@
 # Implementation log
 
+## 2026-10-17 — #110 운영 요약 웹 (로컬 구현 중)
+
+- `main` 기준 `9b183978d5987f8fa8a5f02d542b17181e4929b4`의 별도 작업 복사본·`feature/110-operator-summary`에서 진행한다. 원본 저장소·기존 모임 흐름은 보존한다. 승인된 정책은 명시적 운영자 allowlist·HOST와 분리·기본 거부·원문 없는 읽기 요약·접근 감사다. 실제 계정 지정과 운영 적용은 제외한다.
+- 독립 작성자가 공유 계약과 합의된 접근성 라벨에서 수용 테스트를 설계했다. 컴파일된 골격은 tsc exit0 후 22개 전부 동작 assertion RED였고, 구현 뒤 같은 22개가 GREEN이다. 추가 인증 경계 테스트와 전체 검증·독립 결함 검증은 진행 중이며 이 단계에서 완료로 주장하지 않는다.
+- `/operations`는 목록 → 현재 방 설정/실행 목록 → 실행·시도/공급자별 알려진 사용량의 얇은 조회 화면이다. 세 GET만 호출하며 원문·이름·초대 코드·공급자 응답·비밀값·임의 오류 본문은 표시하지 않는다. Runtime schema는 허용 필드만 남기며, 오류 payload는 아예 읽지 않는다.
+- 화면 메모리 외 공유 QueryClient·Web Storage·URL에 운영 응답을 남기지 않는다. 이동·실패 때 기존 snapshot을 제거하고 요청 취소/소유권 검사를 통해 늦은 결과를 버린다. 사용량은 admission 기준 소계이며 null과 0을 구별한다. HTTP 횟수는 미상이고 실행 종료를 최종 게시로 추정하지 않는다.
+- #109가 실제 로그인·refresh·메모리 인증을 소유한다. 선택적 메모리 토큰 supplier와 auth revision 주입 경계만 준비하며 기본 App에는 실제 토큰 공급자가 없다. 공통 store 연결과 실제 인증 흐름 검증은 통합 대기다. 운영자 자동 지정·기존 HOST 승격·임의 식별 헤더·가짜 로그인 UI는 없다.
+- Node24.11.0·TypeScript5.9.3·Vitest3.2.7은 기존 캐시를 사용했다. 오프라인 pnpm은 일부 tarball이 없어 실패했으나 다운로드하지 않았다. 동일 lockfile을 확인한 원본 node_modules의 파일을 별도 복사하고 424개 junction을 작업 복사본 안으로 다시 지정했다. Windows 긴 경로·junction 준비 실패는 setup 이력이며 테스트 RED로 집계하지 않는다. 원본 쓰기·새 설치·외부 서비스 호출·push·commit·병합·배포 없음.
+
+### 최초 조회 단위 검증 완료, transport 관측 확장 대기
+
+- 추가 인증 13개를 포함해 독립 35개가 같은 기대값으로 GREEN이다. API 정합·lint 경고0·typecheck·전체 unit343/22파일·build가 모두 exit0이다. 운영 route를 lazy 청크14.45kB로 분리해 재빌드했고, index506.42kB 크기 및 기존 Zod 주석 경고는 남는다. lazy 변경 뒤 검증은 고정된 빌드의 브라우저 회귀로 확인했다.
+- 신규 대역 browser8개 모두 PASS, 전체 고정 빌드 browser391 PASS/기존desktopskip1/실패·flaky0/retries0/workers2다. 최초 sandbox 실행의 loopback 거부는 자기 runner 종료 뒤 검토된 로컬 실행 권한으로 재시도했으며, 기능 RED나 기능 실패에 섞지 않는다. 공유 엔진·다른 프로세스를 재시작/정리하지 않았다.
+- 독립 임시 복사본의 control22 PASS 후 null→0, 소계→전체 비용, 권한 거부 상태 폐기 누락, 임의 오류 echo, 응답 허용 목록 우회의 5개 결함을 전부 assertion으로 탐지했다. 실제 source·dist·테스트 SHA는 불변이다. 근거는 `docs/verification/issue-110-web-quality-candidate.json`과 독립 검증 기록·로그다.
+- 이는 전체 #110 완료 선언이 아니다. 부모가 실행별 client transport 관측을 새 formal TDD 단위로 승인했다. nullable 요약과 개별 client call의 정확한 서버 계약·최종 OpenAPI가 오면 별도 RED부터 화면을 확장한다. 과거 기록의 HTTP 미상은 유지하고 client 관측을 provider 수신·과금 확정으로 표시하지 않는다. 실제 #109 인증 store 연결도 계속 통합 대기다.
+
 ## 2026-10-07 — #17 지연 분석 재시도의 동일 화면 참여자 전환 경합
 
 - 최종 `059f049a4832effb2e2cc844d33f4cdd50b5dc1e`의 읽기 검토에서 `ANALYSIS_DELAYED`가 유지된 채 joined HOST에서 다른 joined MEMBER/context로 바뀌면 DelayedState hook이 재사용되는 경계를 확인했다. 기존 unjoined 복구 회귀는 컴포넌트 unmount만 검증했다. 독립 추가2건이 old retry200의 이전 HOST 복원과 old403의 새 MEMBER private cache 삭제를 실제 assertion RED로 재현했다.
@@ -462,3 +478,11 @@
 - 원격 재조회로 web main7b95951·server developdd8e07d/main91eb250 및 두 저장소 open PR0을 확인했다. 검증한 source8 SHA 묶음ecea5468…는 그대로다. 웹main 대상 PR, 서버develop 대상 테스트 전용 PR을 준비한다. 서버 CI의 열린 이슈 연결을 위한 보조 이슈는 같은 JIN-71/웹22의 계약 회귀만 다룬다.
 - 계산 오류 별도 실행을 추정하지 않는다. 조회한 기존 JIN-25(추천 로직·프롬프트)와 JIN-33(결과·저장 상태)은 Done이고 현재 새 계산 오류 수정 세션/브랜치는 미확인이다. 이번 source는 계산 로직을 변경하지 않는다.
 - Commit/PR: 동일 커밋 예정. 정확한 커밋 SHA·PR URL·원격 CI 결과는 게시 후 PR 본문/Linear에 확인한다. 로컬 단위308/browser383/서버659 및 기존skip의 결과와 한계는 앞 기록을 유지한다.
+
+
+## 2026-10-18 KST — #110 운영 요약·로컬 transport 후속
+
+- 기존 query/API·웹 미커밋을 보존하고 독립 transport10 테스트에서 typecheck 뒤6 RED/4 PASS를 확인했다. 확인된0·미진입false·미관측null·부분 관측 소계와 각 call의 상태/단조 ns를 표시하며 인증 공급자·저장소를 복제하지 않았다. 집중45 GREEN이다.
+- 실제 로컬 서버 OpenAPI의 operations3 경로/참조 DTO10개를 기존 snapshot에 병합하고 unrelated 계약을 보존했다. api 생성 정합·최종typecheck·lint0·unit353·build PASS다. 고정 source/dist 전체 mock browser395 PASS/기존skip1/실패·flaky0/retries0이며320px mobile과desktop 새transport4 cases를 포함한다. 실제 backend/browser 및109통합 성공은 아니다.
+- 최종 source 복사본의 결함7종을13개 assertion 실패로 탐지했고 control32 PASS다. 실제 source/test 변경0이다. machine proof는 docs/verification/issue-110-web-final.json이고 원시 로그는 로컬 전용이다. 기존343/391과 중복 합산하지 않는다.
+- 사용자 추가 승인으로 최종 독립 리뷰 후 commit/push/Draft PR/정확 SHA CI까지 준비한다. merge·운영배포·DB·Secret 변경·실제운영자등록은 제외한다. actual109 memory supplier/authRevision 연결은 미완료로 Draft 차단 조건을 남긴다. Commit/PR: 동일 커밋 예정.

@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-17T19:27:55.076692+00:00",
+  "scope": "native fixture cleanup; read-only TCP checks",
+  "ports": [
+    {
+      "host": "127.0.0.1",
+      "port": 18920,
+      "connectionOpen": false
+    },
+    {
+      "host": "127.0.0.1",
+      "port": 18921,
+      "connectionOpen": false
+    },
+    {
+      "host": "127.0.0.1",
+      "port": 18922,
+      "connectionOpen": false
+    }
+  ],
+  "allClosed": true
+}

@@ -1,0 +1,33 @@
+{
+  "workItem": "issue-107-web-precheck-draft-races",
+  "sourceRevision": "e9e81efe2c75813623729e4a9b8214bd8430c8b9",
+  "testFiles": [
+    {
+      "path": "src/components/SubmissionCheckPanel.draft-races.test.tsx",
+      "sha256": "87ee98518ac195aa92cb400933d9811377f53d4a2b540556df4b03e354c3f191"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/components/SubmissionCheckPanel.draft-races.test.tsx",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1",
+    "--reporter=json",
+    "--outputFile=.codex/tdd-evidence/issue-107-web-precheck-draft-races-red-result.json"
+  ],
+  "failedTests": [
+    "#107 keeps dirty local text when the user reopens editing after another tab saves a candidate",
+    "#107 keeps a direct-edit draft when another tab produces a newer question",
+    "#107 asks to reconcile final inclusion when the room closed after an older private snapshot"
+  ],
+  "expectedFailureCategory": "MISSING_BEHAVIOR",
+  "recordedAt": "2026-10-17T18:26:59.195743+00:00",
+  "provenance": "CHRONOLOGICAL_RED",
+  "notes": "Compile PASS. Public draft preservation and latest private room snapshot reconciliation. No source code or existing tests changed."
+}

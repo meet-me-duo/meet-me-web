@@ -411,3 +411,17 @@ fieldset.field legend { margin-bottom: 9px; }
 @media (max-width: 600px) { .account-navigation { gap: .5rem; max-width: 60%; font-size: .75rem; } .account-controls { gap: .4rem; } .account-card { padding: 1.25rem; } }
 
 .guest-record-notice { overflow-wrap: anywhere; }
+.clarification-panel fieldset { border: 0; padding: 0; margin: 1rem 0; display: grid; gap: .75rem; min-width: 0; }
+.clarification-panel legend { font-weight: 700; margin-bottom: .75rem; }
+.clarification-panel fieldset > label { display: flex; align-items: baseline; gap: .5rem; overflow-wrap: anywhere; }
+.clarification-panel fieldset > .field { display: grid; }
+.clarification-panel input[type="radio"] { flex: 0 0 auto; accent-color: #0284c7; }
+
+.precheck-card .actions { flex-wrap: wrap; margin-block: 1rem; }
+.precheck-card .submitted-text { overflow-wrap: anywhere; white-space: pre-wrap; }
+.precheck-question { padding-block: 1rem; border-block: 1px solid var(--border, #e6e6eb); margin-block: 1rem; }
+.precheck-question .choice-preview { padding: 1rem; background: #f0f9ff; border-radius: 1rem; }
+.precheck-card > .button { margin: .5rem .5rem .5rem 0; }
+.precheck-card [role="status"] svg { vertical-align: middle; }
+.precheck-card { overflow-wrap: anywhere; }
+.precheck-question .button { max-width: 100%; white-space: normal; text-align: left; }

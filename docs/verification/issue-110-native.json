@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "scope": "actual-browser-to-isolated-Spring-PostgreSQL-Redis-local-HTTP-OIDC-JWKS",
+  "productionLogin": false,
+  "operatorActivation": false,
+  "credentialsProvisioned": false,
+  "externalRequests": 0,
+  "apiRouteMocks": 0,
+  "operationsRequests": 10,
+  "checks": [
+    "anonymous-real-http-401-host-hints-do-not-grant-access",
+    "actual-kakao-memory-account-real-http-403",
+    "actual-google-allowlisted-account-room-and-invocation-drilldown",
+    "actual-summary-preserves-unknown-transport-usage-and-http-count",
+    "production-memory-supplier-attaches-actual-service-bearer",
+    "actual-logout-revision-discards-private-summary-and-reloads-401",
+    "all-operations-real-http-get-no-store-no-forged-identity",
+    "credentials-absent-from-dom-url-and-browser-storage"
+  ],
+  "at": "2026-10-17T17:20:24.359Z"
+}

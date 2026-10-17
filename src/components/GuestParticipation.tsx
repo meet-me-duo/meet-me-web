@@ -4,6 +4,7 @@ export type GuestIdentity = { kind: "guest" } | { kind: "member"; displayName: s
 export type GuestRecord = { participantId: string; displayName: string };
 export type GuestParticipationProps = {
   roomKey: string;
+  submissionProtocol?: "PRE_SUBMIT_V1" | "LEGACY";
   identity: GuestIdentity;
   records: readonly GuestRecord[];
   editable: boolean;
@@ -123,7 +124,7 @@ function ParticipationForm(props: GuestParticipationProps) {
       </form>}
     </div>}
     {!props.editable && <p role="status">입력이 마감되었거나 확정된 모임이에요. 현재는 참여하거나 조건을 대체할 수 없어요.</p>}
-    {saved && <p role="status">새 조건으로 대체했어요. 기존 원문 조회 권한은 부여되지 않아요.</p>}
+    {saved && <p role="status">{props.submissionProtocol === "PRE_SUBMIT_V1" ? "원문만 저장됐어요. 확인이 끝난 뒤 결과에 반영될 수 있어요. 기존 원문 조회 권한은 부여되지 않으며 질문·답변도 조회할 수 없어요." : "새 조건으로 대체했어요. 기존 원문 조회 권한은 부여되지 않아요."}</p>}
     {error && <p className="alert error" role="alert">{error}</p>}
   </section>;
 }

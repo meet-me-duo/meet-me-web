@@ -1,3 +1,4 @@
+import type { SubmissionCheckSnapshot, StartSubmissionCheckBody, SubmissionCheckCommand } from "./precheck";
 import { getAccessToken, getSessionVersion } from "../auth/session";
 import type {
   ApiProblem,
@@ -14,6 +15,7 @@ import type {
   UnappliedInput,
 } from "./types";
 import type { ReanalyzeBody, ReanalyzeResponse, ReopenBody, ReopenResponse } from "./recovery";
+import type { ClarificationAnswer, ClarificationAnswerResult, ClarificationList } from "./clarifications";
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
 
@@ -73,8 +75,15 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 const encode = encodeURIComponent;
 
 export const api = {
+  getSubmissionCheck: (inviteCode: string, signal?: AbortSignal) => request<SubmissionCheckSnapshot>(`/api/rooms/${encode(inviteCode)}/submission/checks/current`, { signal }),
+  startSubmissionCheck: (inviteCode: string, body: StartSubmissionCheckBody) => request<SubmissionCheckSnapshot>(`/api/rooms/${encode(inviteCode)}/submission/checks`, { method: "POST", body: JSON.stringify(body) }),
+  answerSubmissionCheck: (inviteCode: string, checkId: string, body: SubmissionCheckCommand) => request<SubmissionCheckSnapshot>(`/api/rooms/${encode(inviteCode)}/submission/checks/${encode(checkId)}/answer`, { method: "POST", body: JSON.stringify(body) }),
+  retrySubmissionCheck: (inviteCode: string, checkId: string, body: SubmissionCheckCommand) => request<SubmissionCheckSnapshot>(`/api/rooms/${encode(inviteCode)}/submission/checks/${encode(checkId)}/retry`, { method: "POST", body: JSON.stringify(body) }),
+  cancelSubmissionCheck: (inviteCode: string, checkId: string, body: SubmissionCheckCommand) => request<SubmissionCheckSnapshot>(`/api/rooms/${encode(inviteCode)}/submission/checks/${encode(checkId)}/cancel`, { method: "POST", body: JSON.stringify(body) }),
   getAccountRooms: () => request<{ rooms: { invite_code: string; purpose: string; created_at: string; expires_at: string }[] }>("/api/account/rooms"),
   claimGuestRoom: (code: string) => request<Room>(`/api/rooms/${encode(code)}/claim`, { method: "POST" }),
+  getClarifications: (inviteCode: string, signal?: AbortSignal) => request<ClarificationList>(`/api/rooms/${encode(inviteCode)}/submission/clarifications`, { signal }),
+  answerClarification: (inviteCode: string, questionId: string, body: ClarificationAnswer) => request<ClarificationAnswerResult>(`/api/rooms/${encode(inviteCode)}/submission/clarifications/${encode(questionId)}/answer`, { method: "POST", body: JSON.stringify(body) }),
   createRoom: (body: CreateRoomBody) => request<Room>("/api/rooms", { method: "POST", body: JSON.stringify(body) }),
   getRoom: (inviteCode: string, signal?: AbortSignal) => request<Room>(`/api/rooms/${encode(inviteCode)}`, { signal }),
   joinRoom: (inviteCode: string, displayName?: string, password?: string) =>

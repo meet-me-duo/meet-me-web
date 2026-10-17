@@ -35,6 +35,7 @@ function GuestAccessForm({ room, roomKey, onJoined, onVerified }: GuestAccessPan
   return <>
     <GuestParticipation
       roomKey={roomKey}
+      submissionProtocol={room.submission_protocol}
       identity={account ? { kind: "member", displayName: account.account.displayName } : { kind: "guest" }}
       records={(records.data?.records ?? []).map(record => ({ participantId: record.participant_id, displayName: record.display_name }))}
       editable={editable}

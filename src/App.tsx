@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Link, Route, Routes } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import RoomPage from "./pages/RoomPage";
@@ -6,6 +7,8 @@ import { LoginGate, AccountArchive } from "./auth/AccountViews";
 import { getSessionVersion } from "./auth/session";
 import { useAccountSession } from "./auth/useAccount";
 import { MeetMeLogo } from "./components/MeetMeLogo";
+
+const OperationsPage = lazy(() => import("./pages/AccountOperationsPage"));
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
@@ -38,6 +41,7 @@ export default function App() {
         <Route path="/account/rooms" element={<AccountRoomsRoute />} />
         <Route path="/create" element={<LandingPage key="create" creating />} />
         <Route path="/rooms/:inviteCode" element={<RoomPage />} />
+        <Route path="/operations" element={<Suspense fallback={<p role="status">운영 요약 화면을 불러오는 중입니다.</p>}><OperationsPage /></Suspense>} />
         <Route path="*" element={<div className="center-state"><h1>페이지를 찾을 수 없어요</h1><Link className="button primary" to="/">홈으로 돌아가기</Link></div>} />
       </Routes>
     </Shell></AccountBoundary>

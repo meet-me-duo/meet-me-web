@@ -399,6 +399,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/operations/rooms": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 명시적 운영자 전용 방 요약 페이지 조회 */
+        get: operations["listRooms"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/operations/rooms/{roomId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 현재 방 설정과 과거 버전을 포함한 구조화 실행 조회 */
+        get: operations["roomDetail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/operations/invocations/{invocationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 한 영속 구조화 실행의 승인 시도와 사용량 확인 범위 조회 */
+        get: operations["invocationDetail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1125,6 +1176,358 @@ export interface components {
         AccountRoomsResponse: {
             /** @description 만료되지 않은 본인 주최 방 */
             rooms?: components["schemas"]["AccountRoomResponse"][];
+        };
+        /** @description 고정 운영 조회 오류. 요청 경로와 임의 exception 값은 포함하지 않음 */
+        OperatorProblemResponse: {
+            /** @description 제한된 운영 조회 오류 코드 */
+            code?: string;
+            /** @description 고정 HTTP 상태 이름 */
+            title?: string;
+            /**
+             * Format: int32
+             * @description HTTP 상태 코드
+             */
+            status?: number;
+            /** @description 원문과 내부 오류 정보를 포함하지 않는 안내 */
+            detail?: string;
+        };
+        /** @description 운영자 전용 OperatorInvocationDetailResponse. 원문 및 자격 증명 없음 */
+        OperatorInvocationDetailResponse: {
+            /**
+             * Format: uuid
+             * @description 소속 방 내부 참조
+             */
+            room_id?: string;
+            /** @description 영속 구조화 실행 기록 */
+            invocation?: components["schemas"]["InvocationSummaryResponse"];
+            /** @description 이 실행에만 소속된 승인 시도 */
+            attempts?: components["schemas"]["AttemptSummaryResponse"][];
+            /** @description 공급자별 확인 범위와 알려진 소계 */
+            usage_by_provider?: components["schemas"]["ProviderUsageResponse"][];
+        };
+        /** @description 운영자 전용 ProviderUsageResponse. 원문 및 자격 증명 없음 */
+        ProviderUsageResponse: {
+            /** @description GEMINI 또는 OPENAI */
+            provider?: string;
+            /**
+             * Format: int64
+             * @description 집계 분모인 기록된 승인 시도 수
+             */
+            recorded_attempt_count?: number;
+            /**
+             * Format: int64
+             * @description 입력 토큰 확인 시도 수
+             */
+            input_known_count?: number;
+            /**
+             * Format: int64
+             * @description 출력 토큰 확인 시도 수
+             */
+            output_known_count?: number;
+            /**
+             * Format: int64
+             * @description 추정 비용 확인 시도 수
+             */
+            cost_known_count?: number;
+            /**
+             * Format: int64
+             * @description 입력 토큰 미확인 시도 수
+             */
+            input_unknown_count?: number;
+            /**
+             * Format: int64
+             * @description 출력 토큰 미확인 시도 수
+             */
+            output_unknown_count?: number;
+            /**
+             * Format: int64
+             * @description 추정 비용 미확인 시도 수
+             */
+            cost_unknown_count?: number;
+            /**
+             * Format: int64
+             * @description 확인된 입력 토큰의 소계. 확인 시도가 없으면 null
+             */
+            known_input_tokens?: number | null;
+            /**
+             * Format: int64
+             * @description 확인된 출력 토큰의 소계. 확인 시도가 없으면 null
+             */
+            known_output_tokens?: number | null;
+            /** @description 확인된 USD 추정 비용의 소계. 전체 청구 비용이 아님 */
+            known_cost_usd?: string | null;
+            /** @description RECORDED_ADMISSIONS. 실제 dispatch 집계 분모가 아님 */
+            coverage_basis?: string;
+        };
+        /** @description 운영자 전용 AttemptSummaryResponse. 원문 및 자격 증명 없음 */
+        AttemptSummaryResponse: {
+            /**
+             * Format: uuid
+             * @description 승인 시도 참조
+             */
+            id?: string;
+            /**
+             * Format: int32
+             * @description run 내 승인 시도 번호
+             */
+            attempt_number?: number;
+            /** @description GEMINI 또는 OPENAI */
+            provider?: string;
+            /** @description 기록된 제한된 모델 이름 */
+            model?: string;
+            /** @description 기록된 실행 정책 버전 */
+            policy_version?: string;
+            /**
+             * Format: date-time
+             * @description 승인 시도 시작 기록
+             */
+            started_at?: string;
+            /**
+             * Format: date-time
+             * @description 미완료이면 null
+             */
+            finished_at?: string | null;
+            /** @description 제한된 실패 분류. 임의 문자열은 OTHER. null은 성공 증명이 아님 */
+            failure_kind?: string | null;
+            /**
+             * Format: int64
+             * @description 알려진 입력 토큰. 미확인은 null
+             */
+            input_tokens?: number | null;
+            /**
+             * Format: int64
+             * @description 알려진 출력 토큰. 미확인은 null
+             */
+            output_tokens?: number | null;
+            /** @description 알려진 USD 추정 비용의 십진 문자열. 미확인은 null */
+            estimated_cost_usd?: string | null;
+            /**
+             * Format: int64
+             * @description 저장된 시각 차이. 승인 대기 등을 포함하며 HTTP 시간이 아님
+             */
+            recorded_elapsed_millis?: number | null;
+            /** @description 승인 순서의 INITIAL, RETRY 또는 FALLBACK */
+            role?: string;
+            /** @description 기록된 파서 진입 여부. 관측 부재는 null */
+            parser_dispatched?: boolean | null;
+            /** @description 완결된 로컬 호출들. 관측 부재 null, 확인된 무호출은 빈 배열 */
+            client_calls?: components["schemas"]["LocalClientCallResponse"][] | null;
+        };
+        /** @description 로컬 OkHttp call lifecycle. 원문·URL·헤더·오류 메시지를 포함하지 않음 */
+        LocalClientCallResponse: {
+            /**
+             * Format: int32
+             * @description 이 승인 시도에서 callStart 순번
+             */
+            call_number?: number;
+            /**
+             * Format: int64
+             * @description 단조 시계로 잰 로컬 call 경과 나노초
+             */
+            elapsed_nanos?: number;
+            /**
+             * @description COMPLETED 또는 FAILED. HTTP 오류도 COMPLETED일 수 있음
+             * @enum {string}
+             */
+            outcome?: "COMPLETED" | "FAILED";
+            /**
+             * Format: int32
+             * @description 관측된 HTTP 상태. 응답 헤더가 없으면 null
+             */
+            http_status?: number | null;
+        };
+        /** @description 운영자 전용 InvocationSummaryResponse. 원문 및 자격 증명 없음 */
+        InvocationSummaryResponse: {
+            /**
+             * Format: uuid
+             * @description 영속 논리 실행 참조
+             */
+            id?: string;
+            /**
+             * Format: uuid
+             * @description 소속 run 참조
+             */
+            run_id?: string;
+            /**
+             * Format: int64
+             * @description STRUCTURING 시점에 고정된 실행 버전
+             */
+            run_version?: number;
+            /**
+             * Format: date-time
+             * @description 영속 실행 시작 시각
+             */
+            started_at?: string;
+            /**
+             * Format: date-time
+             * @description 최초 실행 제한 시각
+             */
+            deadline_at?: string;
+            /**
+             * Format: date-time
+             * @description 영속 구조화 종결 시각. 최종 후보 성공을 보증하지 않음
+             */
+            finished_at?: string | null;
+            /**
+             * Format: uuid
+             * @description 구조화 승자 참조. 후보 게시 성공을 보증하지 않음
+             */
+            winner_attempt_id?: string | null;
+            /**
+             * Format: int32
+             * @description Gemini 승인 시도 수. HTTP 건수가 아님
+             */
+            gemini_admitted_attempts?: number;
+            /**
+             * Format: int32
+             * @description OpenAI 폴백 승인 시도 수. HTTP 건수가 아님
+             */
+            luna_admitted_attempts?: number;
+            /**
+             * Format: int64
+             * @description 같은 run 안의 논리 실행 순번
+             */
+            execution_ordinal?: number;
+            /** @description QUEUED 수정 라운드와 연결된 run인지 여부 */
+            revision_linked?: boolean;
+            /**
+             * Format: int64
+             * @description 저장된 벽시계 시각 차이. HTTP 시간이 아니며 미완료는 null
+             */
+            recorded_elapsed_millis?: number | null;
+            /**
+             * Format: int64
+             * @description 모든 영속 승인 관측이 있을 때만 파서 진입 합계. 없거나 부분이면 null
+             */
+            parser_dispatch_count?: number | null;
+            /**
+             * Format: int64
+             * @description 실제 HTTP 횟수를 확인할 증거가 없어 null
+             */
+            http_request_count?: number | null;
+            /**
+             * Format: int64
+             * @description 모든 승인 관측이 있을 때 로컬 client call 수. 수신·청구 건수가 아님
+             */
+            client_call_count?: number | null;
+            /**
+             * Format: int64
+             * @description 관측된 로컬 호출만의 소계. 미관측 시도는 포함하지 않음
+             */
+            known_client_call_count?: number;
+            /**
+             * Format: int64
+             * @description 완결된 로컬 transport 관측이 기록된 승인 시도 수
+             */
+            transport_observed_attempt_count?: number;
+            /**
+             * Format: int64
+             * @description 로컬 transport 관측이 없는 승인 수. 진행·중단·저장 실패 등을 구분할 수 없음
+             */
+            transport_unknown_attempt_count?: number;
+        };
+        /** @description 운영자 전용 OperatorRoomDetailResponse. 원문 및 자격 증명 없음 */
+        OperatorRoomDetailResponse: {
+            /** @description 현재 방 설정과 상태 */
+            room?: components["schemas"]["RoomSummaryResponse"];
+            /** @description 과거 버전을 포함한 실행 페이지 */
+            invocations?: components["schemas"]["InvocationSummaryResponse"][];
+            /** @description 다음 실행 페이지 참조 */
+            next_cursor?: string | null;
+            /** @description 새 분석과 재사용을 구분한 수정 라운드 수 */
+            revision_counts?: components["schemas"]["RevisionCountsResponse"];
+            /**
+             * Format: int64
+             * @description invocation 연결이 없는 과거 시도 수. HTTP 건수가 아님
+             */
+            legacy_attempt_count?: number;
+        };
+        /** @description 운영자 전용 RevisionCountsResponse. 원문 및 자격 증명 없음 */
+        RevisionCountsResponse: {
+            /**
+             * Format: int64
+             * @description 현재 열린 수정 라운드 수
+             */
+            open?: number;
+            /**
+             * Format: int64
+             * @description 새 run 생성으로 처리된 수정 라운드 수
+             */
+            queued?: number;
+            /**
+             * Format: int64
+             * @description 기존 결과 재사용으로 처리된 수정 라운드 수. 신규 호출이 아님
+             */
+            reused?: number;
+        };
+        /** @description 운영자 전용 RoomSummaryResponse. 원문 및 자격 증명 없음 */
+        RoomSummaryResponse: {
+            /**
+             * Format: uuid
+             * @description 내부 방 참조. 초대 코드가 아님
+             */
+            id?: string;
+            /**
+             * Format: date-time
+             * @description 방 생성 시각. 주최자 제출 시각이 아님
+             */
+            created_at?: string;
+            /** @description 현재 방의 모임 방식 */
+            meeting_mode?: string;
+            /** @description 현재 방 시간대 */
+            time_zone_id?: string;
+            /**
+             * Format: date
+             * @description 현재 탐색 시작일 포함
+             */
+            search_start_date?: string;
+            /**
+             * Format: date
+             * @description 현재 탐색 종료일 제외
+             */
+            search_end_date?: string;
+            /**
+             * Format: int32
+             * @description 예상 제출 인원. 미설정이면 null
+             */
+            expected_participants?: number | null;
+            /**
+             * Format: date-time
+             * @description 설정된 제출 마감. 미설정이면 null
+             */
+            submission_deadline?: string | null;
+            /** @description 수동 마감 전용 여부 */
+            manual_only?: boolean;
+            /** @description 현재 입력 수집 상태 */
+            collection_status?: string;
+            /** @description 기록된 마감 사유. 마감 전이면 null */
+            closure_reason?: string | null;
+            /**
+             * Format: date-time
+             * @description 기록된 최초 마감 시각
+             */
+            closed_at?: string | null;
+            /**
+             * Format: int64
+             * @description 현재 참여자 수. 개인정보는 포함하지 않음
+             */
+            participant_count?: number;
+            /**
+             * Format: int64
+             * @description 현재 제출 head가 있는 참여자 수
+             */
+            submitted_participant_count?: number;
+            /** @description 현재 주최자의 저장된 제출 존재 여부 */
+            host_submitted?: boolean;
+            /** @description 현재 활성 run 상태. 과거 실행 결과가 아님 */
+            current_run_status?: string | null;
+        };
+        /** @description 운영자 전용 OperatorRoomPageResponse. 원문 및 자격 증명 없음 */
+        OperatorRoomPageResponse: {
+            /** @description 현재 페이지의 방 요약 */
+            items?: components["schemas"]["RoomSummaryResponse"][];
+            /** @description 다음 페이지 참조. 더 없으면 null */
+            next_cursor?: string | null;
         };
     };
     responses: never;
@@ -2676,6 +3079,202 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
+    listRooms: {
+        parameters: {
+            query?: {
+                limit?: string;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 원문 없는 현재 방 요약 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OperatorRoomPageResponse"];
+                };
+            };
+            /** @description 고정 형식의 잘못된 조회 조건 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 검증된 회원 인증 없음 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 기본 접근 거부 또는 명시적 운영자 allowlist 미포함 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 조회 또는 감사 저장 불가. 보호 데이터 미반환 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+        };
+    };
+    roomDetail: {
+        parameters: {
+            query?: {
+                limit?: string;
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                roomId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 방 상태와 실행 이력 페이지 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OperatorRoomDetailResponse"];
+                };
+            };
+            /** @description 고정 형식의 잘못된 조회 조건 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 검증된 회원 인증 없음 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 기본 접근 거부 또는 명시적 운영자 allowlist 미포함 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 운영자 인가 후에도 조회 대상 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 조회 또는 감사 저장 불가. 보호 데이터 미반환 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+        };
+    };
+    invocationDetail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invocationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 공급자별 알려진 값과 미확인 범위. 로컬 호출은 수신·청구 건수가 아님 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OperatorInvocationDetailResponse"];
+                };
+            };
+            /** @description 고정 형식의 잘못된 조회 조건 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 검증된 회원 인증 없음 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 기본 접근 거부 또는 명시적 운영자 allowlist 미포함 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 운영자 인가 후에도 조회 대상 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 조회 또는 감사 저장 불가. 보호 데이터 미반환 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
                 };
             };
         };

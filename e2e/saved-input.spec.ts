@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { fulfillAccountRefresh } from "./accountFixture";
 
 const code = "abcdefghijklmnopqrstuv";
 const ownText = "화요일  저녁\n목요일은 8시부터\n" + "아주긴조건".repeat(70);
@@ -14,7 +15,9 @@ async function fixture(page: Page, status: string, baseURL: string) {
   await page.route("**/*", async route => {
     const request = route.request();
     const url = new URL(request.url());
-    if (url.origin !== origin || request.method() !== "GET") { unexpected.push(request.method() + " " + request.url()); return route.abort(); }
+    if (url.origin !== origin) { unexpected.push(request.method() + " " + request.url()); return route.abort(); }
+    if (await fulfillAccountRefresh(route, null)) return;
+    if (request.method() !== "GET") { unexpected.push(request.method() + " " + request.url()); return route.abort(); }
     if (!url.pathname.startsWith("/api/")) return route.continue();
     if (url.pathname === path + "/submission") { reads.push(url.pathname); return route.fulfill({ json: { raw_text: ownText, revision: 7, locale: "ko-KR", created_at: "2026-10-07T08:00:00Z", editable: false } }); }
     if (url.pathname === path + "/candidates") return route.fulfill({ json: { quality: status === "READY_WITH_WARNINGS" ? "PARTIAL" : "COMPLETE", applied_submissions: 2, total_submissions: 2, unapplied_inputs: 0, candidates: [candidate] } });

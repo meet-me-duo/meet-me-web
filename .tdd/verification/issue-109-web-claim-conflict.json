@@ -1,0 +1,27 @@
+{
+  "workItem": "issue-109-web-claim-conflict",
+  "sourceRevision": "9b183978d5987f8fa8a5f02d542b17181e4929b4",
+  "status": "CORRECTED_REGRESSION_GREEN_NOT_PREIMPLEMENTATION_RED",
+  "testFiles": [
+    {
+      "path": "src/auth/ClaimConflictView.test.tsx",
+      "sha256": "212053e3092e5326bcdb32384000a53ad19ac2d70afd27333e12a1f70096bb91"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "src/pages/RoomPage.tsx",
+      "sha256": "28748fa4da686f6af296bab20d426ef988f75febdbd84b0452456580b2085b9b"
+    }
+  ],
+  "correction": "Use public opaque viewer context_id hint, never as authentication proof; expand disclosure explicitly before clicking claim. Preserve viewer context/name/role on409.",
+  "typecheck": "node node_modules/typescript/bin/tsc -b --pretty false: PASS",
+  "green": {
+    "tests": 1,
+    "failures": 0,
+    "rawLog": ".codex/tdd-evidence/issue-109-web-claim-conflict-corrected-green.log"
+  },
+  "invalidatedOriginal": ".tdd/history/issue-109-web-claim-conflict-invalid-typed-fixture/original-red.json",
+  "provenance": "Originally authored independently before joined-claim UI; original typed fixture failed full typecheck and its runtime failure is invalid as TDD RED. Corrected test is now independent regression GREEN; no synthetic production fault is reported as preimplementation RED. No RoomPage source was changed by this reviewer.",
+  "recordedAt": "2026-10-17T14:58:52.572760Z"
+}

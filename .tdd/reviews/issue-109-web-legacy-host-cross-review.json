@@ -1,0 +1,25 @@
+{
+  "workItem": "issue-109-web-legacy-host-cross-review",
+  "reviewer": "/root/identity_db_tests",
+  "independence": "Did not author the gate test or production RoomPage authorization UI",
+  "verdict": "APPROVED_TEST_DESIGN",
+  "testFiles": [
+    {
+      "path": "src/auth/LegacyHostLoginGate.test.tsx",
+      "sha256": "c16faf56ce2492da226f494c7df40037f6f38d3a456cac5c99a2c20d3cb4b7ec"
+    }
+  ],
+  "checks": [
+    "Full App boots with explicit anonymous auth fixture and server-confirmed legacy guest HOST viewer",
+    "Both supported login providers remain available",
+    "Already-resolved own-input fetch is flushed before assertions so pending bootstrap cannot mask host commands",
+    "No close, retry or confirmation button/command executes before login",
+    "No automatic ownership claim is performed; explicit linkage remains separate from login",
+    "Fixture is synthetic and API reads/writes are mocked without real credentials or remote effects"
+  ],
+  "limits": [
+    "This verifies legacy COLLECTING-host gate; server tests independently authorize all host commands and deny legacy proof without account",
+    "It does not prove operational OAuth login or a complete claim flow; separate tests cover explicit claim"
+  ],
+  "recordedAt": "2026-10-17T14:50:46Z"
+}

@@ -1,0 +1,46 @@
+{
+  "workItem": "issue-109-web-ui-review-green",
+  "reviewer": "/root/final_review",
+  "role": "Independent UI test author; test oracles cross-reviewed by identity_db_tests; no production changes",
+  "tests": 3,
+  "failures": 0,
+  "testFiles": [
+    {
+      "path": "src/auth/ClosedGuestClaim.test.tsx",
+      "sha256": "78fef1238ef9014f76812ff4782b5090bfb1b8366488dd2e5c4031f6cd3323b5"
+    },
+    {
+      "path": "src/auth/LegacyHostLoginGate.test.tsx",
+      "sha256": "c16faf56ce2492da226f494c7df40037f6f38d3a456cac5c99a2c20d3cb4b7ec"
+    },
+    {
+      "path": "src/auth/ClaimConflictView.test.tsx",
+      "sha256": "027ad681d9bdca8c3ed83016ef02ecaede75d6686c2a033214946e4f827ae192"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "src/pages/RoomPage.tsx",
+      "sha256": "28748fa4da686f6af296bab20d426ef988f75febdbd84b0452456580b2085b9b"
+    },
+    {
+      "path": "src/auth/AccountViews.tsx",
+      "sha256": "b9ebcfcb56a999f38f520b79b1d8b6ee9fd9c7dbffe47adb10ba922ec9192a73"
+    },
+    {
+      "path": "src/App.tsx",
+      "sha256": "de4b805b52c525e623479b90899b65af2ae3919b8edbffa707c0bb98edb2bb95"
+    }
+  ],
+  "rawLog": ".codex/tdd-evidence/issue-109-web-ui-review-green.log",
+  "boundary": "Full App/router/component integration with public API/session doubles; actual Spring/provider browser integration is separately verified",
+  "recordedAt": "2026-10-17T14:57:09.720392Z",
+  "status": "SUPERSEDED_NOT_FINAL_EVIDENCE",
+  "supersededReason": "ClaimConflict typed fixture corrected after this runtime-only run; its original RED was invalidated. Subsequent reviewer 3-case rerun under concurrent native browsers/Gradle timed out ClosedGuestClaim while room loading (2/3), so no final 3-case GREEN is claimed. Final whole web suite must establish current source.",
+  "latestAttempt": {
+    "tests": 3,
+    "failures": 1,
+    "failedTest": "ClosedGuestClaim: async findByRole default timeout while room loading",
+    "rawLog": ".codex/tdd-evidence/issue-109-web-ui-review-corrected-green.log"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "workItem": "issue-109-web-cookie-lock",
+  "role": "independent test designer /root/identity_db_tests; production implementation root",
+  "basis": [
+    "root delegated public runAuthCookieRequest generic API",
+    "Refresh rotation across tabs must serialize before sending cookie; no automatic replay policy relaxation",
+    "Keep entire supplied cookie action under one shared same-origin Web Lock and never transmit credentials through storage/messages"
+  ],
+  "tests": [
+    "Web Locks absent: action invoked exactly once and returned result preserved",
+    "Web Locks present: request meetme-refresh and invoke action only after lock callback is granted",
+    "Lock callback remains pending until entire async action resolves",
+    "Action rejection propagated exactly once without retry inside or outside lock"
+  ],
+  "status": "VALIDATED: frozen 4/4 TODO RED then GREEN; shared-lock bypass detected by three tests; exact source bytes restored and combined session19/helper4=23 GREEN",
+  "red": ".tdd/red/issue-109-web-cookie-lock.json",
+  "browserScope": "Mocked Web Locks validates adapter control contract; real multiple-page browser execution remains root native browser validation task",
+  "verification": ".tdd/verification/issue-109-web-cookie-lock-faults.json"
+}

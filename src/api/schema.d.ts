@@ -39,6 +39,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/rooms/{inviteCode}/submission/clarifications/{questionId}/answer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 본인 보완 답변을 새 revision으로 저장하거나 취소. 자동 분석 없음 */
+        post: operations["answer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rooms/{inviteCode}/reopen": {
         parameters: {
             query?: never;
@@ -178,6 +195,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/rooms/{inviteCode}/submission/clarifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 본인의 모호한 조건 보완 질문 조회 */
+        get: operations["get_2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rooms/{inviteCode}/result": {
         parameters: {
             query?: never;
@@ -268,9 +302,19 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         JsonNode: {
+            array?: boolean;
+            empty?: boolean;
+            null?: boolean;
+            float?: boolean;
+            object?: boolean;
+            container?: boolean;
+            string?: boolean;
+            number?: boolean;
+            /** @enum {string} */
+            nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
+            integralNumber?: boolean;
             missingNode?: boolean;
             valueNode?: boolean;
-            object?: boolean;
             pojo?: boolean;
             floatingPointNumber?: boolean;
             short?: boolean;
@@ -283,16 +327,6 @@ export interface components {
             textual?: boolean;
             boolean?: boolean;
             binary?: boolean;
-            /** @enum {string} */
-            nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
-            integralNumber?: boolean;
-            array?: boolean;
-            empty?: boolean;
-            null?: boolean;
-            float?: boolean;
-            container?: boolean;
-            string?: boolean;
-            number?: boolean;
             embeddedValue?: boolean;
         };
         /** @description 현재 익명 참여자의 자연어 제출 또는 수정 요청 */
@@ -571,6 +605,11 @@ export interface components {
             state_version?: number;
             /** @description 활성 분석의 실제 시각 선택 protocol; legacy 또는 분석 전에는 null */
             recommendation_protocol?: string | null;
+            /**
+             * @description 본인 보완 질문 API 지원 표지. 권한은 별도 검증
+             * @enum {string}
+             */
+            clarification_protocol?: "owner-clarification-v1";
         };
         /** @description 현재 브라우저 세션의 방 참여 상태 */
         ViewerParticipationResponse: {
@@ -588,6 +627,75 @@ export interface components {
              * @description 현재 세션의 본인 room-scoped opaque 참여자 UUID. 자기 원문 캐시 분리 hint이며 권한 증명은 아님
              */
             context_id?: string | null;
+        };
+        /** @description 본인 모호성 질문의 명시적 답변. 저장만 수행하며 HOST 재분석이 별도로 필요 */
+        AnswerClarificationRequest: {
+            /**
+             * @description 명시적 선택
+             * @enum {string}
+             */
+            choice: "A" | "B" | "DIRECT" | "CANCEL";
+            /**
+             * Format: uuid
+             * @description 같은 질문의 동일 답변 재시도에 유지할 UUID
+             */
+            request_id: string;
+            /**
+             * Format: uuid
+             * @description 현재 OPEN 수정 라운드 UUID
+             */
+            revision_round_id: string;
+            /**
+             * Format: int32
+             * @description 질문의 source_revision 정수. 문자열·소수·null은 400, 현재 revision과 다르면 409
+             */
+            expected_revision: number;
+            /** @description DIRECT에서만 전체 대체 원문. ECMAScript trim 후 1~500 Unicode 코드포인트 */
+            direct_text?: string | null;
+        };
+        /** @description 영속 답변 결과. 동일 요청의 재시도는 최초 응답을 재생 */
+        ClarificationAnswerResponse: {
+            /**
+             * @description 새 revision 저장 또는 질문 취소
+             * @enum {string}
+             */
+            status?: "ANSWERED" | "CANCELLED";
+            /** @description 저장한 새 revision. CANCELLED이면 null */
+            submission?: components["schemas"]["SubmissionResponse"] | null;
+        };
+        /** @description 현재 익명 참여자의 최신 제출 */
+        SubmissionResponse: {
+            /**
+             * Format: int32
+             * @description 불변 제출 revision
+             */
+            revision?: number;
+            /** @description BCP 47 제출 locale */
+            locale?: string;
+            /** @description 현재 입력 수집 상태에서 수정 가능한지 여부 */
+            editable?: boolean;
+            /** @description 저장된 자연어 조건 */
+            raw_text?: string | null;
+            /**
+             * @deprecated
+             * @description 호환용으로 항상 빈 배열. 구 수동 원본은 노출하지 않음
+             */
+            manual_available_times?: unknown[];
+            /**
+             * Format: date-time
+             * @description 현재 revision 저장 시각
+             */
+            created_at?: string;
+            /**
+             * Format: uuid
+             * @description 수정 가능할 때의 현재 조건 수정 라운드
+             */
+            revision_round_id?: string | null;
+            /**
+             * Format: int64
+             * @description 응답 snapshot의 방 조율 상태 버전
+             */
+            state_version?: number;
         };
         /** @description 현재 미확정 결과의 조건 수정 라운드를 여는 명령 */
         ReopenInputRequest: {
@@ -797,39 +905,38 @@ export interface components {
              */
             revision_round_id?: string;
         };
-        /** @description 현재 익명 참여자의 최신 제출 */
-        SubmissionResponse: {
-            /**
-             * Format: int32
-             * @description 불변 제출 revision
-             */
-            revision?: number;
-            /** @description BCP 47 제출 locale */
-            locale?: string;
-            /** @description 현재 입력 수집 상태에서 수정 가능한지 여부 */
-            editable?: boolean;
-            /** @description 저장된 자연어 조건 */
-            raw_text?: string | null;
-            /**
-             * @deprecated
-             * @description 호환용으로 항상 빈 배열. 구 수동 원본은 노출하지 않음
-             */
-            manual_available_times?: unknown[];
-            /**
-             * Format: date-time
-             * @description 현재 revision 저장 시각
-             */
-            created_at?: string;
-            /**
-             * Format: uuid
-             * @description 수정 가능할 때의 현재 조건 수정 라운드
-             */
-            revision_round_id?: string | null;
+        /** @description 본인의 현재 미응답 질문 목록. 명확한 입력에는 빈 배열 */
+        ClarificationListResponse: {
+            /** @description 질문 최대1개 */
+            questions?: components["schemas"]["ClarificationQuestionResponse"][];
             /**
              * Format: int64
-             * @description 응답 snapshot의 방 조율 상태 버전
+             * @description 현재 방 snapshot 버전
              */
             state_version?: number;
+        };
+        /** @description 현재 본인 제출에 속한 미응답 질문. 타인의 질문과 원문은 포함하지 않음 */
+        ClarificationQuestionResponse: {
+            /** @description 본인 원문에 존재하는 모호한 구절, 최대200 코드포인트 */
+            excerpt?: string;
+            /** @description 최대160 코드포인트의 질문 */
+            question?: string;
+            /** @description 현재 OPEN 라운드에서 본인이 답변할 수 있는지 */
+            editable?: boolean;
+            /**
+             * Format: uuid
+             * @description 원본 버전에 고정된 질문 UUID
+             */
+            question_id?: string;
+            /**
+             * Format: int32
+             * @description 질문을 만든 불변 원문 revision
+             */
+            source_revision?: number;
+            /** @description A 선택 시 저장할 전체 수정본, 최대500 코드포인트 */
+            option_a?: string;
+            /** @description B 선택 시 저장할 전체 수정본, 최대500 코드포인트 */
+            option_b?: string;
         };
         /** @description 분석에 고정된 날짜·시간 추천 또는 대안 페이지 */
         RecommendationListResponse: {
@@ -1128,6 +1235,98 @@ export interface operations {
                 };
             };
             /** @description 방 생성 요청 제한 초과 */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 요청 제한 저장소 사용 불가 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
+    answer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                inviteCode: string;
+                questionId: string;
+            };
+            cookie?: {
+                meet_me_guest?: string;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnswerClarificationRequest"];
+            };
+        };
+        responses: {
+            /** @description 새 revision, 취소 또는 동일 작업 재생 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClarificationAnswerResponse"];
+                };
+            };
+            /** @description 입력 형식·선택·직접 원문 검증 실패 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 본인 세션 누락·무효 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 방 참여권한 또는 정확 Origin 없음 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 방 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description REVISION_CONFLICT 또는 배치 원문 합계 제한 초과 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 답변 요청 제한 */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -1766,6 +1965,93 @@ export interface operations {
             };
             /** @description 방 없음 */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
+    get_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                inviteCode: string;
+            };
+            cookie?: {
+                meet_me_guest?: string;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 본인에게만 공개하는 현재 미응답 질문 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClarificationListResponse"];
+                };
+            };
+            /** @description 입력 형식·선택·직접 원문 검증 실패 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 본인 세션 누락·무효 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 방 참여권한 또는 정확 Origin 없음 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 방 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description REVISION_CONFLICT 또는 배치 원문 합계 제한 초과 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 답변 요청 제한 */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 요청 제한 저장소 사용 불가 */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -396,3 +396,9 @@ fieldset.field legend { margin-bottom: 9px; }
   .actual-time-form { padding: 18px; }
   .actual-time-actions .button, .more-times { width: 100%; }
 }
+
+.clarification-panel fieldset { border: 0; padding: 0; margin: 1rem 0; display: grid; gap: .75rem; min-width: 0; }
+.clarification-panel legend { font-weight: 700; margin-bottom: .75rem; }
+.clarification-panel fieldset > label { display: flex; align-items: baseline; gap: .5rem; overflow-wrap: anywhere; }
+.clarification-panel fieldset > .field { display: grid; }
+.clarification-panel input[type="radio"] { flex: 0 0 auto; accent-color: #0284c7; }

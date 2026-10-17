@@ -1,0 +1,93 @@
+{
+  "recorded_at": "2026-10-17T15:31:12.697545+00:00",
+  "source": "src/components/ClarificationPanel.tsx",
+  "source_sha256": "088e3370051a584fd94c1b1c116e26a7b2e624d5f4713aebb8f3f1a3d7846cd7",
+  "related_sources": {
+    "src/pages/RoomPage.tsx": "5bf7436ee8c9872c11f3d5e68c19dd5d87854455ce4717c1e44edfddd9196f09",
+    "src/utils/submissionGuidance.ts": "bc3742eeae7944a02ce03dd1f497ad01878b19c9bcaac5a1a5e9569a7370b1d3"
+  },
+  "tests": {
+    "src/components/ClarificationPanel.test.tsx": "0dc404816a85504b9700de81c494b80ad1937a8fbdcb6b692e54677fbfd28a32",
+    "src/pages/RoomPage.clarifications.test.tsx": "cc4c85f6b8bfc49345c16adbe66842edcd23b79b69619c8e02c9f89e6443926a",
+    "src/components/ClarificationPanel.identity.test.tsx": "bb0846240ff4f4c7fdb58dd9783d62a2a3c0aabdfd62ae37a5154dd1b9047b47",
+    "src/components/ClarificationPanel.time-guidance.test.tsx": "1af8ec43a25a2547f05f9d1048a95daaba896bcfdc03fc31642d41caed554564",
+    "src/pages/RoomPage.time-guidance.test.tsx": "b82d1f610488c9bd1d094a35a37c202adf070f9ba7ee7cdcd414bcda69ceac96"
+  },
+  "baseline": "67 focused tests passed before mutation; dist was not rebuilt for mutants. Pre-identity and pre-guidance source/evidence preserved separately.",
+  "mutations": [
+    {
+      "fault": "retry-new-request-id",
+      "description": "매 재시도 request_id 재생성",
+      "mutant_sha256": "92b61e621046d9655df015ff7b27b75b76908f6770914232def017f137c192d5",
+      "command": "node node_modules/vitest/vitest.mjs run src/components/ClarificationPanel.test.tsx --configLoader runner --pool threads --maxWorkers 1 --reporter=default --reporter=json --outputFile.json /tmp/issue107-web-fault-retry-new-request-id.json",
+      "exit": 1,
+      "failed_test_count": 1,
+      "assertion_failure_count": 1,
+      "detected_tests": [
+        "#107 retry, race and access boundaries retains direct input and the exact operation UUID after a transient failure"
+      ],
+      "raw_log": "/tmp/issue107-web-fault-retry-new-request-id.log",
+      "raw_report": "/tmp/issue107-web-fault-retry-new-request-id.json",
+      "killed": true
+    },
+    {
+      "fault": "utf16-direct-length",
+      "description": "직접 입력 길이를 UTF-16 code unit으로 판정",
+      "mutant_sha256": "c4cf378988f92c6311d465962414692d3caeae5ddc4347074b20aa2faa1aeebb",
+      "command": "node node_modules/vitest/vitest.mjs run src/components/ClarificationPanel.test.tsx --configLoader runner --pool threads --maxWorkers 1 --reporter=default --reporter=json --outputFile.json /tmp/issue107-web-fault-utf16-direct-length.json",
+      "exit": 1,
+      "failed_test_count": 1,
+      "assertion_failure_count": 1,
+      "detected_tests": [
+        "#107 direct replacement validation accepts complete Unicode input and preserves its interior (😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀)"
+      ],
+      "raw_log": "/tmp/issue107-web-fault-utf16-direct-length.log",
+      "raw_report": "/tmp/issue107-web-fault-utf16-direct-length.json",
+      "killed": true
+    },
+    {
+      "fault": "remove-live-guards",
+      "description": "unmount된 이전 viewer의 POST 후속 처리 허용",
+      "mutant_sha256": "a2346ea7f396101735e50c3e29de9803f7df9722fcbd8841334d7d7fa2402bcd",
+      "command": "node node_modules/vitest/vitest.mjs run src/components/ClarificationPanel.test.tsx --configLoader runner --pool threads --maxWorkers 1 --reporter=default --reporter=json --outputFile.json /tmp/issue107-web-fault-remove-live-guards.json",
+      "exit": 1,
+      "failed_test_count": 2,
+      "assertion_failure_count": 2,
+      "detected_tests": [
+        "#107 retry, race and access boundaries ignores an old viewer's late successful write without refreshing or modifying the new owner",
+        "#107 retry, race and access boundaries ignores an old viewer's late POST denial rather than clearing the new owner's session"
+      ],
+      "raw_log": "/tmp/issue107-web-fault-remove-live-guards.log",
+      "raw_report": "/tmp/issue107-web-fault-remove-live-guards.json",
+      "killed": true
+    },
+    {
+      "fault": "reuse-question-form",
+      "description": "질문과 원본 revision 및 편집 라운드가 바뀌어도 이전 선택과 비동기 수명 재사용",
+      "mutant_sha256": "8c53f94e7199553480a0977354e5f4aa0a49cce56dafd7b60be62527fa600fc6",
+      "command": "node node_modules/vitest/vitest.mjs run src/components/ClarificationPanel.identity.test.tsx --configLoader runner --pool threads --maxWorkers 1 --reporter=default --reporter=json --outputFile.json /tmp/issue107-web-fault-reuse-question-form.json",
+      "exit": 1,
+      "failed_test_count": 7,
+      "assertion_failure_count": 7,
+      "detected_tests": [
+        "#107 explicit answer intent belongs to its question identity drops Q1 A selection when Q2 replaces it, requiring a new explicit choice",
+        "#107 explicit answer intent belongs to its question identity drops Q1 DIRECT selection when Q2 replaces it, requiring a new explicit choice",
+        "#107 explicit answer intent belongs to its question identity also requires a fresh choice if a source revision changes while the question ID is reused",
+        "#107 explicit answer intent belongs to its question identity clears Q1's 409 block for Q2 and gives Q2 a new operation UUID and source revision",
+        "#107 explicit answer intent belongs to its question identity starts the same source question fresh in a new editing round after the previous round's 409",
+        "#107 explicit answer intent belongs to its question identity ignores Q1's late SUCCESS after Q2 has its own direct draft",
+        "#107 explicit answer intent belongs to its question identity ignores Q1's late DENIAL after Q2 has its own direct draft"
+      ],
+      "raw_log": "/tmp/issue107-web-fault-reuse-question-form.log",
+      "raw_report": "/tmp/issue107-web-fault-reuse-question-form.json",
+      "killed": true
+    }
+  ],
+  "restored_source_sha256": "088e3370051a584fd94c1b1c116e26a7b2e624d5f4713aebb8f3f1a3d7846cd7",
+  "exact_source_restoration": true,
+  "restored_verification": {
+    "command": "node node_modules/vitest/vitest.mjs run src/components/ClarificationPanel.test.tsx src/components/ClarificationPanel.identity.test.tsx src/pages/RoomPage.clarifications.test.tsx src/components/ClarificationPanel.time-guidance.test.tsx src/pages/RoomPage.time-guidance.test.tsx --configLoader runner --pool threads --maxWorkers 1",
+    "exit": 0,
+    "raw_log": "/tmp/issue107-web-restored-final.log"
+  }
+}

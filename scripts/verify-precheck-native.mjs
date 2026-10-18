@@ -8,7 +8,7 @@ import { join } from 'node:path';
 const api = process.env.MEETME_PRECHECK_NATIVE_API ?? 'http://localhost:18920';
 const web = process.env.MEETME_PRECHECK_NATIVE_WEB ?? 'http://localhost:18921';
 const control = process.env.MEETME_PRECHECK_NATIVE_CONTROL ?? 'http://127.0.0.1:18922';
-const evidencePath = 'docs/verification/issue-107-native-browser.json';
+const evidencePath = 'docs/verification/issue-32-native-browser.json';
 const loopback = host => ['localhost', '127.0.0.1', '[::1]'].includes(host);
 for (const address of [api, web, control]) {
   const parsed = new URL(address);
@@ -220,6 +220,62 @@ try {
   await expect(epochGuest.page.locator('body')).not.toContainText(accountRaw); expect((await current(epochGuest.ctx, epochRoom.invite_code)).candidate.raw_text).toBe(raw); await storageBoundary(epochGuest.page, [raw, accountRaw]);
   await markCheck('N10-real-OIDC-account-priority-logout-and-late-private-provider-isolation');
 
+  stage = 'cancel-choice-and-start-again'; action = 'question-before-cancel';
+  const cancelRoom = await reset(stage); const cancelledOwner = await guest(cancelRoom.invite_code, 'native-cancel-owner');
+  const cancellationRequestStart = requests.length;
+  const firstCancelPost = cancelledOwner.page.waitForResponse(response => new URL(response.url()).pathname === privatePath(cancelRoom.invite_code) && response.request().method() === 'POST');
+  await submit(cancelledOwner.page, cancelRoom.invite_code, raw);
+  const originalRequestId = (await firstCancelPost).request().postDataJSON().request_id;
+  await provider('NEEDS_CHOICE', choices(raw)); expect((await runOne()).ran).toBe(true);
+  await expect(cancelledOwner.page.getByRole('heading', { name: '오전과 오후 중 어느 시간인가요?', exact: true })).toBeVisible({ timeout: 12_000 });
+  const beforeCancel = await current(cancelledOwner.ctx, cancelRoom.invite_code); expect(beforeCancel.check.status).toBe('NEEDS_CHOICE'); expect(beforeCancel.check.question).not.toBeNull();
+  action = 'cancel-and-private-projection';
+  const cancelResponse = cancelledOwner.page.waitForResponse(response => new URL(response.url()).pathname === `${privatePath(cancelRoom.invite_code)}/${beforeCancel.check.id}/cancel` && response.request().method() === 'POST');
+  await cancelledOwner.page.getByRole('button', { name: '확인 취소', exact: true }).click();
+  const cancelled = await cancelResponse; expect(cancelled.status()).toBe(200);
+  const cancelBody = cancelled.request().postDataJSON(); expect(cancelBody.expected_revision).toBe(beforeCancel.candidate.revision); expect(cancelBody.expected_check_version).toBe(beforeCancel.check.version);
+  const cancelWire = await cancelled.json(); expect(cancelWire.check.status).toBe('CANCELLED'); expect(cancelWire.check.question).toBeNull(); expect(cancelWire.submission_complete).toBe(false);
+  const afterCancel = await current(cancelledOwner.ctx, cancelRoom.invite_code);
+  expect(afterCancel.check.status).toBe('CANCELLED'); expect(afterCancel.check.question).toBeNull(); expect(afterCancel.candidate.raw_text).toBe(raw); expect(afterCancel.accepted).toBeNull(); expect(afterCancel.submission_complete).toBe(false);
+  await expect(cancelledOwner.page.getByText(/확인을 취소했어요/)).toBeVisible();
+  await expect(cancelledOwner.page.getByRole('heading', { name: '오전과 오후 중 어느 시간인가요?', exact: true })).toHaveCount(0);
+  await expect(cancelledOwner.page.getByRole('button', { name: /^(오전|오후|직접 수정|선택한 내용으로 확인)$/ })).toHaveCount(0);
+  await expect(cancelledOwner.page.getByRole('heading', { name: '조건 제출을 완료했어요', exact: true })).toHaveCount(0);
+  action = 'fresh-submission-after-cancel';
+  await cancelledOwner.page.getByRole('button', { name: '내 조건 수정', exact: true }).click();
+  await expect(cancelledOwner.page.getByRole('textbox', { name: /시간·장소 조건/ })).toHaveValue(raw);
+  const postCancelRaw = '취소 후 새로 입력한 토요일 오후 조건';
+  const newCancelPost = cancelledOwner.page.waitForResponse(response => new URL(response.url()).pathname === privatePath(cancelRoom.invite_code) && response.request().method() === 'POST');
+  await submit(cancelledOwner.page, cancelRoom.invite_code, postCancelRaw);
+  const resumedPost = await newCancelPost; const resumedBody = resumedPost.request().postDataJSON();
+  expect(resumedPost.status()).toBe(202); expect(resumedBody.request_id).not.toBe(originalRequestId); expect(resumedBody.request_id).not.toBe(cancelBody.request_id); expect(resumedBody.expected_revision).toBe(beforeCancel.candidate.revision); expect(resumedBody.raw_text).toBe(postCancelRaw);
+  const resumedCurrent = await current(cancelledOwner.ctx, cancelRoom.invite_code); expect(resumedCurrent.candidate.raw_text).toBe(postCancelRaw); expect(resumedCurrent.candidate.revision).toBe(beforeCancel.candidate.revision + 1); expect(resumedCurrent.accepted).toBeNull(); expect(resumedCurrent.submission_complete).toBe(false);
+  await expect(cancelledOwner.page.getByText(/모호한 부분을 확인 중/)).toBeVisible();
+  expect(requests.slice(cancellationRequestStart).filter(request => request.method === 'POST' && request.path.endsWith('/answer'))).toHaveLength(0);
+  await storageBoundary(cancelledOwner.page, [raw, postCancelRaw]);
+  await markCheck('N13-real-choice-cancel-question-null-preserved-raw-fresh-start-without-old-answer');
+
+  stage = 'explicit-failure-retry-clear'; action = 'failed-provider';
+  const retryRoom = await reset(stage); const retryOwner = await guest(retryRoom.invite_code, 'native-retry-owner');
+  const retryRaw = '실패 후 직접 다시 확인할 토요일 오후 조건';
+  await submit(retryOwner.page, retryRoom.invite_code, retryRaw); await provider('FAILED'); expect((await runOne()).ran).toBe(true);
+  const failedCheck = await current(retryOwner.ctx, retryRoom.invite_code); expect(failedCheck.check.status).toBe('FAILED'); expect(failedCheck.check.question).toBeNull(); expect(failedCheck.check.retry_allowed).toBe(true); expect(failedCheck.accepted).toBeNull(); expect(failedCheck.submission_complete).toBe(false);
+  await expect(retryOwner.page.getByText(/확인에 실패했어요/)).toBeVisible({ timeout: 12_000 });
+  await expect(retryOwner.page.getByRole('heading', { name: '조건 제출을 완료했어요', exact: true })).toHaveCount(0);
+  const failedProviderCalls = (await state()).provider_calls;
+  action = 'explicit-retry-pending';
+  const retriedResponse = retryOwner.page.waitForResponse(response => new URL(response.url()).pathname === `${privatePath(retryRoom.invite_code)}/${failedCheck.check.id}/retry` && response.request().method() === 'POST');
+  await retryOwner.page.getByRole('button', { name: '다시 확인', exact: true }).click();
+  const retried = await retriedResponse; expect(retried.status()).toBe(202);
+  const retryBody = retried.request().postDataJSON(); expect(retryBody.expected_revision).toBe(failedCheck.candidate.revision); expect(retryBody.expected_check_version).toBe(failedCheck.check.version);
+  const pendingRetry = await current(retryOwner.ctx, retryRoom.invite_code); expect(['QUEUED', 'CHECKING']).toContain(pendingRetry.check.status); expect(pendingRetry.candidate.revision).toBe(failedCheck.candidate.revision); expect(pendingRetry.candidate.raw_text).toBe(retryRaw); expect(pendingRetry.accepted).toBeNull(); expect(pendingRetry.submission_complete).toBe(false); expect((await state()).provider_calls).toBe(failedProviderCalls);
+  await expect(retryOwner.page.getByText(/모호한 부분을 확인 중/)).toBeVisible(); await expect(retryOwner.page.getByRole('heading', { name: '조건 제출을 완료했어요', exact: true })).toHaveCount(0);
+  action = 'retried-CLEAR-accepted';
+  const retryAccepted = await clear(retryOwner.page, retryRoom.invite_code); expect(retryAccepted.check.status).toBe('CLEAR'); expect(retryAccepted.check.question).toBeNull(); expect(retryAccepted.candidate.revision).toBe(failedCheck.candidate.revision); expect(retryAccepted.accepted.raw_text).toBe(retryRaw); expect(retryAccepted.submission_complete).toBe(true); expect((await state()).provider_calls).toBe(failedProviderCalls + 1);
+  await expect(retryOwner.page.getByText(/다른 참여자를 기다려/)).toBeVisible();
+  await storageBoundary(retryOwner.page, [retryRaw]);
+  await markCheck('N14-real-provider-failure-explicit-retry-pending-accepted-CLEAR');
+
   await Promise.all(responseWork); expect(externalRequests).toBe(0); expect(failures).toEqual([]); expect(await hashes(sourceFiles)).toEqual(sourceBefore);
   expect(createHash('sha256').update(await readFile(runtimeManifestPath)).digest('hex')).toBe(runtimeManifestHash); expect(await hashes(await artifactFiles(nativeDist))).toEqual(nativeArtifacts);
   await mkdir('docs/verification', { recursive: true });
@@ -236,12 +292,12 @@ try {
     let text = await page.locator('body').innerText().catch(() => 'BODY_UNAVAILABLE');
     for (const token of tokens) text = text.replaceAll(token, '<redacted>');
     await mkdir('.codex/tdd-evidence', { recursive: true });
-    await writeFile('.codex/tdd-evidence/issue-107-native-browser-failure-body.txt', text);
+    await writeFile('.codex/tdd-evidence/issue-32-native-browser-failure-body.txt', text);
     if (stage === 'save-choice-direct-clear' && action === 'save-before-worker') {
       let message = String(error?.message ?? '');
       for (const token of tokens) message = message.replaceAll(token, '<redacted>');
       message = message.replace(/https?:\/\/[^\s)]+/g, '<redacted-url>').replace(/(?:cookie|authorization)[^\n]*/gi, '<redacted-header>');
-      await writeFile('.codex/tdd-evidence/issue-107-native-browser-pending-assertion.txt', message);
+      await writeFile('.codex/tdd-evidence/issue-32-native-browser-pending-assertion.txt', message);
     }
   }
   await mkdir('docs/verification', { recursive: true });

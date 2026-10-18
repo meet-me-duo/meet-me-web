@@ -1,0 +1,122 @@
+{
+  "workItem": "issue32-cancel-question-status-ui",
+  "sourceRevision": "02a68d8e50680e87dd153156e8bb7ea884a794cc",
+  "boundary": {
+    "result": "PASS",
+    "scope": "independent74 GREEN then isolated status-guard-removal fault1 detected4 assertions/control3 and exact-restored7 GREEN",
+    "originalProductionMutated": false,
+    "newTestSHAUnchanged": true,
+    "sourceTestsBeforeAfterEqual": true,
+    "externalHTTP": 0,
+    "actualProviderCalls": 0,
+    "Gradle": 0,
+    "runs": [
+      {
+        "label": "independent74-green",
+        "argv": [
+          "node",
+          "node_modules/vitest/vitest.mjs",
+          "run",
+          "--configLoader",
+          "runner",
+          "--pool",
+          "threads",
+          "--maxWorkers",
+          "1",
+          "--retry",
+          "0",
+          "--reporter=json",
+          "--outputFile=/tmp/issue128-ui-status-regression/independent74-green.json",
+          "src/api/client.precheck.test.ts",
+          "src/pages/RoomPage.precheck.test.tsx",
+          "src/pages/RoomPage.precheck-correction.test.tsx",
+          "src/components/SubmissionCheckPanel.lifecycle.test.tsx",
+          "src/components/GuestParticipation.precheck.test.tsx",
+          "src/components/SubmissionCheckPanel.draft.test.tsx",
+          "src/pages/RoomPage.precheck-privacy.test.tsx",
+          "src/components/SubmissionCheckPanel.close.test.tsx",
+          "src/pages/RoomPage.precheck-protocol.test.tsx",
+          "src/components/SubmissionCheckPanel.draft-races.test.tsx",
+          "src/components/SubmissionCheckPanel.correction-snapshot.test.tsx",
+          "src/components/SubmissionCheckPanel.status-lifecycle.test.tsx"
+        ],
+        "exit": 0,
+        "durationSeconds": 16.952810488997784,
+        "total": 74,
+        "passed": 74,
+        "failed": 0,
+        "pending": 0
+      },
+      {
+        "label": "guard-removal-mutant",
+        "argv": [
+          "node",
+          "node_modules/vitest/vitest.mjs",
+          "run",
+          "--configLoader",
+          "runner",
+          "--pool",
+          "threads",
+          "--maxWorkers",
+          "1",
+          "--retry",
+          "0",
+          "--reporter=json",
+          "--outputFile=/tmp/issue128-ui-status-regression/guard-removal-mutant.json",
+          "src/components/SubmissionCheckPanel.status-lifecycle.test.tsx"
+        ],
+        "exit": 1,
+        "durationSeconds": 2.562713740997424,
+        "total": 7,
+        "passed": 3,
+        "failed": 4,
+        "pending": 0
+      },
+      {
+        "label": "guard-removal-restored",
+        "argv": [
+          "node",
+          "node_modules/vitest/vitest.mjs",
+          "run",
+          "--configLoader",
+          "runner",
+          "--pool",
+          "threads",
+          "--maxWorkers",
+          "1",
+          "--retry",
+          "0",
+          "--reporter=json",
+          "--outputFile=/tmp/issue128-ui-status-regression/guard-removal-restored.json",
+          "src/components/SubmissionCheckPanel.status-lifecycle.test.tsx"
+        ],
+        "exit": 0,
+        "durationSeconds": 2.7184343469998566,
+        "total": 7,
+        "passed": 7,
+        "failed": 0,
+        "pending": 0
+      }
+    ],
+    "setupFailuresExcluded": "Earlier first tsc fixture issues and parent corepackcache ENOENT preserved separately; not product RED."
+  },
+  "sourceFiles": {
+    "src/components/SubmissionCheckPanel.tsx": "2bcf5ffa421d6f3ee30ad6c06224fa10da253fcafde8723ee4ea6c1c9942d8a2"
+  },
+  "testFiles": {
+    "src/components/SubmissionCheckPanel.status-lifecycle.test.tsx": "ba446a4f16f54901f6cc23b976befea50c20457f920d265e82793eb80d678cd4"
+  },
+  "injections": [
+    {
+      "name": "remove-status-authority-guard",
+      "source": "src/components/SubmissionCheckPanel.tsx",
+      "patch": "guard-removal.patch",
+      "assertionFailures": 4,
+      "controlPass": 3,
+      "errors": 0,
+      "restore": "exact original bytes",
+      "restoredPass": 7
+    }
+  ],
+  "recordedAt": "2026-10-18T08:00:24.401812+00:00"
+}

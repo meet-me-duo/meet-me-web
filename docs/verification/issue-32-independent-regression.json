@@ -1,0 +1,40 @@
+{
+  "recordedBy": "Root summarizes independent test-author sealed evidence; raw unchanged copies remain ignored",
+  "baseline": "02a68d8e50680e87dd153156e8bb7ea884a794cc",
+  "testPath": "src/components/SubmissionCheckPanel.status-lifecycle.test.tsx",
+  "testSha256": "ba446a4f16f54901f6cc23b976befea50c20457f920d265e82793eb80d678cd4",
+  "fixedPanelSha256": "2bcf5ffa421d6f3ee30ad6c06224fa10da253fcafde8723ee4ea6c1c9942d8a2",
+  "red": {
+    "tests": 7,
+    "genuineAssertionFailures": 4,
+    "initialControlsPassed": 3,
+    "errors": 0,
+    "skipped": 0,
+    "manifestSha256": "953b8d8fcde287ddae9ca25e51ac0f29fbe8f5441afa1cf2f00a1652a3698da2"
+  },
+  "green": {
+    "tests": 7,
+    "passed": 7,
+    "includingExisting67": 74,
+    "doubleCountWithFull627": false
+  },
+  "independentFault": {
+    "mutation": "Remove active-status question gate",
+    "genuineAssertionFailures": 4,
+    "controlsPassed": 3,
+    "errors": 0,
+    "restoredTests": 7,
+    "restoredPassed": 7,
+    "receiptSha256": "21f9b0265ae75ae4270ff613303b6cd974981bc47ded4a3634aaaff717ea367b",
+    "originalProductAndTestsUnchangedByFaultRun": true
+  },
+  "setupErrors": [
+    "Initial new fixture TypeScript typing corrections before valid compiled RED, preserved by author",
+    "Root corepack cache path unavailable; source/dependencies unchanged; existing node Vitest CLI equivalent succeeded"
+  ],
+  "limits": [
+    "Real public API client with synthetic fetch for unit contracts; not actual model accuracy",
+    "Native14 and full627/425 gates separately recorded",
+    "Existing test expectations unchanged; no paid or actual OAuth calls"
+  ]
+}

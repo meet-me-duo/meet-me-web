@@ -1,3 +1,21 @@
+# #32 취소된 확인 질문과 재시도 UI 상태 복구 (2026-10-18 UTC)
+
+- 기준: PR31 exact02a68d8e50680e87dd153156e8bb7ea884a794cc를 clean main9b183978 ff-only 갱신 뒤 feature/issue-32-cancel-question에서 상속. PR31/다른branch직접변경0. 서버#128과 연결하며 사용자 승인 #123 로컬누락검증 범위다.
+- [x] 기존PR31 read-only 점검·집중unit67+관련90=157 PASS, browser22 PASS/skip·retry·flaky0·원본268지문불변. 이번새수정의성공으로합산하지않음
+- [x] 신규독립회귀: CANCELLED/FAILED/TIMED_OUT retainedquestion 비활성, 정상 NEEDS_CHOICE control, 새입력·명시retry완료·직접수정재검사 public API 계약. 컴파일RED와INITIALPASS구분/기존기대값불변
+- [x] 최소 active-question 1조건·새7GREEN/기존67포함74PASS·독립guard제거4assert탐지/원복7PASS. testba446/source2bcf5ffa동결
+- [x] 현재server128/candidateweb32 native14PASS/실API154·routeMock/외부/실model/OAuth0. Primaryfake로TwoStage/금융graph우회·운영성공주장0. source/runtime/assets지문동일·정상종료
+- [x] 웹필수 api/lint/typecheck/build/전체unit627·전체browser425PASS+기존skip1·실패/flaky/retry0, 134지문불변
+- [x] server전체guard1717중1713PASS/기존4SKIP 및최종독립게시review LOCAL PASS·미해결P1P2없음
+- [ ] 양쪽정확HEADCI 확인. 자세한근거는docs/verification/issue-32-*.json
+- [ ] commit/push·별도Draft·정확HEADCI. Commit/PR 동일커밋예정
+
+500자·상한·참여/마감·last CLEAR 정책을 변경하지 않는다. 질문DB이력은서버에서보존하며새질문시도횟수를환급하지않는다. 실제AI/OAuth/운영접근·Secret·병합·배포0. 합성provider/transport 성공은 실제Decision정확도/운영활성화와구분한다. 서버·웹 전체 README 이미지/편집은server#127 선행검증이후다.
+
+---
+
+이하는 원본 PR31 당시 이력이다.
+
 # #107 제출 전 확인·기존 기능 웹 통합
 
 최종 갱신: 2026-10-17 UTC. 현재는 별도 작업 브랜치의 로컬 구현/검증 단계다. 원격 commit·push·PR·병합은 root가 통합 검증·독립 리뷰 후 단독 수행한다. 기존 PR28/29/30 브랜치를 변경하지 않았다. 과거 아래 #110 단계별 기록은 보존한다.

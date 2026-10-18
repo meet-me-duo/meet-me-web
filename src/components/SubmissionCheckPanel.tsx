@@ -76,7 +76,7 @@ export default function SubmissionCheckPanel({ room, onRoomChanged, onAccessDeni
   });
   const current = query.data;
   const check = current?.check;
-  const question = check?.question;
+  const question = check?.status === "NEEDS_CHOICE" ? check.question : null;
   const closed = room.collection_status === "CLOSED" || current?.room.collection_status === "CLOSED";
   const legacyCorrectionAccepted = current?.accepted?.confirmation_source === "LEGACY_CORRECTION";
   const closureVerified = current?.room.collection_status === "CLOSED";

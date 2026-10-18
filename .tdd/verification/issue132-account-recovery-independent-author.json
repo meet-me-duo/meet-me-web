@@ -1,0 +1,62 @@
+{
+  "workItem": "issue132-account-recovery",
+  "scope": "Independent synthetic unit/UI oracle and scratch-only fault injection; not real browser/model accuracy evidence",
+  "chronology": {
+    "phase1": "31 valid skeleton RED; named TODO and compile/lint ready",
+    "phase2": "14 valid new behavior RED plus6 existing PASS; unrelated jsdom CSS harness error preserved separately",
+    "boundaries": "4 valid assertion RED then same4 GREEN; original51 bytes unchanged"
+  },
+  "focusedGreen": {
+    "path": "/tmp/issue132-account-recovery/boundary-fixes-green.json",
+    "passed": 81,
+    "newIndependentCases": 55,
+    "existingHostCases": 26,
+    "failed": 0
+  },
+  "faultInjection": {
+    "canonical": ".tdd/verification/issue132-account-recovery-faults.json",
+    "detail": "/tmp/issue132-account-recovery/independent-fi/faults.json",
+    "baselinePass": 55,
+    "detectedMutants": 9,
+    "restoredPassPerMutant": 55,
+    "schemaValidated": true,
+    "originalSourceAndTestsUnchanged": true
+  },
+  "limitations": [
+    "Synthetic unit/UI/FI plus actual HTTPS manual A6 verified; primary synthetic provider bypasses TwoStage/classifier/financial enforcement",
+    "Original rapid full-unload8 not claimed GREEN",
+    "No actual external OAuth/model/paid/production operation"
+  ],
+  "recordedAt": "2026-10-18T11:39:43.426928Z",
+  "actualHttpsStatus": {
+    "suite": "Separate explicitly named manual A6; original8 not replaced",
+    "currentSpecSha256": "7639afe7ee3426a472e6a3d34962c4c3275432f091a221992a396489f1d5125e",
+    "actualSixResult": "6PASS/0retry/0skip/0flaky/0unexpected",
+    "independentReview": ".tdd/verification/issue132-account-recovery-https-author.json",
+    "nativeAutomaticFocus": "unverified; no native focus event in bounded observed headless switch; unit-only focus verification",
+    "historicalAutomaticSourceAndFailuresPreserved": true,
+    "sourceOrOracleChangesAfterFailure": "Explicit approved newnamed manual A2 oracle; oldautomatic4435 not claimed GREEN",
+    "finalReceipt": {
+      "path": "/tmp/issue132-account-recovery/https-a6/manual-final/receipt.json",
+      "sha256": "8e26f2cf3e11dfc72a1bf7ba53fab9b60c346fcce4172db35331bd6d5751241a"
+    },
+    "cleanupConfirmed": true
+  },
+  "fullUnitGate": {
+    "passed": 682,
+    "failed": 0,
+    "skipped": 0,
+    "receipt": "/tmp/issue132-account-recovery/root-full-gates-final/receipt.json",
+    "sourceBeforeAfterEqual": true
+  },
+  "historicalFiSourceManifest": {
+    "path": "/tmp/issue132-account-recovery/publication-source-manifest.json",
+    "sha256": "da9f2cf5203eb0d3ac9d855af1fb18bec21c89c8b6baacfad6b75bba5c15192c"
+  },
+  "finalPublicationManifest": {
+    "path": "/tmp/issue132-account-recovery/publication-final-manifest.json",
+    "sha256": "83961ec091ac388d843c46f8ebc2c38c5170d22444872138939d224c28ad6d5b",
+    "current17FilesMismatch": 0,
+    "product7AndUnitTest4SameAsFi9": true
+  }
+}

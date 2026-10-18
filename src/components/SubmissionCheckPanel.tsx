@@ -5,12 +5,13 @@ import { api, ApiError, errorMessage } from "../api/client";
 import type { Room } from "../api/types";
 import type { StartSubmissionCheckBody, SubmissionCheckCommand, SubmissionCheckSnapshot } from "../api/precheck";
 import { viewerContext } from "../api/recovery";
+import { usePrivateDraft } from "../auth/usePrivateDraft";
 import { getSessionVersion } from "../auth/session";
 import { submissionText } from "../utils/submission";
 import { submissionExample, TIME_INPUT_GUIDE } from "../utils/submissionGuidance";
 import { formatDateTime } from "../utils/time";
 
-type Operation = { kind: "start"; body: StartSubmissionCheckBody } | { kind: "answer" | "retry" | "cancel"; id: string; body: SubmissionCheckCommand };
+type Operation = ({ kind: "start"; body: StartSubmissionCheckBody } | { kind: "answer" | "retry" | "cancel"; id: string; body: SubmissionCheckCommand }) & { draftAtDispatch?: string };
 type Props = { room: Room; onRoomChanged: (room: Room) => void; onAccessDenied: (error: ApiError) => void };
 const running = new Set(["QUEUED", "CHECKING"]);
 const messages: Record<string, string> = {
@@ -103,6 +104,7 @@ export default function SubmissionCheckPanel({ room, onRoomChanged, onAccessDeni
   useEffect(() => { setSelected(null); setDirect(false); }, [check?.id, question?.id]);
   useEffect(() => {
     if (query.error instanceof ApiError && [401, 403, 404].includes(query.error.status)) {
+      if ([403, 404].includes(query.error.status)) privateDraft.discard();
       generation.current++; setDenied(true); setDraft(""); setSelected(null); setUncertain(null);
       client.removeQueries({ queryKey: key, exact: true }); onAccessDenied(query.error);
     }
@@ -115,6 +117,11 @@ export default function SubmissionCheckPanel({ room, onRoomChanged, onAccessDeni
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room.state_version, room.collection_status]);
 
+  const privateDraft = usePrivateDraft({ room, editorKind: "PRECHECK", revision: candidate?.revision ?? 0, fresh: query.isSuccess && query.isFetchedAfterMount && !query.isFetching, onRecovered: (raw, revision) => { draftBaseRevision.current = revision; draftEdited.current = true; setDraft(raw); setEditing(true); } });
+  useEffect(() => {
+    const unload = (event: BeforeUnloadEvent) => { if (draftEdited.current && latestDraft.current.length > 0) { event.preventDefault(); event.returnValue = ""; } };
+    window.addEventListener("beforeunload", unload); return () => window.removeEventListener("beforeunload", unload);
+  }, []);
   async function execute(operation: Operation) {
     if (!active() || busy.current || closed) return;
     busy.current = true; setPending(true); setFailure(null); setUncertain(null); setRecovered(false);
@@ -129,9 +136,9 @@ export default function SubmissionCheckPanel({ room, onRoomChanged, onAccessDeni
       if (!active()) return;
       client.setQueryData<SubmissionCheckSnapshot>(key, previous => latestSnapshot(previous, result));
       const submitted = operation.kind === "start" ? operation.body.raw_text : operation.kind === "answer" ? operation.body.direct_text : undefined;
-      const hasNewDraft = submitted === undefined ? draftEdited.current : submissionText(latestDraft.current).text !== submitted;
+      const hasNewDraft = submitted === undefined ? draftEdited.current : operation.draftAtDispatch === undefined || latestDraft.current !== operation.draftAtDispatch;
       if (!hasNewDraft && (operation.kind === "start" || operation.kind === "answer")) {
-        draftEdited.current = false; setDraft(result.candidate?.raw_text ?? latestDraft.current); setDirect(false); setSelected(null);
+        privateDraft.discard(); draftEdited.current = false; setDraft(result.candidate?.raw_text ?? latestDraft.current); setDirect(false); setSelected(null);
       }
       setEditing(hasNewDraft);
       if (latestRoom.current.collection_status === "CLOSED" && result.room.collection_status !== "CLOSED") void query.refetch();
@@ -139,6 +146,7 @@ export default function SubmissionCheckPanel({ room, onRoomChanged, onAccessDeni
     } catch (error) {
       if (!active()) return;
       if (error instanceof ApiError && [401, 403, 404].includes(error.status)) {
+        if ([403, 404].includes(error.status)) privateDraft.discard();
         setDenied(true); setDraft(""); setSelected(null); client.removeQueries({ queryKey: key, exact: true }); onAccessDenied(error);
       } else {
         setFailure(error);
@@ -155,12 +163,12 @@ export default function SubmissionCheckPanel({ room, onRoomChanged, onAccessDeni
   }
   function command(kind: "answer" | "retry" | "cancel", extra: Partial<SubmissionCheckCommand> = {}) {
     if (!commandAllowed || !check || !candidate) return;
-    void execute({ kind, id: check.id, body: { request_id: crypto.randomUUID(), expected_revision: candidate.revision, expected_check_version: check.version, ...extra } });
+    void execute({ kind, id: check.id, ...(extra.direct_text === undefined ? {} : { draftAtDispatch: latestDraft.current }), body: { request_id: crypto.randomUUID(), expected_revision: candidate.revision, expected_check_version: check.version, ...extra } });
   }
   function submit() {
     if (!commandAllowed || !input.valid || uncertain || busy.current) return;
     if (direct && question) command("answer", { question_id: question.id, direct_text: input.text });
-    else void execute({ kind: "start", body: { request_id: crypto.randomUUID(), expected_revision: candidate?.revision ?? 0, raw_text: input.text } });
+    else void execute({ kind: "start", draftAtDispatch: latestDraft.current, body: { request_id: crypto.randomUUID(), expected_revision: candidate?.revision ?? 0, raw_text: input.text } });
   }
   async function closeRoom(confirmEarly = false) {
     if (busy.current || !active()) return;
@@ -189,9 +197,10 @@ export default function SubmissionCheckPanel({ room, onRoomChanged, onAccessDeni
     {question && !closed && <div className="precheck-question"><h3>{question.text}</h3><p>확인할 부분: {question.source_excerpt}</p><div className="actions">{question.options.map(option => <button key={option.id} className="button secondary" aria-pressed={selected === option.id} disabled={!commandAllowed} onClick={() => { setSelected(option.id); setDirect(false); }}>{option.text}</button>)}<button className="button secondary" disabled={!commandAllowed} onClick={() => { setDirect(true); setSelected(null); if (!draftEdited.current) { draftBaseRevision.current = candidate?.revision ?? 0; setDraft(candidate?.raw_text ?? ""); } draftEdited.current = true; }}>직접 수정</button></div>
       {selected && !direct && <div className="choice-preview"><p className="submitted-text">{question.options.find(option => option.id === selected)?.proposed_text}</p><button className="button primary" disabled={!commandAllowed} onClick={() => command("answer", { question_id: question.id, choice_id: selected })}>선택한 내용으로 확인</button></div>}
     </div>}
+    {privateDraft.conflictPanel}
     {draftEdited.current && <p className="alert warning" role="status">새 수정 내용은 아직 저장하지 않았어요. 이 화면에만 보관하며 새 조건으로 반영되지 않았어요.</p>}
     {draftEdited.current && candidate && candidate.revision > draftBaseRevision.current && input.text !== candidate.raw_text && <p className="alert warning" role="status">최신 입력이 갱신됐어요. 다른 탭의 저장 내용과 이 화면의 미저장 입력을 구분해 확인해 주세요. 내 임시 입력은 이 화면에 보존했어요.</p>}
-    {showEditor && <><label className="field"><span>시간·장소 조건 <small>필수</small></span><textarea rows={4} value={draft} aria-describedby="precheck-input-hint precheck-count" aria-invalid={!input.valid && input.length > 500} placeholder={submissionExample(room.meeting_mode)} onChange={event => { if (!draftEdited.current) draftBaseRevision.current = candidate?.revision ?? 0; draftEdited.current = true; setDraft(event.target.value); }} /><small id="precheck-count" className={input.length > 500 ? "field-error" : "character-count"}>{input.length}/500</small></label>
+    {showEditor && <><label className="field"><span>시간·장소 조건 <small>필수</small></span><textarea rows={4} value={draft} aria-describedby="precheck-input-hint precheck-count" aria-invalid={!input.valid && input.length > 500} placeholder={submissionExample(room.meeting_mode)} onChange={event => { if (!draftEdited.current) draftBaseRevision.current = candidate?.revision ?? 0; draftEdited.current = true; privateDraft.remember(event.target.value, draftBaseRevision.current); setDraft(event.target.value); }} /><small id="precheck-count" className={input.length > 500 ? "field-error" : "character-count"}>{input.length}/500</small></label>
       <p id="precheck-input-hint" className="field-hint">{TIME_INPUT_GUIDE} 앞뒤 공백을 제외하고 1~500자로 입력해 주세요.</p><button className="button primary" disabled={!commandAllowed || !input.valid || !!uncertain} onClick={submit}>{pending ? "확인 요청 중…" : direct ? "수정한 내용 확인" : candidate ? "수정 내용 확인" : "조건 제출하기"}</button></>}
     {!closed && candidate && !question && !showEditor && <button className="button secondary" disabled={pending} onClick={() => { setEditing(true); setDraft(candidate?.raw_text ?? ""); draftEdited.current = false; }}>내 조건 수정</button>}
     {!closed && check && check.retry_allowed && <button className="button secondary" disabled={!commandAllowed} onClick={() => command("retry")}>다시 확인</button>}

@@ -1,0 +1,113 @@
+{
+  "workItem": "issue132-account-recovery",
+  "webRevision": "f08aaa9810bf9e9fe4fe22b7a1285449ab5e9e95",
+  "serverRevision": "3982535765e878875a901dd9d28352358e594f6f",
+  "scope": "Independent actual HTTPS A acceptance review; same-account original-tab recovery uses explicitly named manual recheck UI, not automatic focus oracle",
+  "testFile": {
+    "path": "integration/host-creation/auth-recovery.spec.ts",
+    "sha256": "7639afe7ee3426a472e6a3d34962c4c3275432f091a221992a396489f1d5125e"
+  },
+  "commandMode": "HOST_INTEGRATION_SUITE=account-recovery node scripts/run-host-integration.mjs",
+  "firstNamedManualExecution": true,
+  "testStats": {
+    "startTime": "2026-10-18T11:37:08.153Z",
+    "duration": 42453.822,
+    "expected": 6,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "eachTestResults": {
+    "count": 6,
+    "passed": 6,
+    "resultsPerTest": 1,
+    "retries": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "unexpected": 0
+  },
+  "acceptance": [
+    "SPA keeps account memory; stable reload obtains fresh accepted input",
+    "Real scheduled refresh401 after synthetic cookie removal; same-account local OIDC popup; explicit original-tab recheck executes exactly one real refresh200; fresh public owner and private GET before exactraw restore; POST0/DB0",
+    "Native beforeunload cancel retains raw; confirmed full exit loses unsaved memory and reload does not invent server input"
+  ],
+  "evidence": {
+    "path": "/tmp/issue132-account-recovery/https-a6/manual-final/evidence.json",
+    "sha256": "ef3b6645ec5bfb97530293da5b0bfe6894ed19ca6aafa0c0418cfeff183f469d"
+  },
+  "playwright": {
+    "path": "/tmp/issue132-account-recovery/https-a6/manual-final/playwright.json",
+    "sha256": "6dd95a405162f57dbf03bdf77a80562b5ea13e13653744a731639fe1072754b6"
+  },
+  "independentHashChecks": {
+    "currentWebInputFiles": 120,
+    "currentWebInputMismatches": 0,
+    "retainedWebAssets": 6,
+    "retainedWebAssetMismatches": 0,
+    "serverSourceFiles": 482,
+    "serverSourceMismatches": 0,
+    "frozenRuntimeFiles": 1559,
+    "frozenRuntimeMismatches": 0,
+    "dependencyJars": 216,
+    "dependencyMismatches": 0,
+    "runtimeManifestSha256": "0c242dece87d8693f7ab47ba12d183fd763ba6fee979fb6563f02683895f4901"
+  },
+  "fixtureChecks": {
+    "certificateChain": true,
+    "untrustedCaRejected": true,
+    "stableInputAndRuntimeFingerprints": true,
+    "stableWebAssets": true,
+    "privateKeysAndProfilesRemoved": true
+  },
+  "fixtureSocketErrorCounter": 1,
+  "originalAutomaticOracle": {
+    "sha256": "443592b6f31c1384bff056767fdb6ef8cfe7bc49a5dca21f7d0319c6d27363b9",
+    "status": "UNVERIFIED_NATIVE_FOCUS; previous failure preserved, not converted into this PASS",
+    "observedFocusEvents": 0,
+    "observerEvents": 46,
+    "observerPath": "/tmp/issue132-account-recovery/focus-observer/events.json",
+    "oldSourcePath": "/tmp/issue132-account-recovery/https-a6/explicit-manual-preparation/automatic-4435.source"
+  },
+  "originalEight": {
+    "sha256": "cd96223572d0f7a4deb1f670559b7fd62fca017ea70f527ea7396ae23bffbdb9",
+    "status": "original rapid-unload failures preserved separately, not claimed GREEN by A6"
+  },
+  "actualProviderCalls": 0,
+  "actualExternalOAuthCalls": 0,
+  "productionAccess": false,
+  "limitations": [
+    "Chromium desktop/narrow viewport, not physical mobile.",
+    "HTTPS localhost ports prove real credentialed CORS, not production subdomain isolation.",
+    "Primary synthetic precheck provider bypasses TwoStage, physical provider dispatch and financial budget enforcement.",
+    "Final analysis workers stay disabled: accepted versions/batch freeze only; no actual AI output, latency, cost or model accuracy.",
+    "Fresh test-only AuthEndToEnd PostgreSQL/Redis/local OIDC ownership; retired old Compose is archived, not active.",
+    "Native automatic focus recovery not verified; unit focus/manual coalescing verified separately",
+    "Strict refresh family reuse rejection unchanged; lossless rapid document unload is outside A"
+  ],
+  "recordedAt": "2026-10-18T11:40:50.306305Z",
+  "finalOwnerReceipt": {
+    "path": "/tmp/issue132-account-recovery/https-a6/manual-final/receipt.json",
+    "sha256": "8e26f2cf3e11dfc72a1bf7ba53fab9b60c346fcce4172db35331bd6d5751241a",
+    "independentlyRead": true
+  },
+  "finalPublicationManifest": {
+    "path": "/tmp/issue132-account-recovery/publication-final-manifest.json",
+    "sha256": "83961ec091ac388d843c46f8ebc2c38c5170d22444872138939d224c28ad6d5b",
+    "current17FilesMismatch": 0
+  },
+  "cleanup": {
+    "ownedContainers2Absent": true,
+    "fixturePortsClosed": {
+      "19440": true,
+      "19441": true,
+      "19442": true,
+      "19443": true,
+      "19444": true,
+      "19445": true,
+      "19446": true
+    },
+    "privateKeysAndProfilesAbsent": true
+  },
+  "inputFilesChecked": 120,
+  "inputFilesBeforeAfterEqual": true
+}

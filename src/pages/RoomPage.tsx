@@ -17,7 +17,9 @@ import { submissionExample, TIME_INPUT_GUIDE } from "../utils/submissionGuidance
 import { useRecentRooms } from "../hooks/useRecentRooms";
 import { useAccountSession } from "../auth/useAccount";
 import { ClaimGuestParticipation, LoginGate } from "../auth/AccountViews";
-import { getSessionVersion } from "../auth/session";
+import { usePrivateDraft } from "../auth/usePrivateDraft";
+import { discardQuarantinedDraftForRoom } from "../auth/draftQuarantine";
+import { getSession, getSessionVersion } from "../auth/session";
 import GuestAccessPanel from "../components/GuestAccessPanel";
 import { rememberRoom, roomLink } from "../utils/recentRooms";
 
@@ -31,6 +33,10 @@ export default function RoomPage() {
   const { inviteCode = "" } = useParams();
   const accountSession = useAccountSession();
   const authVersion = getSessionVersion();
+  useEffect(() => () => {
+    // Only the authentication epoch transition may retain this room's draft.
+    if (getSessionVersion() === authVersion) discardQuarantinedDraftForRoom(inviteCode);
+  }, [inviteCode, authVersion]);
   const currentAccess = useRef({ inviteCode, authVersion });
   currentAccess.current = { inviteCode, authVersion };
   const mounted = useRef(true);
@@ -44,7 +50,7 @@ export default function RoomPage() {
   useEffect(() => { setDraft(null); }, [inviteCode]);
   const [accessFailure, setAccessFailure] = useState<{ inviteCode: string; error: Error } | null>(null);
   const deniedRoom = useRef<string | null>(null);
-  const denyAccess = useCallback((error: ApiError) => { accessEpoch.current++; setDraft(null); deniedRoom.current = inviteCode; setAccessFailure({ inviteCode, error }); }, [inviteCode]);
+  const denyAccess = useCallback((error: ApiError) => { if (getSessionVersion() === authVersion) discardQuarantinedDraftForRoom(inviteCode); accessEpoch.current++; setDraft(null); deniedRoom.current = inviteCode; setAccessFailure({ inviteCode, error }); }, [inviteCode, authVersion]);
   const roomQuery = useQuery({
     queryKey: ["room", inviteCode],
     queryFn: async ({ signal }) => {
@@ -52,6 +58,7 @@ export default function RoomPage() {
       const incoming = await api.getRoom(inviteCode, signal);
       const previous = queryClient.getQueryData<Room>(["room", inviteCode]);
       if (signal.aborted || readEpoch !== accessEpoch.current) return previous ?? incoming;
+      if (getSession() && getSessionVersion() === authVersion && (!incoming.viewer.joined || (previous && viewerContext(previous) !== viewerContext(incoming)))) discardQuarantinedDraftForRoom(inviteCode);
       if (previous && viewerContext(previous) !== viewerContext(incoming)) {
         accessEpoch.current++;
         const contextEpoch = accessEpoch.current;
@@ -75,6 +82,7 @@ export default function RoomPage() {
   const setRoom = (room: Room) => {
     if (deniedRoom.current === inviteCode || epoch !== accessEpoch.current) return;
     const previous = queryClient.getQueryData<Room>(["room", inviteCode]);
+    if (getSession() && getSessionVersion() === authVersion && (!room.viewer.joined || (previous && viewerContext(previous) !== viewerContext(room)))) discardQuarantinedDraftForRoom(inviteCode);
     if (previous && viewerContext(previous) !== viewerContext(room)) {
       accessEpoch.current++;
       setDraft(null);
@@ -292,6 +300,8 @@ function SubmissionPanel({ room, onRoomChanged, onAccessDenied, draft, onDraftCh
   const [savedRawText, setSavedRawText] = useState("");
   const [editing, setEditing] = useState(false);
   const latestInput = useRef("");
+  const latestRawInput = useRef(rawText); latestRawInput.current = rawText;
+  const submittedRawInput = useRef<string | null>(null);
   const conditionInput = useRef<HTMLTextAreaElement>(null);
   const saving = useRef(false);
   const mounted = useRef(true);
@@ -308,20 +318,24 @@ function SubmissionPanel({ room, onRoomChanged, onAccessDenied, draft, onDraftCh
       setLoadedRevision(submissionQuery.data.revision);
     }
   }, [submissionQuery.data, loadedRevision, savedRawText, draft]);
+  const privateDraft = usePrivateDraft({ room, editorKind: "LEGACY", revision: submissionQuery.data?.revision ?? 0, fresh: submissionQuery.isSuccess && submissionQuery.isFetchedAfterMount && !submissionQuery.isFetching, onRecovered: raw => { setRawText(raw); latestInput.current = submissionText(raw).text; setEditing(true); } });
+  const discardPrivateDraft = privateDraft.discard;
   const refreshRoom = useMutation({ mutationKey: ["room", room.invite_code], mutationFn: () => api.getRoom(room.invite_code), onSuccess: refreshed => { if (mounted.current) onRoomChanged(refreshed); }, onError: error => { if (mounted.current && error instanceof ApiError && [401, 403, 404].includes(error.status)) onAccessDenied(error); } });
   const save = useMutation({
     mutationKey: ownSubmissionKey(room),
     mutationFn: (text: string) => api.saveSubmission(room.invite_code, { raw_text: text, ...(correcting ? { revision_round_id: room.revision_round!.id, expected_revision: loadedRevision! } : {}) }),
-    onSuccess: (submission, submittedText) => {
+    onSuccess: (submission) => {
       if (!mounted.current) return;
       const previous = queryClient.getQueryData<Submission>(ownSubmissionKey(room));
       if (previous && previous.revision > submission.revision) return;
-      setRawText(current => submissionText(current).text === submittedText ? submission.raw_text : current);
+      const newerExactDraft = latestRawInput.current !== submittedRawInput.current;
+      setRawText(current => newerExactDraft ? current : submission.raw_text);
       setSavedRawText(submission.raw_text);
       setLoadedRevision(submission.revision);
       queryClient.setQueryData(ownSubmissionKey(room), submission);
-      setEditing(latestInput.current !== submittedText);
-      onDraftChanged(room, latestInput.current !== submittedText ? (conditionInput.current?.value ?? rawText) : null);
+      setEditing(newerExactDraft);
+      if (!newerExactDraft) privateDraft.discard();
+      onDraftChanged(room, newerExactDraft ? latestRawInput.current : null);
       refreshRoom.mutate();
     },
     onSettled: () => { saving.current = false; },
@@ -342,11 +356,16 @@ function SubmissionPanel({ room, onRoomChanged, onAccessDenied, draft, onDraftCh
     },
   });
   useEffect(() => {
-    for (const error of [submissionQuery.error, save.error]) if (error instanceof ApiError && [401, 403, 404].includes(error.status)) onAccessDenied(error);
+    for (const error of [submissionQuery.error, save.error]) if (error instanceof ApiError && [401, 403, 404].includes(error.status)) { if ([403, 404].includes(error.status)) discardPrivateDraft(); onAccessDenied(error); }
     if (save.error instanceof ApiError && save.error.status === 409) { void queryClient.invalidateQueries({ queryKey: ["room", room.invite_code] }); void queryClient.invalidateQueries({ queryKey: ["submission", room.invite_code] }); }
-  }, [submissionQuery.error, save.error, onAccessDenied, queryClient, room.invite_code]);
+  }, [submissionQuery.error, save.error, onAccessDenied, queryClient, room.invite_code, discardPrivateDraft]);
   const { text, length, valid } = submissionText(rawText);
   const dirty = text !== savedRawText;
+  const dirtyInput = useRef(false); dirtyInput.current = rawText !== savedRawText;
+  useEffect(() => {
+    const unload = (event: BeforeUnloadEvent) => { if (dirtyInput.current) { event.preventDefault(); event.returnValue = ""; } };
+    window.addEventListener("beforeunload", unload); return () => window.removeEventListener("beforeunload", unload);
+  }, []);
   useEffect(() => { onDraftChanged(room, dirty ? rawText : null); }, [room, rawText, dirty, onDraftChanged]);
   const legacyManualOnly = submissionQuery.data?.raw_text === null;
 
@@ -372,12 +391,13 @@ function SubmissionPanel({ room, onRoomChanged, onAccessDenied, draft, onDraftCh
       <p id="submission-privacy" className="submission-privacy">반영된 조건은 다른 참여자에게 공개되지 않아요. 분석에 반영하지 못한 원문은 주최자에게 공개될 수 있어요.</p>
       {submissionQuery.isPending ? <div className="inline-loading"><LoaderCircle className="spin" /> 기존 입력 확인 중…</div> : submissionQuery.isError ? <div className="alert error">{errorMessage(submissionQuery.error)}</div> : <>
         {legacyManualOnly && <div className="alert warning" role="status">기존 시간표 입력은 보존되어 있어요. 가능한 시간을 자연어로 다시 입력하고 저장해 주세요.</div>}
-        <label className="field"><span>시간·장소 조건 <small>필수</small></span><textarea ref={conditionInput} autoFocus={editing} aria-describedby="submission-time-guide submission-count submission-hint submission-privacy" aria-invalid={length > SUBMISSION_TEXT_LIMIT} rows={4} value={rawText} onChange={(event) => { latestInput.current = submissionText(event.target.value).text; setRawText(event.target.value); }} placeholder={submissionExample(room.meeting_mode)} /><small id="submission-count" className={"character-count " + (length > SUBMISSION_TEXT_LIMIT ? "field-error" : "")}>{length}/{SUBMISSION_TEXT_LIMIT}</small></label>
+        <label className="field"><span>시간·장소 조건 <small>필수</small></span><textarea ref={conditionInput} autoFocus={editing} aria-describedby="submission-time-guide submission-count submission-hint submission-privacy" aria-invalid={length > SUBMISSION_TEXT_LIMIT} rows={4} value={rawText} onChange={(event) => { latestInput.current = submissionText(event.target.value).text; privateDraft.remember(event.target.value, loadedRevision ?? 0); setRawText(event.target.value); }} placeholder={submissionExample(room.meeting_mode)} /><small id="submission-count" className={"character-count " + (length > SUBMISSION_TEXT_LIMIT ? "field-error" : "")}>{length}/{SUBMISSION_TEXT_LIMIT}</small></label>
         <p id="submission-time-guide" className="field-hint">{TIME_INPUT_GUIDE}</p>
         <p id="submission-hint" className="field-hint">앞뒤 공백을 제외하고 1~500자로 입력해 주세요.</p>
-        <div className="submission-footer"><div>{loadedRevision ? <span className="saved-revision"><CheckCircle2 size={16} /> 저장된 입력 #{loadedRevision}</span> : <span className="field-hint">조건은 마감 전까지 수정할 수 있어요.</span>}</div><div className="submission-actions">{editing && <button className="button secondary" disabled={save.isPending} onClick={() => { setRawText(submissionQuery.data?.raw_text ?? ""); save.reset(); setEditing(false); }}>수정 취소</button>}<button className="button primary" onClick={() => { if (saving.current) return; saving.current = true; latestInput.current = text; save.mutate(text); }} disabled={!valid || !dirty || save.isPending || submissionQuery.data?.editable === false || (correcting && !room.capabilities?.can_edit_own_submission)}>{save.isPending ? "저장 중…" : loadedRevision ? "수정 내용 저장" : "조건 제출하기"}</button></div></div>
+        <div className="submission-footer"><div>{loadedRevision ? <span className="saved-revision"><CheckCircle2 size={16} /> 저장된 입력 #{loadedRevision}</span> : <span className="field-hint">조건은 마감 전까지 수정할 수 있어요.</span>}</div><div className="submission-actions">{editing && <button className="button secondary" disabled={save.isPending} onClick={() => { privateDraft.discard(); setRawText(submissionQuery.data?.raw_text ?? ""); save.reset(); setEditing(false); }}>수정 취소</button>}<button className="button primary" onClick={() => { if (saving.current) return; saving.current = true; submittedRawInput.current = rawText; latestInput.current = text; save.mutate(text); }} disabled={!valid || !dirty || save.isPending || submissionQuery.data?.editable === false || (correcting && !room.capabilities?.can_edit_own_submission)}>{save.isPending ? "저장 중…" : loadedRevision ? "수정 내용 저장" : "조건 제출하기"}</button></div></div>
       </>}
     </>}
+    {privateDraft.conflictPanel}
     {!completed && dirty && loadedRevision !== null && <div className="alert warning" role="status">수정한 내용이 아직 저장되지 않았어요.</div>}
     {!completed && loadedRevision !== null && !dirty && !legacyManualOnly && <div className="alert success" role="status">조건이 안전하게 저장됐어요.</div>}
     <p className="submission-privacy">{correcting ? "저장은 분석 완료를 뜻하지 않아요. 주최자가 다시 분석하면 저장한 조건을 사용해요." : "저장은 분석 완료를 뜻하지 않아요. 입력 마감 후 조건을 분석해요."}</p>

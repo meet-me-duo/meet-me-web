@@ -505,3 +505,15 @@
 - 격리 루프백 API18910/웹18911에서 실제 Spring·PostgreSQL·Redis·로컬HTTP OIDC/JWKS·합성RS256으로 native8 checks/operations10 requests PASS, API응답mock0/외부요청0이다. 익명401·일반계정403·테스트allowlist계정200 drilldown, 실제Bearer·unknown표시·logout폐기·no-store·DOM/URL/storage credential비노출을 확인했다. 초기 waitPromise 하네스 실패와 RFC UUID 테스트fixture 보정은 별도 실패 이력으로 보존하고 PASS에 섞지 않았다.
 - 실제 실행 서버의 operations3 paths/참조component10개는 현재 웹 snapshot과 정확히 일치한다. runtime export SHA256은 `54ec5ef4111c04df4df4620c0bd72ed2ee97b02a209314da45d348fe4c429c66`이다. 독립 근거 대조·source 리뷰의 남은P1/P2는 없으며 기록은 `docs/verification/issue-110-account-integration-independent.md`와 `issue-110-native.json`이다.
 - 이번 통합 commit·push·Draft PR·정확 HEAD 원격CI는 아직 pending이다. 운영로그인·운영자등록·운영설정/DB/Secret 변경·병합·배포는 하지 않는다. 서버 인가/감사/Nginx/V14·V15 근거는 서버 검증과 별도로 구분한다.
+
+
+## 2026-10-18 계정 복구 최소 보완 검증
+
+검증된 본인 입력 ≤500원문1건을 원탭 메모리에 보존하고 같은 방 새탭 로그인·명시 재확인·최신 소유권/입력 조회 후에만 draft로 복원한다. 일반 이동·소유권 거절·다른 계정·로그아웃은 폐기하고 pending저장중 공백만 바뀐 새exactraw도 보존한다. 송신trim/500검증·질문상한·참여/마감 정책은 바꾸지 않는다. 신규55/관련81·전체682단위·독립FI9탐지/매회원복55·전체mockbrowser425+기존skip1·api/lint/type/build PASS다. 실제localHTTPS 명시복구6PASS와frozen source482/classes1559/jars216/자산6전후동일·컨테이너/포트/키정리를 독립 확인했다.
+
+첫lifecycle4회귀·pendingexactraw/소유권4RED·시계fixture오류·자동focus관측부재는원본보존/분리했다. 새6은원8빠른전체이탈·자동focus4435를GREEN으로대체하지않는다. 상세 내부 인증 진단은공개대상에서제외하고로컬에만보존한다. 고정서버398의Primary대역이TwoStage/금융graph를우회하므로실모델/OAuth/운영성공주장0이다. runtime#131 actualgraph는별도서버검증이다. 다음은최종독립리뷰·기존PR33 후속commit/push/exactCI, Commit/PR 동일후속커밋예정이다.
+
+
+### 계정 복구 게시 전 독립 리뷰 PASS
+
+승인된 A 흐름과 최종 제품7/신규 독립55의 지문, FI9의 실제 assertion 탐지·매회 복구55PASS, 전체 unit682·mock browser425PASS/기존skip1 및 실제 로컬 HTTPS 명시복구6PASS를 읽기 대조했다. 최종 manifest17개와 unit134/HTTPS120 입력의 현재 지문 불일치0이며 새 P1/P2는 없다. 원8 빠른 전체이탈·native 자동focus 미검증, 고정 runtime 선행 준비와 Primary대역의 TwoStage/금융graph 우회 한계는 유지한다. 이 판정은 로컬 게시 준비에 한하며 후속 commit/push·정확 HEAD CI는 별도 게이트다. 리뷰 중 제품·테스트·실행·원격 변경0이다.

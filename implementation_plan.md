@@ -1,3 +1,32 @@
+# 계정 복구 안내·이 탭의 미저장 입력 보존 (2026-10-18 UTC)
+
+- [USER] 제출 전 확인 통합 과정에서 발견한 계정 복구 UX를 최소 범위로 보완한다. 기존 서버 인증 정책은 유지하고 이 탭의 입력 보존·같은 방 재로그인·복귀 확인만 추가한다.
+- [x] 세션 복구 결과를 확인중/본인확인/비로그인/만료/일시불가로 구분한다. 처음401은 정상 guest와 구별할 수 없어 중립 안내를 사용한다. 늦은 응답은 기존 generation 경계로 차단한다.
+- [x] 검증된 account/본인 참여에서 입력한 최대500 Unicode 원문1건을 탭 메모리에 보관한다. 방·account·viewer context·revision·editor kind 일치와 fresh private GET 후에만 draft로 복원한다. 다른 계정·로그아웃·소유권 거절은 폐기하며 원문을 비로그인 DOM이나 영구저장소에 노출하지 않는다.
+- [x] 같은 방을 새 창으로 열어 재로그인하고 원탭 focus/명시 확인 때만 복구한다. revision 충돌은 사용자가 사용/폐기를 선택하며 자동 POST·제출완료 승격0이다. beforeunload 경고는 사용자가 실제 이탈을 선택한 뒤의 메모리 복원을 보장하지 않는다.
+- [x] 신규 독립51(state/store31+실제App흐름20)과 기존session19=70 GREEN, 관련 기존255 GREEN, typecheck/lint 경고0. 각 RED·fixture setup오류·원본sha는 분리 보존한다.
+- [x] 독립 신규55(유효RED49/초회PASS6)→최종GREEN·기존HOST26포함81PASS. 기존전체첫678중lifecycle4FAIL 원본보존→최소productfix→최종682PASS. 독립FI9 assertion탐지/매회exactrestore55GREEN, api/lint/type/build PASS·134source전후현재동일.
+- [x] 전체mockbrowser425PASS/기존skip1·retry/flaky0. 별도실제HTTPS 명시복구6PASS/각retry0·source/runtime/assets동일·owned2/keys/profiles/19440–46 정리. 원8/자동focus4435의실패는별도잔여로유지하며같은oraclePASS로치환0. loopback 합성OAuth/Primaryprovider는실외부·TwoStage/금융graph·모델품질검증아님.
+- [x] 최종 독립 게시 전 로컬 리뷰 PASS: source7/test55·FI9·전체unit682/mockbrowser425+기존skip1·명시복구HTTPS6 근거와 현재 지문을 대조했다. 새 P1/P2 없음. 원8/자동focus 미검증 및 frozen runtime 선행 조건을 유지한다.
+- [ ] PR33새commit/push·정확HEADCI. 선행고정runtime398재사용준비가필요하며self-contained CI integrationjob은추가하지않았다. 상세는docs/verification/issue-32-account-recovery.md.
+
+현재 HTTPS8 원본은 불변이다. 앞선 실행7PASS/1timeout 및 별도 관측 실행6PASS/2timeout을 보존하며 원래 연속 전체문서 이동 요구를 충족했다고 주장하지 않는다. 별도 안정 경로·빠른 전체문서 이탈 및 명시적 재로그인 복구 결과를 구분한다. 내부 상세 진단은 로컬 전용 `.codex/tdd-evidence/issue24-private-auth-diagnostic/`에 보관한다. 현재 Commit/PR 동일후속커밋예정, main/실제 운영/Secret 변경0이다.
+
+# PR24 HTTPS 회귀 보존·현재 통합 및 조건부 main 승인 (2026-10-18 UTC)
+
+- [USER] 검증 뒤 대응 서버/웹 main 정상 PR·정확 병합CI·실제 배포·가입/로그인 확인까지 승인했다. 과거 main 보류 문구는 당시 이력이며 실제 인증·DB·모델 활성화 준비가 확인되기 전 배포 성공으로 표시하지 않는다. security/자격증명/admin승격은 제외한다.
+- [x] 기존25–31 exactHEAD/최신대표33f08aaa98·CI39111519165 SUCCESS와 독립 대체근거를 재확인하고 각PR에 이유/33링크를 남겨 closed-unmerged. 24와33만Draft유지, 원본branchforcepush0
+- [x] PR24 원7files/bytes/SHA/과거8PASS를 docs/history/issue-24-https-original/에 archive. 기존runner가oldserver91eb+현재web을섞으므로단순원본추가/옛익명HOST·PUT완료oracle재사용은안전하지않음
+- [ ] 별도현재계약HTTPS8(4scenario×desktop/mobile): 실제localOIDC/accountHOST/create0명·share·refresh, POST202→PrimarysyntheticCLEARaccepted/UUIDreplay, host미제출accepted0/1/2 조기마감·정확동결, guestproof/private권한, CA신뢰/비신뢰음성대조·실CORS CDPOPTIONS·routeAPI0. 실제AI/OAuth외부0, Primary가TwoStage/financialgraph우회함을명시
+- [ ] 고정server398source482/frozen1559/deps216 지문·새test-onlyJava launcher·호스트TLS/denyproxy·Testcontainers수명/정상종료, 독립FI/전체웹필수gate/최종리뷰/PR33새exactHEADCI 확인
+- [ ] 통합검증뒤PR24에정확보존·대체근거와새CI를연결해정리. 현재별도legacy8/native14와중복합산0. main실제병합은서버호환/auth/DB/운영AI완료경계확인후시행
+
+현재서버main91eb2505/웹main9b183978은기존그대로다. serverdevelop39825357의정확CI39113901061이성공했고신규모델평가는별도issue130이다. 모델OFF는신규accepted완료를막고provider단일토글은2단계예산활성화가아니므로이를임의변경하지않는다. 현재진행기록은이후Git/PR/receipt에연결하며Commit/PR 동일후속커밋예정이다.
+
+---
+
+이하는 PR33 최초 게시 당시 이력이다.
+
 # #32 취소된 확인 질문과 재시도 UI 상태 복구 (2026-10-18 UTC)
 
 - 기준: PR31 exact02a68d8e50680e87dd153156e8bb7ea884a794cc를 clean main9b183978 ff-only 갱신 뒤 feature/issue-32-cancel-question에서 상속. PR31/다른branch직접변경0. 서버#128과 연결하며 사용자 승인 #123 로컬누락검증 범위다.

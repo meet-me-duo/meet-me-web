@@ -1,13 +1,19 @@
+import { getSessionRestoreStatus, setSessionRestoreStatus, type SessionRestoreStatus } from "./sessionRestoration";
+import { clearQuarantinedDraft, retainQuarantinedDraftForAccount } from "./draftQuarantine";
 import { runAuthCookieRequest } from "./authCookieLock";
 export interface Account { id: string; displayName: string }
 export interface AuthSession { accessToken: string; expiresAt: string; account: Account }
+export { getSessionRestoreStatus } from "./sessionRestoration";
+export type { SessionRestoreStatus } from "./sessionRestoration";
 const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
 let session: AuthSession | null = null;
 let version = 0;
 let generation = 0;
 let restoring: Promise<Account | null> | null = null;
 const listeners = new Set<() => void>();
-function publish(next: AuthSession | null) {
+function publish(next: AuthSession | null, status: SessionRestoreStatus = next ? "authenticated" : "anonymous") {
+  setSessionRestoreStatus(status);
+  if (next) retainQuarantinedDraftForAccount(next.account.id);
   if (session?.account.id !== next?.account.id) version++;
   session = next;
   for (const listener of listeners) listener();
@@ -27,6 +33,9 @@ export function subscribeSession(listener: () => void): () => void { listeners.a
 export function restoreSession(): Promise<Account | null> {
   if (restoring) return restoring;
   const started = generation;
+  const knownAccount = session !== null || getSessionRestoreStatus() === "expired";
+  setSessionRestoreStatus("checking");
+  for (const listener of listeners) listener();
   const work = runAuthCookieRequest(async () => {
     if (started !== generation) return null;
     try {
@@ -35,10 +44,10 @@ export function restoreSession(): Promise<Account | null> {
       const body: unknown = response.ok ? await response.json() : null;
       if (started !== generation) return null;
       const next = validSession(body) ? body : null;
-      publish(next);
+      publish(next, next ? "authenticated" : response.status === 401 ? knownAccount ? "expired" : "anonymous" : "unavailable");
       return next?.account ?? null;
     } catch {
-      if (started === generation) publish(null);
+      if (started === generation) publish(null, "unavailable");
       return null;
     }
   });
@@ -49,6 +58,7 @@ export function restoreSession(): Promise<Account | null> {
 export async function endSession(allDevices = false): Promise<void> {
   const token = getAccessToken();
   generation++;
+  clearQuarantinedDraft();
   version++;
   restoring = null;
   publish(null);

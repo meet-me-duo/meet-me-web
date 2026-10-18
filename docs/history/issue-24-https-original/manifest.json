@@ -1,0 +1,56 @@
+{
+  "sourcePr": 24,
+  "sourceHead": "8bd4e3356f9ed3100e644cce776a72054c34727b",
+  "legacyServer": "91eb2505ddf6b4db549a5bc2b8b07f11e514d0b0",
+  "legacyWebBase": "9b183978d5987f8fa8a5f02d542b17181e4929b4",
+  "originalFileCount": 7,
+  "originalBytesUnchanged": true,
+  "archiveIsExecutable": false,
+  "historicalConnectedChecksPass": 8,
+  "newCurrentRunClaim": false,
+  "reason": "Original runner fixed old backend but built current checkout; current account/precheck contract requires separate current suite; archived .source filenames prevent accidental old-oracle execution",
+  "files": [
+    {
+      "originalPath": "docs/verification/issue-22-local-integration.json",
+      "archivePath": "docs/history/issue-24-https-original/docs/verification/issue-22-local-integration.json.source",
+      "bytes": 9696,
+      "sha256": "8e613b773925c03eb8bfa05c35330242b56daac81e2d67df37c06dedeebd2ad2"
+    },
+    {
+      "originalPath": "docs/verification/issue-22-local-integration.md",
+      "archivePath": "docs/history/issue-24-https-original/docs/verification/issue-22-local-integration.md.source",
+      "bytes": 10956,
+      "sha256": "a8452ac7f785da3e3ed2418d996a7b7108cf020fa33d3f3385929a10334fefa5"
+    },
+    {
+      "originalPath": "integration/host-creation/compose.yml",
+      "archivePath": "docs/history/issue-24-https-original/integration/host-creation/compose.yml.source",
+      "bytes": 1407,
+      "sha256": "22f8d376d6ecb1aa34047856da5a52abd976d46100001953d26b7e04db656da9"
+    },
+    {
+      "originalPath": "integration/host-creation/fixtures.ts",
+      "archivePath": "docs/history/issue-24-https-original/integration/host-creation/fixtures.ts.source",
+      "bytes": 5084,
+      "sha256": "03cabb180e3277a19e2772a49fc21c50490f54101fcea426b707183b931bc11d"
+    },
+    {
+      "originalPath": "integration/host-creation/host-creation.spec.ts",
+      "archivePath": "docs/history/issue-24-https-original/integration/host-creation/host-creation.spec.ts.source",
+      "bytes": 26902,
+      "sha256": "4d794228cabd90df4c40c6076f87eaae57aba164e4572e2704e48607f5096c8f"
+    },
+    {
+      "originalPath": "playwright.host-integration.config.ts",
+      "archivePath": "docs/history/issue-24-https-original/playwright.host-integration.config.ts.source",
+      "bytes": 809,
+      "sha256": "5768b34352516bf9ee986abc43a61a2a87eb07ce4391fd67a4ae2f83c9ecc7ad"
+    },
+    {
+      "originalPath": "scripts/run-host-integration.mjs",
+      "archivePath": "docs/history/issue-24-https-original/scripts/run-host-integration.mjs.source",
+      "bytes": 15385,
+      "sha256": "91ddb2526aa00a86dfa8b67c18598ee58cafe1eb24f33dc5a6d3af33d60a528a"
+    }
+  ]
+}

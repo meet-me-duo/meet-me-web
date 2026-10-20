@@ -1,0 +1,31 @@
+{
+  "workItem": "issue-107-web-precheck-close",
+  "sourceRevision": "e9e81efe2c75813623729e4a9b8214bd8430c8b9",
+  "testFiles": [
+    {
+      "path": "src/components/SubmissionCheckPanel.close.test.tsx",
+      "sha256": "49c7b3722204f9716cea5b14e4237484049b63af52bca568ef5ac1fb5a7826da"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/components/SubmissionCheckPanel.close.test.tsx",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1",
+    "--reporter=json",
+    "--outputFile=.codex/tdd-evidence/issue-107-web-precheck-close-red-result.json"
+  ],
+  "failedTests": [
+    "#107 holds the close lock through the confirmed early-close request"
+  ],
+  "expectedFailureCategory": "MISSING_BEHAVIOR",
+  "recordedAt": "2026-10-17T18:25:49.795942+00:00",
+  "provenance": "CHRONOLOGICAL_RED",
+  "notes": "Public contract oracle, compile PASS; synthetic JSON/HTTP. Initial wrong EARLY_CLOSE_REQUIRED fixture was invalid and replaced with actual EARLY_CLOSE_CONFIRMATION_REQUIRED before collecting this effective RED."
+}

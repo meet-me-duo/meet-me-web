@@ -1,0 +1,27 @@
+{
+  "issue": 108,
+  "role": "independent-web-test-author",
+  "baseline": "95f09c0a98c6538b0f19ed381fdf11a2f5b844d9",
+  "testFile": "src/pages/RoomPage.guest-reaccess.test.tsx",
+  "testSha256": "846821503dd4c3750c6cff5c63f5708a40f291fbfdfa7cecefb592b3a113b0c5",
+  "command": "COREPACK_HOME=/tmp/meetme108-corepack XDG_DATA_HOME=/tmp/meetme108-data XDG_CACHE_HOME=/tmp/meetme108-cache corepack pnpm test src/pages/RoomPage.guest-reaccess.test.tsx",
+  "typecheck": { "status": "PASS", "command": "corepack pnpm typecheck" },
+  "red": {
+    "status": "EXPECTED_FAIL",
+    "failed": 16,
+    "passed": 0,
+    "classification": "Agreed name/account-participation/reaccess controls are absent from the baseline RoomPage",
+    "immutableSnapshot": "/tmp/issue108-web-red-lazy",
+    "snapshotMethod": "git archive baseline; add the frozen test and additive API declarations; baseline RoomPage is unchanged",
+    "localLog": "/tmp/issue108-web-integration-red-lazy.log"
+  },
+  "green": { "status": "PASS", "passed": 16, "failed": 0, "localLog": "/tmp/issue108-web-integration-green.log" },
+  "designCorrection": {
+    "scope": "Two closed/confirmed read-restoration tests",
+    "reason": "The initial test incorrectly required an automatic own-submission GET. The existing public contract reads closed-room originals only after the user opens the saved-input disclosure.",
+    "finalExpectation": "After server-authorized viewer restoration, no original is fetched automatically; opening the disclosure fetches and displays the owner's saved original.",
+    "redRevalidatedAfterCorrection": true,
+    "otherExpectationsWeakened": false,
+    "originalFrozenComponentTestsChanged": false
+  }
+}

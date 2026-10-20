@@ -1,0 +1,33 @@
+{
+  "workItem": "issue-107-web-precheck-draft",
+  "sourceRevision": "e9e81efe2c75813623729e4a9b8214bd8430c8b9",
+  "testFiles": [
+    {
+      "path": "src/components/SubmissionCheckPanel.draft.test.tsx",
+      "sha256": "bb4a81403a0e2a2080c5676312cd1c785174128456de37dd57a8580ccb832f6d"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/components/SubmissionCheckPanel.draft.test.tsx",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1",
+    "--reporter=json",
+    "--outputFile=.codex/tdd-evidence/issue-107-web-precheck-draft-red-result.json"
+  ],
+  "failedTests": [
+    "#107 distinguishes an unsaved edit from the prior accepted completion"
+  ],
+  "expectedFailureCategory": "MISSING_BEHAVIOR",
+  "recordedAt": "2026-10-17T18:22:35.244200+00:00",
+  "provenance": "CHRONOLOGICAL_RED",
+  "notes": "Typecheck PASS; unqualified completed heading remains while new unsaved draft is being edited. Existing accepted content must be retained but must not mark the new draft complete.",
+  "valid": false,
+  "withdrawnReason": "accepted.confirmation_source metadata addition changed fingerprint; old chronological RED retained as historical evidence only."
+}

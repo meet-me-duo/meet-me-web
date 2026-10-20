@@ -1,0 +1,234 @@
+{
+  "workItem": "issue107-independent-web-review",
+  "reviewer": "/root/baseline_merge_review",
+  "role": "Independent source and fault reviewer; no product or independent test edits; scratch production mutations only",
+  "status": "APPROVED_FOR_AUTHORIZED_COMMIT_PUSH_DRAFT_PR_LOCAL_WEB_SCOPE",
+  "recordedAt": "2026-10-17T19:27:48.331784+00:00",
+  "reviewedSourceFingerprints": [
+    {
+      "path": "src/api/client.ts",
+      "sha256": "3047e2b184bd30b2dc7403215d2671f0220d2f38dc8395b7d87947425daefda6"
+    },
+    {
+      "path": "src/api/precheck.ts",
+      "sha256": "4690caaea4155a14b2d8869961bc450aa1ca689449f00b20438dab7743d69fd2"
+    },
+    {
+      "path": "src/api/types.ts",
+      "sha256": "e35e13382894823240f72bd63db0f6b66d9f2068befb9cff79f6ac365dd04db5"
+    },
+    {
+      "path": "src/pages/RoomPage.tsx",
+      "sha256": "492f2322645e7f30c0eabba29ba4d8842e43bc507f6bdf50d2eb9373a03d1377"
+    },
+    {
+      "path": "src/components/SubmissionCheckPanel.tsx",
+      "sha256": "c4863d46b29528a30d2369417611d5b2b57419862c9a8ca7da891647545a717f"
+    },
+    {
+      "path": "src/components/GuestAccessPanel.tsx",
+      "sha256": "9cb264ba28883d2769ac875fbeacd791f7b6d726da3ed752671eeb549b165338"
+    },
+    {
+      "path": "src/components/GuestParticipation.tsx",
+      "sha256": "37cd8349d774a6342b6406f0606541fed2215c817a62c4bf0f0b249dcc4bbeae"
+    },
+    {
+      "path": "src/auth/AccountBoundary.tsx",
+      "sha256": "ab40be7f077b74e66be64cc44d7f88bee2732e4ef1617159e906ec4c006c8dd5"
+    },
+    {
+      "path": "src/auth/session.ts",
+      "sha256": "b4c9cedd6132ebf497348b2e7c34baa7a2f8bb86ae7e0db4462e9f2a692ba18b"
+    },
+    {
+      "path": "src/api/recovery.ts",
+      "sha256": "e4154303d46629f512b6583beab67a4632f07cd1ff08042e9eac5f9f69332a3a"
+    },
+    {
+      "path": "src/App.tsx",
+      "sha256": "ee68b9bddd0b7c755c6e2af9229ea260e7ea1469eda355d21f989011830fea8e"
+    },
+    {
+      "path": "src/api/operations.ts",
+      "sha256": "dca174adc2f1ea9520f0d5cc7be209a9d48a697edda72d32325f7390dfdd9a7d"
+    }
+  ],
+  "findings": [
+    {
+      "id": "R107-W01",
+      "priority": "P2",
+      "status": "REMEDIATED_FINAL_SOURCE_AND_SCRATCH_FAULT_VERIFIED",
+      "summary": "Accepted CLEAR completion stayed unqualified while a new unsaved draft was being edited; independent chronological draft RED led to explicit acceptedComplete/current draft separation."
+    },
+    {
+      "id": "R107-W02",
+      "priority": "P2",
+      "status": "REMEDIATED_FINAL_SOURCE_AND_SCRATCH_FAULT_VERIFIED",
+      "summary": "EARLY_CLOSE_CONFIRMATION_REQUIRED retry starts void closeRoom(true); outer finally releases busy/pending before inner close request finishes. Server close idempotence unchanged; new independent button-lock test requested.",
+      "independentOracle": "src/components/SubmissionCheckPanel.close.test.tsx",
+      "redManifest": ".tdd/red/issue-107-web-precheck-close.json",
+      "fix": "Await confirmed recursive close; independent final67 and scratch close-lock fault each verified actual target failure/restored GREEN."
+    },
+    {
+      "id": "R107-W03",
+      "priority": "P2",
+      "summary": "Two lost-local-draft public edit paths remediated and independently verified with final67 and scratch mutation.",
+      "status": "REMEDIATED_FINAL_SOURCE_AND_SCRATCH_FAULT_VERIFIED"
+    },
+    {
+      "id": "R107-W04",
+      "priority": "P2",
+      "summary": "Public CLOSED plus stale private COLLECTING snapshot should show final-own-state lookup pending, without asserting running/completed/excluded outcome prematurely.",
+      "status": "REMEDIATED_FINAL_SOURCE_AND_SCRATCH_FAULT_VERIFIED"
+    },
+    {
+      "id": "R107-W05",
+      "priority": "P2",
+      "summary": "Unknown nonempty future submission protocol must not fall through to legacy private writers; independent chronological protocol RED collected.",
+      "status": "REMEDIATED_FINAL_SOURCE_AND_SCRATCH_FAULT_VERIFIED"
+    },
+    {
+      "id": "R107-W06",
+      "priority": "P2",
+      "status": "REMEDIATED_FINAL_SOURCE_AND_SCRATCH_FAULT_VERIFIED",
+      "summary": "Post-correction current accepted version can differ from historical check; explicit version-linked confirmation_source now distinguishes LEGACY_CORRECTION and PRECHECK without numeric revision/text inference."
+    }
+  ],
+  "checks": [
+    "Account epoch checked after fetch and JSON success/error decoding; failed/expired Bearer does not silently retry as guest",
+    "Component is keyed by room/viewer/account epoch, active/mounted guards fence late results, private query removed on unmount/denial; account boundary clears all caches",
+    "Explicit choice shows original and proposed text before confirmation; direct replacement and1..500 Unicode validation preserved; no semantic regex or auto-rewrite",
+    "Server submission_complete+accepted+CLEAR required; pending,failed,cancelled,old operation_outcome are not completion",
+    "New protocol uses precheck only before correction; CLOSED+OPEN existing correction retains round/revision PUT and cohort capability, join remains collection-state gated",
+    "Guest REPLACE_ONLY stays blind, never obtains old original/question access; new saved wording distinguishes candidate save from CLEAR/result use",
+    "Existing legacy clarification and operator/account routes remain present; precheck stays out of legacy room flow; private raw-null summary wording distinguished from old manual format"
+  ],
+  "faultEvidence": ".tdd/verification/issue107-independent-web-faults.json",
+  "faultBaseline": {
+    "tests": 67,
+    "pass": 67,
+    "fail": 0
+  },
+  "mutantsDetected": 11,
+  "actualModelCalls": 0,
+  "actualOAuthCalls": 0,
+  "remoteWrites": 0,
+  "originalProductionEditsByReviewer": 0,
+  "originalTestEditsByReviewer": 0,
+  "limits": [
+    "Real model capability, MUST_ASK/MUST_NOT_ASK accuracy, paid cost and latency are unverified. No production/OAuth/Secrets/model calls or main/deployment approval.",
+    "Complete426-case browser run used installed system Chromium after official CDN403 and absent local msedge; same tests/projects/oracles/retries0, with this binary difference explicitly retained.",
+    "Affected early UUID/accepted-provenance RED is withdrawn and reconstructed evidence is explicitly post-implementation; no chronological first-RED claim for reconstruction.",
+    "Native12 uses actual isolated backend/PG/Redis/RS256/real guest proof and loopback synthetic OIDC/provider, with API route mocks0; it does not measure actual model semantic accuracy."
+  ],
+  "sourceObservationPostCorrection": {
+    "status": "RESOLVED_UI_BY_EXPLICIT_VERSION_LINKED_CONFIRMATION_SOURCE",
+    "contract": "accepted.confirmation_source required PRECHECK|LEGACY_CORRECTION; actual server generated OpenAPI and native end-to-end verification still pending",
+    "independentTests": "src/components/SubmissionCheckPanel.correction-snapshot.test.tsx covers differing historical statuses, divergent revision clocks and even identical text"
+  },
+  "assertionFailuresAcrossMutants": 15,
+  "finalIndependentTestFingerprints": [
+    {
+      "path": "src/api/client.precheck.test.ts",
+      "sha256": "65d97132b6c90f75ad27855243239753a8b73da72f60ab9c340f97e46b80765b"
+    },
+    {
+      "path": "src/components/GuestParticipation.precheck.test.tsx",
+      "sha256": "4a3ec55a2a53981842d64de0da3f6b311035e6b5f074de7362fcdb513de32a2c"
+    },
+    {
+      "path": "src/pages/RoomPage.precheck-correction.test.tsx",
+      "sha256": "bfd00706bf070fddaf826d05e8c596b3a6be33839f8ff2f0f8fde2f1902d0058"
+    },
+    {
+      "path": "src/pages/RoomPage.precheck-privacy.test.tsx",
+      "sha256": "079bd347fa1f7927fc7e6b4a3014e3b6e629b319a2d3558e3379afd8c0926fcb"
+    },
+    {
+      "path": "src/pages/RoomPage.precheck-protocol.test.tsx",
+      "sha256": "6d0dd1b22c5954eb5459a4faee5b986225eae37f4ec30ee989998785a8e25c28"
+    },
+    {
+      "path": "src/pages/RoomPage.precheck.test.tsx",
+      "sha256": "bf65a2150bdb8ad98c70db49ffb7cbd01cc7c4f5b1f23cfe6bc93b0bbe36ffc4"
+    },
+    {
+      "path": "src/components/SubmissionCheckPanel.close.test.tsx",
+      "sha256": "49c7b3722204f9716cea5b14e4237484049b63af52bca568ef5ac1fb5a7826da"
+    },
+    {
+      "path": "src/components/SubmissionCheckPanel.correction-snapshot.test.tsx",
+      "sha256": "91e246c688f2ec843d0bebcc8d91b2a81d0912dd813becbd22f35c14b12285e2"
+    },
+    {
+      "path": "src/components/SubmissionCheckPanel.draft-races.test.tsx",
+      "sha256": "87ee98518ac195aa92cb400933d9811377f53d4a2b540556df4b03e354c3f191"
+    },
+    {
+      "path": "src/components/SubmissionCheckPanel.draft.test.tsx",
+      "sha256": "17f0620880fbfef0189b4f2bc9e39f5923eb28826931097515893dee09a0c035"
+    },
+    {
+      "path": "src/components/SubmissionCheckPanel.lifecycle.test.tsx",
+      "sha256": "a82c63dadb2597e53c839f76339ef2c78bfb6e67fbe55ad1b83c01f75e56fe93"
+    }
+  ],
+  "faultScopes": [
+    ".tdd/verification/issue107-independent-web-faults-initial.json is the earlier six-type source snapshot; do not double-count it with the final eleven-type run",
+    ".tdd/verification/issue107-independent-web-faults.json is final frozen source,67-test baseline,11 fault types (the public edit-action fault changes two related production handlers in one run); each restored target GREEN"
+  ],
+  "openImplementationFindings": [],
+  "pendingRequiredIntegrationChecks": [
+    "Parent overall server mandatory guard/full/core-FI/provenance gates before authorized combined publication.",
+    "After authorized commit/push/Draft PR, verify CI for that exact published HEAD before any separately authorized merge."
+  ],
+  "scopeDecision": "Independent local web source/contract/fault/full-standard/native review is complete. The user-authorized commit/push/Draft PR may proceed after parent overall local server gates; exact published HEAD CI is a post-publication, pre-merge gate. This is not main/deployment or real-model readiness approval.",
+  "generatedContractSupplement": {
+    "review": ".tdd/reviews/issue107-independent-web-contract-review.json",
+    "status": "APPROVED_FINAL_NATIVE_SCHEMA_GENERATED_ALIAS_SCOPE_PENDING_BROWSER_AND_FULL_GATES"
+  },
+  "fullStandardGateIndependentCheck": {
+    "receipt": ".tdd/verification/issue-107-web-standard-gates.json",
+    "sourceFiles": 127,
+    "beforeAfterEqual": true,
+    "currentMismatches": [],
+    "unit": {
+      "files": 57,
+      "tests": 620,
+      "passed": 620,
+      "failed": 0,
+      "format": "Actual Vitest raw text summary inspected; no JSON reporter claimed"
+    },
+    "browser": {
+      "cases": 426,
+      "passed": 425,
+      "existingSkipped": 1,
+      "unexpected": 0,
+      "flaky": 0,
+      "retries": 0,
+      "rawResult": ".codex/tdd-evidence/issue-107-web-standard-browser-result.json"
+    },
+    "commandsAllExit0": true,
+    "browserInstallLimit": "Official Playwright CDN returned environment403 Domain forbidden; default local msedge is unavailable. Complete same testDir/projects run via installed /usr/bin/chromium and explicit local config. No tests or expected values changed.",
+    "scope": "All local web standard gates passed; native final formatted-backend12 subsequently reverified. Published exact HEAD CI is a post-publication gate."
+  },
+  "finalFormattedNativeIndependentCheck": {
+    "evidence": "docs/verification/issue-107-native-browser.json",
+    "contractGate": ".tdd/verification/issue-107-final-native-contract-gate.json",
+    "tests": 12,
+    "status": "PASS",
+    "at": "2026-10-17T19:26:14.757Z",
+    "runtimeManifestSha256": "03bb749dad1461b5096a17c7a6bc0dd76bb4fbd437bfb176ac75d7ce044ce9a0",
+    "runtimeEntries": 216,
+    "runtimeMissing": 0,
+    "runtimeMismatches": 0,
+    "webSourceMismatches": 0,
+    "assetMismatches": 0,
+    "finalCore35ManifestMatchesRuntime": true,
+    "apiRouteMocks": 0,
+    "externalRequests": 0,
+    "actualModelCalls": 0,
+    "actualOAuthProviderCalls": 0
+  }
+}

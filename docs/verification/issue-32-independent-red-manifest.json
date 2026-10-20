@@ -1,0 +1,81 @@
+{
+  "workItem": "issue32-cancel-question-status-ui",
+  "sourceRevision": "02a68d8e50680e87dd153156e8bb7ea884a794cc",
+  "testFiles": [
+    {
+      "path": "src/components/SubmissionCheckPanel.status-lifecycle.test.tsx",
+      "sha256": "ba446a4f16f54901f6cc23b976befea50c20457f920d265e82793eb80d678cd4"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1",
+    "--retry",
+    "0",
+    "--reporter=json",
+    "--outputFile=/tmp/issue128-ui-status-regression/red.json",
+    "src/components/SubmissionCheckPanel.status-lifecycle.test.tsx"
+  ],
+  "failedTests": [
+    "#32 historical questions never reopen a terminated check cancels a visible question, preserves the raw input and starts a fresh request without an old answer",
+    "#32 historical questions never reopen a terminated check restores FAILED without activating a retained historical question",
+    "#32 historical questions never reopen a terminated check restores TIMED_OUT without activating a retained historical question",
+    "#32 historical questions never reopen a terminated check keeps a completed CLEAR snapshot free of historical answer controls"
+  ],
+  "expectedFailureCategory": "MISSING_BEHAVIOR",
+  "recordedAt": "2026-10-18T07:58:24.129157+00:00",
+  "provenance": "CHRONOLOGICAL_RED",
+  "notes": {
+    "typecheck": "PASS",
+    "newFileLint": "PASS",
+    "tests": 7,
+    "requirementAssertionFailures": 4,
+    "initialPass": 3,
+    "errors": 0,
+    "skips": 0,
+    "retries": 0,
+    "raw": "/tmp/issue128-ui-status-regression/red.json",
+    "rawLog": "/tmp/issue128-ui-status-regression/red.log",
+    "sourceAtRed": "/tmp/issue128-ui-status-regression/source-before.json",
+    "postRedAudit": "First completed after-red audit before notifying root found only parent implementation_plan.md changed; production/test SHA were unchanged. Root then received RED unlock and now owns the product fix. Latest inventory is explicitly after that release, not a claim of red-source equality.",
+    "existingTestsUnchanged": true,
+    "setupFailureExcluded": "initial new-test tsc optional-array accesses and invalid ByRoleOptions.exact; fixed before validRED; separately preserved logs are setupfail/RED0",
+    "cases": [
+      {
+        "name": "#32 historical questions never reopen a terminated check cancels a visible question, preserves the raw input and starts a fresh request without an old answer",
+        "status": "failed"
+      },
+      {
+        "name": "#32 historical questions never reopen a terminated check restores FAILED without activating a retained historical question",
+        "status": "failed"
+      },
+      {
+        "name": "#32 historical questions never reopen a terminated check restores TIMED_OUT without activating a retained historical question",
+        "status": "failed"
+      },
+      {
+        "name": "#32 historical questions never reopen a terminated check keeps a completed CLEAR snapshot free of historical answer controls",
+        "status": "failed"
+      },
+      {
+        "name": "#32 historical questions never reopen a terminated check preserves valid NEEDS_CHOICE, original text and the full proposal until explicit confirmation",
+        "status": "passed"
+      },
+      {
+        "name": "#32 complete retry and direct-edit flows through the public API client retries a failed check explicitly, remains pending, then completes only on accepted CLEAR",
+        "status": "passed"
+      },
+      {
+        "name": "#32 complete retry and direct-edit flows through the public API client submits an explicit direct-text answer, rechecks the whole edited text and then displays accepted CLEAR",
+        "status": "passed"
+      }
+    ]
+  }
+}

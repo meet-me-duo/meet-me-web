@@ -1,4 +1,7 @@
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
+import { fulfillAccountRefresh, installAccountRefresh } from "./accountFixture";
+
+test.beforeEach(async ({ context }) => { await installAccountRefresh(context, null); });
 
 const code = "abcdefghijklmnopqrstuv", key = "meet-me:recent-rooms:v1";
 const room = {
@@ -10,9 +13,11 @@ const room = {
 
 async function fixture(context: BrowserContext, options: { joined?: boolean; role?: string; status?: string; error?: number } = {}) {
   let joined = options.joined ?? true, role = options.role ?? "HOST";
-  await context.route("**/api/**", route => {
+  await context.route("**/api/**", async route => {
     const request = route.request(), pathname = new URL(request.url()).pathname;
+    if (await fulfillAccountRefresh(route, joined && role === "HOST" ? "로컬 사용자" : null)) return;
     const response = () => ({ ...room, public_status: options.status ?? room.public_status, viewer: { joined, role: joined ? role : null, display_name: joined ? "로컬 사용자" : null } });
+    if (pathname === `/api/rooms/${code}/guest-records` && request.method() === "GET") return route.fulfill({ json: { records: [] } });
     if (pathname === "/api/rooms" && request.method() === "POST") { joined = true; role = "HOST"; return route.fulfill({ status: 201, json: response() }); }
     if (pathname.endsWith("/participants") && request.method() === "POST") { joined = true; role = "MEMBER"; return route.fulfill({ status: 201, json: response() }); }
     if (pathname.endsWith("/submission")) return route.fulfill({ status: 404, json: { code: "SUBMISSION_NOT_FOUND" } });
@@ -24,12 +29,14 @@ async function seed(page: Page, lastOpenedAt = Date.now()) {
   await page.goto("/");
   await page.evaluate(({ key, code, lastOpenedAt }) => localStorage.setItem(key, JSON.stringify({ version: 1, rooms: [{ inviteCode: code, title: "다시 찾을 모임", lastOpenedAt }] })), { key, code, lastOpenedAt });
   await page.reload();
+  // Begin local-history assertions only after the new page's required auth bootstrap settles.
+  await expect(page.getByRole("heading", { name: /조건만 말하세요/ })).toBeVisible();
 }
 
 test("creation is recorded before opening and a new tab returns to a selectable home", async ({ page, context }) => {
   await fixture(context);
   await page.goto("/create");
-  await page.getByLabel("주최자 이름").fill("로컬 사용자");
+  await expect(page.getByLabel("주최자 이름")).toHaveCount(0);
   await page.getByLabel("모임 목적 / 이름").fill(room.purpose);
   await page.getByRole("button", { name: /다음 단계/ }).click();
   await page.getByRole("button", { name: "방 만들기", exact: true }).click();
@@ -47,10 +54,10 @@ test("creation is recorded before opening and a new tab returns to a selectable 
 test("a plain invitation is not recorded until joining, then persists through reload", async ({ page, context }) => {
   await fixture(context, { joined: false });
   await page.goto(`/rooms/${code}`);
-  await expect(page.getByRole("button", { name: "모임 참여하기" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "참여하기" })).toBeVisible();
   expect(await page.evaluate(key => localStorage.getItem(key), key)).toBeNull();
-  await page.getByLabel("내 이름").fill("참여자");
-  await page.getByRole("button", { name: "모임 참여하기" }).click();
+  await page.getByLabel("이름", { exact: true }).fill("참여자");
+  await page.getByRole("button", { name: "참여하기" }).click();
   await expect(page.getByText(/홈의.*이 기기의 최근 모임/)).toBeVisible();
   await page.goto("/"); await page.reload();
   await expect(page.getByRole("link", { name: "다시 찾을 모임 다시 열기" })).toBeVisible();
@@ -75,8 +82,8 @@ test("a saved address never supplies authority after participation is lost", asy
   await page.getByRole("link", { name: "다시 찾을 모임 다시 열기" }).click();
   await expect(page.getByText(/같은 이름으로 새로 참여해도/)).toBeVisible();
   await expect(page.getByRole("heading", { name: "주최자 도구" })).toHaveCount(0);
-  await page.getByLabel("내 이름").fill("로컬 사용자");
-  await page.getByRole("button", { name: "모임 참여하기" }).click();
+  await page.getByLabel("이름", { exact: true }).fill("로컬 사용자");
+  await page.getByRole("button", { name: "참여하기" }).click();
   await expect(page.getByRole("button", { name: "초대 링크 복사" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "주최자 도구" })).toHaveCount(0);
 });
@@ -85,7 +92,7 @@ test("storage rejection preserves successful creation and explains link preserva
   await fixture(context);
   await page.addInitScript(() => { Storage.prototype.setItem = () => { throw new DOMException("denied", "QuotaExceededError"); }; });
   await page.goto("/create");
-  await page.getByLabel("주최자 이름").fill("로컬 사용자");
+  await expect(page.getByLabel("주최자 이름")).toHaveCount(0);
   await page.getByLabel("모임 목적 / 이름").fill(room.purpose);
   await page.getByRole("button", { name: /다음 단계/ }).click();
   await page.getByRole("button", { name: "방 만들기", exact: true }).click();
@@ -142,12 +149,16 @@ test("ten long titles remain usable on narrow mobile and desktop", async ({ page
     await page.setViewportSize({ width, height: 844 });
     await page.getByRole("link", { name: /이 기기의 최근 모임 10개 보기/ }).click();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
-    for (const button of await page.locator(".recent-actions .button").all()) {
-      expect(await button.evaluate(element => Number.parseFloat(getComputedStyle(element).minHeight))).toBeGreaterThanOrEqual(44);
+    const buttons = await page.locator(".recent-actions .button").evaluateAll(elements => elements.map(element => ({
+      minHeight: Number.parseFloat(getComputedStyle(element).minHeight),
+      height: element.getBoundingClientRect().height,
+    })));
+    expect(buttons).toHaveLength(30);
+    for (const button of buttons) {
+      expect(button.minHeight).toBeGreaterThanOrEqual(44);
       // Chromium can report 43.999969px for a 44px box at a fractional scroll position.
-      const height = (await button.boundingBox())!.height;
-      expect(Math.round(height * 1_000) / 1_000).toBeGreaterThanOrEqual(44);
+      expect(Math.round(button.height * 1_000) / 1_000).toBeGreaterThanOrEqual(44);
     }
-    await page.screenshot({ path: testInfo.outputPath(`recent-${width}.png`) });
+    await page.screenshot({ path: testInfo.outputPath(`recent-${width}.png`), scale: "css" });
   }
 });

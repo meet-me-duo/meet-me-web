@@ -1,0 +1,265 @@
+{
+  "workItem": "issue132-account-recovery",
+  "sourceRevision": "f08aaa9810bf9e9fe4fe22b7a1285449ab5e9e95",
+  "boundary": "Strict refresh rejection, private draft account/context/revision/fresh-read fences and honest full-unload warning; local synthetic scratch FI only",
+  "sourceFiles": [
+    {
+      "path": "src/auth/session.ts",
+      "sha256": "9f55ee0516034cd142b7fb1f7321ebc71a80432c13b8a78bbe91c7aa76eae927"
+    },
+    {
+      "path": "src/auth/sessionRestoration.ts",
+      "sha256": "8f22ae7415ae10d31ae72bbde06c57c0651954b00309cc3fa6a717e1e1cb4385"
+    },
+    {
+      "path": "src/auth/draftQuarantine.ts",
+      "sha256": "e9241f5cbb3fe6a001ef8ba4c612cfaeb3f3b7e2803d0a95bac49dd780dfe1ca"
+    },
+    {
+      "path": "src/auth/usePrivateDraft.tsx",
+      "sha256": "9161635e994a9b1285d20aed75ab5d2bccc2874bcde0dede5f7dbe7a91e09a7c"
+    },
+    {
+      "path": "src/auth/AccountBoundary.tsx",
+      "sha256": "27664495be12d5fc90b99be3e625995a15fc610860b24f79ce0d80a4bf026aae"
+    },
+    {
+      "path": "src/components/SubmissionCheckPanel.tsx",
+      "sha256": "5ba8805ea0c12739e696ac427f6cf6c71f8a3b3f9c6a5bcb08e18e8df68d16b4"
+    },
+    {
+      "path": "src/pages/RoomPage.tsx",
+      "sha256": "7ea74218412ed7c2fb4770b30aab652de2e31353c79b5af842a49804f094732e"
+    }
+  ],
+  "testFiles": [
+    {
+      "path": "src/auth/session.recovery.test.ts",
+      "sha256": "ba1ca624400a3e0cf810745a43f04ebd677b93ac28475aa9484510f9b2cddad8"
+    },
+    {
+      "path": "src/auth/draftQuarantine.test.ts",
+      "sha256": "c988074e58b6cf6470066ae76b1aa85a2ed89f02149568e6f5ae1682b9af9a4f"
+    },
+    {
+      "path": "src/auth/AccountRecovery.flow.test.tsx",
+      "sha256": "2f693fe20646e81487878e6b0dee94224012cc4ba12e5193f1f1056632d5fa63"
+    },
+    {
+      "path": "src/auth/AccountRecovery.boundaries.test.tsx",
+      "sha256": "56894ff6bcb3703bcc479b4a1c8be3c46cb2d9ab1deabe7ca94dc491e8a76665"
+    }
+  ],
+  "injections": [
+    {
+      "fault": "F01-generation-fence",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "src/auth/session.recovery.test.ts",
+        "--configLoader",
+        "runner",
+        "--pool",
+        "threads",
+        "--maxWorkers",
+        "1",
+        "--reporter",
+        "verbose",
+        "--reporter",
+        "json",
+        "--outputFile",
+        "/tmp/issue132-account-recovery/independent-fi/F01-generation-fence.json"
+      ],
+      "detectedBy": "issue132 explicit account restoration state without replay-policy changes fences obsolete HTTP200 and status after explicit logout; issue132 explicit account restoration state without replay-policy changes fences obsolete HTTP503 and status after explicit logout; issue132 explicit account restoration state without replay-policy changes fences late successful JSON after logout and a newer B login",
+      "result": "DETECTED"
+    },
+    {
+      "fault": "F02-account-switch-clear",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "src/auth/session.recovery.test.ts",
+        "--configLoader",
+        "runner",
+        "--pool",
+        "threads",
+        "--maxWorkers",
+        "1",
+        "--reporter",
+        "verbose",
+        "--reporter",
+        "json",
+        "--outputFile",
+        "/tmp/issue132-account-recovery/independent-fi/F02-account-switch-clear.json"
+      ],
+      "detectedBy": "issue132 explicit account restoration state without replay-policy changes clears A's quarantine when B becomes authenticated even without any mounted room UI",
+      "result": "DETECTED"
+    },
+    {
+      "fault": "F03-context-binding",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "src/auth/draftQuarantine.test.ts",
+        "src/auth/AccountRecovery.flow.test.tsx",
+        "--configLoader",
+        "runner",
+        "--pool",
+        "threads",
+        "--maxWorkers",
+        "1",
+        "--reporter",
+        "verbose",
+        "--reporter",
+        "json",
+        "--outputFile",
+        "/tmp/issue132-account-recovery/independent-fi/F03-context-binding.json"
+      ],
+      "detectedBy": "issue132 original-tab private draft quarantine across authentication remounts does not recover A raw for another fresh participant context even when the account is A; issue132 one bounded memory-only owner-bound quarantine returns no raw text for a mismatching verified binding 2",
+      "result": "DETECTED"
+    },
+    {
+      "fault": "F04-revision-conflict",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "src/auth/draftQuarantine.test.ts",
+        "src/auth/AccountRecovery.flow.test.tsx",
+        "--configLoader",
+        "runner",
+        "--pool",
+        "threads",
+        "--maxWorkers",
+        "1",
+        "--reporter",
+        "verbose",
+        "--reporter",
+        "json",
+        "--outputFile",
+        "/tmp/issue132-account-recovery/independent-fi/F04-revision-conflict.json"
+      ],
+      "detectedBy": "issue132 original-tab private draft quarantine across authentication remounts preserves a changed server revision and offers the quarantined raw separately until explicit use; issue132 one bounded memory-only owner-bound quarantine exposes a revision2 mismatch only as a conflict without silently rebasing the draft; issue132 one bounded memory-only owner-bound quarantine exposes a revision4 mismatch only as a conflict without silently rebasing the draft",
+      "result": "DETECTED"
+    },
+    {
+      "fault": "F05-fresh-private-read",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "src/auth/AccountRecovery.flow.test.tsx",
+        "--configLoader",
+        "runner",
+        "--pool",
+        "threads",
+        "--maxWorkers",
+        "1",
+        "--reporter",
+        "verbose",
+        "--reporter",
+        "json",
+        "--outputFile",
+        "/tmp/issue132-account-recovery/independent-fi/F05-fresh-private-read.json"
+      ],
+      "detectedBy": "issue132 original-tab private draft quarantine across authentication remounts preserves a changed server revision and offers the quarantined raw separately until explicit use; issue132 original-tab private draft quarantine across authentication remounts restores a LEGACY draft only after its own fresh submission revision, without PUT or precheck clock confusion",
+      "result": "DETECTED"
+    },
+    {
+      "fault": "F06-anonymous-unload-warning",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "src/auth/AccountRecovery.flow.test.tsx",
+        "--configLoader",
+        "runner",
+        "--pool",
+        "threads",
+        "--maxWorkers",
+        "1",
+        "--reporter",
+        "verbose",
+        "--reporter",
+        "json",
+        "--outputFile",
+        "/tmp/issue132-account-recovery/independent-fi/F06-anonymous-unload-warning.json"
+      ],
+      "detectedBy": "issue132 original-tab private draft quarantine across authentication remounts warns before full unload while a private draft is retained, including anonymous remount, and clears warning on logout",
+      "result": "DETECTED"
+    },
+    {
+      "fault": "F07-fresh-public-owner-discard",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "src/auth/AccountRecovery.boundaries.test.tsx",
+        "--configLoader",
+        "runner",
+        "--pool",
+        "threads",
+        "--maxWorkers",
+        "1",
+        "--reporter",
+        "verbose",
+        "--reporter",
+        "json",
+        "--outputFile",
+        "/tmp/issue132-account-recovery/independent-fi/F07-fresh-public-owner-discard.json"
+      ],
+      "detectedBy": "issue132 exact pending drafts and irreversible fresh ownership denial clears the retained raw after a verified same-account fresh public ownership result unjoined, not merely the DOM; issue132 exact pending drafts and irreversible fresh ownership denial clears the retained raw after a verified same-account fresh public ownership result context-changed, not merely the DOM",
+      "result": "DETECTED"
+    },
+    {
+      "fault": "F08-precheck-pending-exact-raw",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "src/auth/AccountRecovery.boundaries.test.tsx",
+        "--configLoader",
+        "runner",
+        "--pool",
+        "threads",
+        "--maxWorkers",
+        "1",
+        "--reporter",
+        "verbose",
+        "--reporter",
+        "json",
+        "--outputFile",
+        "/tmp/issue132-account-recovery/independent-fi/F08-precheck-pending-exact-raw.json"
+      ],
+      "detectedBy": "issue132 exact pending drafts and irreversible fresh ownership denial keeps a newer exact whitespace-only PRECHECK edit across a successful pending save, without another POST or PUT",
+      "result": "DETECTED"
+    },
+    {
+      "fault": "F09-legacy-pending-exact-raw",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "src/auth/AccountRecovery.boundaries.test.tsx",
+        "--configLoader",
+        "runner",
+        "--pool",
+        "threads",
+        "--maxWorkers",
+        "1",
+        "--reporter",
+        "verbose",
+        "--reporter",
+        "json",
+        "--outputFile",
+        "/tmp/issue132-account-recovery/independent-fi/F09-legacy-pending-exact-raw.json"
+      ],
+      "detectedBy": "issue132 exact pending drafts and irreversible fresh ownership denial keeps a newer exact whitespace-only LEGACY edit across a successful pending save, without another POST or PUT",
+      "result": "DETECTED"
+    }
+  ],
+  "recordedAt": "2026-10-18T11:24:13.211713Z"
+}

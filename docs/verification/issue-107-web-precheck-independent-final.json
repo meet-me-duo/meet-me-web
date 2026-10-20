@@ -1,0 +1,166 @@
+{
+  "status": "PASS_FOR_INDEPENDENT_WEB_AND_ISOLATED_NATIVE_SCOPE",
+  "at": "2026-10-17T19:26:25.582635+00:00",
+  "gitBaseHead": "e9e81efe2c75813623729e4a9b8214bd8430c8b9",
+  "dirtyWorkingTree": true,
+  "sourceSnapshot": {
+    "capturedAt": "2026-10-17T19:10:45.818Z",
+    "files": {
+      "src/api/client.ts": "3047e2b184bd30b2dc7403215d2671f0220d2f38dc8395b7d87947425daefda6",
+      "src/api/precheck.ts": "4690caaea4155a14b2d8869961bc450aa1ca689449f00b20438dab7743d69fd2",
+      "src/api/types.ts": "e35e13382894823240f72bd63db0f6b66d9f2068befb9cff79f6ac365dd04db5",
+      "src/pages/RoomPage.tsx": "492f2322645e7f30c0eabba29ba4d8842e43bc507f6bdf50d2eb9373a03d1377",
+      "src/components/SubmissionCheckPanel.tsx": "c4863d46b29528a30d2369417611d5b2b57419862c9a8ca7da891647545a717f",
+      "src/components/GuestParticipation.tsx": "37cd8349d774a6342b6406f0606541fed2215c817a62c4bf0f0b249dcc4bbeae",
+      "src/components/GuestAccessPanel.tsx": "9cb264ba28883d2769ac875fbeacd791f7b6d726da3ed752671eeb549b165338"
+    }
+  },
+  "sourceStableAcrossFocusedBuildBrowser": true,
+  "testFiles": {
+    "src/api/client.precheck.test.ts": "65d97132b6c90f75ad27855243239753a8b73da72f60ab9c340f97e46b80765b",
+    "src/pages/RoomPage.precheck.test.tsx": "bf65a2150bdb8ad98c70db49ffb7cbd01cc7c4f5b1f23cfe6bc93b0bbe36ffc4",
+    "src/pages/RoomPage.precheck-correction.test.tsx": "bfd00706bf070fddaf826d05e8c596b3a6be33839f8ff2f0f8fde2f1902d0058",
+    "src/components/SubmissionCheckPanel.lifecycle.test.tsx": "a82c63dadb2597e53c839f76339ef2c78bfb6e67fbe55ad1b83c01f75e56fe93",
+    "src/components/GuestParticipation.precheck.test.tsx": "4a3ec55a2a53981842d64de0da3f6b311035e6b5f074de7362fcdb513de32a2c",
+    "src/components/SubmissionCheckPanel.draft.test.tsx": "17f0620880fbfef0189b4f2bc9e39f5923eb28826931097515893dee09a0c035",
+    "src/pages/RoomPage.precheck-privacy.test.tsx": "079bd347fa1f7927fc7e6b4a3014e3b6e629b319a2d3558e3379afd8c0926fcb",
+    "src/components/SubmissionCheckPanel.close.test.tsx": "49c7b3722204f9716cea5b14e4237484049b63af52bca568ef5ac1fb5a7826da",
+    "src/pages/RoomPage.precheck-protocol.test.tsx": "6d0dd1b22c5954eb5459a4faee5b986225eae37f4ec30ee989998785a8e25c28",
+    "src/components/SubmissionCheckPanel.draft-races.test.tsx": "87ee98518ac195aa92cb400933d9811377f53d4a2b540556df4b03e354c3f191",
+    "src/components/SubmissionCheckPanel.correction-snapshot.test.tsx": "91e246c688f2ec843d0bebcc8d91b2a81d0912dd813becbd22f35c14b12285e2",
+    "e2e/precheck.spec.ts": "c4910b1000a976489613f91941fa869ebfde8f4f41e111eae7535ac8f6b65acb",
+    "scripts/verify-precheck-native.mjs": "32aef6a9a4e2e42b316366bc28f9aa5bccc7e141004766902360442b3d3c4829"
+  },
+  "unit": {
+    "passed": 67,
+    "failed": 0,
+    "log": ".codex/tdd-evidence/issue-107-web-precheck-final-green.log",
+    "result": ".codex/tdd-evidence/issue-107-web-precheck-final-green-result.json",
+    "finalGeneratedAliasesRerun": {
+      "passed": 67,
+      "failed": 0,
+      "files": 11,
+      "log": ".codex/tdd-evidence/issue-107-web-generated67-green.log",
+      "gate": ".tdd/verification/issue-107-web-generated-contract-gate.json",
+      "owner": "web_precheck_impl",
+      "at": "2026-10-17T19:07:53Z"
+    }
+  },
+  "syntheticBrowser": {
+    "passed": 22,
+    "failed": 0,
+    "desktop": 11,
+    "mobile": 11,
+    "actualBrowser": "/usr/bin/chromium",
+    "transport": "same-origin Playwright route fixtures",
+    "actualBackend": false,
+    "actualModelCalls": 0,
+    "result": ".codex/tdd-evidence/issue-107-web-precheck-browser-green-result.json",
+    "log": ".codex/tdd-evidence/issue-107-web-precheck-final-browser.log",
+    "actualCommandConfig": "docs/verification/issue-107-playwright-local.config.mjs",
+    "checkedInEquivalentConfig": "docs/verification/issue-107-playwright-local.config.mjs",
+    "buildArtifacts": {
+      "dist/assets/AccountOperationsPage-BqcY0RhA.css": "0f5aa7736566ff093b65786378628c8dbca778dfc42816014d7514590a117adc",
+      "dist/assets/AccountOperationsPage-DX49OX-Z.js": "9a96dd8340093b0d364a8f2ad97bd17ce846f5982492850401c336336de88711",
+      "dist/assets/favicon-DjtCOTlh.svg": "cf1f8ed7dc4da2af8250d48bf63bab813aa9e855d86edda6f833b24db91742bd",
+      "dist/assets/index-D-kvJm0_.css": "57a01d8576de8f2e0afd847d2e8d4b22100ad72186e9998feaa4552a2315c1ed",
+      "dist/assets/index-DDiaN2p2.js": "abf03134a9060dce591640923ba3ae1201fc0b9b239388a47a881f32d6381fa0",
+      "dist/index.html": "ba018deacdd7c81248c33691c48d701ae78e1d43675e2d1d34101e4ddd0d42d1"
+    },
+    "finalAliasCssRerun": {
+      "passed": 22,
+      "failed": 0,
+      "at": "2026-10-17T19:10:14.443Z",
+      "durationMs": 16201.820999999998
+    }
+  },
+  "checks": {
+    "typecheck": "PASS",
+    "focusedTestAndNativeScriptLint": "PASS",
+    "build": "PASS",
+    "diffCheck": "PASS",
+    "activeRedFingerprintCheck": "PASS",
+    "nativeScriptSyntax": "PASS"
+  },
+  "tddProvenance": {
+    "currentCoreFixtureFingerprints": "RECONSTRUCTED_SKELETON_AFTER_FIXTURE_HARDENING",
+    "reconstructed": {
+      "failures": 54,
+      "passingLegacyControl": 1,
+      "actualProductionTreeModified": false,
+      "chronologicalOriginalRedClaim": false
+    },
+    "correctionCloseProtocolDraftRacesAndCorrectionSourceRegressions": "individual chronological RED manifests",
+    "withdrawnOriginalRecords": [
+      "docs/verification/issue-107-web-precheck-original-red-withdrawn.json",
+      "docs/verification/issue-107-web-precheck-draft-original-red-withdrawn.json"
+    ],
+    "authoringReview": "docs/verification/issue-107-web-precheck-independent-authoring.md"
+  },
+  "native": {
+    "status": "PASS",
+    "passed": 12,
+    "failed": 0,
+    "script": "scripts/verify-precheck-native.mjs",
+    "plan": "docs/verification/issue-107-native-browser-plan.md",
+    "evidence": "docs/verification/issue-107-native-browser.json",
+    "log": ".codex/tdd-evidence/issue-107-native-browser.log",
+    "syntaxAndLint": "PASS",
+    "completedSuite": true,
+    "scope": "actual-browser-Spring-PostgreSQL-Redis-RS256-loopback-OIDC-real-guest-proof-synthetic-provider",
+    "runtimeManifestSha256": "03bb749dad1461b5096a17c7a6bc0dd76bb4fbd437bfb176ac75d7ce044ce9a0",
+    "sourceRuntimeAssetsStableAcrossExecution": true,
+    "actualApiRouteMocks": 0,
+    "externalRequests": 0,
+    "actualModelCalls": 0,
+    "actualOAuthProviderCalls": 0,
+    "productionAccess": false,
+    "checks": [
+      "N01-real-POST202-durable-candidate-pending-without-false-completion",
+      "N02-real-question-explicit-full-choice-recheck-CLEAR",
+      "N03-real-direct-full-input-recheck-CLEAR",
+      "N04-broad-intent-preserved-given-synthetic-CLEAR",
+      "N11-real-reload-read-only-concurrent-CAS-one-winner-explicit-idempotency-replay",
+      "N05-manual-real-closure-does-not-wait-for-provider-late-CLEAR-not-accepted",
+      "N05-deadline-real-closure-does-not-wait-for-provider-late-CLEAR-not-accepted",
+      "N06-real-batch-freezes-only-accepted-pending-edit-uses-prior-version",
+      "N07-real-password-issued-HttpOnly-proof-own-read-host-not-other-owner",
+      "N08-real-REPLACE_ONLY-blind-save-check-no-read-or-accepted-elevation",
+      "N09-real-invalid-Bearer-wins-over-valid-guest-cookie",
+      "N10-real-OIDC-account-priority-logout-and-late-private-provider-isolation"
+    ],
+    "actualDeadlinePath": "Separate test-only control invokes actual transactional DeadlineClosureScheduler.closeDueRooms(); no SQL-forced CLOSED state",
+    "harnessCorrections": [
+      "Node fetch Response.status property vs Playwright APIResponse.status()",
+      "Guest join public status201 (initial harness expected200)",
+      "Renamed progress helper to avoid try-scope record-variable TDZ",
+      "Deadline rejects writes immediately; physical closure occurs on actual scheduler tick, explicitly invoked in isolated fixture"
+    ],
+    "productFailuresFromHarnessAttempts": 0,
+    "initialFinalAttempt": {
+      "passed": 6,
+      "status": "HARNESS_DEADLINE_TICK_MISSING",
+      "originalFailureEvidence": ".codex/tdd-evidence/issue-107-native-browser-final-first-failure.json",
+      "expectationsWeakened": false
+    },
+    "updatedAt": "2026-10-17T19:26:14.757Z",
+    "finalFormatRerun": {
+      "passed": 12,
+      "failed": 0,
+      "scriptAndExpectationsUnchanged": true,
+      "previousPass": "docs/verification/issue-107-native-browser-before-final-format.json",
+      "runtimeManifestSha256": "03bb749dad1461b5096a17c7a6bc0dd76bb4fbd437bfb176ac75d7ce044ce9a0",
+      "at": "2026-10-17T19:26:14.757Z"
+    }
+  },
+  "external": {
+    "actualModelCalls": 0,
+    "actualOAuthProviderCalls": 0,
+    "productionAccess": false,
+    "commitPushPrMergeByAuthor": false
+  },
+  "remaining": [
+    "Publication and exact HEAD CI under parent ownership",
+    "Real model false-positive/false-negative evaluation and paid cost/latency measurements remain unapproved and unexecuted"
+  ]
+}

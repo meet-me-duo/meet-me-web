@@ -1,0 +1,31 @@
+{
+  "workItem": "issue-109-web-claim-conflict",
+  "sourceRevision": "9b183978d5987f8fa8a5f02d542b17181e4929b4",
+  "testFiles": [
+    {
+      "path": "src/auth/ClaimConflictView.test.tsx",
+      "sha256": "027ad681d9bdca8c3ed83016ef02ecaede75d6686c2a033214946e4f827ae192"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/auth/ClaimConflictView.test.tsx",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1",
+    "--reporter=json",
+    "--outputFile=/tmp/meetme-109-web-claim-conflict-red.json"
+  ],
+  "failedTests": [
+    "#109 shows an explicit claim conflict without replacing an account member already in the room"
+  ],
+  "expectedFailureCategory": "MISSING_BEHAVIOR",
+  "recordedAt": "2026-10-17T14:54:02.969726Z",
+  "status": "INVALIDATED",
+  "invalidatedReason": "Vitest transpilation reported missing UI at runtime, but the typed fixture incorrectly used participant_id instead of generated Viewer context_id. This was not a valid typechecked TDD RED."
+}

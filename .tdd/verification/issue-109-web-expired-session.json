@@ -1,0 +1,73 @@
+{
+  "workItem": "issue-109-web-expired-session",
+  "role": "Independent public-contract auth tests /root/auth_tests; root implements production behavior",
+  "status": "PASS",
+  "baseline": {
+    "name": "baseline-green",
+    "exitCode": 0,
+    "tests": 3,
+    "failedTests": [],
+    "rawLog": ".codex/tdd-evidence/issue-109-web-expired-session-baseline-green.log",
+    "report": "/tmp/meetme-109-web-expired-session-baseline-green.json",
+    "freshReport": true
+  },
+  "faults": [
+    {
+      "name": "fault-omit-strict-account-token",
+      "exitCode": 1,
+      "tests": 3,
+      "failedTests": [
+        "#109 expired local account cannot fall back to guest cookies rejects private GET before any guest-capable fetch at the exact Access expiry",
+        "#109 expired local account cannot fall back to guest cookies rejects submission PUT before any guest-capable fetch at the exact Access expiry"
+      ],
+      "rawLog": ".codex/tdd-evidence/issue-109-web-expired-session-fault-omit-strict-account-token.log",
+      "report": "/tmp/meetme-109-web-expired-session-fault-omit-strict-account-token.json",
+      "freshReport": true,
+      "replacement": {
+        "from": "getAccessToken(true)",
+        "to": "getAccessToken()"
+      },
+      "detected": true
+    },
+    {
+      "name": "fault-allow-private-browser-cache",
+      "exitCode": 1,
+      "tests": 3,
+      "failedTests": [
+        "#109 expired local account cannot fall back to guest cookies bypasses browser HTTP cache when fetching private submission data for a valid account"
+      ],
+      "rawLog": ".codex/tdd-evidence/issue-109-web-expired-session-fault-allow-private-browser-cache.log",
+      "report": "/tmp/meetme-109-web-expired-session-fault-allow-private-browser-cache.json",
+      "freshReport": true,
+      "replacement": {
+        "from": "    cache: \"no-store\",\n",
+        "to": ""
+      },
+      "detected": true
+    }
+  ],
+  "restored": {
+    "name": "restored-green",
+    "exitCode": 0,
+    "tests": 3,
+    "failedTests": [],
+    "rawLog": ".codex/tdd-evidence/issue-109-web-expired-session-restored-green.log",
+    "report": "/tmp/meetme-109-web-expired-session-restored-green.json",
+    "freshReport": true
+  },
+  "sourceRestoredExact": true,
+  "sourceSha256": "74609f280b3318a92ed4af35f0345a498f04ce58cf51f40418a034469f38e9aa",
+  "testFiles": [
+    {
+      "path": "src/api/client.expired-session.test.ts",
+      "sha256": "8d723636f28ffd6368d9946b01d12cfac65be1ccec4d6bbae239a688ed47f896"
+    }
+  ],
+  "recordedAt": "2026-10-17T15:11:56.751883Z",
+  "deltaFromEarlierApiFaults": {
+    "earlierEvidence": ".tdd/verification/issue-109-web-api-faults.json",
+    "earlierClientSha256": "9c6191a07a0c1e05919a63f7bcbe6d482e494781b99ea84c2331cdab2f83f0ab",
+    "removeOnlyStrictTokenGuardAndCacheAdditionsRecoversExactEarlierBytes": true,
+    "existingBearerAndEpochLogicUnchanged": true
+  }
+}

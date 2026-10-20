@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { api, ApiError } from "../api/client";
 import type { Room, SavedSubmission } from "../api/types";
+import * as accountHook from "../auth/useAccount";
+import * as accountSession from "../auth/session";
 import App from "../App";
 
 const room: Room = {
@@ -16,14 +18,22 @@ const room: Room = {
 const saved: SavedSubmission = { raw_text: "화요일 저녁", revision: 1, locale: "ko-KR", created_at: "2026-10-15T00:00:00Z", editable: true };
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); localStorage.clear(); });
-function mount(path = "/create") {
+function mount(path = "/create", loggedHost = path === "/create") {
+  if (loggedHost) {
+    const session = { accessToken: "synthetic-host-access", expiresAt: new Date(Date.now() + 900_000).toISOString(), account: { id: "11111111-2222-4333-8444-555555555555", displayName: "주최자" } };
+    vi.spyOn(accountSession, "getSession").mockReturnValue(session);
+    vi.spyOn(accountHook, "useAccountSession").mockReturnValue(session);
+  }
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 60_000 }, mutations: { retry: false } } });
   render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[path]}><App /></MemoryRouter></QueryClientProvider>);
   return client;
 }
 async function creationForm() {
-  fireEvent.change(screen.getByLabelText("주최자 이름"), { target: { value: "주최자" } });
-  fireEvent.change(screen.getByLabelText("모임 목적 / 이름"), { target: { value: room.purpose } });
+  const purpose = await screen.findByLabelText("모임 목적 / 이름");
+  expect(purpose).toHaveFocus();
+  expect(screen.queryByLabelText("주최자 이름")).not.toBeInTheDocument();
+  expect(screen.getByText("주최자 님의 모임으로 만들어져요.")).toBeInTheDocument();
+  fireEvent.change(purpose, { target: { value: room.purpose } });
   fireEvent.click(screen.getByRole("button", { name: /다음 단계/ }));
   const button = await screen.findByRole("button", { name: "방 만들기" });
   return button.closest("form")!;
@@ -45,7 +55,7 @@ describe("#22 creation and host submission are separate", () => {
     expect(screen.getByText("아직 내 조건은 제출하지 않았어요.", { exact: false })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "나중에 입력하기" })).toHaveAttribute("href", "/");
     expect(create).toHaveBeenCalledTimes(1);
-    expect(create.mock.calls[0]?.[0]).toEqual({ host_display_name: "주최자", purpose: room.purpose, meeting_mode: "EITHER", expected_participants: 4, submission_deadline: null, manual_only: false, search_start_date: null, search_end_date: null });
+    expect(create.mock.calls[0]?.[0]).toEqual({ purpose: room.purpose, meeting_mode: "EITHER", expected_participants: 4, submission_deadline: null, manual_only: false, search_start_date: null, search_end_date: null });
     expect(save).not.toHaveBeenCalled(); expect(join).not.toHaveBeenCalled();
   });
 
@@ -68,7 +78,7 @@ describe("#22 creation and host submission are separate", () => {
     vi.spyOn(api, "getRoom").mockResolvedValue(room); noSubmission();
     let reject!: (reason: Error) => void;
     const save = vi.spyOn(api, "saveSubmission").mockImplementationOnce(() => new Promise((_resolve, no) => { reject = no; })).mockResolvedValue(saved);
-    mount(`/rooms/${room.invite_code}`);
+    mount(`/rooms/${room.invite_code}`, true);
     fireEvent.click(await screen.findByRole("button", { name: "내 조건 입력하기" }));
     const input = screen.getByRole("textbox"); expect(input).toHaveFocus();
     fireEvent.change(input, { target: { value: saved.raw_text } });
@@ -85,7 +95,7 @@ describe("#22 creation and host submission are separate", () => {
     expect(save.mock.calls).toEqual([[room.invite_code, { raw_text: saved.raw_text }], [room.invite_code, { raw_text: saved.raw_text }]]);
     expect(create).not.toHaveBeenCalled(); expect(join).not.toHaveBeenCalled();
     cleanup(); vi.mocked(api.getSubmission).mockResolvedValue(saved);
-    mount(`/rooms/${room.invite_code}`);
+    mount(`/rooms/${room.invite_code}`, true);
     await screen.findByRole("heading", { name: "조건 제출을 완료했어요" });
     expect(screen.queryByRole("heading", { name: "모임이 만들어졌어요" })).not.toBeInTheDocument();
     expect(save).toHaveBeenCalledTimes(2); expect(join).not.toHaveBeenCalled();

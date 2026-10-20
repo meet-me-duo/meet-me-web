@@ -1,0 +1,59 @@
+{
+  "workItem": "issue132-account-recovery-boundaries",
+  "sourceRevision": "f08aaa9810bf9e9fe4fe22b7a1285449ab5e9e95",
+  "testFiles": [
+    {
+      "path": "src/auth/AccountRecovery.boundaries.test.tsx",
+      "sha256": "56894ff6bcb3703bcc479b4a1c8be3c46cb2d9ab1deabe7ca94dc491e8a76665"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/auth/AccountRecovery.boundaries.test.tsx",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1",
+    "--reporter",
+    "verbose",
+    "--reporter",
+    "json",
+    "--outputFile",
+    "/tmp/issue132-account-recovery/author/boundaries-red-final.json"
+  ],
+  "total": 4,
+  "failed": 4,
+  "passed": 0,
+  "setupErrors": 0,
+  "classification": "independent chronological assertion RED; earlier TS preparation errors corrected before final frozen run",
+  "failures": [
+    {
+      "title": "keeps a newer exact whitespace-only PRECHECK edit across a successful pending save, without another POST or PUT",
+      "reason": "pending save overwrites/hides newer exact raw"
+    },
+    {
+      "title": "keeps a newer exact whitespace-only LEGACY edit across a successful pending save, without another POST or PUT",
+      "reason": "pending save overwrites/hides newer exact raw"
+    },
+    {
+      "title": "clears the retained raw after a verified same-account fresh public ownership result unjoined, not merely the DOM",
+      "reason": "fresh verified ownership denial leaves recoverable quarantine"
+    },
+    {
+      "title": "clears the retained raw after a verified same-account fresh public ownership result context-changed, not merely the DOM",
+      "reason": "fresh verified ownership denial leaves recoverable quarantine"
+    }
+  ],
+  "typecheckExit": 0,
+  "lintExit": 0,
+  "recordedAt": "2026-10-18T11:17:54.696235Z",
+  "frozenProductionManifest": {
+    "path": "/tmp/issue132-account-recovery/final-source-manifest.json",
+    "sha256": "ba1b214b89f9f5ff6e90564aae974acd7b44d4caa8c9b37d2e647dacd3202d50",
+    "note": "historical pre-lifecycle-fix source, archived exact bytes in final-source/"
+  }
+}

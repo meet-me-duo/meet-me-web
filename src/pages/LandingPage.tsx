@@ -10,6 +10,8 @@ import { createRoomBody, createRoomSchema, defaultSearchDates, type CreateRoomVa
 import { LandingStory } from "../components/LandingStory";
 import { RecentRooms } from "../components/RecentRooms";
 import { useRecentRooms } from "../hooks/useRecentRooms";
+import { LoginGate } from "../auth/AccountViews";
+import { useAccountSession } from "../auth/useAccount";
 import { rememberRoom } from "../utils/recentRooms";
 
 const MODE_OPTIONS: { value: MeetingMode; label: string; detail: string }[] = [
@@ -19,6 +21,7 @@ const MODE_OPTIONS: { value: MeetingMode; label: string; detail: string }[] = [
 ];
 
 export default function LandingPage({ creating = false }: { creating?: boolean }) {
+  const accountSession = useAccountSession();
   const [step, setStep] = useState(1);
   const [now, setNow] = useState(() => new Date());
   const heading = useRef<HTMLHeadingElement>(null);
@@ -28,7 +31,7 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
   const recent = useRecentRooms();
   const form = useForm<CreateRoomValues>({
     resolver: zodResolver(createRoomSchema),
-    defaultValues: { hostName: "", purpose: "", meetingMode: "EITHER", customSearch: false, searchStart: "", searchEnd: "", useExpected: true, expectedParticipants: "4", useDeadline: false, deadline: "", manualOnly: false },
+    defaultValues: { hostName: accountSession?.account.displayName ?? "", purpose: "", meetingMode: "EITHER", customSearch: false, searchStart: "", searchEnd: "", useExpected: true, expectedParticipants: "4", useDeadline: false, deadline: "", manualOnly: false },
   });
   const mutation = useMutation({ mutationFn: api.createRoom });
   const creationUncertain = !(mutation.error instanceof ApiError) || mutation.error.status >= 500 || mutation.error.status === 408;
@@ -93,6 +96,8 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
     </div>
   );
 
+  if (!accountSession) return <LoginGate returnTo="/create" />;
+
   return (
     <div className="form-page page-width narrow">
       <div className="glass-card create-card">
@@ -101,8 +106,8 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
         {step === 1 ? (
           <div className="form-step">
             <div className="section-heading"><h1>모임 기본 정보</h1><p>참여자들이 링크에서 확인하게 될 정보예요.</p></div>
-            <Field label="주최자 이름" error={form.formState.errors.hostName?.message}><input autoFocus maxLength={50} placeholder="예: 김민수" {...form.register("hostName")} /></Field>
-            <Field label="모임 목적 / 이름" error={form.formState.errors.purpose?.message}><input maxLength={500} placeholder="예: 프로젝트 킥오프 미팅" {...form.register("purpose")} /></Field>
+            <p className="create-hint">{accountSession.account.displayName} 님의 모임으로 만들어져요.</p>
+            <Field label="모임 목적 / 이름" error={form.formState.errors.purpose?.message}><input autoFocus maxLength={500} placeholder="예: 프로젝트 킥오프 미팅" {...form.register("purpose")} /></Field>
             <fieldset className="field"><legend>선호 모임 방식</legend><div className="create-choice mode-choices">{MODE_OPTIONS.map((option) => <label key={option.value}><input type="radio" value={option.value} {...form.register("meetingMode")} /><span>{option.label}</span></label>)}</div><p className="create-hint">{MODE_OPTIONS.find(option => option.value === values.meetingMode)?.detail}</p></fieldset>
             <fieldset className="field search-period"><legend>후보 탐색 기간</legend>
               {!values.customSearch && <div className="period-summary"><strong>{defaultDates.start} ~ {defaultDates.last}</strong><p className="create-hint">오늘부터 14일 · 마지막 날 포함 · 한국 시간</p></div>}
@@ -122,7 +127,7 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
             </fieldset>}
             <div className="closure-summary" role="status"><strong>적용되는 마감</strong><p>{values.manualOnly ? "자동 마감 없이 주최자가 직접 마감해요." : values.useExpected && values.useDeadline ? `주최자를 포함해 ${expectedLabel} 제출 또는 지정 시각 중 먼저 충족되면 마감해요.` : values.useExpected ? `주최자를 포함한 ${expectedLabel}이 모두 제출하면 마감해요.` : values.useDeadline ? "지정 시각이 되면 마감해요." : "자동 마감 조건을 선택해 주세요."}{!values.manualOnly && values.useDeadline && values.deadline && ` (${values.deadline.replace("T", " ")} 한국 시간)`}</p></div>
             {mutation.isError && <div className="alert error" role="alert"><p>{creationUncertain ? "방 생성 결과를 확인하지 못했어요. 이미 만들어졌을 수 있어요. 다시 시도하면 새 모임이 추가될 수 있어요." : "방 생성 요청이 거절됐어요."}</p>{errorMessage(mutation.error)}</div>}
-            <div className="actions between"><button type="button" className="button secondary" disabled={mutation.isPending} onClick={() => { setStep(1); window.setTimeout(() => form.setFocus("hostName"), 0); }}><ArrowLeft size={18} /> 이전</button><button className="button primary" disabled={mutation.isPending}>{mutation.isPending ? "방 만드는 중…" : "방 만들기"}</button></div>
+            <div className="actions between"><button type="button" className="button secondary" disabled={mutation.isPending} onClick={() => { setStep(1); window.setTimeout(() => form.setFocus("purpose"), 0); }}><ArrowLeft size={18} /> 이전</button><button className="button primary" disabled={mutation.isPending}>{mutation.isPending ? "방 만드는 중…" : "방 만들기"}</button></div>
           </form>
         )}
       </div>

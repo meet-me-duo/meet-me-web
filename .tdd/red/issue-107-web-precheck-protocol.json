@@ -1,0 +1,31 @@
+{
+  "workItem": "issue-107-web-precheck-protocol",
+  "sourceRevision": "e9e81efe2c75813623729e4a9b8214bd8430c8b9",
+  "testFiles": [
+    {
+      "path": "src/pages/RoomPage.precheck-protocol.test.tsx",
+      "sha256": "6d0dd1b22c5954eb5459a4faee5b986225eae37f4ec30ee989998785a8e25c28"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/pages/RoomPage.precheck-protocol.test.tsx",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1",
+    "--reporter=json",
+    "--outputFile=.codex/tdd-evidence/issue-107-web-precheck-protocol-red-result.json"
+  ],
+  "failedTests": [
+    "#107 rejects an unsupported submission protocol before private reads/writes"
+  ],
+  "expectedFailureCategory": "MISSING_BEHAVIOR",
+  "recordedAt": "2026-10-17T18:26:53.880678+00:00",
+  "provenance": "CHRONOLOGICAL_RED",
+  "notes": "Unknown future wire enum is intentional capability mismatch; expected explicit support error and no private legacy/precheck calls. Current fallback is not authorized downgrade. Purpose text was corrected to avoid accidentally matching the support-error assertion; current-fingerprint RED re-executed."
+}

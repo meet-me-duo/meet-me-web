@@ -1,0 +1,31 @@
+{
+  "workItem": "issue-107-web-precheck-blind",
+  "sourceRevision": "e9e81efe2c75813623729e4a9b8214bd8430c8b9",
+  "testFiles": [
+    {
+      "path": "src/components/GuestParticipation.precheck.test.tsx",
+      "sha256": "4a3ec55a2a53981842d64de0da3f6b311035e6b5f074de7362fcdb513de32a2c"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/components/GuestParticipation.precheck.test.tsx",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1",
+    "--reporter=json",
+    "--outputFile=.codex/tdd-evidence/issue-107-web-precheck-blind-first-result.json"
+  ],
+  "failedTests": [
+    "#107 blind replacement protocol wording keeps PRE_SUBMIT_V1 replacement blind and distinguishes durable save from verified completion"
+  ],
+  "expectedFailureCategory": "MISSING_BEHAVIOR",
+  "recordedAt": "2026-10-17T18:19:05.821713+00:00",
+  "passedControls": 1,
+  "notes": "PRE_SUBMIT_V1 replacement saves candidate/check and cannot imply accepted/result inclusion. Legacy wording control passes. No READ_OWN elevation; real model0."
+}

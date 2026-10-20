@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { fulfillAccountRefresh } from "./accountFixture";
 
 const code = "abcdefghijklmnopqrstuv";
 const candidate = {
@@ -15,6 +16,7 @@ async function mockApi(page: Page, options: { rawText?: string | null; status?: 
   await page.route("**/api/**", async (route) => {
     const request = route.request();
     const url = request.url();
+    if (await fulfillAccountRefresh(route, options.role === "HOST" ? "지수" : null)) return;
     if (url.endsWith("/submission")) {
       if (request.method() === "PUT") {
         const body = request.postDataJSON();

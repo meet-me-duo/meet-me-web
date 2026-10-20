@@ -6,7 +6,7 @@
 - PR33 `3c6fb446e3a6e20aec5fd2f9e1eb78233c6f09e6`과 PR24 `8bd4e3356f9ed3100e644cce776a72054c34727b`는 조상 관계가 아니다. 겹친 실행기·fixture·spec·Playwright 설정은 현재 계정 계약의 PR33판을 사용하고, PR24의 과거 main 고정 검증 문서2개·Compose1개는 역사 자료로 보존한다. 단순히 PR33이 PR24 전체를 포함했다고 표시하지 않는다.
 - CI를 develop push에서도 실행하도록 준비했다. 제품 TS/TSX/API 계약은 PR33과 바이트가 같으며 공급자 선택은 서버의 Jev 판단·Luna 보완 생성·Gemini 최종 분석과 Luna fallback 계약을 따른다.
 - 이 로컬 통합 source의 API 정합·lint·typecheck·단위682·build PASS, desktop/mobile 브라우저425 PASS·기존1 SKIP·retry/flaky0을 확인했다. Chromium 로컬 실행이며 실제 외부 OAuth/서버 공급자 응답 품질 검증으로 확대하지 않는다.
-- 현재 원격 develop 생성은 자동 승인 검토가 과거 commit/push 금지를 적용해 거부하여 보류다. 실제 원격 통합 SHA·새 main행 PR·정확 HEAD CI가 확인되기 전 완료로 표시하지 않는다. 원본 main checkout은 보존한다.
+- 원격 develop 생성의 최초 자동 승인 검토 거부 뒤, 최신 사용자 develop 통합 승인을 명시한 재검토가 성공했다. 원격 develop은 main `9b183978d5987f8fa8a5f02d542b17181e4929b4`에서 생성되었으며 실제 통합 SHA·새 main행 PR·정확 HEAD CI는 후속 확인한다. 원본 main checkout은 보존한다.
 
 
 ## 2026-10-17 — 서버 #109 연결 웹 로그인·본인 방 아카이브

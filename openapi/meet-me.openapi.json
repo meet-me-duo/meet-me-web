@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:18920",
+      "url": "http://localhost",
       "description": "Generated server url"
     }
   ],
@@ -352,6 +352,9 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "방 생성에 필요한 내부 설정 사용 불가"
           },
           "401": {
             "description": "로그인 필요",
@@ -3429,9 +3432,6 @@
       "JsonNode": {
         "type": "object",
         "properties": {
-          "string": {
-            "type": "boolean"
-          },
           "array": {
             "type": "boolean"
           },
@@ -3444,16 +3444,42 @@
           "float": {
             "type": "boolean"
           },
-          "number": {
+          "object": {
+            "type": "boolean"
+          },
+          "container": {
+            "type": "boolean"
+          },
+          "string": {
             "type": "boolean"
           },
           "missingNode": {
             "type": "boolean"
           },
-          "pojo": {
+          "number": {
             "type": "boolean"
           },
+          "nodeType": {
+            "type": "string",
+            "enum": [
+              "ARRAY",
+              "BINARY",
+              "BOOLEAN",
+              "MISSING",
+              "NULL",
+              "NUMBER",
+              "OBJECT",
+              "POJO",
+              "STRING"
+            ]
+          },
           "integralNumber": {
+            "type": "boolean"
+          },
+          "valueNode": {
+            "type": "boolean"
+          },
+          "pojo": {
             "type": "boolean"
           },
           "floatingPointNumber": {
@@ -3485,29 +3511,6 @@
             "type": "boolean"
           },
           "binary": {
-            "type": "boolean"
-          },
-          "nodeType": {
-            "type": "string",
-            "enum": [
-              "ARRAY",
-              "BINARY",
-              "BOOLEAN",
-              "MISSING",
-              "NULL",
-              "NUMBER",
-              "OBJECT",
-              "POJO",
-              "STRING"
-            ]
-          },
-          "object": {
-            "type": "boolean"
-          },
-          "valueNode": {
-            "type": "boolean"
-          },
-          "container": {
             "type": "boolean"
           },
           "embeddedValue": {
@@ -5174,7 +5177,7 @@
               "null"
             ],
             "format": "int32",
-            "description": "primary 표시 순서1~3; 대안은 null",
+            "description": "동등한 시간 선택지의 primary 표시 순서1~3; 품질 등급이 아니며 대안은 null",
             "maximum": 3,
             "minimum": 1
           },
@@ -5184,7 +5187,7 @@
           },
           "variants": {
             "type": "array",
-            "description": "같은 시간의 모든 유효 방식·장소·참석 조합",
+            "description": "같은 시간의 유효 방식·장소별 최대 참석 가능 집합; 불필요한 하위집합 제외",
             "items": {
               "$ref": "#/components/schemas/RecommendationVariantResponse"
             }
@@ -5245,6 +5248,13 @@
               }
             ],
             "description": "대면 대표 지역; 온라인은 null"
+          },
+          "excluded_participant_names": {
+            "type": "array",
+            "description": "고정 분석 배치에서 이 조합에 참석하지 않는 참여자의 공개 이름; 전원 참석은 빈 배열",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [

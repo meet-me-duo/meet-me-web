@@ -375,6 +375,7 @@ fieldset.field legend { margin-bottom: 9px; }
 .recommendation-variant:focus-within { outline: 3px solid #0f172a; outline-offset: 2px; }
 .recommendation-variant > input { flex: none; width: 18px; height: 18px; margin-top: 3px; accent-color: #0369a1; }
 .recommendation-variant > span { min-width: 0; }
+.recommendation-variant .field-hint { display: block; color: #475569; font-size: .9rem; line-height: 1.6; overflow-wrap: anywhere; }
 .recommendation-range { display: flex; gap: 7px; align-items: flex-start; margin-block: 12px; font-size: .94rem; line-height: 1.6; overflow-wrap: anywhere; }
 .recommendation-range svg { flex: none; margin-top: 3px; }
 .recommendation-card .candidate-meta { font-size: .94rem; }

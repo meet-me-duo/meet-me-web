@@ -14,6 +14,7 @@ function presentation(option: RecommendationOption, position: number) {
     id: variant.variant_id, startAt: option.time_range.start_at, endAt: option.time_range.end_at,
     attendanceCount: variant.attendance_count, totalParticipants: variant.total_participants,
     meetingMode: variant.meeting_mode, place: variant.place?.display_name ?? null,
+    excludedParticipantNames: variant.excluded_participant_names ?? [],
   })) };
 }
 

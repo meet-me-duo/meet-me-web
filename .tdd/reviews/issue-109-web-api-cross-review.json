@@ -1,0 +1,38 @@
+{
+  "workItem": "issue-109-web-api-cross-review",
+  "reviewer": "/root/identity_db_tests",
+  "independence": "Reviewer authored server identity and web session tests but did not author API privacy tests or production API client implementation. Test oracle assessed against public authentication contract before implementation.",
+  "testFiles": [
+    {
+      "path": "src/api/client.account.test.ts",
+      "sha256": "e33bba88fdb9db4ec2e9d3fc79bdd3f305a9ca2d947a55d9b804d937edf78d55"
+    },
+    {
+      "path": "src/api/client.account-error-decode.test.ts",
+      "sha256": "bc1af75c6ad8c01b4946f6a635a3f485a18f23c987d48567af22e343293e327d"
+    }
+  ],
+  "cases": 13,
+  "verdict": "APPROVED_TEST_DESIGN",
+  "checks": [
+    "Bearer only in Authorization and current token read per request; cookies retained; guest Authorization absent",
+    "No credential copied into request URL/body",
+    "Request identity epoch checked for pending fetch success/private GET and ownership-changing POST",
+    "Successful JSON decoding delayed across identity switch rejects stale data",
+    "Failure JSON decoding delayed across identity switch rejects stale private error detail",
+    "Pending prior-account 401 rejects as AUTH_CONTEXT_CHANGED without previous private detail",
+    "No retry or guest fallback on 401/503 mutation failure",
+    "AbortSignal forwarded and cancellation not retried",
+    "Asynchronous tests install rejection handlers before releasing promises and explicitly synchronize JSON decode start; no arbitrary sleeps",
+    "All data and tokens synthetic; no real account/credential/remote side effects",
+    "Frozen file fingerprints match independent RED summaries and categories use MISSING_BEHAVIOR"
+  ],
+  "resolvedFinding": {
+    "finding": "Missing failure-response JSON decode identity-switch coverage",
+    "resolution": "Author added independently frozen one-case client.account-error-decode.test.ts cycle; prior12case test fingerprint retained"
+  },
+  "limitations": [
+    "This approves the test design only. API production GREEN, deliberate fault detection, final fingerprint verification and browser checks remain execution tasks."
+  ],
+  "recordedAt": "2026-10-17T14:42:02Z"
+}

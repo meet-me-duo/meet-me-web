@@ -1,0 +1,47 @@
+{
+  "status": "PASS",
+  "scope": "actual-browser-Spring-PostgreSQL-Redis-RS256-loopback-OIDC-real-guest-proof-synthetic-provider",
+  "sourceFiles": {
+    "src/api/client.ts": "3047e2b184bd30b2dc7403215d2671f0220d2f38dc8395b7d87947425daefda6",
+    "src/api/precheck.ts": "4690caaea4155a14b2d8869961bc450aa1ca689449f00b20438dab7743d69fd2",
+    "src/api/types.ts": "e35e13382894823240f72bd63db0f6b66d9f2068befb9cff79f6ac365dd04db5",
+    "src/pages/RoomPage.tsx": "492f2322645e7f30c0eabba29ba4d8842e43bc507f6bdf50d2eb9373a03d1377",
+    "src/components/SubmissionCheckPanel.tsx": "2bcf5ffa421d6f3ee30ad6c06224fa10da253fcafde8723ee4ea6c1c9942d8a2",
+    "src/components/GuestParticipation.tsx": "37cd8349d774a6342b6406f0606541fed2215c817a62c4bf0f0b249dcc4bbeae",
+    "src/components/GuestAccessPanel.tsx": "9cb264ba28883d2769ac875fbeacd791f7b6d726da3ed752671eeb549b165338"
+  },
+  "runtimeManifestSha256": "0c242dece87d8693f7ab47ba12d183fd763ba6fee979fb6563f02683895f4901",
+  "nativeArtifacts": {
+    "/tmp/issue128-native-ui/web-dist/assets/AccountOperationsPage-BHPhd4qb.js": "6a5612245555debb321dc18ebdf1520369b1e851ea1f126a5490e329b19898c8",
+    "/tmp/issue128-native-ui/web-dist/assets/AccountOperationsPage-BqcY0RhA.css": "0f5aa7736566ff093b65786378628c8dbca778dfc42816014d7514590a117adc",
+    "/tmp/issue128-native-ui/web-dist/assets/favicon-DjtCOTlh.svg": "cf1f8ed7dc4da2af8250d48bf63bab813aa9e855d86edda6f833b24db91742bd",
+    "/tmp/issue128-native-ui/web-dist/assets/index-D-kvJm0_.css": "57a01d8576de8f2e0afd847d2e8d4b22100ad72186e9998feaa4552a2315c1ed",
+    "/tmp/issue128-native-ui/web-dist/assets/index-OlYRfPUe.js": "356de8372683400a2ad3348f15316d7072e06a175e2678d700a24af87cec4aa3",
+    "/tmp/issue128-native-ui/web-dist/index.html": "9101ef8cdd8fbf0d6d7712f518eed126f038de4df28ae72664b9296edfa89fc2"
+  },
+  "scriptSha256": "f0743d90d7447e82edcaeb63de09bb50ed6d9981e7c03279e4481356a8d40322",
+  "checks": [
+    "N01-real-POST202-durable-candidate-pending-without-false-completion",
+    "N02-real-question-explicit-full-choice-recheck-CLEAR",
+    "N03-real-direct-full-input-recheck-CLEAR",
+    "N04-broad-intent-preserved-given-synthetic-CLEAR",
+    "N11-real-reload-read-only-concurrent-CAS-one-winner-explicit-idempotency-replay",
+    "N05-manual-real-closure-does-not-wait-for-provider-late-CLEAR-not-accepted",
+    "N05-deadline-real-closure-does-not-wait-for-provider-late-CLEAR-not-accepted",
+    "N06-real-batch-freezes-only-accepted-pending-edit-uses-prior-version",
+    "N07-real-password-issued-HttpOnly-proof-own-read-host-not-other-owner",
+    "N08-real-REPLACE_ONLY-blind-save-check-no-read-or-accepted-elevation",
+    "N09-real-invalid-Bearer-wins-over-valid-guest-cookie",
+    "N10-real-OIDC-account-priority-logout-and-late-private-provider-isolation",
+    "N13-real-choice-cancel-question-null-preserved-raw-fresh-start-without-old-answer",
+    "N14-real-provider-failure-explicit-retry-pending-accepted-CLEAR"
+  ],
+  "apiRouteMocks": 0,
+  "externalRequests": 0,
+  "actualModelCalls": 0,
+  "actualOAuthProviderCalls": 0,
+  "productionAccess": false,
+  "controls": "separate-loopback-test-only-provider-worker-fixture",
+  "requestsObserved": 154,
+  "at": "2026-10-18T08:11:13.182Z"
+}

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { installAccountRefresh } from "./accountFixture";
 
 const code = "abcdefghijklmnopqrstuv";
 
@@ -36,8 +37,10 @@ const candidate = {
 };
 
 async function mockRoom(page: Page, status: string, options: { joined?: boolean; role?: "HOST" | "MEMBER" } = {}) {
+  await installAccountRefresh(page, options.role === "HOST" && options.joined !== false ? "지수" : null);
   await page.route("**/api/rooms/**", async (route) => {
     const url = route.request().url();
+    if (url.endsWith("/guest-records") && route.request().method() === "GET") return route.fulfill({ json: { records: [] } });
     if (url.endsWith("/submission")) return route.fulfill({ status: 404, contentType: "application/problem+json", body: JSON.stringify({ code: "SUBMISSION_NOT_FOUND", detail: "제출 없음" }) });
     if (url.endsWith("/candidates")) return route.fulfill({ json: { quality: "COMPLETE", applied_submissions: 4, total_submissions: 4, unapplied_inputs: 0, candidates: [candidate] } });
     if (url.endsWith("/result")) return route.fulfill({ json: { candidate, confirmed_at: "2026-09-20T13:00:00Z" } });
@@ -50,8 +53,8 @@ test("a new browser is asked to join before seeing the room", async ({ page }) =
   await mockRoom(page, "COLLECTING", { joined: false });
   await page.goto(`/rooms/${code}`);
   await expect(page.getByRole("heading", { name: "졸업 프로젝트 회의" })).toBeVisible();
-  await page.getByLabel("내 이름").fill("지수");
-  await page.getByRole("button", { name: "모임 참여하기" }).click();
+  await page.getByLabel("이름", { exact: true }).fill("지수");
+  await page.getByRole("button", { name: "참여하기" }).click();
   await expect(page.getByRole("heading", { name: "가능한 조건을 알려주세요" })).toBeVisible();
 });
 

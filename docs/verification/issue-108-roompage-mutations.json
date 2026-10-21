@@ -1,0 +1,244 @@
+{
+  "issue": 108,
+  "role": "independent-frozen-integration-test-author",
+  "status": "PASS",
+  "productChangesRetained": false,
+  "buildInvocations": 0,
+  "frozenTests": {
+    "src/pages/RoomPage.guest-reaccess.test.tsx": "846821503dd4c3750c6cff5c63f5708a40f291fbfdfa7cecefb592b3a113b0c5",
+    "src/components/GuestParticipation.test.tsx": "41134954949bc58a23191cb9d5528eb5ca6315d59a55d457b3ddd6586ea03c97"
+  },
+  "productionBaseline": {
+    "src/pages/RoomPage.tsx": {
+      "sha256": "b1f010ea2abcf02da0c92d5a90ec526c9304a5027a9b1bfb8062378984330ab9",
+      "mode": "600"
+    },
+    "src/components/GuestAccessPanel.tsx": {
+      "sha256": "e63c19382b23f904fcde8780f097d77f74044963baa4682c7797c507356cdbed",
+      "mode": "600"
+    }
+  },
+  "plans": [
+    {
+      "id": "M01_PRIVATE_CACHE_PURGE_OMITTED",
+      "file": "src/pages/RoomPage.tsx",
+      "filter": "uses an explicit duplicate-name ID and purges prior private caches",
+      "expectedTests": [
+        "T04"
+      ],
+      "expectedAssertion": {
+        "invariantLine": 131,
+        "outwardFailureLine": 137,
+        "type": "Private cache must be absent before authorized viewer re-read; otherwise the verified viewer cannot be displayed."
+      }
+    },
+    {
+      "id": "M02_REPLACE_ONLY_ORIGINAL_READ",
+      "file": "src/components/GuestAccessPanel.tsx",
+      "filter": "starts blank, survives an unjoined room refresh",
+      "expectedTests": [
+        "T07"
+      ],
+      "expectedAssertion": {
+        "invariantLine": 187,
+        "type": "Own-submission GET spy must have zero calls for REPLACE_ONLY."
+      }
+    },
+    {
+      "id": "M03_STALE_COMPLETION_PREMATURE_ROOM_READ",
+      "file": "src/components/GuestAccessPanel.tsx",
+      "filter": "#108 stale reaccess results",
+      "expectedTests": [
+        "T14",
+        "T15",
+        "T16"
+      ],
+      "expectedAssertion": {
+        "navigationLine": 271,
+        "authTransitionLine": 288,
+        "type": "Old room or authentication completion must not issue an additional room GET."
+      }
+    }
+  ],
+  "commandPrefix": "COREPACK_HOME=/tmp/meetme108-corepack XDG_DATA_HOME=/tmp/meetme108-data XDG_CACHE_HOME=/tmp/meetme108-cache corepack pnpm vitest run src/pages/RoomPage.guest-reaccess.test.tsx --configLoader runner --pool threads --maxWorkers 1 --reporter=json",
+  "results": [
+    {
+      "id": "M01_PRIVATE_CACHE_PURGE_OMITTED",
+      "mutationStartedAt": "2026-10-17T16:48:06.265Z",
+      "file": "src/pages/RoomPage.tsx",
+      "mutantSha256": "74e8f5fd95a502581ac07fc5d9965b91100e7ff1ddb66cc02c52311b8209d8a2",
+      "originalSha256": "b1f010ea2abcf02da0c92d5a90ec526c9304a5027a9b1bfb8062378984330ab9",
+      "expectedTests": [
+        "T04"
+      ],
+      "test": {
+        "exitCode": 1,
+        "start": "2026-10-17T16:48:06.284Z",
+        "end": "2026-10-17T16:48:29.715Z",
+        "passed": 0,
+        "failed": 1,
+        "skipped": 15,
+        "failures": [
+          {
+            "testId": "T04",
+            "assertionLocations": [
+              137
+            ]
+          }
+        ],
+        "parsedReporter": true,
+        "stderrBytesSuppressed": 0
+      },
+      "detected": true,
+      "restoredAt": "2026-10-17T16:48:29.793Z",
+      "restoration": {
+        "bytesExact": true,
+        "modeExact": true
+      },
+      "analysis": {
+        "productionTarget": "RoomPage.restoreVerifiedGuest private-cache purge, immediately before the authorized room GET",
+        "change": "Replace only the private removeQueries statement with a comment; retain cancellation and authorized re-read.",
+        "observedAssertion": "The private-cache invariant in the room-read mock rejects restoration, and the test fails at the expected restored-viewer display assertion.",
+        "observedLines": [
+          137
+        ]
+      }
+    },
+    {
+      "id": "M02_REPLACE_ONLY_ORIGINAL_READ",
+      "mutationStartedAt": "2026-10-17T16:48:29.888Z",
+      "file": "src/components/GuestAccessPanel.tsx",
+      "mutantSha256": "1a9b2420c4caa993ba082f928fce0261b67187683998160e1beb2caf73a23261",
+      "originalSha256": "e63c19382b23f904fcde8780f097d77f74044963baa4682c7797c507356cdbed",
+      "expectedTests": [
+        "T07"
+      ],
+      "test": {
+        "exitCode": 1,
+        "start": "2026-10-17T16:48:29.889Z",
+        "end": "2026-10-17T16:48:40.020Z",
+        "passed": 0,
+        "failed": 1,
+        "skipped": 15,
+        "failures": [
+          {
+            "testId": "T07",
+            "assertionLocations": [
+              187
+            ]
+          }
+        ],
+        "parsedReporter": true,
+        "stderrBytesSuppressed": 0
+      },
+      "detected": true,
+      "restoredAt": "2026-10-17T16:48:40.022Z",
+      "restoration": {
+        "bytesExact": true,
+        "modeExact": true
+      },
+      "analysis": {
+        "productionTarget": "GuestAccessPanel.onReaccess, immediately after the awaited response and before current-context validation",
+        "change": "Insert an own-submission GET only when the response level is REPLACE_ONLY.",
+        "observedAssertion": "The own-submission spy must have zero calls; the injected read makes that assertion fail.",
+        "observedLines": [
+          187
+        ]
+      }
+    },
+    {
+      "id": "M03_STALE_COMPLETION_PREMATURE_ROOM_READ",
+      "mutationStartedAt": "2026-10-17T16:48:40.027Z",
+      "file": "src/components/GuestAccessPanel.tsx",
+      "mutantSha256": "ca3ec449f6c2c97f56c5c5f1d81ee5ef930f4b29f17f5d2bffeed8b4dbd5f38d",
+      "originalSha256": "e63c19382b23f904fcde8780f097d77f74044963baa4682c7797c507356cdbed",
+      "expectedTests": [
+        "T14",
+        "T15",
+        "T16"
+      ],
+      "test": {
+        "exitCode": 1,
+        "start": "2026-10-17T16:48:40.027Z",
+        "end": "2026-10-17T16:48:47.760Z",
+        "passed": 0,
+        "failed": 3,
+        "skipped": 13,
+        "failures": [
+          {
+            "testId": "T14",
+            "assertionLocations": [
+              271
+            ]
+          },
+          {
+            "testId": "T15",
+            "assertionLocations": [
+              271
+            ]
+          },
+          {
+            "testId": "T16",
+            "assertionLocations": [
+              288
+            ]
+          }
+        ],
+        "parsedReporter": true,
+        "stderrBytesSuppressed": 0
+      },
+      "detected": true,
+      "restoredAt": "2026-10-17T16:48:47.763Z",
+      "restoration": {
+        "bytesExact": true,
+        "modeExact": true
+      },
+      "analysis": {
+        "productionTarget": "GuestAccessPanel.onReaccess, immediately after the awaited response and before current-context validation",
+        "change": "Insert an unconditional room GET before the existing room/auth/mount guard.",
+        "observedAssertion": "Room GET count must remain unchanged after old navigation or authentication completion. All three stale-response assertions fail.",
+        "observedLines": [
+          271,
+          288
+        ]
+      }
+    }
+  ],
+  "startedAt": "2026-10-17T16:48:06.223Z",
+  "finalGreen": {
+    "exitCode": 0,
+    "start": "2026-10-17T16:48:47.777Z",
+    "end": "2026-10-17T16:49:06.369Z",
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0,
+    "failures": [],
+    "parsedReporter": true,
+    "stderrBytesSuppressed": 0
+  },
+  "productionRestored": {
+    "src/pages/RoomPage.tsx": {
+      "bytesExact": true,
+      "modeExact": true
+    },
+    "src/components/GuestAccessPanel.tsx": {
+      "bytesExact": true,
+      "modeExact": true
+    }
+  },
+  "finishedAt": "2026-10-17T16:49:06.377Z",
+  "frozenTestsVerifiedAfterFinalGreen": {
+    "src/pages/RoomPage.guest-reaccess.test.tsx": {
+      "expectedSha256": "846821503dd4c3750c6cff5c63f5708a40f291fbfdfa7cecefb592b3a113b0c5",
+      "actualSha256": "846821503dd4c3750c6cff5c63f5708a40f291fbfdfa7cecefb592b3a113b0c5",
+      "unchanged": true
+    },
+    "src/components/GuestParticipation.test.tsx": {
+      "expectedSha256": "41134954949bc58a23191cb9d5528eb5ca6315d59a55d457b3ddd6586ea03c97",
+      "actualSha256": "41134954949bc58a23191cb9d5528eb5ca6315d59a55d457b3ddd6586ea03c97",
+      "unchanged": true
+    }
+  },
+  "rawOutputPolicy": "Vitest JSON and stderr were consumed in memory only; retained records contain fixed test IDs, numeric counts, assertion line numbers, source hashes, modes and timestamps.",
+  "distOrRuntimeTouched": false
+}

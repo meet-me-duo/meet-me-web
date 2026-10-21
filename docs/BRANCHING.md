@@ -3,18 +3,18 @@
 ## 기본 원칙
 
 - `main`은 항상 배포 가능한 상태로 유지한다.
-- 장기 유지 브랜치인 `develop`은 두지 않는다.
-- 모든 변경은 짧게 유지하는 `feature/*` 브랜치에서 작업한 뒤 Pull Request로 `main`에 병합한다.
+- 2026-10-20 사용자 승인부터 `develop`을 서버와 웹의 릴리스 통합 브랜치로 사용한다.
+- 변경은 `feature/*`에서 검증한 뒤 Pull Request로 `develop`에 통합한다. 통합 CI를 통과한 `develop`에서 `main`행 PR을 준비하고, 사용자가 직접 최종 병합한다.
 - 현재는 별도의 프론트엔드 스테이징 환경을 운영하지 않는다.
 
 이 방식은 소규모 팀의 불필요한 병합 단계를 줄이면서도 PR과 CI로 운영 브랜치를 보호하기 위한 결정이다.
 
 ## 작업 흐름
 
-1. 최신 `main`에서 작업 브랜치를 만든다.
+1. 최신 `develop`에서 작업 브랜치를 만든다.
 
    ```powershell
-   git switch main
+   git switch develop
    git pull --ff-only
    git switch -c feature/<topic>
    ```
@@ -30,13 +30,13 @@
    corepack pnpm test:e2e
    ```
 
-3. 브랜치를 원격에 올리고 `main`을 대상으로 Pull Request를 만든다.
+3. 브랜치를 원격에 올리고 `develop`을 대상으로 Pull Request를 만든다.
 
    ```powershell
    git push -u origin feature/<topic>
    ```
 
-4. 필수 CI 작업인 `verify`가 성공하고 대화가 정리된 뒤 병합한다.
+4. 필수 CI 작업인 `verify`가 성공하고 대화가 정리된 뒤 `develop`에 병합한다. `develop` push에도 같은 CI를 실행한다.
 5. 병합 후 더 이상 필요하지 않은 feature 브랜치는 삭제한다.
 
 ## `main` 보호 규칙
@@ -55,7 +55,7 @@
 
 `main`에 변경이 들어오면 CI와 운영 배포 워크플로가 실행된다. 운영 배포 대상은 `https://app.meet-me.co.kr`이며, 실제 배포 승인은 GitHub의 `production` Environment 정책을 따른다.
 
-feature 브랜치에서는 운영 배포가 실행되지 않는다.
+feature·develop 브랜치에서는 운영 배포가 실행되지 않는다. `main` 병합은 운영 배포를 촉발하므로 서버 target OAuth·secret·policy readiness와 호환 배포 상태를 먼저 확인한다. 소스 통합 성공을 실제 외부 OAuth·모델 품질·운영 준비 완료로 표시하지 않는다.
 
 ## 스테이징 환경을 두지 않는 이유
 

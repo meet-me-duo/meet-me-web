@@ -1,0 +1,32 @@
+{
+  "workItem": "issue-107-web-precheck-correction-snapshot",
+  "sourceRevision": "e9e81efe2c75813623729e4a9b8214bd8430c8b9",
+  "testFiles": [
+    {
+      "path": "src/components/SubmissionCheckPanel.correction-snapshot.test.tsx",
+      "sha256": "91e246c688f2ec843d0bebcc8d91b2a81d0912dd813becbd22f35c14b12285e2"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/components/SubmissionCheckPanel.correction-snapshot.test.tsx",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1",
+    "--reporter=json",
+    "--outputFile=.codex/tdd-evidence/issue-107-web-precheck-correction-snapshot-red-result.json"
+  ],
+  "failedTests": [
+    "#107 shows a LEGACY_CORRECTION accepted result despite historical CLEAR precheck",
+    "#107 shows a LEGACY_CORRECTION accepted result despite historical CLOSED_BEFORE_COMPLETION precheck"
+  ],
+  "expectedFailureCategory": "MISSING_BEHAVIOR",
+  "recordedAt": "2026-10-17T18:31:40.670287+00:00",
+  "provenance": "CHRONOLOGICAL_RED",
+  "notes": "Root-approved explicit accepted.confirmation_source provenance. CLEAR and CLOSED_BEFORE historical precheck cannot label newer accepted LEGACY_CORRECTION result excluded. Candidate revision100 vs accepted1 and same-text control reject numeric/text inference. Genuine pending PRECHECK accepted regression remains in RoomPage tests."
+}

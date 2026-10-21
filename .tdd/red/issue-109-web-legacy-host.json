@@ -1,0 +1,29 @@
+{
+  "workItem": "issue-109-web-legacy-host",
+  "sourceRevision": "9b183978d5987f8fa8a5f02d542b17181e4929b4",
+  "testFiles": [
+    {
+      "path": "src/auth/LegacyHostLoginGate.test.tsx",
+      "sha256": "c16faf56ce2492da226f494c7df40037f6f38d3a456cac5c99a2c20d3cb4b7ec"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/auth/LegacyHostLoginGate.test.tsx",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1",
+    "--reporter=json",
+    "--outputFile=/tmp/meetme-109-web-legacy-host-red.json"
+  ],
+  "failedTests": [
+    "#109 requires legacy guest HOST login before exposing host commands"
+  ],
+  "expectedFailureCategory": "MISSING_BEHAVIOR",
+  "recordedAt": "2026-10-17T14:50:18.603370Z"
+}

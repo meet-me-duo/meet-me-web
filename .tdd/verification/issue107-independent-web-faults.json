@@ -1,0 +1,280 @@
+{
+  "workItem": "issue107-independent-web-faults-final",
+  "reviewer": "/root/baseline_merge_review",
+  "status": "PASS",
+  "recordedAt": "2026-10-17T18:35:08.108621Z",
+  "sourceCopy": "/tmp/meetme107-independent-web-xnc8c8z6",
+  "baseline": {
+    "tests": 67,
+    "pass": 67,
+    "fail": 0
+  },
+  "productionFingerprints": [
+    {
+      "path": "src/api/client.ts",
+      "sha256": "3047e2b184bd30b2dc7403215d2671f0220d2f38dc8395b7d87947425daefda6"
+    },
+    {
+      "path": "src/components/SubmissionCheckPanel.tsx",
+      "sha256": "c4863d46b29528a30d2369417611d5b2b57419862c9a8ca7da891647545a717f"
+    },
+    {
+      "path": "src/pages/RoomPage.tsx",
+      "sha256": "492f2322645e7f30c0eabba29ba4d8842e43bc507f6bdf50d2eb9373a03d1377"
+    },
+    {
+      "path": "src/components/GuestParticipation.tsx",
+      "sha256": "37cd8349d774a6342b6406f0606541fed2215c817a62c4bf0f0b249dcc4bbeae"
+    }
+  ],
+  "frozenTestFingerprints": [
+    {
+      "path": "src/api/client.precheck.test.ts",
+      "sha256": "65d97132b6c90f75ad27855243239753a8b73da72f60ab9c340f97e46b80765b"
+    },
+    {
+      "path": "src/components/GuestParticipation.precheck.test.tsx",
+      "sha256": "4a3ec55a2a53981842d64de0da3f6b311035e6b5f074de7362fcdb513de32a2c"
+    },
+    {
+      "path": "src/pages/RoomPage.precheck-correction.test.tsx",
+      "sha256": "bfd00706bf070fddaf826d05e8c596b3a6be33839f8ff2f0f8fde2f1902d0058"
+    },
+    {
+      "path": "src/pages/RoomPage.precheck-privacy.test.tsx",
+      "sha256": "079bd347fa1f7927fc7e6b4a3014e3b6e629b319a2d3558e3379afd8c0926fcb"
+    },
+    {
+      "path": "src/pages/RoomPage.precheck-protocol.test.tsx",
+      "sha256": "6d0dd1b22c5954eb5459a4faee5b986225eae37f4ec30ee989998785a8e25c28"
+    },
+    {
+      "path": "src/pages/RoomPage.precheck.test.tsx",
+      "sha256": "bf65a2150bdb8ad98c70db49ffb7cbd01cc7c4f5b1f23cfe6bc93b0bbe36ffc4"
+    },
+    {
+      "path": "src/components/SubmissionCheckPanel.close.test.tsx",
+      "sha256": "49c7b3722204f9716cea5b14e4237484049b63af52bca568ef5ac1fb5a7826da"
+    },
+    {
+      "path": "src/components/SubmissionCheckPanel.correction-snapshot.test.tsx",
+      "sha256": "91e246c688f2ec843d0bebcc8d91b2a81d0912dd813becbd22f35c14b12285e2"
+    },
+    {
+      "path": "src/components/SubmissionCheckPanel.draft-races.test.tsx",
+      "sha256": "87ee98518ac195aa92cb400933d9811377f53d4a2b540556df4b03e354c3f191"
+    },
+    {
+      "path": "src/components/SubmissionCheckPanel.draft.test.tsx",
+      "sha256": "17f0620880fbfef0189b4f2bc9e39f5923eb28826931097515893dee09a0c035"
+    },
+    {
+      "path": "src/components/SubmissionCheckPanel.lifecycle.test.tsx",
+      "sha256": "a82c63dadb2597e53c839f76339ef2c78bfb6e67fbe55ad1b83c01f75e56fe93"
+    }
+  ],
+  "mutants": [
+    {
+      "id": "late-json-account-epoch",
+      "mutatedPath": "src/api/client.ts",
+      "testFile": "src/api/client.precheck.test.ts",
+      "mutantExit": 1,
+      "failedAssertions": [
+        {
+          "name": "#107 pre-submit private HTTP boundary checks account epoch again after delayed JSON decoding (ok=true)",
+          "failure": "AssertionError: expected null to be an instance of ApiError\n    at Proxy.<anonymous> (file:///workspace/issue107-baseline-integration/web/node_modules/.pnpm/@vitest+expect@3.2.7/node_modules/@vitest/expect/dist/index.js:"
+        },
+        {
+          "name": "#107 pre-submit private HTTP boundary checks account epoch again after delayed JSON decoding (ok=false)",
+          "failure": "AssertionError: expected undefined to be 'AUTH_CONTEXT_CHANGED' // Object.is equality\n    at /tmp/meetme107-independent-web-xnc8c8z6/src/api/client.precheck.test.ts:70:73\n    at file:///workspace/issue107-baseline-integr"
+        }
+      ],
+      "restoredExit": 0,
+      "restoredTests": 16,
+      "copiedSourceRestoredExactly": true,
+      "log": ".codex/tdd-evidence/issue107-independent-web-faults-final/late-json-account-epoch.log"
+    },
+    {
+      "id": "unsaved-local-draft-overwrite",
+      "mutatedPath": "src/components/SubmissionCheckPanel.tsx",
+      "testFile": "src/components/SubmissionCheckPanel.lifecycle.test.tsx",
+      "mutantExit": 1,
+      "failedAssertions": [
+        {
+          "name": "#107 independent pre-submit lifecycle fences preserves unsaved local typing when another tab advances the candidate",
+          "failure": "Error: expect(element).toHaveValue(이 탭의 아직 저장하지 않은 초안)\n\nExpected the element to have value:\n  이 탭의 아직 저장하지 않은 초안\nReceived:\n  다른 탭에서 저장된 조건\n    at Proxy.expectWrapper (file:///workspace/issue107-baseline-integration/web/n"
+        }
+      ],
+      "restoredExit": 0,
+      "restoredTests": 7,
+      "copiedSourceRestoredExactly": true,
+      "log": ".codex/tdd-evidence/issue107-independent-web-faults-final/unsaved-local-draft-overwrite.log"
+    },
+    {
+      "id": "failed-means-complete",
+      "mutatedPath": "src/components/SubmissionCheckPanel.tsx",
+      "testFile": "src/pages/RoomPage.precheck.test.tsx",
+      "mutantExit": 1,
+      "failedAssertions": [
+        {
+          "name": "#107 pre-submit card separates durable save and accepted completion restores FAILED without POST or false completion",
+          "failure": "TestingLibraryElementError: Found multiple elements with the text: /조건 제출을 완료했어요|다른 참여자를 기다려/\n\nHere are the matching elements:\n\nIgnored nodes: comments, script, style\n\u001b[36m<h2>\u001b[39m\n  \u001b[0m조건 제출을 완료했어요\u001b[0m\n\u001b[36m</h2>\u001b[39m"
+        }
+      ],
+      "restoredExit": 0,
+      "restoredTests": 29,
+      "copiedSourceRestoredExactly": true,
+      "log": ".codex/tdd-evidence/issue107-independent-web-faults-final/failed-means-complete.log"
+    },
+    {
+      "id": "precheck-inside-closed-correction",
+      "mutatedPath": "src/pages/RoomPage.tsx",
+      "testFile": "src/pages/RoomPage.precheck-correction.test.tsx",
+      "mutantExit": 1,
+      "failedAssertions": [
+        {
+          "name": "#107 closed correction compatibility edits only through the existing round/revision PUT despite the expired collection deadline",
+          "failure": "AssertionError: expected \"getSubmissionCheck\" to not be called at all, but actually been called 1 times\n\nReceived: \n\n  1st getSubmissionCheck call:\n\n    Array [\n      \"abcdefghijklmnopqrstuv\",\n      AbortSignal {},\n    ]"
+        },
+        {
+          "name": "#107 closed correction compatibility does not grant a joined viewer outside the frozen cohort a new check or editor",
+          "failure": "AssertionError: expected \"getSubmissionCheck\" to not be called at all, but actually been called 1 times\n\nReceived: \n\n  1st getSubmissionCheck call:\n\n    Array [\n      \"abcdefghijklmnopqrstuv\",\n      AbortSignal {},\n    ]"
+        }
+      ],
+      "restoredExit": 0,
+      "restoredTests": 3,
+      "copiedSourceRestoredExactly": true,
+      "log": ".codex/tdd-evidence/issue107-independent-web-faults-final/precheck-inside-closed-correction.log"
+    },
+    {
+      "id": "blind-replacement-legacy-completion-copy",
+      "mutatedPath": "src/components/GuestParticipation.tsx",
+      "testFile": "src/components/GuestParticipation.precheck.test.tsx",
+      "mutantExit": 1,
+      "failedAssertions": [
+        {
+          "name": "#107 blind replacement protocol wording keeps PRE_SUBMIT_V1 replacement blind and distinguishes durable save from verified completion",
+          "failure": "Error: expect(element).toHaveTextContent()\n\nExpected element to have text content:\n  /원문.*저장|조건.*저장/\nReceived:\n  기존 참여 기록에 다시 접근암호를 설정하지 않으면 다른 기기에서도 누구나 이 기록의 조건을 대체할 수 있어 수정이 보호되지 않아요.다른 기기의 암호 없는 기록은 기존 원문을 조회하지 않고 새 "
+        }
+      ],
+      "restoredExit": 0,
+      "restoredTests": 2,
+      "copiedSourceRestoredExactly": true,
+      "log": ".codex/tdd-evidence/issue107-independent-web-faults-final/blind-replacement-legacy-completion-copy.log"
+    },
+    {
+      "id": "obsolete-operation-outcome-is-completion",
+      "mutatedPath": "src/components/SubmissionCheckPanel.tsx",
+      "testFile": "src/pages/RoomPage.precheck.test.tsx",
+      "mutantExit": 1,
+      "failedAssertions": [
+        {
+          "name": "#107 explicit choice, direct edit and failure handling ignores obsolete operation_outcome when current snapshot is a newer pending candidate",
+          "failure": "TestingLibraryElementError: Found multiple elements with the text: /조건 제출을 완료했어요|다른 참여자를 기다려/\n\nHere are the matching elements:\n\nIgnored nodes: comments, script, style\n\u001b[36m<h2>\u001b[39m\n  \u001b[0m조건 제출을 완료했어요\u001b[0m\n\u001b[36m</h2>\u001b[39m"
+        }
+      ],
+      "restoredExit": 0,
+      "restoredTests": 29,
+      "copiedSourceRestoredExactly": true,
+      "log": ".codex/tdd-evidence/issue107-independent-web-faults-final/obsolete-operation-outcome-is-completion.log"
+    },
+    {
+      "id": "confirmed-close-lock-released-early",
+      "mutatedPath": "src/components/SubmissionCheckPanel.tsx",
+      "testFile": "src/components/SubmissionCheckPanel.close.test.tsx",
+      "mutantExit": 1,
+      "failedAssertions": [
+        {
+          "name": "#107 holds the close lock through the confirmed early-close request",
+          "failure": "Error: expect(element).toBeDisabled()\n\nReceived element is not disabled:\n  <button\n  class=\"button danger-outline\"\n/>\n    at Proxy.expectWrapper (file:///workspace/issue107-baseline-integration/web/node_modules/.pnpm/@vi"
+        }
+      ],
+      "restoredExit": 0,
+      "restoredTests": 1,
+      "copiedSourceRestoredExactly": true,
+      "log": ".codex/tdd-evidence/issue107-independent-web-faults-final/confirmed-close-lock-released-early.log"
+    },
+    {
+      "id": "dirty-draft-reset-by-public-edit-actions",
+      "mutatedPath": "src/components/SubmissionCheckPanel.tsx",
+      "testFile": "src/components/SubmissionCheckPanel.draft-races.test.tsx",
+      "mutantExit": 1,
+      "failedAssertions": [
+        {
+          "name": "#107 keeps dirty local text when the user reopens editing after another tab saves a candidate",
+          "failure": "Error: expect(element).toHaveValue(이 탭의 소중한 미저장 초안)\n\nExpected the element to have value:\n  이 탭의 소중한 미저장 초안\nReceived:\n  다른 탭에서 저장한 원문\n    at Proxy.expectWrapper (file:///workspace/issue107-baseline-integration/web/node_mo"
+        },
+        {
+          "name": "#107 keeps a direct-edit draft when another tab produces a newer question",
+          "failure": "Error: expect(element).toHaveValue(직접 고치던 미저장 전체 조건)\n\nExpected the element to have value:\n  직접 고치던 미저장 전체 조건\nReceived:\n  다른 탭의 새 질문 원문\n    at Proxy.expectWrapper (file:///workspace/issue107-baseline-integration/web/node_"
+        }
+      ],
+      "restoredExit": 0,
+      "restoredTests": 3,
+      "copiedSourceRestoredExactly": true,
+      "log": ".codex/tdd-evidence/issue107-independent-web-faults-final/dirty-draft-reset-by-public-edit-actions.log"
+    },
+    {
+      "id": "stale-private-closure-is-treated-as-final",
+      "mutatedPath": "src/components/SubmissionCheckPanel.tsx",
+      "testFile": "src/components/SubmissionCheckPanel.draft-races.test.tsx",
+      "mutantExit": 1,
+      "failedAssertions": [
+        {
+          "name": "#107 asks to reconcile final inclusion when the room closed after an older private snapshot",
+          "failure": "Error: expect(element).not.toHaveTextContent()\n\nExpected element not to have text content:\n  /이번 결과에 반영되지 않았|이번 결과에 반영되지 않아요|이번 결과에 반영되지 않은 입력/\nReceived:\n  마감된 내 입력 확인내 원문과 확인 질문·답변은 다른 참여자에게 공개되지 않아요.저장된 원문 #1마감 전 확인중이던"
+        }
+      ],
+      "restoredExit": 0,
+      "restoredTests": 3,
+      "copiedSourceRestoredExactly": true,
+      "log": ".codex/tdd-evidence/issue107-independent-web-faults-final/stale-private-closure-is-treated-as-final.log"
+    },
+    {
+      "id": "legacy-correction-source-ignored",
+      "mutatedPath": "src/components/SubmissionCheckPanel.tsx",
+      "testFile": "src/components/SubmissionCheckPanel.correction-snapshot.test.tsx",
+      "mutantExit": 1,
+      "failedAssertions": [
+        {
+          "name": "#107 shows a LEGACY_CORRECTION accepted result despite historical CLEAR precheck",
+          "failure": "Error: expect(element).not.toHaveTextContent()\n\nExpected element not to have text content:\n  /이번 결과에 반영되지 않았|이번 결과에 반영되지 않아요|이번 결과에 반영되지 않은 입력/\nReceived:\n  마감된 내 입력 확인내 원문과 확인 질문·답변은 다른 참여자에게 공개되지 않아요.저장된 원문 #100오래된 최초 검"
+        },
+        {
+          "name": "#107 shows a LEGACY_CORRECTION accepted result despite historical CLOSED_BEFORE_COMPLETION precheck",
+          "failure": "Error: expect(element).not.toHaveTextContent()\n\nExpected element not to have text content:\n  /이번 결과에 반영되지 않았|이번 결과에 반영되지 않아요|이번 결과에 반영되지 않은 입력/\nReceived:\n  마감된 내 입력 확인내 원문과 확인 질문·답변은 다른 참여자에게 공개되지 않아요.저장된 원문 #100같은 문자열을 "
+        }
+      ],
+      "restoredExit": 0,
+      "restoredTests": 2,
+      "copiedSourceRestoredExactly": true,
+      "log": ".codex/tdd-evidence/issue107-independent-web-faults-final/legacy-correction-source-ignored.log"
+    },
+    {
+      "id": "unknown-protocol-downgrades-to-legacy",
+      "mutatedPath": "src/pages/RoomPage.tsx",
+      "testFile": "src/pages/RoomPage.precheck-protocol.test.tsx",
+      "mutantExit": 1,
+      "failedAssertions": [
+        {
+          "name": "#107 rejects an unsupported submission protocol before private reads/writes",
+          "failure": "Error: expect(element).toHaveTextContent()\n\nExpected element to have text content:\n  /지원.*일치|지원하지.*버전|업데이트|지원.*계약/\nReceived:\n  본인님이 참여한 모임미래 프로토콜 모임10월 17일 (토)부터 10월 31일 (토) 전까지 · 비대면초대 링크 복사 비공개로 모으는 조건가능한 조건을 알려주세요가능한 "
+        }
+      ],
+      "restoredExit": 0,
+      "restoredTests": 1,
+      "copiedSourceRestoredExactly": true,
+      "log": ".codex/tdd-evidence/issue107-independent-web-faults-final/unknown-protocol-downgrades-to-legacy.log"
+    }
+  ],
+  "mutationScope": "Disposable scratch production copies only. Original production and original independent tests never edited.",
+  "originalProductionUnchanged": true,
+  "originalTestsUnchanged": true,
+  "actualModelCalls": 0,
+  "actualOAuthCalls": 0,
+  "remoteWrites": 0,
+  "limitations": [
+    "Vitest jsdom and synthetic API spies only; not browser/native backend/model semantic evidence",
+    "Final generated OpenAPI and actual backend-browser validation pending separately"
+  ]
+}

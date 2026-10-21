@@ -1,0 +1,195 @@
+{
+  "workItem": "issue32-cancel-question-web",
+  "status": "PASS_ALL_STANDARD_WEB_GATES_SYNTHETIC_BROWSER_SCOPE",
+  "sourceRevision": "02a68d8e50680e87dd153156e8bb7ea884a794cc",
+  "candidateDirty": true,
+  "candidateBranch": "feature/issue-32-cancel-question",
+  "sourceSnapshot": {
+    "manifest": "docs/verification/issue-32-web-source-manifest.json",
+    "manifestSHA256": "67aad468a66395bfb41887c282fec35da45ac715f9dd04c865da4b6193c018da",
+    "files": 134,
+    "beforeAfterEqual": true,
+    "frozen": {
+      "src/components/SubmissionCheckPanel.tsx": "2bcf5ffa421d6f3ee30ad6c06224fa10da253fcafde8723ee4ea6c1c9942d8a2",
+      "src/components/SubmissionCheckPanel.status-lifecycle.test.tsx": "ba446a4f16f54901f6cc23b976befea50c20457f920d265e82793eb80d678cd4",
+      "scripts/verify-precheck-native.mjs": "f0743d90d7447e82edcaeb63de09bb50ed6d9981e7c03279e4481356a8d40322"
+    }
+  },
+  "commands": [
+    {
+      "name": "api-check",
+      "argv": [
+        "node",
+        "scripts/check-openapi-generated.mjs"
+      ],
+      "exit": 0,
+      "durationSeconds": 0.8634903869970003,
+      "log": "/tmp/issue32-web-final-gate/api-check.log"
+    },
+    {
+      "name": "lint",
+      "argv": [
+        "node",
+        "node_modules/eslint/bin/eslint.js",
+        "."
+      ],
+      "exit": 0,
+      "durationSeconds": 2.996021267004835,
+      "log": "/tmp/issue32-web-final-gate/lint.log"
+    },
+    {
+      "name": "typecheck",
+      "argv": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "-b",
+        "--pretty",
+        "false"
+      ],
+      "exit": 0,
+      "durationSeconds": 6.7792136010029935,
+      "log": "/tmp/issue32-web-final-gate/typecheck.log"
+    },
+    {
+      "name": "unit",
+      "argv": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--configLoader",
+        "runner",
+        "--pool",
+        "threads",
+        "--maxWorkers",
+        "1",
+        "--retry",
+        "0",
+        "--reporter=json",
+        "--outputFile=/tmp/issue32-web-final-gate/unit-result.json"
+      ],
+      "exit": 0,
+      "durationSeconds": 82.2529130000039,
+      "log": "/tmp/issue32-web-final-gate/unit.log"
+    },
+    {
+      "name": "build-typecheck",
+      "argv": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "-b"
+      ],
+      "exit": 0,
+      "durationSeconds": 6.746544142995845,
+      "log": "/tmp/issue32-web-final-gate/build-typecheck.log"
+    },
+    {
+      "name": "build",
+      "argv": [
+        "node",
+        "node_modules/vite/bin/vite.js",
+        "build",
+        "--configLoader",
+        "runner",
+        "--outDir",
+        "/tmp/issue32-web-final-gate/dist"
+      ],
+      "exit": 0,
+      "durationSeconds": 3.8696450919960625,
+      "log": "/tmp/issue32-web-final-gate/build.log"
+    },
+    {
+      "name": "browser",
+      "argv": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config",
+        "/tmp/issue32-web-final-gate/playwright.config.mjs",
+        "--workers",
+        "2",
+        "--retries",
+        "0"
+      ],
+      "exit": 0,
+      "durationSeconds": 386.24969588399836,
+      "log": "/tmp/issue32-web-final-gate/browser.log"
+    }
+  ],
+  "unit": {
+    "files": 58,
+    "total": 627,
+    "passed": 627,
+    "failed": 0,
+    "skipped": 0,
+    "retries": 0
+  },
+  "browser": {
+    "total": 426,
+    "passed": 425,
+    "skipped": 1,
+    "failed": 0,
+    "flaky": 0,
+    "errors": 0,
+    "retries": 0,
+    "resultRetryValues": [
+      0
+    ],
+    "durationMs": 385693.735,
+    "skips": [
+      {
+        "file": "landing.spec.ts",
+        "title": "mobile layout keeps primary action inside viewport",
+        "project": "desktop",
+        "annotations": [
+          {
+            "type": "skip",
+            "location": {
+              "file": "/workspace/issue128-cancel-question/web/e2e/landing.spec.ts",
+              "line": 57,
+              "column": 8
+            }
+          }
+        ]
+      }
+    ],
+    "testSourceAndAssertionsUnchanged": true,
+    "actualBackend": false,
+    "transport": "same-origin Playwright route fixtures; synthetic JSON",
+    "environment": {
+      "node": "v24.19.0",
+      "chromium": "Chromium 151.0.7922.173 built on Debian GNU/Linux 13 (trixie)",
+      "workers": 2,
+      "retries": 0,
+      "browserTimeoutMs": 15000,
+      "testAndExpectedValuesUnchanged": true,
+      "defaultMsedgeReplacedByIsolatedSystemChromiumConfig": true
+    },
+    "originalConfig": "docs/verification/issue-107-full-playwright-local.config.mjs",
+    "isolatedConfig": ".codex/tdd-evidence/issue-32-web-final-gate/playwright.config.mjs",
+    "isolatedConfigSHA256": "1d9c89aeaf53eee8c2d79d42d4bde8287a4d0c01704709c850bd6aac83361c27",
+    "configDelta": "Same testDir, timeout15000, fullyParallel, workers2/retries0, system Chromium and desktop/mobile device profiles. Only dedicated output/result paths, strict free loopback19432 and isolated dist chosen. Original default local msedge not used."
+  },
+  "buildArtifacts": {
+    "assets/AccountOperationsPage-BqcY0RhA.css": "0f5aa7736566ff093b65786378628c8dbca778dfc42816014d7514590a117adc",
+    "assets/AccountOperationsPage-dpgvA1kV.js": "d309d0d9d2be49a9df62d114317bc65d25d23e247dc4801e24161c38dc23a8dc",
+    "assets/favicon-DjtCOTlh.svg": "cf1f8ed7dc4da2af8250d48bf63bab813aa9e855d86edda6f833b24db91742bd",
+    "assets/index-BMpqoq4T.js": "becf4d04caf2d99a0d4f9a7d6495d0b141576aca99d2a0df78daa743561c6881",
+    "assets/index-D-kvJm0_.css": "57a01d8576de8f2e0afd847d2e8d4b22100ad72186e9998feaa4552a2315c1ed",
+    "index.html": "0ca5576c31af864ddbebc851e0b7790705ba1181d9a46844679b85f202fd09d3"
+  },
+  "rawEvidence": ".codex/tdd-evidence/issue-32-web-final-gate/",
+  "rawReceiptSHA256": "cd27efdeae3dae35f1d72880831daff7925c45e4b1395513b2d638256b3cf9b1",
+  "scopeLimits": [
+    "627 units include the original core67 and new7; do not add earlier focused counts.",
+    "426 E2E include original precheck22; do not add earlier browser counts.",
+    "Independent74/FI1 evidence is separate fault-detection history, not extra unique tests.",
+    "No actual server, production OAuth, actual AI, provider cost/latency/accuracy validation. Native14 is a separate owner-controlled gate; this receipt supplies no current backend integration evidence."
+  ],
+  "providerKeysBlank": true,
+  "newDependencyInstalls": 0,
+  "actualModelCalls": 0,
+  "actualOAuthCalls": 0,
+  "productionAccess": false,
+  "GradleRuns": 0,
+  "recordedAt": "2026-10-18T08:11:44.392552+00:00"
+}

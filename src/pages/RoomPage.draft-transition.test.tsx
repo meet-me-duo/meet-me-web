@@ -7,6 +7,7 @@ import { MemoryRouter, Route, Routes, useNavigate } from "react-router-dom";
 import { api, ApiError } from "../api/client";
 import type { Candidate, Room, Submission } from "../api/types";
 import RoomPage from "./RoomPage";
+import { mockRoomAccount } from "../test/roomAccountFixture";
 
 const code = "abcdefghijklmnopqrstuv";
 const otherCode = "zyxwvutsrqponmlkjihgfe";
@@ -37,6 +38,7 @@ function Navigation() {
   return <><button onClick={() => navigate(`/rooms/${otherCode}`)}>합성 다른 모임으로 이동</button><button onClick={() => navigate(`/rooms/${code}`)}>합성 원래 모임으로 이동</button></>;
 }
 function mount(snapshot: Room = base) {
+  mockRoomAccount(snapshot);
   const reads = vi.spyOn(api, "getRoom").mockResolvedValue(snapshot);
   vi.spyOn(api, "getSubmission").mockResolvedValue(own());
   vi.spyOn(api, "getCandidates").mockResolvedValue({ analysis_id: a0, quality: "PARTIAL", applied_submissions: 1, total_submissions: 2, unapplied_inputs: 1, candidates: [candidate] } as Awaited<ReturnType<typeof api.getCandidates>>);

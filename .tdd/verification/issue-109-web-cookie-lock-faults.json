@@ -1,0 +1,43 @@
+{
+  "workItem": "issue-109-web-cookie-lock",
+  "sourceRevision": "9b183978d5987f8fa8a5f02d542b17181e4929b4",
+  "boundary": "Browser cross-tab cookie rotation serialization without replay or Web Storage credentials",
+  "sourceFiles": [
+    {
+      "path": "src/auth/authCookieLock.ts",
+      "sha256": "0436f72645a38d1c540758f0515469c199d9b0ca91c2cddada2f1a91db00bde1"
+    },
+    {
+      "path": "src/auth/session.ts",
+      "sha256": "b4c9cedd6132ebf497348b2e7c34baa7a2f8bb86ae7e0db4462e9f2a692ba18b"
+    }
+  ],
+  "testFiles": [
+    {
+      "path": "src/auth/authCookieLock.test.ts",
+      "sha256": "9277f2d4dca3924a9ba04698aa445b396d0b72f8adb7c03a86eb7c900999c621"
+    }
+  ],
+  "injections": [
+    {
+      "fault": "bypass navigator.locks and immediately invoke the cookie action",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "src/auth/authCookieLock.test.ts",
+        "--configLoader",
+        "runner",
+        "--pool",
+        "threads",
+        "--maxWorkers",
+        "1",
+        "--reporter=json",
+        "--outputFile=/tmp/meetme-109-web-cookie-lock-fault.json"
+      ],
+      "detectedBy": "src/auth/authCookieLock.test.ts#requests the shared lock and waits for its grant before invoking the cookie action",
+      "result": "DETECTED"
+    }
+  ],
+  "recordedAt": "2026-10-17T15:11:27Z"
+}

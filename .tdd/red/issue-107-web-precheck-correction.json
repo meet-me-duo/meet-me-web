@@ -1,0 +1,32 @@
+{
+  "workItem": "issue-107-web-precheck-correction",
+  "sourceRevision": "e9e81efe2c75813623729e4a9b8214bd8430c8b9",
+  "testFiles": [
+    {
+      "path": "src/pages/RoomPage.precheck-correction.test.tsx",
+      "sha256": "bfd00706bf070fddaf826d05e8c596b3a6be33839f8ff2f0f8fde2f1902d0058"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/pages/RoomPage.precheck-correction.test.tsx",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1",
+    "--reporter=json",
+    "--outputFile=.codex/tdd-evidence/issue-107-web-precheck-correction-result.json"
+  ],
+  "failedTests": [
+    "#107 closed correction compatibility edits only through the existing round/revision PUT despite the expired collection deadline",
+    "#107 closed correction compatibility does not grant a joined viewer outside the frozen cohort a new check or editor"
+  ],
+  "expectedFailureCategory": "MISSING_BEHAVIOR",
+  "recordedAt": "2026-10-17T18:17:27.126406+00:00",
+  "passedControls": 1,
+  "notes": "2 missing legacy correction behavior assertions; 1 DB-CLOSED guest control passes. Product skeleton selected incorrectly in OPEN correction; no network/model."
+}

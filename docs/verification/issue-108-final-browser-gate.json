@@ -1,0 +1,40 @@
+{
+  "status": "PASS",
+  "scope": "complete final production bundle browser suite",
+  "stats": {
+    "startTime": "2026-10-17T17:06:03.245Z",
+    "duration": 963521.9500000001,
+    "expected": 383,
+    "skipped": 1,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "workers": 1,
+  "retries": 0,
+  "testTimeoutMs": 30000,
+  "expectTimeoutMs": 5000,
+  "rawReport": "/tmp/issue108-isolated-browser-results.json",
+  "rawReportSha256": "b8471b145db96fb82d0f13488f073d6cd8537effab9a70e55b8d5c06bcb0ef5d",
+  "rawLog": "/tmp/issue108-isolated-browser.log",
+  "baseConfigUnchanged": true,
+  "temporaryConfig": "/tmp/issue108-isolated-playwright.config.mjs",
+  "distFiles": [
+    {
+      "path": "dist/assets/favicon-DjtCOTlh.svg",
+      "sha256": "cf1f8ed7dc4da2af8250d48bf63bab813aa9e855d86edda6f833b24db91742bd"
+    },
+    {
+      "path": "dist/assets/index-BFAmp3oO.js",
+      "sha256": "23874e3ebbf2d1210f1414fd1928a9073ee543cfc0a30d49198771a863bad96c"
+    },
+    {
+      "path": "dist/assets/index-BhUL5YpB.css",
+      "sha256": "1eb0447d57c5fef786d909d4468ca009039e56a5a016b29f33b2a1dda141509e"
+    },
+    {
+      "path": "dist/index.html",
+      "sha256": "ba8eb646b8b8e1fe31f6a1b012a0b94bf510f2ea9ff9edfb43c64d2c6cea56f9"
+    }
+  ],
+  "recordedAt": "2026-10-17T17:22:48.267739+00:00"
+}

@@ -1,0 +1,379 @@
+{
+  "recordedAt": "2026-10-17T15:40:54.933089+00:00",
+  "workItem": "issue-107",
+  "goalDeadline": "2026-10-18 Asia/Seoul",
+  "goalTool": "not available; no installation or configuration change",
+  "status": "ISOLATED_VALIDATION_COMPLETE_PRODUCTION_INTEGRATION_BLOCKED",
+  "blockers": [
+    "#109 shared ownership resolver actual package/signature/adapter not delivered; ClarificationOwnerPort has no main adapter; production startup is blocked.",
+    "#109 account integration of SaveSubmissionUseCase/GetOwnSubmissionUseCase and integrated account/Bearer HTTP tests remain required."
+  ],
+  "publicationAuthorization": "User subsequently authorized commit, push, Draft PR and exact HEAD CI verification after final local gates and independent review; independent scope and #109 integration wait must be explicit.",
+  "excludedActions": [
+    "merge",
+    "auto-merge",
+    "main deployment",
+    "production DB changes",
+    "Secret changes",
+    "production calls",
+    "paid AI calls"
+  ],
+  "validationLimits": [
+    "Synthetic provider stubs do not prove natural language semantics, real cost or latency.",
+    "PostgreSQL Testcontainers and mock browser are separate layers; no real backend-to-browser or production credential validation.",
+    "Clear-input question avoidance and A/B preservation of relative dates, negation and preferences are prompt/provider contracts, not proven real-model accuracy."
+  ],
+  "repository": "/workspace/meet-me-web",
+  "baseRevision": "9b183978d5987f8fa8a5f02d542b17181e4929b4",
+  "branch": "feature/issue-107-clarifications",
+  "gateRuns": {
+    "recordedAt": "2026-10-17T15:39:04.808532+00:00",
+    "runs": [
+      {
+        "command": [
+          "node",
+          "scripts/check-openapi-generated.mjs"
+        ],
+        "exitCode": 0,
+        "durationSeconds": 0.637,
+        "log": "/tmp/issue107-web-api-check.log"
+      },
+      {
+        "command": [
+          "node",
+          "node_modules/typescript/bin/tsc",
+          "-b",
+          "--pretty",
+          "false"
+        ],
+        "exitCode": 0,
+        "durationSeconds": 5.774,
+        "log": "/tmp/issue107-web-typecheck.log"
+      },
+      {
+        "command": [
+          "node",
+          "node_modules/eslint/bin/eslint.js",
+          "."
+        ],
+        "exitCode": 0,
+        "durationSeconds": 3.171,
+        "log": "/tmp/issue107-web-lint.log"
+      },
+      {
+        "command": [
+          "node",
+          "node_modules/vitest/vitest.mjs",
+          "run",
+          "--configLoader",
+          "runner",
+          "--pool",
+          "threads",
+          "--maxWorkers",
+          "1"
+        ],
+        "exitCode": 0,
+        "durationSeconds": 44.254,
+        "log": "/tmp/issue107-web-final-all.log"
+      },
+      {
+        "command": [
+          "node",
+          "node_modules/vite/bin/vite.js",
+          "build",
+          "--configLoader",
+          "runner"
+        ],
+        "exitCode": 0,
+        "durationSeconds": 4.557,
+        "log": "/tmp/issue107-web-final-build.log"
+      },
+      {
+        "command": [
+          "node",
+          "node_modules/@playwright/test/cli.js",
+          "test",
+          "--config",
+          "/tmp/issue107-playwright.config.ts"
+        ],
+        "exitCode": 0,
+        "durationSeconds": 366.257,
+        "log": "/tmp/issue107-web-e2e-fixed-bundle.log"
+      }
+    ],
+    "distUnchangedDuringFinalBrowserGate": true,
+    "panelSha256": "088e3370051a584fd94c1b1c116e26a7b2e624d5f4713aebb8f3f1a3d7846cd7"
+  },
+  "gates": [
+    {
+      "command": [
+        "node",
+        "scripts/check-openapi-generated.mjs"
+      ],
+      "exitCode": 0,
+      "log": "/tmp/issue107-web-api-check.log"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "-b",
+        "--pretty",
+        "false"
+      ],
+      "exitCode": 0,
+      "log": "/tmp/issue107-web-typecheck.log"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/eslint/bin/eslint.js",
+        "."
+      ],
+      "exitCode": 0,
+      "warnings": [],
+      "log": "/tmp/issue107-web-lint.log"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--configLoader",
+        "runner",
+        "--pool",
+        "threads",
+        "--maxWorkers",
+        "1"
+      ],
+      "exitCode": 0,
+      "tests": 375,
+      "passed": 375,
+      "log": "/tmp/issue107-web-final-all.log"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/vite/bin/vite.js",
+        "build",
+        "--configLoader",
+        "runner"
+      ],
+      "exitCode": 0,
+      "warnings": [
+        "Vite bundle 503.35 kB exceeds 500 kB advisory; dependency annotation warnings"
+      ],
+      "log": "/tmp/issue107-web-final-build.log"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config",
+        "/tmp/issue107-playwright.config.ts",
+        "e2e/clarifications.spec.ts"
+      ],
+      "exitCode": 0,
+      "passed": 8,
+      "mockOnly": true,
+      "log": "/tmp/issue107-web-independent-e2e.log",
+      "historicalBeforeIdentity": true,
+      "finalEntireSuiteAlsoIncludesAll8": true
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config",
+        "/tmp/issue107-playwright.config.ts"
+      ],
+      "exitCode": 1,
+      "total": 392,
+      "passed": 389,
+      "failed": 2,
+      "skipped": 1,
+      "log": "/tmp/issue107-web-e2e-all.log",
+      "note": "Two mobile page.goto/page.reload ERR_HTTP_RESPONSE_CODE_FAILURE, cause unconfirmed; retained as first attempt."
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config",
+        "/tmp/issue107-playwright.config.ts",
+        "--project",
+        "mobile",
+        "--grep",
+        "failed save keeps|NO_MATCH HOST can read nullable legacy reason"
+      ],
+      "exitCode": 0,
+      "passed": 2,
+      "log": "/tmp/issue107-web-e2e-navigation-rerun.log",
+      "note": "Targeted retry, distinct from entire suite."
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config",
+        "/tmp/issue107-playwright.config.ts"
+      ],
+      "exitCode": 0,
+      "total": 392,
+      "passed": 391,
+      "failed": 0,
+      "skipped": 1,
+      "log": "/tmp/issue107-web-e2e-before-identity.log",
+      "note": "Successful fixed-bundle entire-suite rerun before the additional identity defect correction; historical result."
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config",
+        "/tmp/issue107-playwright.config.ts"
+      ],
+      "exitCode": 0,
+      "total": 392,
+      "passed": 391,
+      "failed": 0,
+      "skipped": 1,
+      "log": "/tmp/issue107-web-e2e-before-guidance.log",
+      "note": "Successful fixed-bundle entire-suite rerun after identity correction and before additional user-requested time guidance; historical result."
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config",
+        "/tmp/issue107-playwright.config.ts"
+      ],
+      "exitCode": 0,
+      "total": 392,
+      "passed": 391,
+      "failed": 0,
+      "skipped": 1,
+      "log": "/tmp/issue107-web-e2e-fixed-bundle.log",
+      "note": "Final entire-suite rerun against fixed bundle with no concurrent dist rebuild; intentional desktop-only mobile-layout skip."
+    }
+  ],
+  "faultInjection": {
+    "detected": 4,
+    "assertionFailures": [
+      1,
+      1,
+      2,
+      7
+    ],
+    "summary": "docs/verification/issue-107-web-faults.json",
+    "sourceAndAllFrozenTestHashesVerified": true,
+    "restoredFocusedTests": 67,
+    "preIdentityEvidence": "/workspace/shared/issue107/pre-identity-web-evidence.tar.gz",
+    "preGuidanceEvidence": "/workspace/shared/issue107/pre-guidance-web-evidence.tar.gz"
+  },
+  "identityRegression": {
+    "tests": 11,
+    "redFailed": 10,
+    "redPassed": 1,
+    "greenPassed": 11,
+    "redLog": "/tmp/issue107-web-identity-red.log",
+    "greenLog": "/tmp/issue107-web-identity-green.log",
+    "summary": "docs/verification/issue-107-web-identity-red.json"
+  },
+  "timeGuidanceRegression": {
+    "tests": 15,
+    "redFailed": 15,
+    "greenPassed": 15,
+    "redLog": "/tmp/issue107-web-time-guidance-red.log",
+    "greenLog": "/tmp/issue107-web-time-guidance-green.log",
+    "summary": "docs/verification/issue-107-web-time-guidance-red.json"
+  },
+  "nativeOpenApiSha256": "551e18428cca1e7b569f8a4a45c1c4e70432ed389367b4833c13feea7f6e9efe",
+  "changedSourceAndTestFiles": [
+    {
+      "path": "e2e/clarifications.spec.ts",
+      "sha256": "b7f281f2c837533d1eb1c7853cf7c0ee8a8ba599fce9dc5fb55020b9550d6dba"
+    },
+    {
+      "path": "openapi/meet-me.openapi.json",
+      "sha256": "551e18428cca1e7b569f8a4a45c1c4e70432ed389367b4833c13feea7f6e9efe"
+    },
+    {
+      "path": "src/api/clarifications.ts",
+      "sha256": "d93b305340227537e2dc0feadffcdb8b8341709ef40369b2d04bbfd49793ba66"
+    },
+    {
+      "path": "src/api/client.ts",
+      "sha256": "498fd69bf136c44a64da7ff8fbd54ebe18298ff8f15490619be4b45de6778401"
+    },
+    {
+      "path": "src/api/schema.d.ts",
+      "sha256": "ef92a90872969a09aad51707d32bcb2426cd35af121ed1ee276a6d04c05ec800"
+    },
+    {
+      "path": "src/api/types.ts",
+      "sha256": "3dfb40c29f72843abfa96aa1ee991de1be62ddae3f65e9deb5ec7d5b30f5a7d8"
+    },
+    {
+      "path": "src/components/ClarificationPanel.identity.test.tsx",
+      "sha256": "bb0846240ff4f4c7fdb58dd9783d62a2a3c0aabdfd62ae37a5154dd1b9047b47"
+    },
+    {
+      "path": "src/components/ClarificationPanel.test.tsx",
+      "sha256": "0dc404816a85504b9700de81c494b80ad1937a8fbdcb6b692e54677fbfd28a32"
+    },
+    {
+      "path": "src/components/ClarificationPanel.time-guidance.test.tsx",
+      "sha256": "1af8ec43a25a2547f05f9d1048a95daaba896bcfdc03fc31642d41caed554564"
+    },
+    {
+      "path": "src/components/ClarificationPanel.tsx",
+      "sha256": "088e3370051a584fd94c1b1c116e26a7b2e624d5f4713aebb8f3f1a3d7846cd7"
+    },
+    {
+      "path": "src/pages/RoomPage.clarifications.test.tsx",
+      "sha256": "cc4c85f6b8bfc49345c16adbe66842edcd23b79b69619c8e02c9f89e6443926a"
+    },
+    {
+      "path": "src/pages/RoomPage.time-guidance.test.tsx",
+      "sha256": "b82d1f610488c9bd1d094a35a37c202adf070f9ba7ee7cdcd414bcda69ceac96"
+    },
+    {
+      "path": "src/pages/RoomPage.tsx",
+      "sha256": "5bf7436ee8c9872c11f3d5e68c19dd5d87854455ce4717c1e44edfddd9196f09"
+    },
+    {
+      "path": "src/styles.css",
+      "sha256": "e1287d9a278ad34ae466d2173af1d79128ef6d2c401756c02d4718ea171b2ee0"
+    },
+    {
+      "path": "src/utils/submissionGuidance.ts",
+      "sha256": "bc3742eeae7944a02ce03dd1f497ad01878b19c9bcaac5a1a5e9569a7370b1d3"
+    }
+  ],
+  "distFiles": [
+    {
+      "path": "dist/assets/favicon-DjtCOTlh.svg",
+      "sha256": "cf1f8ed7dc4da2af8250d48bf63bab813aa9e855d86edda6f833b24db91742bd"
+    },
+    {
+      "path": "dist/assets/index-CMePBkfe.css",
+      "sha256": "18bc5c14d3d60806fb74f0e6cfeaa450683078cea904f994f658213310ab1ddc"
+    },
+    {
+      "path": "dist/assets/index-CpT6NrDw.js",
+      "sha256": "90b8194a80421dbed9106442c74a4cbac8be4a4f3aca080e7b4032d90195c0e7"
+    },
+    {
+      "path": "dist/index.html",
+      "sha256": "8719ea7b4b7659781098fc66c7b65dd9e15dfda5a63c7c7d02ce18a409a6ae0b"
+    }
+  ],
+  "handoff": "/workspace/shared/issue107/HANDOFF.md"
+}

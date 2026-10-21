@@ -8,8 +8,11 @@ test-results/
 .env.*
 !.env.example
 *.log
+/.codex/tdd-evidence/
 .DS_Store
 .terraform/
 *.tfplan
 *.tfstate
 *.tfstate.*
+# Local raw #110 test output; tracked manifests contain concise results and hashes.
+docs/verification/issue-110-web-logs/

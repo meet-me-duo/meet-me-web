@@ -1,0 +1,98 @@
+{
+  "recorded_at": "2026-10-17T16:25:13.641804+00:00",
+  "worktree": "/workspace/meet-me-web-107-integration",
+  "base": "95f09c0a98c6538b0f19ed381fdf11a2f5b844d9",
+  "applied_without_commit": "de82a7dd84002d76ac5d0a97cf2c4b1a629b1fc0",
+  "runs": [
+    {
+      "gate": "api:check",
+      "exit": 0,
+      "result": "Native snapshot generated API types match",
+      "raw_log": "/tmp/issue107-web-auth-api-check.log",
+      "sha256": "a068520cd1499a0667978b848c48f4bbea9c6d48db62a0ac2d4222504cfd4b6e"
+    },
+    {
+      "gate": "typecheck",
+      "exit": 0,
+      "result": "TypeScript full project",
+      "raw_log": "/tmp/issue107-web-auth-typecheck.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "gate": "lint",
+      "exit": 0,
+      "result": "Full ESLint after final fixture correction, warning 0",
+      "raw_log": "/tmp/issue107-web-auth-lint-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "gate": "unit",
+      "exit": 0,
+      "result": "37 files, 466 passed",
+      "raw_log": "/tmp/issue107-web-auth-full-unit.log",
+      "sha256": "b4b4193103b3b9718b5da0409778f1dcb6d1b08c60a7f815f38fb99a83fa618f"
+    },
+    {
+      "gate": "build",
+      "exit": 0,
+      "result": "JS511.65kB advisory, successful build",
+      "raw_log": "/tmp/issue107-web-auth-build.log",
+      "sha256": "d15702cb78c404a60f0f4952c4f8c60718c4a44421b4ddcbfab6fd210cfa06d9"
+    },
+    {
+      "gate": "browser",
+      "exit": 0,
+      "result": "391 passed, 1 pre-existing intentional skip, 5.9m",
+      "raw_log": "/tmp/issue107-web-auth-full-browser-final.log",
+      "sha256": "a202efd2d9f82619f7d6da6ab4290d10952f4ebf8643f1f5c4ec1434adefe707"
+    }
+  ],
+  "final_browser": {
+    "command": "node node_modules/@playwright/test/cli.js test --config /tmp/issue107-web-auth-playwright.config.ts",
+    "workers": 2,
+    "retries": 0,
+    "base_url": "http://127.0.0.1:4175",
+    "passed": 391,
+    "skipped": 1,
+    "failed": 0
+  },
+  "hash_verification": {
+    "source": {
+      "file_count": 93,
+      "unchanged": true,
+      "before": "/tmp/issue107-web-auth-source-before.json",
+      "after": "/tmp/issue107-web-auth-source-after.json"
+    },
+    "dist": {
+      "file_count": 4,
+      "unchanged": true,
+      "before": "/tmp/issue107-web-auth-dist-before.json",
+      "after": "/tmp/issue107-web-auth-dist-after.json"
+    },
+    "recorded_at": "2026-10-17T16:24:33.214732+00:00",
+    "integration_head": "95f09c0a98c6538b0f19ed381fdf11a2f5b844d9",
+    "original_head": "de82a7dd84002d76ac5d0a97cf2c4b1a629b1fc0",
+    "original_clean": true
+  },
+  "initial_browser_attempt": {
+    "passed": 200,
+    "failed": 6,
+    "interrupted": 2,
+    "skipped": 1,
+    "not_run": 183,
+    "exit": 130,
+    "reason": "Strict HOST creation fixture origin hardcoded4173 rejected isolated4175; fixture-only migration approved, product assertions preserved.",
+    "raw_log": "/tmp/issue107-web-auth-browser-initial-origin-failure.log"
+  },
+  "corrected_fixture_target": {
+    "passed": 12,
+    "exit": 0,
+    "raw_log": "/tmp/issue107-web-auth-browser-origin-corrected.log"
+  },
+  "limits": [
+    "Browser API/auth refresh transport synthetic; combined browser-to-actual-server native E2E not run.",
+    "Parent actual-server ownership/native tests are separate evidence.",
+    "Integrated-source fault injection not performed in this delegated phase; existing published component/auth FI evidence is separate.",
+    "No server Gradle, production/provider/AI calls, commit, push, or PR action by this reviewer."
+  ]
+}

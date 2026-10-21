@@ -1,0 +1,129 @@
+{
+  "scope": "#110 web candidate; generated server OpenAPI pending",
+  "createdAt": "2026-10-17T14:49:34.175664+00:00",
+  "base": "9b183978d5987f8fa8a5f02d542b17181e4929b4",
+  "checks": [
+    {
+      "label": "full-api-check",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts/check-openapi-generated.mjs"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-10-17T14:44:45.707108+00:00",
+      "finishedAt": "2026-10-17T14:44:57.945589+00:00"
+    },
+    {
+      "label": "full-lint",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "node_modules/eslint/bin/eslint.js",
+        ".",
+        "--max-warnings",
+        "0"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-10-17T14:44:57.946792+00:00",
+      "finishedAt": "2026-10-17T14:45:10.460543+00:00"
+    },
+    {
+      "label": "full-typecheck",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "node_modules/typescript/bin/tsc",
+        "-b",
+        "--pretty",
+        "false"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-10-17T14:45:10.461988+00:00",
+      "finishedAt": "2026-10-17T14:45:18.484124+00:00"
+    },
+    {
+      "label": "full-unit",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--configLoader",
+        "runner",
+        "--pool",
+        "threads",
+        "--maxWorkers",
+        "1"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-10-17T14:45:18.485130+00:00",
+      "finishedAt": "2026-10-17T14:48:11.210455+00:00"
+    },
+    {
+      "label": "full-build",
+      "args": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "node_modules/vite/bin/vite.js",
+        "build",
+        "--configLoader",
+        "runner"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-10-17T14:48:11.211875+00:00",
+      "finishedAt": "2026-10-17T14:48:30.986472+00:00"
+    }
+  ],
+  "units": {
+    "passed": 343,
+    "failed": 0,
+    "files": 22
+  },
+  "afterGateChange": "App operations route lazy split; rebuilt exit0, browser verification pending; no component/client/test changes",
+  "sourceSha256": {
+    "src/App.tsx": "4f6780903d715ece63cb47f615df8205749beb503db3cd957973f2b5b1d34188",
+    "src/api/operations.ts": "b1d6b00f70e68bfdf4682839c51dd0c21cb5bdf019901caab7102c0323fb9563",
+    "src/pages/OperationsPage.tsx": "03233f61553569f23510bdc4fa332d2dcb195a8a0903b33f4dcf207ef1cd73d1",
+    "src/pages/OperationsPage.css": "9068468c2fd211b46ef987253e886735e5f7e17a59b6f512f3bd91f58ded7111",
+    "pnpm-lock.yaml": "920e180876d076d2cc4e75c1ed32ab796c47f7c6f3bd698f814654b28b7c05bd",
+    "openapi/meet-me.openapi.json": "56a8ddfa3bc7bd1c562ddb31a6ea8c39806abb86eef727381992678f2e9b42f2",
+    "src/api/schema.d.ts": "97fb4408602138753dd9f37026e5d84aea411425be0b0b3c9fc05d13746211e2"
+  },
+  "distSha256": {
+    "assets/favicon-aObUoNjF.svg": "099edb4ddd98ccdd93d2275e9e6b1d7b972fac863c3912e2869bcb8be88e739e",
+    "assets/index-9Yb7saz_.js": "72f284cde06a8fe60eee92f06c853958e7457e8a35dc6a2e3c0a14d82b8f17f5",
+    "assets/index-Ce_2tAug.css": "eae3b83d6555f85d08022b10887230f4e439cbf96630c033f4bd5a0f0edea098",
+    "assets/OperationsPage-Bq-GvKE1.js": "47003e337c07e962f34fc2c06f605f1d0e71b645d30f3ea395e5826036ce9d9f",
+    "assets/OperationsPage-BqcY0RhA.css": "0f5aa7736566ff093b65786378628c8dbca778dfc42816014d7514590a117adc",
+    "index.html": "c417893db6416746c65e91d4ef1de1b967a9fdeeb72d719b97968e28046d8cec"
+  },
+  "warnings": [
+    "Vite index bundle506.42kB warning after operations lazy split; build succeeds",
+    "existing Zod pure annotation warnings in dependency code"
+  ],
+  "actualCommonAuthIntegrated": false,
+  "externalCalls": false,
+  "pushed": false,
+  "deployed": false,
+  "browser": {
+    "operationsPassed": 8,
+    "fullPassed": 391,
+    "existingSkipped": 1,
+    "failed": 0,
+    "retries": 0,
+    "workers": 2,
+    "fullDuration": "3.9m",
+    "logs": [
+      "docs/verification/issue-110-web-logs/17b-operations-browser.log",
+      "docs/verification/issue-110-web-logs/18-full-browser-regression.log"
+    ]
+  },
+  "independentFaults": {
+    "controlPassed": 22,
+    "mutantsKilled": 5,
+    "realSourceChanged": false,
+    "summary": "docs/verification/issue-110-web-logs/22-independent-evidence.json"
+  },
+  "remainingScope": [
+    "Server-generated final OpenAPI and generated DTO aliases pending",
+    "Formal transport observability extension newly authorized; exact contract and new UI TDD pending",
+    "Actual #109 common-memory session/authRevision integration pending; default route has no token supplier"
+  ],
+  "sourceAndDistUnchangedSinceBrowserFreeze": true
+}

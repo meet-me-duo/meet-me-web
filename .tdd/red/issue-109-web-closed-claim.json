@@ -1,0 +1,29 @@
+{
+  "workItem": "issue-109-web-closed-claim",
+  "sourceRevision": "9b183978d5987f8fa8a5f02d542b17181e4929b4",
+  "testFiles": [
+    {
+      "path": "src/auth/ClosedGuestClaim.test.tsx",
+      "sha256": "78fef1238ef9014f76812ff4782b5090bfb1b8366488dd2e5c4031f6cd3323b5"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/auth/ClosedGuestClaim.test.tsx",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1",
+    "--reporter=json",
+    "--outputFile=/tmp/meetme-109-web-closed-claim-red.json"
+  ],
+  "failedTests": [
+    "#109 explicitly connects an existing closed guest HOST after login and then finds it in the account archive"
+  ],
+  "expectedFailureCategory": "MISSING_BEHAVIOR",
+  "recordedAt": "2026-10-17T14:45:00.012349Z"
+}

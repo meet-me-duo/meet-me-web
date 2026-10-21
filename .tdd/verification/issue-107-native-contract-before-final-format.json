@@ -1,0 +1,20 @@
+{
+  "status": "PASS_FINAL_NATIVE_CONTRACT_RUNTIME_PROVENANCE_PENDING_BROWSER",
+  "at": "2026-10-17T19:13:55.200105+00:00",
+  "final_native_export_sha256": "4b3088a9f6464652ba62255059c6d2258ebfc243b82e798bbb2694d724a329d5",
+  "working_snapshot_sha256": "e44e9fb6e99d28309440f65458e26dce439b60372d9a81db575e28b9fd414c97",
+  "json_semantic_equal": true,
+  "paths": 36,
+  "server_source_manifest": ".tdd/verification/issue-107-native-runtime-source-manifest.json",
+  "runtime_source_manifest_sha256": "b755a39313b021dce3927170971d8b9d82c31d5da7c3e1c819e5c89f29604d40",
+  "source_entries": 216,
+  "source_mismatches": [],
+  "frozen_class_resource_manifest": ".tdd/verification/issue-107-native-frozen-class-resource-manifest.json",
+  "frozen_files": 1339,
+  "classpath_sha256": "8e0ae2bcd1fa621faa9d7a04892330174b8955ffbbe7dfefd5409bbb1abf2cdf",
+  "prepare_log": ".codex/tdd-evidence/issue-107-native-atomic-prepare-deadline-control.log",
+  "preparation": "compile testClasses, copy project runtime classes/resources, then write source manifest under one shared Gradle lock; native java launched from copied paths after releasing lock",
+  "runtime": "actual isolated Spring/PG18/Redis8/OIDC+RS256+guest proof, synthetic precheck provider, no paid model",
+  "browser_gate": "independent writer running separately; this file does not assert browser success",
+  "test_only_control": "Actual transactional DeadlineClosureScheduler.closeDueRooms() on POST /room/run-deadline-closure; production source unchanged"
+}

@@ -1,0 +1,39 @@
+{
+  "workItem": "issue-109-web-api",
+  "sourceRevision": "9b183978d5987f8fa8a5f02d542b17181e4929b4",
+  "testFiles": [
+    {
+      "path": "src/api/client.account.test.ts",
+      "sha256": "e33bba88fdb9db4ec2e9d3fc79bdd3f305a9ca2d947a55d9b804d937edf78d55"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/api/client.account.test.ts",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1",
+    "--reporter=json",
+    "--outputFile=/tmp/meetme-109-web-api-red.json"
+  ],
+  "failedTests": [
+    "issue #109 authenticated API privacy boundary attaches current Bearer and cookies to public room GET",
+    "issue #109 authenticated API privacy boundary attaches current Bearer and cookies to own archive GET",
+    "issue #109 authenticated API privacy boundary attaches current Bearer and cookies to explicit claim POST",
+    "issue #109 authenticated API privacy boundary attaches current Bearer and cookies to own submission PUT",
+    "issue #109 authenticated API privacy boundary reads the current token for each request and omits Authorization for guests",
+    "issue #109 authenticated API privacy boundary rejects a late successful private GET after an account epoch change",
+    "issue #109 authenticated API privacy boundary rejects a late successful ownership POST after an account epoch change",
+    "issue #109 authenticated API privacy boundary rejects an obsolete response when account changes during successful JSON decoding",
+    "issue #109 authenticated API privacy boundary replaces a delayed old-account 401 with an auth-context error without exposing its detail",
+    "issue #109 authenticated API privacy boundary preserves 401 mutation errors without automatic retry or anonymous fallback",
+    "issue #109 authenticated API privacy boundary preserves 503 mutation errors without automatic retry or anonymous fallback"
+  ],
+  "expectedFailureCategory": "MISSING_BEHAVIOR",
+  "recordedAt": "2026-10-17T14:40:28.819852Z"
+}

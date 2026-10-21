@@ -1,0 +1,29 @@
+{
+  "status": "PASS_GENERATED_CONTRACT_FOCUSED_UNIT_PENDING_FINAL_NATIVE",
+  "at": "2026-10-17T19:10:35.400449+00:00",
+  "focused_tests": 67,
+  "passed": 67,
+  "failed": 0,
+  "checks": [
+    "typecheck",
+    "api:check",
+    "eslint (warnings 0)",
+    "generic build",
+    "native build"
+  ],
+  "source_fingerprints": {
+    "openapi/meet-me.openapi.json": "e44e9fb6e99d28309440f65458e26dce439b60372d9a81db575e28b9fd414c97",
+    "src/api/schema.d.ts": "b9d929d0f0b48c20fa075267cdfe4716ca3fe419917cfee23893b6c549d40b85",
+    "src/api/precheck.ts": "4690caaea4155a14b2d8869961bc450aa1ca689449f00b20438dab7743d69fd2",
+    "src/api/types.ts": "e35e13382894823240f72bd63db0f6b66d9f2068befb9cff79f6ac365dd04db5",
+    "src/api/client.ts": "3047e2b184bd30b2dc7403215d2671f0220d2f38dc8395b7d87947425daefda6",
+    "src/components/SubmissionCheckPanel.tsx": "c4863d46b29528a30d2369417611d5b2b57419862c9a8ca7da891647545a717f",
+    "src/pages/RoomPage.tsx": "492f2322645e7f30c0eabba29ba4d8842e43bc507f6bdf50d2eb9373a03d1377",
+    "src/components/GuestParticipation.tsx": "37cd8349d774a6342b6406f0606541fed2215c817a62c4bf0f0b249dcc4bbeae",
+    "src/styles.css": "f177b4649a8cef367aa72b343c1530c2cd7d668786695429f684565b85e455cd"
+  },
+  "raw_focused_log": ".codex/tdd-evidence/issue-107-web-generated67-green.log",
+  "native_input_phase": "defense12; final admission runtime schema equivalence pending",
+  "independent_review": ".tdd/reviews/issue107-independent-web-contract-review.json",
+  "boundary": "Behavior files unchanged from independent 67-case/11-fault review. Full combined 620 unit preceded generated-only alias changes and is recorded separately. Final actual isolated backend/browser and remote CI remain separate gates."
+}

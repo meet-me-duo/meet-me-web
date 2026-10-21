@@ -6,6 +6,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { api, ApiError } from "../api/client";
 import type { Room, Submission } from "../api/types";
 import RoomPage from "./RoomPage";
+import { mockRoomAccount } from "../test/roomAccountFixture";
 
 const code = "abcdefghijklmnopqrstuv";
 const oldContext = "55555555-5555-4555-8555-555555555555";
@@ -27,6 +28,7 @@ afterEach(() => { cleanup(); for (const client of clients.splice(0)) client.clea
 
 describe("delayed retries belong to their initiating joined-owner context", () => {
   it.each([200, 403] as const)("ignores a former HOST retry %s after a joined MEMBER context takes over the same delayed view", async status => {
+    mockRoomAccount(delayed);
     const reads = vi.spyOn(api, "getRoom").mockResolvedValue(delayed);
     vi.spyOn(api, "getSubmission").mockResolvedValue(newOwn);
     let release!: (room: Room) => void;

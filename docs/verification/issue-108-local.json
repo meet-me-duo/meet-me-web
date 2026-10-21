@@ -1,0 +1,102 @@
+{
+  "workItem": "issue-108-guest-reaccess",
+  "baseline": "9b183978d5987f8fa8a5f02d542b17181e4929b4",
+  "branch": "feature/issue-108-guest-reaccess",
+  "status": "INDEPENDENT_COMPONENT_VERIFIED_INTEGRATION_PENDING",
+  "sourceFiles": [
+    {
+      "path": "src/components/GuestParticipation.tsx",
+      "sha256": "3fed5e1f83ecaac2703bd9d6dc283e594c40efd079c125e3bb4f1deef3f7becf"
+    }
+  ],
+  "testFiles": [
+    {
+      "path": "src/components/GuestParticipation.test.tsx",
+      "sha256": "41134954949bc58a23191cb9d5528eb5ca6315d59a55d457b3ddd6586ea03c97"
+    }
+  ],
+  "red": {
+    "tests": 20,
+    "failed": 20,
+    "category": "MISSING_BEHAVIOR",
+    "rawLog": "/tmp/meetme108-web-red.log"
+  },
+  "focusedGreen": {
+    "tests": 20,
+    "failed": 0,
+    "rawLog": "/tmp/meetme108-web-restored-green.log"
+  },
+  "fullUnit": {
+    "tests": 328,
+    "failed": 0,
+    "testFiles": 19,
+    "rawLog": "/tmp/meetme108-web-alltests.log"
+  },
+  "gates": {
+    "api:check": "PASS, unchanged API snapshot",
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "build": "PASS"
+  },
+  "faultInjections": [
+    {
+      "fault": "omit-chosen-password",
+      "result": "DETECTED",
+      "assertionFailures": 1
+    },
+    {
+      "fault": "promote-replace-to-read",
+      "result": "DETECTED",
+      "assertionFailures": 1
+    },
+    {
+      "fault": "expose-error-details",
+      "result": "DETECTED",
+      "assertionFailures": 2
+    },
+    {
+      "fault": "accept-stale-reaccess",
+      "result": "DETECTED",
+      "assertionFailures": 2
+    },
+    {
+      "fault": "bypass-closed-write",
+      "result": "DETECTED",
+      "assertionFailures": 2
+    },
+    {
+      "fault": "retain-password-after-request",
+      "result": "DETECTED",
+      "assertionFailures": 4
+    }
+  ],
+  "sourceAndFrozenTestRestoredExactly": true,
+  "independentReview": {
+    "reviewer": "/root/independent_review",
+    "blockingFindings": 0,
+    "scope": "Component code and frozen tests only; roomKey requires a server ownership/authentication epoch"
+  },
+  "browserRegression": {
+    "status": "PASS",
+    "passed": 383,
+    "failed": 0,
+    "flaky": 0,
+    "skipped": 1,
+    "retries": 0,
+    "workers": 2,
+    "durationMilliseconds": 694659.434,
+    "browser": "System Chromium /usr/bin/chromium, desktop and Pixel 7 device settings, temporary config only",
+    "scope": "Existing mocked browser suite; does not exercise new component or a live backend",
+    "rawLog": "/tmp/meetme108-browser.log",
+    "report": "/tmp/meetme108-browser-results.json"
+  },
+  "notVerified": [
+    "Actual HTTP cookies, Bearer rejection, guest proof and member claim",
+    "RoomPage and real API integration",
+    "Cross-device PostgreSQL concurrency, deadline and confirmation authorization",
+    "Actual OpenAPI of combined #109/#108 implementation"
+  ],
+  "remoteWrites": false,
+  "recordedAt": "2026-10-17T14:47:27.170509Z",
+  "builtAppIncludesNewComponent": false
+}

@@ -1,0 +1,27 @@
+{
+  "workItem": "issue-109-web-closed-claim-cross-review",
+  "reviewer": "/root/identity_db_tests",
+  "independence": "Reviewer did not author closed guest claim tests or production claim UI",
+  "verdict": "APPROVED_TEST_DESIGN",
+  "testFiles": [
+    {
+      "path": "src/auth/ClosedGuestClaim.test.tsx",
+      "sha256": "78fef1238ef9014f76812ff4782b5090bfb1b8366488dd2e5c4031f6cd3323b5"
+    }
+  ],
+  "checks": [
+    "Full App authenticated user fixture starts on a CLOSED room with viewer joined false",
+    "No claim before user click; no join button or join request for closed room",
+    "Explicit claim called exactly once for the current invite code",
+    "Successful claimed HOST viewer restores host UI rather than creating a participant",
+    "Account archive link and returned room link remain navigable after explicit claim",
+    "Archive expiry label remains visible after linkage",
+    "All accounts and tokens are synthetic; APIs stubbed; no actual OAuth/remote operation claimed"
+  ],
+  "scopeLimits": [
+    "Cookie proof and participant/data preservation are server PostgreSQL tests responsibilities; this is the complementary web routing interaction test",
+    "This test asserts expiry presence; exact expiry computation is independently covered by server archive tests",
+    "Implementation GREEN and deliberate fault detection remain execution tasks"
+  ],
+  "recordedAt": "2026-10-17T14:45:53Z"
+}

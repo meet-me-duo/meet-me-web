@@ -1,0 +1,23 @@
+{
+  "scope": "actual-browser-to-isolated-Spring-PostgreSQL-Redis-local-HTTP-OIDC-JWKS",
+  "productionLogin": false,
+  "credentialsProvisioned": false,
+  "externalRequests": 0,
+  "apiRouteMocks": 0,
+  "checks": [
+    "anonymous-host-login-gate-both-providers",
+    "google-oidc-cookie-refresh-bearer-profile-create",
+    "own-host-archive-expiry",
+    "same-provider-new-device-durable-account-archive",
+    "kakao-oidc-and-cross-account-archive-isolation",
+    "guest-participation-without-login",
+    "explicit-verified-guest-claim-preserves-member-rights",
+    "member-join-without-name-or-password-no-host-rights",
+    "explicit-claim-existing-account-participation-conflict",
+    "device-logout-preserves-other-device-refresh",
+    "same-cookie-multi-tab-refresh-serialized-by-browser-lock",
+    "all-device-logout-clears-sensitive-account-ui"
+  ],
+  "status": "PASS",
+  "at": "2026-10-17T16:27:48.332Z"
+}

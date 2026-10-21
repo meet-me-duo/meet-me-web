@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { fulfillAccountRefresh } from "./accountFixture";
 import type { ConfirmedResult, RecommendationList, RecommendationOption, Room } from "../src/api/types";
 
 const code = "abcdefghijklmnopqrstuv";
@@ -33,6 +34,7 @@ async function fixture(page: Page, baseURL: string, options: { count?: number; r
   await page.route("**/*", async route => {
     const request = route.request(); const url = new URL(request.url()); const method = request.method();
     if (url.origin !== origin) { unexpected.push(request.url()); return route.abort(); }
+    if (await fulfillAccountRefresh(route, (options.role ?? "HOST") === "HOST" ? "합성 참여자" : null)) return;
     if (!url.pathname.startsWith("/api/")) return method === "GET" ? route.continue() : route.abort();
     if (method === "GET") {
       reads.push(url.pathname + url.search);

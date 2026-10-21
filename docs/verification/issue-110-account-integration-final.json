@@ -1,0 +1,424 @@
+{
+  "scope": "issue110 integrated with actual issue109 source; standalone history retained separately",
+  "serverAccountBase": "c06b60a9833ae77e5fce9cfef5719ab2f37470ff",
+  "webAccountBase": "95f09c0a98c6538b0f19ed381fdf11a2f5b844d9",
+  "unit": {
+    "passed": 415,
+    "failed": 0
+  },
+  "browser": {
+    "startTime": "2026-10-17T17:02:09.133Z",
+    "duration": 269591.793,
+    "expected": 395,
+    "skipped": 1,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "browserRetries": 0,
+  "accountRouteRed": {
+    "total": 6,
+    "failedAssertions": 4,
+    "passed": 2
+  },
+  "accountRouteGreen": {
+    "passed": 6
+  },
+  "newIntegrationMutations": [
+    {
+      "fault": "memory-bearer",
+      "failedTests": [
+        "#110 route binding to the actual #109 memory session uses the current memory token on each request, including a same-account refresh",
+        "#110 route binding to the actual #109 memory session shows authentication required for a known expired account before the next operations fetch",
+        "#110 route binding to the actual #109 memory session fails closed with sanitized 503 for an unexpected memory token supplier failure",
+        "#110 route binding to the actual #109 memory session erases old summary and aborts its late response after actual account switch"
+      ],
+      "failed": 4,
+      "passed": 2,
+      "total": 6
+    },
+    {
+      "fault": "expiry-status",
+      "failedTests": [
+        "#110 route binding to the actual #109 memory session shows authentication required for a known expired account before the next operations fetch"
+      ],
+      "failed": 1,
+      "passed": 5,
+      "total": 6
+    }
+  ],
+  "sourceAndTestsRestoredExactly": true,
+  "native": {
+    "status": "PASS",
+    "scope": "actual-browser-to-isolated-Spring-PostgreSQL-Redis-local-HTTP-OIDC-JWKS",
+    "productionLogin": false,
+    "operatorActivation": false,
+    "credentialsProvisioned": false,
+    "externalRequests": 0,
+    "apiRouteMocks": 0,
+    "operationsRequests": 10,
+    "checks": [
+      "anonymous-real-http-401-host-hints-do-not-grant-access",
+      "actual-kakao-memory-account-real-http-403",
+      "actual-google-allowlisted-account-room-and-invocation-drilldown",
+      "actual-summary-preserves-unknown-transport-usage-and-http-count",
+      "production-memory-supplier-attaches-actual-service-bearer",
+      "actual-logout-revision-discards-private-summary-and-reloads-401",
+      "all-operations-real-http-get-no-store-no-forged-identity",
+      "credentials-absent-from-dom-url-and-browser-storage"
+    ],
+    "at": "2026-10-17T17:20:24.359Z"
+  },
+  "openapi": {
+    "source": "actual running issue110 fixture with real account109 code",
+    "sourceSha256": "54ec5ef4111c04df4df4620c0bd72ed2ee97b02a209314da45d348fe4c429c66",
+    "paths": [
+      "/api/operations/invocations/{invocationId}",
+      "/api/operations/rooms",
+      "/api/operations/rooms/{roomId}"
+    ],
+    "referencedComponents": [
+      "#/components/schemas/AttemptSummaryResponse",
+      "#/components/schemas/InvocationSummaryResponse",
+      "#/components/schemas/LocalClientCallResponse",
+      "#/components/schemas/OperatorInvocationDetailResponse",
+      "#/components/schemas/OperatorProblemResponse",
+      "#/components/schemas/OperatorRoomDetailResponse",
+      "#/components/schemas/OperatorRoomPageResponse",
+      "#/components/schemas/ProviderUsageResponse",
+      "#/components/schemas/RevisionCountsResponse",
+      "#/components/schemas/RoomSummaryResponse"
+    ],
+    "allOperationsMatchWebSnapshot": true,
+    "noWebContractRewriteNeeded": true
+  },
+  "actualBackendBrowserIntegration": true,
+  "actualAccount109Integration": true,
+  "productionAuthentication": false,
+  "operationalActivation": false,
+  "rawReports": {
+    "web-109-110-api.json": "67621b9355102f83a7f9116bb78f96c7fcac6d899e37682792811add002239db",
+    "web-109-110-final.json": "c21ba54c02d51b9b0dbe02b2e61466b7a672b32602c4206928b43babcdacfd27",
+    "web-109-110-browser.json": "8dfed6ab0e515f0ca5b7d894aba6ec3fdd0ce854bca80b4c7e6ca6ad8273f15c",
+    "web-109-110-account-red-account-red.log": "ecf62e14813d8be94896350982f262d1e6244b6e2644a2495f1a7bdac913d725",
+    "web-109-110-account-green-account-red.log": "9e568e039ebe3d0ab64ed87bee6647b9ad8f4edc8566bfc08ac245b541caa4d7",
+    "web-109-110-integration-faults.json": "412ef71ff24a2c1546d127a77c714c6e8bf42b4209df1ed5db5ec2dafa1d030b",
+    "native-110-browser-2.json": "f1a60ad9cf6ef039ae3ceb998d8aa15e2ac899dff490a0f64e6d1320a85a022f",
+    "issue-110-integrated-openapi.json": "1fc4195e9960388e373222cf16a7ebeae4515b6c1197ada74e8ad67299cae55a"
+  },
+  "localFileFingerprints": {
+    "src/api/client.account-error-decode.test.ts": {
+      "rawSha256": "06374bf0702faf14c8b5a3e47a08104dca8fede84408afef833de4096b6e6374",
+      "canonicalLfSha256": "bc1af75c6ad8c01b4946f6a635a3f485a18f23c987d48567af22e343293e327d"
+    },
+    "src/api/client.account.test.ts": {
+      "rawSha256": "824372f109d7a3c753874158e0a1bcda4fe0100b4aa6a1206d37d9d74749e723",
+      "canonicalLfSha256": "e33bba88fdb9db4ec2e9d3fc79bdd3f305a9ca2d947a55d9b804d937edf78d55"
+    },
+    "src/api/client.expired-session.test.ts": {
+      "rawSha256": "fa35fa8d7c7ffbc8e250e398eea033d2ba0b58df342ec8a8e6cf8e42e2198249",
+      "canonicalLfSha256": "8d723636f28ffd6368d9946b01d12cfac65be1ccec4d6bbae239a688ed47f896"
+    },
+    "src/api/client.recommendations.test.ts": {
+      "rawSha256": "eeae3c94667b7f628a7b4fa5d1202e3ee8eae176411a982b5b39ad5b7ac37a50",
+      "canonicalLfSha256": "dc8d32e711665c07307b6b468515fedb61a0e6f84ce63251cb41a89d3943c29d"
+    },
+    "src/api/client.test.ts": {
+      "rawSha256": "2cef1549b6342dc562b2d7c0c4e9469c534a32f00b4332919b051d9a18064957",
+      "canonicalLfSha256": "a048c54f5de6e9967acb1c600fb7842bd7a408142604d399717f255189cfde82"
+    },
+    "src/api/client.ts": {
+      "rawSha256": "068468563711f197cb5dad19ecfdc43390655d67fb06d6ec7019a07cbe2c4031",
+      "canonicalLfSha256": "74609f280b3318a92ed4af35f0345a498f04ce58cf51f40418a034469f38e9aa"
+    },
+    "src/api/operations.acceptance.test.ts": {
+      "rawSha256": "56c42f7bcb3fbd283b6d21f54cc320e1ded8b550ab521b6d72ab5ae9a9c35dfd",
+      "canonicalLfSha256": "25e1a43b375f4624345f2005983f7ee33556dd3da19aa72acc3b94e2c7292da8"
+    },
+    "src/api/operations.auth-boundary.test.ts": {
+      "rawSha256": "dcc2ff6b85719d0a30e2c80b60487f581dd32042a243652eeb3309d7d116c910",
+      "canonicalLfSha256": "10d8ab180809cc59e2e0d8bd205ff22205d92c6acc9b7195e9233f933a5f0371"
+    },
+    "src/api/operations.transport.test.ts": {
+      "rawSha256": "3db092cc7bcbfa1d5477600808e6358dce3ad2ed6d9ff6072bbeb8ad2d43b4c6",
+      "canonicalLfSha256": "e5a974749bce6e5c879a5e3c285b6bec83a14c8cdd01e9ff35c8cddd9815003b"
+    },
+    "src/api/operations.ts": {
+      "rawSha256": "d439dc867df16a7c29ae03cbb2c65d0c28d98090acddb9c98207a0b1e3d2997b",
+      "canonicalLfSha256": "dca174adc2f1ea9520f0d5cc7be209a9d48a697edda72d32325f7390dfdd9a7d"
+    },
+    "src/api/recovery.ts": {
+      "rawSha256": "f0cb08ab1fdd61c8dc28364ac81d4d4075140a47b3f802edded68926014bb96a",
+      "canonicalLfSha256": "e4154303d46629f512b6583beab67a4632f07cd1ff08042e9eac5f9f69332a3a"
+    },
+    "src/api/schema.d.ts": {
+      "rawSha256": "51ff14f4594506b527f2a1c3ede84dbf90bbef6f463330cd968afefe8ff3e328",
+      "canonicalLfSha256": "51ff14f4594506b527f2a1c3ede84dbf90bbef6f463330cd968afefe8ff3e328"
+    },
+    "src/api/types.ts": {
+      "rawSha256": "fe07f44ff5533f843df815517df95c5188be0a54964e8ed395ca859de44a52f1",
+      "canonicalLfSha256": "c8541b0965c185d184f7b1193163b65bee135cf29d5a2751ef96ec6b1c65075d"
+    },
+    "src/App.tsx": {
+      "rawSha256": "d4cf8a76f2a664bdbe7e39145d6ad056f43c734344bec30af50e4445535925cc",
+      "canonicalLfSha256": "ee68b9bddd0b7c755c6e2af9229ea260e7ea1469eda355d21f989011830fea8e"
+    },
+    "src/assets/favicon.svg": {
+      "rawSha256": "099edb4ddd98ccdd93d2275e9e6b1d7b972fac863c3912e2869bcb8be88e739e",
+      "canonicalLfSha256": "cf1f8ed7dc4da2af8250d48bf63bab813aa9e855d86edda6f833b24db91742bd"
+    },
+    "src/auth/AccountBoundary.tsx": {
+      "rawSha256": "2b28c0b5f60a8b0d5cdbbb593ea659b0b934a42247288714a483fe1333e657a7",
+      "canonicalLfSha256": "ab40be7f077b74e66be64cc44d7f88bee2732e4ef1617159e906ec4c006c8dd5"
+    },
+    "src/auth/AccountViews.test.tsx": {
+      "rawSha256": "d27919cbc5e3c71d90af1db888ef534a3337d14510c993be5d520a83f5577022",
+      "canonicalLfSha256": "15da3bd1c6c229abd6b1d288071acd1d2f972208da6aa8d6f4ddbab5a25f9589"
+    },
+    "src/auth/AccountViews.tsx": {
+      "rawSha256": "1a0faadc781d923d4ecb7791e5ed57167b2de09aa1e7c0609d8938609bd45f3c",
+      "canonicalLfSha256": "b9ebcfcb56a999f38f520b79b1d8b6ee9fd9c7dbffe47adb10ba922ec9192a73"
+    },
+    "src/auth/authCookieLock.test.ts": {
+      "rawSha256": "9b51c7c1fb29f1ee41312bc07297171994325a17a87e3f9a271a8182918eca49",
+      "canonicalLfSha256": "9277f2d4dca3924a9ba04698aa445b396d0b72f8adb7c03a86eb7c900999c621"
+    },
+    "src/auth/authCookieLock.ts": {
+      "rawSha256": "59166da25eddb3715db0049f8af97456d208b0d2d322f34cf754b4ff9e22d9b2",
+      "canonicalLfSha256": "0436f72645a38d1c540758f0515469c199d9b0ca91c2cddada2f1a91db00bde1"
+    },
+    "src/auth/ClaimConflictView.test.tsx": {
+      "rawSha256": "eed77139a05e5996775e5f5c0b54110696e447db466718b042f500d2528d3cc3",
+      "canonicalLfSha256": "212053e3092e5326bcdb32384000a53ad19ac2d70afd27333e12a1f70096bb91"
+    },
+    "src/auth/ClosedGuestClaim.test.tsx": {
+      "rawSha256": "d45a8344bcdb78f02111a8e91e57c45288fa6f7ba6b4a3fa28e16809b325e2ab",
+      "canonicalLfSha256": "78fef1238ef9014f76812ff4782b5090bfb1b8366488dd2e5c4031f6cd3323b5"
+    },
+    "src/auth/LegacyHostLoginGate.test.tsx": {
+      "rawSha256": "3360f9509b726edcafef31949dc31f0d5b781ece56d209b9e1c461d7d4dd8846",
+      "canonicalLfSha256": "c16faf56ce2492da226f494c7df40037f6f38d3a456cac5c99a2c20d3cb4b7ec"
+    },
+    "src/auth/loginReturn.ts": {
+      "rawSha256": "82f6a6101edbab77014a2f45811734f825a0f51a2a0ce8256ac8920dd43bb51c",
+      "canonicalLfSha256": "1d8285e11a38660c46dd841a8886368ed782bbbbc756b1c9a0d48b4e885a953a"
+    },
+    "src/auth/session.test.ts": {
+      "rawSha256": "0757aae13ff06bcc992e1a97b6b029d39606a24f9707f0835ee7b8175455d21e",
+      "canonicalLfSha256": "55a33015887915098cc749e8df301111165daddd770671ad2ca936c262149b17"
+    },
+    "src/auth/session.ts": {
+      "rawSha256": "cf03961bccc7c4ab2f157b1a14bfe772b3a2e79bc8196233da6aad7362022cec",
+      "canonicalLfSha256": "b4c9cedd6132ebf497348b2e7c34baa7a2f8bb86ae7e0db4462e9f2a692ba18b"
+    },
+    "src/auth/useAccount.ts": {
+      "rawSha256": "0b5d0b961540cca7840bc92dcee07a5ef9fe34979e863e4643067be8fffb4195",
+      "canonicalLfSha256": "54816c097b9403a4dfb30b27e33bd08716df6c0dfd7ba174f5bda873a10ec2f0"
+    },
+    "src/components/AnalysisRecoveryPanel.test.tsx": {
+      "rawSha256": "5e62bb0246aae1d1985a90c8485080e8ec8791ccae0f137cbf644b842b3e6894",
+      "canonicalLfSha256": "847f36bb5ff9d7bd32ce8339c4b452b5222b21d78f9dbe44556b05df0c2cab19"
+    },
+    "src/components/AnalysisRecoveryPanel.tsx": {
+      "rawSha256": "f2337271d64417a53bc113d36351bb8506cd3e0dd09e876b93b8bb266fa99088",
+      "canonicalLfSha256": "33454e85d12722c9b644e457ae841e09bf00be8d9e7592d73e66e30c056517fd"
+    },
+    "src/components/CandidateCard.tsx": {
+      "rawSha256": "7b109b4c559b38f430350e3896ed0bad8186d4e5a3fc1b8d9204483b664e77d0",
+      "canonicalLfSha256": "521eee5d0b3033bf4aa06afbfe2db8b88452e1a11710605896c9e3a6bcd25a96"
+    },
+    "src/components/LandingStory.tsx": {
+      "rawSha256": "41c806f66bf1ce3086b15270bdc92a6da1a1aceabe7af4a84204b76c44f9d510",
+      "canonicalLfSha256": "61439eaa6ae22191e8e6e3c18b287656cfa6e4d83af6fd18871c500c369caef4"
+    },
+    "src/components/MeetMeLogo.tsx": {
+      "rawSha256": "d7bd164c4f7f033b7d0b52392bf4be822ef2e8ff0d0a240178ee7f17b2be437e",
+      "canonicalLfSha256": "2187ff59837ddef4b413ffacdd8debea0e7ec41e9a01a0deaaec3581e9bb1cc0"
+    },
+    "src/components/RecentRooms.tsx": {
+      "rawSha256": "aa170fc12042a1c65cc11e120dbae7cc949d09046cd0b7d48df1dc1a29f3d4df",
+      "canonicalLfSha256": "ea20e9e64b0b757dba93fece7cfe83310509a2eece7fc03e5a8c6da2cddcc734"
+    },
+    "src/components/RecommendationChoices.test.tsx": {
+      "rawSha256": "cf1510311469d38b45086a8792f3992669e036815428debe8486882b19b20096",
+      "canonicalLfSha256": "4fdd33e4308cab0abb3e2ee79f5242e59af2e4af73c0c209a0b9f0f02c6da692"
+    },
+    "src/components/RecommendationChoices.tsx": {
+      "rawSha256": "b28c8728d3d1b73f4ab47c998f02553a687e5647da61a359f4ae6ad3d82976bd",
+      "canonicalLfSha256": "62d3e734f0079a2f2fb7569ac8d172518b4a775bb3e04d2be117e74b6ea657fe"
+    },
+    "src/components/RecommendationsPanel.tsx": {
+      "rawSha256": "ce986716645e4b4931e9abb10a2e577500f92f9a6751cf191b47869dc99d5484",
+      "canonicalLfSha256": "16eb1fcaf60b125ac4811ac1efeb16a0a0ef447c7c3d6baab4b1ad3c787f94cc"
+    },
+    "src/components/recommendationView.ts": {
+      "rawSha256": "d45d348e0b4bd2a1e1b854add5763e90ccb1ab0caa78121efb8a16cdafe0174f",
+      "canonicalLfSha256": "3f13f9639a13aa0aeb6106cb5400af3bbdc0e813fc35aa16325d23744ed3aa3b"
+    },
+    "src/hooks/useRecentRooms.ts": {
+      "rawSha256": "60f6840794f7bbeb3478b280d529a93384620f1424de4552aacc8157525db59a",
+      "canonicalLfSha256": "39a64a9bb63872981d703992004ed2c14e74aacb7964768f4336f994f6e34b50"
+    },
+    "src/main.tsx": {
+      "rawSha256": "6f19ade5353a68cf6e504e1a2b759f1063e67d35e2efe7b73a60703c44779bda",
+      "canonicalLfSha256": "7d7b52c035c4718a62feeb25d35d92f46fa8a8f12ba5469829e4ceca8a4b7f30"
+    },
+    "src/OperationsRoute.account-integration.test.tsx": {
+      "rawSha256": "f8430cdfae7e6c8c595e882e6338db86868cdbb358160862566cdc496a4125af",
+      "canonicalLfSha256": "f8430cdfae7e6c8c595e882e6338db86868cdbb358160862566cdc496a4125af"
+    },
+    "src/pages/AccountOperationsPage.tsx": {
+      "rawSha256": "23cdc0af4e5d8de92b366144c20dce2a7c4759f419a6bab1fcf83a2cf6b9d70e",
+      "canonicalLfSha256": "23cdc0af4e5d8de92b366144c20dce2a7c4759f419a6bab1fcf83a2cf6b9d70e"
+    },
+    "src/pages/HostCreationFlow.test.tsx": {
+      "rawSha256": "1979b7b213eed6d73b3d1e37a517f5ef25bc312142b13900eadd53f5dff3228a",
+      "canonicalLfSha256": "6fbd2620c9a941c9116bcac26c43387c9c0484b0fc684fd0feae59f64f981bd1"
+    },
+    "src/pages/HostCreationReview.test.tsx": {
+      "rawSha256": "77f8051b12e7bb59df644fa975b400ce4f159f67859421f4a06a061feb086446",
+      "canonicalLfSha256": "725cc43aaa80229854c98d28dc84aac4bd39cf45b483b9fa2b9c05a48116206e"
+    },
+    "src/pages/LandingPage.tsx": {
+      "rawSha256": "a095927d7f33a9c6115503977bba8d9093076ab90d16af8d99ff0780db8fbca0",
+      "canonicalLfSha256": "4e8c9c54cc0e52bcfd4fec34eda8887db1cecd33d89f44feeeaecde02edac47e"
+    },
+    "src/pages/OperationsPage.acceptance.test.tsx": {
+      "rawSha256": "1f6bb48df52ef90cdd76002158a134991e018bdd9a9ac17ec5db0e5675c02df4",
+      "canonicalLfSha256": "e9778259f6c6159daf2112e409a397392c99e227609fe4b1ee5680bbdeacb8d9"
+    },
+    "src/pages/OperationsPage.auth-lifecycle.test.tsx": {
+      "rawSha256": "0d6204b3069edcccc352b879c648bf67aa07b4980576f4b9ee30eb3496c466da",
+      "canonicalLfSha256": "11f606499d7b7a4f1a713e72f802b39f44f8648dc37f8e5d440a5a1424db27cb"
+    },
+    "src/pages/OperationsPage.css": {
+      "rawSha256": "24fdb09bfe6b8b27fb73f0b00e141b902c3043f94f5eb91c4acd575bf27ead81",
+      "canonicalLfSha256": "9068468c2fd211b46ef987253e886735e5f7e17a59b6f512f3bd91f58ded7111"
+    },
+    "src/pages/OperationsPage.transport.test.tsx": {
+      "rawSha256": "3745c00ca8655abbfed9a9d572f218a6f82f86c257674897686b9b3e33af5e2a",
+      "canonicalLfSha256": "b09c0041ef511714f9601e322d446fa28e28ff61007af7f1940cdfb01501d528"
+    },
+    "src/pages/OperationsPage.tsx": {
+      "rawSha256": "24a83fb334b88b7a899d7f17bf78060999e241a8115ad0e406e13abbb149ba8f",
+      "canonicalLfSha256": "7776de1330c96542e35dbb14c95c348cb3810c6efde8d9a314485d941424cfd9"
+    },
+    "src/pages/RoomPage.auth-lifecycle.test.tsx": {
+      "rawSha256": "0177e194c781780c9e6256ad0821e79798975db3333b15466affbf0453c6b4b9",
+      "canonicalLfSha256": "c4b87061fb21b889a79e9ca2bc5a63480db6ec6e047b25ba2af441d8ed62691e"
+    },
+    "src/pages/RoomPage.cold-owner-cache.test.tsx": {
+      "rawSha256": "41f3e25a39d8e92eac31fd71843632a091cd24278fcc69f06e2a30ef6f3613e0",
+      "canonicalLfSha256": "fcd4a17c4cd8fe26f6ff366084f637fcb9da653f9b3fc8ee2a0d7be2a05dc45b"
+    },
+    "src/pages/RoomPage.delayed-owner-lifecycle.test.tsx": {
+      "rawSha256": "181c6531ace8d81e20f7ae53bed2ca9c920f8f28055eb6fd19b762688a791190",
+      "canonicalLfSha256": "f21ee443ab8e65d9b8192fbcecfd2ff3e1995b326784fe61d29dd6251bfb594d"
+    },
+    "src/pages/RoomPage.draft-transition.test.tsx": {
+      "rawSha256": "5eae2e958076dc63e1773aaf4e8cbb6e82e9ad89e3aa6a44659f91d1c9c6aa0b",
+      "canonicalLfSha256": "0dc7b65c666586ce4eeb8b80fbefff75be55734738840013c0aad0f78c3cd039"
+    },
+    "src/pages/RoomPage.recommendations.test.tsx": {
+      "rawSha256": "dbeb640ccca61c5967afb202f2ec82516fe34c5ee3ef43d28708f7d9c2ddec94",
+      "canonicalLfSha256": "96c3c0319977b0c1592a0eb33c826acf4e76d7fc585581108797917956c89c9a"
+    },
+    "src/pages/RoomPage.recovery.test.tsx": {
+      "rawSha256": "ca9609ada2cb5db1b6153a74d0dba5f92ba19033b2aef480c419a3084c55ec94",
+      "canonicalLfSha256": "707170f9bd31679df9aaecaf3d3ce4c9c79f2b46c3342c6ceb98154495f1dcf5"
+    },
+    "src/pages/RoomPage.stale-room-read.test.tsx": {
+      "rawSha256": "c9cbdf905efdc1f883d9ec64a7b631cce0e1f43edad61e6ab2802ebbf44dea75",
+      "canonicalLfSha256": "00d0c22aa95c73018628e3a36896f3c2a97ae51ee2763e5b738e6126b5311c89"
+    },
+    "src/pages/RoomPage.test.tsx": {
+      "rawSha256": "f515f01d56f3c65894207078ca7a5f0c6c2393e5bec35c6dddc4ecb4f9651eed",
+      "canonicalLfSha256": "8bf1d4c0a3de6fef8d936965821f8c4845b65f69c4cee7c2bc27d814460a1d3c"
+    },
+    "src/pages/RoomPage.tsx": {
+      "rawSha256": "05aef897eaf04fda4202441c55f2ecc4c3f9c1e62bfe5883979710a1ee97b5ba",
+      "canonicalLfSha256": "28748fa4da686f6af296bab20d426ef988f75febdbd84b0452456580b2085b9b"
+    },
+    "src/styles.css": {
+      "rawSha256": "d09bbab624e3eb6f973a70b5433e0dc3c29c1ad0c535a3ceb896762937d43af1",
+      "canonicalLfSha256": "bd11d27a28d06805652aa5e126e3be0a6c4f6b47e12f6294cb43933c2acdf17f"
+    },
+    "src/test/roomAccountFixture.ts": {
+      "rawSha256": "2abaea6d17ad5151a016fb74f5b88d19bc56c5595214e73329a178cd46adac02",
+      "canonicalLfSha256": "1cd3f4abc53e1ff8562bbb7459de9564fff043e17bb98d88a7bc41ff84dea922"
+    },
+    "src/test/setup.ts": {
+      "rawSha256": "60aa525f7ffa6bfd3045d22710d4eeef3a5ff2074ecc3dbcef99374badebad17",
+      "canonicalLfSha256": "9b328c4843431fa76d8de00008fc159e95f99a840211085ff3b8f25e53d14409"
+    },
+    "src/utils/createRoom.account-authority.test.ts": {
+      "rawSha256": "73e69b6daf835a30edab7c2de35e77ad3ddffa1741504fa7c1e0f3d3f900c7f3",
+      "canonicalLfSha256": "7aa054ff6e9d91f1340ce41a3410ac8a174c51ac0aa8465f59de9bee90a45c07"
+    },
+    "src/utils/createRoom.account-name.test.ts": {
+      "rawSha256": "caa2aec2621b7178263c8a76568c86dabbb87ef15650d276a28f3c7fa89074ee",
+      "canonicalLfSha256": "d6e42480417db85ccb23e75b1c3a81c4aa9e6138d87e91989bf7680eb838e095"
+    },
+    "src/utils/createRoom.test.ts": {
+      "rawSha256": "b63a008e7b8abea7a0e967576af6fe2f36be51abecba7f5bf4eb9b6f5c2c3368",
+      "canonicalLfSha256": "e1538ba3c99f68efbd3ba929466a2a7e25064eeff2f58c74145be7570be17668"
+    },
+    "src/utils/createRoom.ts": {
+      "rawSha256": "59524668a99702574038934d9eb8da1a133ade53d759af993027144697192452",
+      "canonicalLfSha256": "1b845f9ef42dcff212d000328d8470da00c4b30bb6ca20c50f90e610e1d264c7"
+    },
+    "src/utils/recentRooms.test.ts": {
+      "rawSha256": "2b6ca4b4696f3ac27831da08d8c4ed4d864ac0f39f0123a532030b357837c6f8",
+      "canonicalLfSha256": "ef1e67f9a49766bd753606bd31d99f5112ed5bb029b9be9c7d0f3c5fa479fdc8"
+    },
+    "src/utils/recentRooms.ts": {
+      "rawSha256": "b388184ff08bd943fbba0ade3c198116873d489d86d2bdfa5f27643613f97104",
+      "canonicalLfSha256": "6671e5f81644afcba1a167aef6db712d7518ccd3810ab9257774322a3e24f4f1"
+    },
+    "src/utils/recommendationTime.test.ts": {
+      "rawSha256": "9b50d84ffbe60fb5a1d198ebbde871abe1aa8d0c48f606b88bdb30038cb83adc",
+      "canonicalLfSha256": "2765d77c9cd3e1a3e0e618e798e58233a9bc2d14d3247b302b4ff5b842af8fe4"
+    },
+    "src/utils/recommendationTime.ts": {
+      "rawSha256": "636d0fdd6f36f7a7538ba67be3dd988d4c25413a480c13ce0d4a29c49bef339b",
+      "canonicalLfSha256": "fdc847ef644f10232a827b44467e93fc94bfd9dedd9cebde83f3c4471738c28a"
+    },
+    "src/utils/submission.test.ts": {
+      "rawSha256": "6d927c9dc3692079daed9de44a068e063def40c9579cd1cde29284e863e6d279",
+      "canonicalLfSha256": "9b477c6fff7e3fc289873b4acd2951d9cc5abbdef7ce840b70c8f9222c5ceb5a"
+    },
+    "src/utils/submission.ts": {
+      "rawSha256": "97c1a3b274b624f08ff89d050c5a338f625b8c5207cfc117800e7d06c073c026",
+      "canonicalLfSha256": "23775123fdc8d39549c52fdabbd1efb2c8f99736656712309904b498435b7481"
+    },
+    "src/utils/time.ts": {
+      "rawSha256": "c25f3a9e51426a7f1afc41448a67547eb1015852b42aea4e3cae3215e6e5ca68",
+      "canonicalLfSha256": "8e54c0f460732f90dd3d22211c27147d8e378b9068df90162d07df6cfe90c864"
+    },
+    "dist/assets/AccountOperationsPage-BqcY0RhA.css": {
+      "rawSha256": "0f5aa7736566ff093b65786378628c8dbca778dfc42816014d7514590a117adc",
+      "canonicalLfSha256": "0f5aa7736566ff093b65786378628c8dbca778dfc42816014d7514590a117adc"
+    },
+    "dist/assets/AccountOperationsPage-CkQO6r9Y.js": {
+      "rawSha256": "14a32cf99e4062344bf4e5b52679c5600c022b305ea1b6d59d01ed3918d1ead6",
+      "canonicalLfSha256": "14a32cf99e4062344bf4e5b52679c5600c022b305ea1b6d59d01ed3918d1ead6"
+    },
+    "dist/assets/favicon-aObUoNjF.svg": {
+      "rawSha256": "099edb4ddd98ccdd93d2275e9e6b1d7b972fac863c3912e2869bcb8be88e739e",
+      "canonicalLfSha256": "cf1f8ed7dc4da2af8250d48bf63bab813aa9e855d86edda6f833b24db91742bd"
+    },
+    "dist/assets/index-BYX0ouXu.js": {
+      "rawSha256": "7a27e208703ce7d3d319e9e30d6d222d85831271a012b91a02bf7064e7e674c3",
+      "canonicalLfSha256": "7a27e208703ce7d3d319e9e30d6d222d85831271a012b91a02bf7064e7e674c3"
+    },
+    "dist/assets/index-DfMJutKC.css": {
+      "rawSha256": "3b0662cb0de9ccdfc609dc2e9a0b6c2d1d62137a2023d13a54c5cce6b09b5c38",
+      "canonicalLfSha256": "3b0662cb0de9ccdfc609dc2e9a0b6c2d1d62137a2023d13a54c5cce6b09b5c38"
+    },
+    "dist/index.html": {
+      "rawSha256": "285df49f08aff01147280ab50b3186bc235bea40063902cbee33d906e09489e1",
+      "canonicalLfSha256": "f36f982430a7adc416ef5017a4de30b9e4782d77b45a4d902c4508bacd6ed40b"
+    }
+  },
+  "lineEndingScope": "raw local Windows verification bytes and canonical LF identities; release fingerprints bind actual publication bytes",
+  "publication": "feature commit/push/Draft PR/exact HEAD CI pending"
+}

@@ -625,15 +625,20 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         JsonNode: {
-            string?: boolean;
             array?: boolean;
             empty?: boolean;
             null?: boolean;
             float?: boolean;
-            number?: boolean;
+            object?: boolean;
+            container?: boolean;
+            string?: boolean;
             missingNode?: boolean;
-            pojo?: boolean;
+            number?: boolean;
+            /** @enum {string} */
+            nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
             integralNumber?: boolean;
+            valueNode?: boolean;
+            pojo?: boolean;
             floatingPointNumber?: boolean;
             short?: boolean;
             int?: boolean;
@@ -645,11 +650,6 @@ export interface components {
             textual?: boolean;
             boolean?: boolean;
             binary?: boolean;
-            /** @enum {string} */
-            nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
-            object?: boolean;
-            valueNode?: boolean;
-            container?: boolean;
             embeddedValue?: boolean;
         };
         /** @description 현재 익명 참여자의 자연어 제출 또는 수정 요청 */
@@ -1551,12 +1551,12 @@ export interface components {
             option_id: string;
             /**
              * Format: int32
-             * @description primary 표시 순서1~3; 대안은 null
+             * @description 동등한 시간 선택지의 primary 표시 순서1~3; 품질 등급이 아니며 대안은 null
              */
             rank: number | null;
             /** @description 사용자가 실제 시작·종료를 고를 수 있는 전체 연속 창 */
             time_range: components["schemas"]["CandidateTimeRangeResponse"];
-            /** @description 같은 시간의 모든 유효 방식·장소·참석 조합 */
+            /** @description 같은 시간의 유효 방식·장소별 최대 참석 가능 집합; 불필요한 하위집합 제외 */
             variants: components["schemas"]["RecommendationVariantResponse"][];
             /** @description 실제 지역 날짜와 양쪽 종료 경계를 보존한 시간 설명 */
             summary: string;
@@ -1587,6 +1587,8 @@ export interface components {
             partial_attendance: boolean;
             /** @description 대면 대표 지역; 온라인은 null */
             place: components["schemas"]["CandidatePlaceResponse"] | null;
+            /** @description 고정 분석 배치에서 이 조합에 참석하지 않는 참여자의 공개 이름; 전원 참석은 빈 배열 */
+            excluded_participant_names?: string[];
         };
         /** @description 동명 기록을 구분하는 공개 선택 정보 */
         GuestRecordResponse: {
@@ -2305,6 +2307,13 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["ApiProblemSchema"];
                 };
+            };
+            /** @description 방 생성에 필요한 내부 설정 사용 불가 */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description 요청 제한 저장소 사용 불가 */
             503: {

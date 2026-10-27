@@ -1,0 +1,36 @@
+{
+  "workItem": "issue-107-web-precheck-draft",
+  "sourceRevision": "e9e81efe2c75813623729e4a9b8214bd8430c8b9",
+  "testFiles": [
+    {
+      "path": "src/components/SubmissionCheckPanel.draft.test.tsx",
+      "sha256": "17f0620880fbfef0189b4f2bc9e39f5923eb28826931097515893dee09a0c035"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/api/client.precheck.test.ts",
+    "src/pages/RoomPage.precheck.test.tsx",
+    "src/components/SubmissionCheckPanel.lifecycle.test.tsx",
+    "src/components/GuestParticipation.precheck.test.tsx",
+    "src/components/SubmissionCheckPanel.draft.test.tsx",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1",
+    "--reporter=json",
+    "--outputFile=/workspace/issue107-baseline-integration/web/.codex/tdd-evidence/issue-107-web-precheck-refined-red-result.json"
+  ],
+  "failedTests": [
+    "#107 distinguishes an unsaved edit from the prior accepted completion"
+  ],
+  "expectedFailureCategory": "MISSING_BEHAVIOR",
+  "recordedAt": "2026-10-17T18:36:10.540325+00:00",
+  "provenance": "RECONSTRUCTED_SKELETON_AFTER_FIXTURE_HARDENING",
+  "notes": "Current metadata-valid fingerprint compiled and failed against reconstructed scratch card skeleton. Original chronological unqualified-complete-heading RED occurred before the PRECHECK metadata fixture addition and is not reused as current-fingerprint chronological RED.",
+  "executionCwd": "/tmp/meetme-web-precheck-frozen-skeleton"
+}

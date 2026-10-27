@@ -1,5 +1,22 @@
 # Implementation log
 
+## 2026-10-20 — 서버와 웹 develop 릴리스 통합 준비
+
+- 사용자 승인에 따라 develop 통합 후 main행 PR을 준비하며, main 병합은 사용자가 직접 한다. 운영 배포·키/권한 변경·추가 유료 호출은 수행하지 않는다. 기존 develop 미사용 방침은 이번 승인부터 docs/BRANCHING.md의 흐름으로 대체한다.
+- PR33 `3c6fb446e3a6e20aec5fd2f9e1eb78233c6f09e6`과 PR24 `8bd4e3356f9ed3100e644cce776a72054c34727b`는 조상 관계가 아니다. 겹친 실행기·fixture·spec·Playwright 설정은 현재 계정 계약의 PR33판을 사용하고, PR24의 과거 main 고정 검증 문서2개·Compose1개는 역사 자료로 보존한다. 단순히 PR33이 PR24 전체를 포함했다고 표시하지 않는다.
+- CI를 develop push에서도 실행하도록 준비했다. 제품 TS/TSX/API 계약은 PR33과 바이트가 같으며 공급자 선택은 서버의 Jev 판단·Luna 보완 생성·Gemini 최종 분석과 Luna fallback 계약을 따른다.
+- 이 로컬 통합 source의 API 정합·lint·typecheck·단위682·build PASS, desktop/mobile 브라우저425 PASS·기존1 SKIP·retry/flaky0을 확인했다. Chromium 로컬 실행이며 실제 외부 OAuth/서버 공급자 응답 품질 검증으로 확대하지 않는다.
+- 원격 develop 생성의 최초 자동 승인 검토 거부 뒤, 최신 사용자 develop 통합 승인을 명시한 재검토가 성공했다. 원격 develop은 main `9b183978d5987f8fa8a5f02d542b17181e4929b4`에서 생성되었으며 실제 통합 SHA·새 main행 PR·정확 HEAD CI는 후속 확인한다. 원본 main checkout은 보존한다.
+
+
+## 2026-10-17 — 서버 #109 연결 웹 로그인·본인 방 아카이브
+
+- 최신 원격 main `9b183978d5987f8fa8a5f02d542b17181e4929b4`의 clean 트리에서 local `feature/issue-109-account-archive`로 분리했다. 원격 develop이 없는 웹 저장소 지침을 따른 것이며 서버 기준 develop3232128과 구분한다. 기존 미커밋 작업을 가져오지 않았다.
+- Google/Kakao 로그인, 로그인 필수 생성, 회원 이름 생략, 게스트 참여, 명시적 게스트 연결·409충돌, 본인 HOST 아카이브와 정리 예정 시각을 구현했다. 계정별 메모리/cache·지연 응답 격리, HttpOnly cookie Refresh 회전, 탭 간 cookie 요청 직렬화 및 만료 Access의 게스트 우회 차단을 포함한다.
+- 독립 frozen RED/GREEN·결함 주입과 교차 검토는 `.tdd`에 기록한다. ClaimConflict 최초 typed fixture 오류는 INVALIDATED 이력으로 보존하고 수정 후 독립 회귀 GREEN으로 구분했다. 실제 운영 OAuth 성공을 주장하지 않는다.
+- 최신 unit364/364, typecheck/lint/api:check/build, 최종동일source/dist browser383PASS+기존skip1/실패0, 실제격리서버native12PASS를 확인했다. 정확지문은 verification manifest, 결과는 `docs/ISSUE_109_HANDOFF.md`에 기록한다. 추가사용자승인으로독립리뷰뒤commit/push/DraftPR/정확headCI를 진행하며 merge/deploy/운영DB/실제secret변경은제외한다.
+
+
 ## 2026-10-07 — #17 지연 분석 재시도의 동일 화면 참여자 전환 경합
 
 - 최종 `059f049a4832effb2e2cc844d33f4cdd50b5dc1e`의 읽기 검토에서 `ANALYSIS_DELAYED`가 유지된 채 joined HOST에서 다른 joined MEMBER/context로 바뀌면 DelayedState hook이 재사용되는 경계를 확인했다. 기존 unjoined 복구 회귀는 컴포넌트 unmount만 검증했다. 독립 추가2건이 old retry200의 이전 HOST 복원과 old403의 새 MEMBER private cache 삭제를 실제 assertion RED로 재현했다.
@@ -462,3 +479,50 @@
 - 원격 재조회로 web main7b95951·server developdd8e07d/main91eb250 및 두 저장소 open PR0을 확인했다. 검증한 source8 SHA 묶음ecea5468…는 그대로다. 웹main 대상 PR, 서버develop 대상 테스트 전용 PR을 준비한다. 서버 CI의 열린 이슈 연결을 위한 보조 이슈는 같은 JIN-71/웹22의 계약 회귀만 다룬다.
 - 계산 오류 별도 실행을 추정하지 않는다. 조회한 기존 JIN-25(추천 로직·프롬프트)와 JIN-33(결과·저장 상태)은 Done이고 현재 새 계산 오류 수정 세션/브랜치는 미확인이다. 이번 source는 계산 로직을 변경하지 않는다.
 - Commit/PR: 동일 커밋 예정. 정확한 커밋 SHA·PR URL·원격 CI 결과는 게시 후 PR 본문/Linear에 확인한다. 로컬 단위308/browser383/서버659 및 기존skip의 결과와 한계는 앞 기록을 유지한다.
+
+## 2026-10-17 — #110 운영 요약 웹 (로컬 구현 중)
+
+- `main` 기준 `9b183978d5987f8fa8a5f02d542b17181e4929b4`의 별도 작업 복사본·`feature/110-operator-summary`에서 진행한다. 원본 저장소·기존 모임 흐름은 보존한다. 승인된 정책은 명시적 운영자 allowlist·HOST와 분리·기본 거부·원문 없는 읽기 요약·접근 감사다. 실제 계정 지정과 운영 적용은 제외한다.
+- 독립 작성자가 공유 계약과 합의된 접근성 라벨에서 수용 테스트를 설계했다. 컴파일된 골격은 tsc exit0 후 22개 전부 동작 assertion RED였고, 구현 뒤 같은 22개가 GREEN이다. 추가 인증 경계 테스트와 전체 검증·독립 결함 검증은 진행 중이며 이 단계에서 완료로 주장하지 않는다.
+- `/operations`는 목록 → 현재 방 설정/실행 목록 → 실행·시도/공급자별 알려진 사용량의 얇은 조회 화면이다. 세 GET만 호출하며 원문·이름·초대 코드·공급자 응답·비밀값·임의 오류 본문은 표시하지 않는다. Runtime schema는 허용 필드만 남기며, 오류 payload는 아예 읽지 않는다.
+- 화면 메모리 외 공유 QueryClient·Web Storage·URL에 운영 응답을 남기지 않는다. 이동·실패 때 기존 snapshot을 제거하고 요청 취소/소유권 검사를 통해 늦은 결과를 버린다. 사용량은 admission 기준 소계이며 null과 0을 구별한다. HTTP 횟수는 미상이고 실행 종료를 최종 게시로 추정하지 않는다.
+- #109가 실제 로그인·refresh·메모리 인증을 소유한다. 선택적 메모리 토큰 supplier와 auth revision 주입 경계만 준비하며 기본 App에는 실제 토큰 공급자가 없다. 공통 store 연결과 실제 인증 흐름 검증은 통합 대기다. 운영자 자동 지정·기존 HOST 승격·임의 식별 헤더·가짜 로그인 UI는 없다.
+- Node24.11.0·TypeScript5.9.3·Vitest3.2.7은 기존 캐시를 사용했다. 오프라인 pnpm은 일부 tarball이 없어 실패했으나 다운로드하지 않았다. 동일 lockfile을 확인한 원본 node_modules의 파일을 별도 복사하고 424개 junction을 작업 복사본 안으로 다시 지정했다. Windows 긴 경로·junction 준비 실패는 setup 이력이며 테스트 RED로 집계하지 않는다. 원본 쓰기·새 설치·외부 서비스 호출·push·commit·병합·배포 없음.
+
+### 최초 조회 단위 검증 완료, transport 관측 확장 대기
+
+- 추가 인증 13개를 포함해 독립 35개가 같은 기대값으로 GREEN이다. API 정합·lint 경고0·typecheck·전체 unit343/22파일·build가 모두 exit0이다. 운영 route를 lazy 청크14.45kB로 분리해 재빌드했고, index506.42kB 크기 및 기존 Zod 주석 경고는 남는다. lazy 변경 뒤 검증은 고정된 빌드의 브라우저 회귀로 확인했다.
+- 신규 대역 browser8개 모두 PASS, 전체 고정 빌드 browser391 PASS/기존desktopskip1/실패·flaky0/retries0/workers2다. 최초 sandbox 실행의 loopback 거부는 자기 runner 종료 뒤 검토된 로컬 실행 권한으로 재시도했으며, 기능 RED나 기능 실패에 섞지 않는다. 공유 엔진·다른 프로세스를 재시작/정리하지 않았다.
+- 독립 임시 복사본의 control22 PASS 후 null→0, 소계→전체 비용, 권한 거부 상태 폐기 누락, 임의 오류 echo, 응답 허용 목록 우회의 5개 결함을 전부 assertion으로 탐지했다. 실제 source·dist·테스트 SHA는 불변이다. 근거는 `docs/verification/issue-110-web-quality-candidate.json`과 독립 검증 기록·로그다.
+- 이는 전체 #110 완료 선언이 아니다. 부모가 실행별 client transport 관측을 새 formal TDD 단위로 승인했다. nullable 요약과 개별 client call의 정확한 서버 계약·최종 OpenAPI가 오면 별도 RED부터 화면을 확장한다. 과거 기록의 HTTP 미상은 유지하고 client 관측을 provider 수신·과금 확정으로 표시하지 않는다. 실제 #109 인증 store 연결도 계속 통합 대기다.
+
+
+
+## 2026-10-18 KST — #110 운영 요약·로컬 transport 후속
+
+- 기존 query/API·웹 미커밋을 보존하고 독립 transport10 테스트에서 typecheck 뒤6 RED/4 PASS를 확인했다. 확인된0·미진입false·미관측null·부분 관측 소계와 각 call의 상태/단조 ns를 표시하며 인증 공급자·저장소를 복제하지 않았다. 집중45 GREEN이다.
+- 실제 로컬 서버 OpenAPI의 operations3 경로/참조 DTO10개를 기존 snapshot에 병합하고 unrelated 계약을 보존했다. api 생성 정합·최종typecheck·lint0·unit353·build PASS다. 고정 source/dist 전체 mock browser395 PASS/기존skip1/실패·flaky0/retries0이며320px mobile과desktop 새transport4 cases를 포함한다. 실제 backend/browser 및109통합 성공은 아니다.
+- 최종 source 복사본의 결함7종을13개 assertion 실패로 탐지했고 control32 PASS다. 실제 source/test 변경0이다. machine proof는 docs/verification/issue-110-web-final.json이고 원시 로그는 로컬 전용이다. 기존343/391과 중복 합산하지 않는다.
+- 사용자 추가 승인으로 최종 독립 리뷰 후 commit/push/Draft PR/정확 SHA CI까지 준비한다. merge·운영배포·DB·Secret 변경·실제운영자등록은 제외한다. actual109 memory supplier/authRevision 연결은 미완료로 Draft 차단 조건을 남긴다. Commit/PR: 동일 커밋 예정.
+
+## 2026-10-18 KST — #110 실제 #109 메모리 인증 통합 로컬 완료
+
+- 별도 통합 작업 복사본에서 실제 #109 웹 HEAD `95f09c0a98c6538b0f19ed381fdf11a2f5b844d9`와 standalone #110 `bdfd22d238682764ecd56de5fa4755402d08e460`을 연결했다. 원본 standalone 근거는 역사로 유지하며 이번 통합 검증으로 재명명하지 않는다. 기존 #109 session/useAccountSession/getSessionVersion을 재사용하고 계정 타입·인증 저장소를 복제하지 않는다.
+- `/operations`의 안정된 API 객체는 매 요청 `getAccessToken(true)`를 읽는다. 알려진 만료는 요청 전401, 일반 supplier 장애는 요약503이며 게스트 재시도는 없다. 실제 계정 변경·로그아웃의 privacy revision과 AbortSignal로 기존 화면·늦은 응답을 폐기한다. 독립 route6개는 compiled RED4/기존PASS2 뒤 같은 테스트로 GREEN이다.
+- API 생성·정합, typecheck·lint경고0·전체unit415/36파일·production build PASS다. 고정 source72개/dist6개 전체 mock browser395 PASS/기존desktopskip1/실패·flaky·retry0이며 operations12개가 desktop/mobile에서 첫 회 통과했다. 최종 빌드와 브라우저 전후 지문 및 결함 복구 후 현재 지문도 모두 일치한다.
+- 실제 메모리 Bearer 연결 제거와 만료401→503의 새 결함2개는 각각4개/1개 assertion 실패로 탐지됐다. wrapper 원문 bytes와 테스트36개 지문이 유지됐다. 이전 standalone 결함7개와 합산해 새 통합 회차로 주장하지 않는다.
+- 격리 루프백 API18910/웹18911에서 실제 Spring·PostgreSQL·Redis·로컬HTTP OIDC/JWKS·합성RS256으로 native8 checks/operations10 requests PASS, API응답mock0/외부요청0이다. 익명401·일반계정403·테스트allowlist계정200 drilldown, 실제Bearer·unknown표시·logout폐기·no-store·DOM/URL/storage credential비노출을 확인했다. 초기 waitPromise 하네스 실패와 RFC UUID 테스트fixture 보정은 별도 실패 이력으로 보존하고 PASS에 섞지 않았다.
+- 실제 실행 서버의 operations3 paths/참조component10개는 현재 웹 snapshot과 정확히 일치한다. runtime export SHA256은 `54ec5ef4111c04df4df4620c0bd72ed2ee97b02a209314da45d348fe4c429c66`이다. 독립 근거 대조·source 리뷰의 남은P1/P2는 없으며 기록은 `docs/verification/issue-110-account-integration-independent.md`와 `issue-110-native.json`이다.
+- 이번 통합 commit·push·Draft PR·정확 HEAD 원격CI는 아직 pending이다. 운영로그인·운영자등록·운영설정/DB/Secret 변경·병합·배포는 하지 않는다. 서버 인가/감사/Nginx/V14·V15 근거는 서버 검증과 별도로 구분한다.
+
+
+## 2026-10-18 계정 복구 최소 보완 검증
+
+검증된 본인 입력 ≤500원문1건을 원탭 메모리에 보존하고 같은 방 새탭 로그인·명시 재확인·최신 소유권/입력 조회 후에만 draft로 복원한다. 일반 이동·소유권 거절·다른 계정·로그아웃은 폐기하고 pending저장중 공백만 바뀐 새exactraw도 보존한다. 송신trim/500검증·질문상한·참여/마감 정책은 바꾸지 않는다. 신규55/관련81·전체682단위·독립FI9탐지/매회원복55·전체mockbrowser425+기존skip1·api/lint/type/build PASS다. 실제localHTTPS 명시복구6PASS와frozen source482/classes1559/jars216/자산6전후동일·컨테이너/포트/키정리를 독립 확인했다.
+
+첫lifecycle4회귀·pendingexactraw/소유권4RED·시계fixture오류·자동focus관측부재는원본보존/분리했다. 새6은원8빠른전체이탈·자동focus4435를GREEN으로대체하지않는다. 상세 내부 인증 진단은공개대상에서제외하고로컬에만보존한다. 고정서버398의Primary대역이TwoStage/금융graph를우회하므로실모델/OAuth/운영성공주장0이다. runtime#131 actualgraph는별도서버검증이다. 다음은최종독립리뷰·기존PR33 후속commit/push/exactCI, Commit/PR 동일후속커밋예정이다.
+
+
+### 계정 복구 게시 전 독립 리뷰 PASS
+
+승인된 A 흐름과 최종 제품7/신규 독립55의 지문, FI9의 실제 assertion 탐지·매회 복구55PASS, 전체 unit682·mock browser425PASS/기존skip1 및 실제 로컬 HTTPS 명시복구6PASS를 읽기 대조했다. 최종 manifest17개와 unit134/HTTPS120 입력의 현재 지문 불일치0이며 새 P1/P2는 없다. 원8 빠른 전체이탈·native 자동focus 미검증, 고정 runtime 선행 준비와 Primary대역의 TwoStage/금융graph 우회 한계는 유지한다. 이 판정은 로컬 게시 준비에 한하며 후속 commit/push·정확 HEAD CI는 별도 게이트다. 리뷰 중 제품·테스트·실행·원격 변경0이다.

@@ -1,0 +1,112 @@
+{
+  "recordedAt": "2026-10-17T18:36:17.443723Z",
+  "checks": [
+    {
+      "manifest": ".tdd/red/issue-107-web-precheck-blind.json",
+      "provenance": "Original independent documented cycle",
+      "files": [
+        {
+          "path": "src/components/GuestParticipation.precheck.test.tsx",
+          "matches": true
+        }
+      ]
+    },
+    {
+      "manifest": ".tdd/red/issue-107-web-precheck-browser.json",
+      "provenance": "RECONSTRUCTED_SKELETON_AFTER_FIXTURE_HARDENING",
+      "files": [
+        {
+          "path": "e2e/precheck.spec.ts",
+          "matches": true
+        }
+      ]
+    },
+    {
+      "manifest": ".tdd/red/issue-107-web-precheck-close.json",
+      "provenance": "CHRONOLOGICAL_RED",
+      "files": [
+        {
+          "path": "src/components/SubmissionCheckPanel.close.test.tsx",
+          "matches": true
+        }
+      ]
+    },
+    {
+      "manifest": ".tdd/red/issue-107-web-precheck-correction-snapshot.json",
+      "provenance": "CHRONOLOGICAL_RED",
+      "files": [
+        {
+          "path": "src/components/SubmissionCheckPanel.correction-snapshot.test.tsx",
+          "matches": true
+        }
+      ]
+    },
+    {
+      "manifest": ".tdd/red/issue-107-web-precheck-correction.json",
+      "provenance": "Original independent documented cycle",
+      "files": [
+        {
+          "path": "src/pages/RoomPage.precheck-correction.test.tsx",
+          "matches": true
+        }
+      ]
+    },
+    {
+      "manifest": ".tdd/red/issue-107-web-precheck-draft-races.json",
+      "provenance": "CHRONOLOGICAL_RED",
+      "files": [
+        {
+          "path": "src/components/SubmissionCheckPanel.draft-races.test.tsx",
+          "matches": true
+        }
+      ]
+    },
+    {
+      "manifest": ".tdd/red/issue-107-web-precheck-draft.json",
+      "provenance": "RECONSTRUCTED_SKELETON_AFTER_FIXTURE_HARDENING",
+      "files": [
+        {
+          "path": "src/components/SubmissionCheckPanel.draft.test.tsx",
+          "matches": true
+        }
+      ]
+    },
+    {
+      "manifest": ".tdd/red/issue-107-web-precheck-protocol.json",
+      "provenance": "CHRONOLOGICAL_RED",
+      "files": [
+        {
+          "path": "src/pages/RoomPage.precheck-protocol.test.tsx",
+          "matches": true
+        }
+      ]
+    },
+    {
+      "manifest": ".tdd/red/issue-107-web-precheck.json",
+      "provenance": "RECONSTRUCTED_SKELETON_AFTER_FIXTURE_HARDENING",
+      "files": [
+        {
+          "path": "src/api/client.precheck.test.ts",
+          "matches": true
+        },
+        {
+          "path": "src/pages/RoomPage.precheck.test.tsx",
+          "matches": true
+        },
+        {
+          "path": "src/components/SubmissionCheckPanel.lifecycle.test.tsx",
+          "matches": true
+        },
+        {
+          "path": "src/components/GuestParticipation.precheck.test.tsx",
+          "matches": true
+        },
+        {
+          "path": "src/components/SubmissionCheckPanel.draft.test.tsx",
+          "matches": true
+        }
+      ]
+    }
+  ],
+  "notes": "Active manifest mismatches remain provenance work for independent test writer, not grounds to pretend chronological RED for post-fixture reconstructed evidence."
+}

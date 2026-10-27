@@ -1,0 +1,39 @@
+{
+  "workItem": "PR33 account recovery and bounded private draft",
+  "unit": {
+    "tests": 682,
+    "passed": 682,
+    "failed": 0,
+    "pending": 0,
+    "sourceFiles": 134,
+    "sourceBeforeAfterCurrentEqual": true,
+    "receiptSha256": "c42ddc814f32d3c4b38f17e3c092976791008877c286d97738cd72e1d1f9eb26",
+    "resultSha256": "9c9fbe9553b2bddad8f465fd3ea2ae549dc862df2a85b8fe5c18a17c5a4fd0f8",
+    "rawDirectory": "/tmp/issue132-account-recovery/root-full-gates-final"
+  },
+  "browser": {
+    "expected": 425,
+    "skipped": 1,
+    "unexpected": 0,
+    "flaky": 0,
+    "durationMs": 518862.17100000003,
+    "retries": 0,
+    "sourceBeforeAfterCurrentEqual": true,
+    "resultSha256": "3f7bc5cb8a1ab41376c525e91f9f4c341865ed9841711baee2ed0c327e14446f",
+    "configSha256": "680f1f7da492c6b04a07a621234be84c08b564d3c0bb0b1a516eb09c258f366d",
+    "rawDirectory": ".codex/tdd-evidence/issue132-final-browser"
+  },
+  "apiLintTypeBuild": "PASS",
+  "firstFullUnitFailure": {
+    "tests": 678,
+    "passed": 674,
+    "failed": 4,
+    "classification": "Genuine lifecycle regression; unchanged previous tests; minimal source fix then current682 PASS",
+    "rawDirectory": "/tmp/issue132-account-recovery/root-full-gates"
+  },
+  "limits": [
+    "Mock browser gate is separate from real local HTTPS6",
+    "Existing original8 and automatic-focus4435 failures remain preserved, not relabeled PASS",
+    "No actual external model/OAuth/production access"
+  ]
+}

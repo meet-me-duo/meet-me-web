@@ -1,0 +1,47 @@
+{
+  "workItem": "issue-109-web-session",
+  "sourceRevision": "9b183978d5987f8fa8a5f02d542b17181e4929b4",
+  "testFiles": [
+    {
+      "path": "src/auth/session.test.ts",
+      "sha256": "55a33015887915098cc749e8df301111165daddd770671ad2ca936c262149b17"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/auth/session.test.ts",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1",
+    "--reporter=json",
+    "--outputFile=/tmp/meetme-109-web-session-red.json"
+  ],
+  "failedTests": [
+    "issue #109 service session boundary starts anonymous and restores the service account through credentialed POST refresh",
+    "issue #109 service session boundary keeps credentials and the profile in memory without reading or writing Web Storage",
+    "issue #109 service session boundary coalesces overlapping refresh calls into one rotation request",
+    "issue #109 service session boundary notifies subscribers of restored and cleared account state and supports unsubscribe",
+    "issue #109 service session boundary clears the previous account on refresh HTTP 401 without retrying the rotating request",
+    "issue #109 service session boundary clears the previous account on refresh HTTP 503 without retrying the rotating request",
+    "issue #109 service session boundary handles uncertain refresh network failure as unauthenticated without retry",
+    "issue #109 service session boundary rejects malformed or already expired successful refresh payload 0",
+    "issue #109 service session boundary rejects malformed or already expired successful refresh payload 1",
+    "issue #109 service session boundary rejects malformed or already expired successful refresh payload 2",
+    "issue #109 service session boundary rejects malformed or already expired successful refresh payload 3",
+    "issue #109 service session boundary never sends an Access Token once its exact expiry instant is reached",
+    "issue #109 service session boundary clears locally and sends explicit logout allDevices=false with the current Bearer and cookies",
+    "issue #109 service session boundary clears locally and sends explicit logout allDevices=true with the current Bearer and cookies",
+    "issue #109 service session boundary does not revive a logged out account when an older refresh finishes later",
+    "issue #109 service session boundary advances the privacy epoch on identity changes and logout while reads leave it stable",
+    "issue #109 service session boundary an obsolete refresh HTTP 200 cannot replace or erase a newer login after logout",
+    "issue #109 service session boundary an obsolete refresh HTTP 401 cannot replace or erase a newer login after logout",
+    "issue #109 service session boundary reports failed server logout while retaining local logout and never retrying the request"
+  ],
+  "expectedFailureCategory": "TDD_TODO_REACHED",
+  "recordedAt": "2026-10-17T14:37:33Z"
+}

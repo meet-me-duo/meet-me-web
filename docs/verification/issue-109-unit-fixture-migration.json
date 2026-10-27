@@ -1,0 +1,206 @@
+{
+  "workItem": "issue-109-web-unit-fixture-migration",
+  "role": "independent test-only legacy fixture update; no production modifications",
+  "scope": [
+    "Eight legacy host flow/room unit files now supply an explicit synthetic logged profile only for HOST fixtures. Member/unjoined initial snapshots stay anonymous through mockRoomAccount; no global default login mock.",
+    "Legacy room read, private-cache ownership, draft, submission, duplicate-write and uncertain-outcome assertions preserved; only actors updated to the accepted mandatory-host-login contract.",
+    "Creation uses account profile and purpose initial focus; obsolete host-name typing replaced by absence/account hint assertions.",
+    "Eight additional schema regressions prove 1..50 Unicode profile code points and blank/51 rejection against unchanged production Zod behavior."
+  ],
+  "testFiles": [
+    {
+      "path": "src/pages/HostCreationFlow.test.tsx",
+      "sha256": "6fbd2620c9a941c9116bcac26c43387c9c0484b0fc684fd0feae59f64f981bd1"
+    },
+    {
+      "path": "src/pages/HostCreationReview.test.tsx",
+      "sha256": "725cc43aaa80229854c98d28dc84aac4bd39cf45b483b9fa2b9c05a48116206e"
+    },
+    {
+      "path": "src/pages/RoomPage.test.tsx",
+      "sha256": "8bf1d4c0a3de6fef8d936965821f8c4845b65f69c4cee7c2bc27d814460a1d3c"
+    },
+    {
+      "path": "src/pages/RoomPage.recovery.test.tsx",
+      "sha256": "707170f9bd31679df9aaecaf3d3ce4c9c79f2b46c3342c6ceb98154495f1dcf5"
+    },
+    {
+      "path": "src/pages/RoomPage.recommendations.test.tsx",
+      "sha256": "96c3c0319977b0c1592a0eb33c826acf4e76d7fc585581108797917956c89c9a"
+    },
+    {
+      "path": "src/pages/RoomPage.draft-transition.test.tsx",
+      "sha256": "0dc7b65c666586ce4eeb8b80fbefff75be55734738840013c0aad0f78c3cd039"
+    },
+    {
+      "path": "src/pages/RoomPage.auth-lifecycle.test.tsx",
+      "sha256": "c4b87061fb21b889a79e9ca2bc5a63480db6ec6e047b25ba2af441d8ed62691e"
+    },
+    {
+      "path": "src/pages/RoomPage.delayed-owner-lifecycle.test.tsx",
+      "sha256": "f21ee443ab8e65d9b8192fbcecfd2ff3e1995b326784fe61d29dd6251bfb594d"
+    },
+    {
+      "path": "src/test/roomAccountFixture.ts",
+      "sha256": "1cd3f4abc53e1ff8562bbb7459de9564fff043e17bb98d88a7bc41ff84dea922"
+    },
+    {
+      "path": "src/utils/createRoom.account-name.test.ts",
+      "sha256": "d6e42480417db85ccb23e75b1c3a81c4aa9e6138d87e91989bf7680eb838e095"
+    }
+  ],
+  "commands": [
+    {
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "src/pages/HostCreationFlow.test.tsx",
+        "src/pages/HostCreationReview.test.tsx",
+        "--configLoader",
+        "runner",
+        "--pool",
+        "threads",
+        "--maxWorkers",
+        "1"
+      ],
+      "result": "31/31 GREEN",
+      "log": "/tmp/meetme-109-web-host-fixtures.log"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "src/utils/createRoom.account-name.test.ts",
+        "--configLoader",
+        "runner",
+        "--pool",
+        "threads",
+        "--maxWorkers",
+        "1"
+      ],
+      "result": "8/8 GREEN on unchanged production; no valid RED claimed",
+      "log": "/tmp/meetme-109-web-account-name-red.json"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "src/pages/HostCreationFlow.test.tsx",
+        "src/pages/HostCreationReview.test.tsx",
+        "src/pages/RoomPage.test.tsx",
+        "src/pages/RoomPage.recovery.test.tsx",
+        "src/pages/RoomPage.recommendations.test.tsx",
+        "src/pages/RoomPage.draft-transition.test.tsx",
+        "src/pages/RoomPage.auth-lifecycle.test.tsx",
+        "src/pages/RoomPage.delayed-owner-lifecycle.test.tsx",
+        "--configLoader",
+        "runner",
+        "--pool",
+        "threads",
+        "--maxWorkers",
+        "1"
+      ],
+      "result": "156/156 GREEN in eight migrated files",
+      "log": "/tmp/meetme-109-web-host-all-fixtures.log"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--configLoader",
+        "runner",
+        "--pool",
+        "threads",
+        "--maxWorkers",
+        "1"
+      ],
+      "result": "358/358 GREEN in all 26 unit test files, 33.38s",
+      "log": "/tmp/meetme-109-web-unit-post-fixtures.log"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "-b",
+        "--pretty",
+        "false"
+      ],
+      "result": "PASS",
+      "log": "/tmp/meetme-109-web-owned-tests-typecheck.log"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/eslint/bin/eslint.js",
+        "owned test files and helper"
+      ],
+      "result": "PASS",
+      "log": "/tmp/meetme-109-web-owned-tests-lint.log"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--configLoader",
+        "runner",
+        "--pool",
+        "threads",
+        "--maxWorkers",
+        "1"
+      ],
+      "result": "28files362/362 PASS after latest R109-06 strict expired-session/cache production changes,30.70s",
+      "log": "/tmp/meetme-109-web-unit-r10906-final.log"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "src/pages/HostCreationFlow.test.tsx",
+        "src/utils/createRoom.account-name.test.ts",
+        "src/utils/createRoom.account-authority.test.ts",
+        "--configLoader",
+        "runner",
+        "--pool",
+        "threads",
+        "--maxWorkers",
+        "1"
+      ],
+      "result": "15/15 PASS following serialization contract supersession",
+      "log": "/tmp/meetme-109-web-account-authority-fixtures.log"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--configLoader",
+        "runner",
+        "--pool",
+        "threads",
+        "--maxWorkers",
+        "1"
+      ],
+      "result": "29 files 364/364 PASS after final account-authority serialization fix,37.47s",
+      "log": "/tmp/meetme-109-web-unit-account-authority-final.log"
+    }
+  ],
+  "correctedFinding": "Installed Zod4.6.5 .max(50) uses Unicode code point count when necessary; initial UTF16-only assumption disproved by actual tests and dependency source. No production fix needed.",
+  "recordedAt": "2026-10-17T15:31:16.505284Z",
+  "accountAuthoritySupersession": {
+    "reason": "Authenticated server account profile is the sole authority for member HOST name. The ignored optional legacy request field was validated as UTF16 max50 before being ignored, rejecting valid 26..50 emoji profile names.",
+    "changedExpectations": [
+      "src/pages/HostCreationFlow.test.tsx exact creation payload omits host_display_name",
+      "src/utils/createRoom.account-name.test.ts preserves trimmed parsed profile names and all 1..50 Unicode/blank51 checks, while asserting body has no host_display_name",
+      "e2e/create-form.spec.ts exact creation payload omits host_display_name"
+    ],
+    "preserved": "All other payload fields, profile hint/name input waiver, purpose focus, guest behavior and original non-auth assertions unchanged.",
+    "independentRed": ".tdd/red/issue-109-web-account-authority.json",
+    "provenance": "The original eight Unicode schema tests were GREEN regressions; no prior RED claimed. Their old serialization-only assertion is explicitly superseded by the approved account authority contract. New separate two-case test froze valid RED before parent source change."
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "workItem": "issue107-independent-web-generated-contract-review",
+  "reviewer": "/root/baseline_merge_review",
+  "recordedAt": "2026-10-17T19:27:48.333568+00:00",
+  "status": "APPROVED_FINAL_NATIVE_SCHEMA_GENERATED_ALIAS_AND_EXACT_FORMATTED_RUNTIME_SCOPE",
+  "sourceFingerprints": [
+    {
+      "path": "openapi/meet-me.openapi.json",
+      "sha256": "e44e9fb6e99d28309440f65458e26dce439b60372d9a81db575e28b9fd414c97"
+    },
+    {
+      "path": "src/api/schema.d.ts",
+      "sha256": "b9d929d0f0b48c20fa075267cdfe4716ca3fe419917cfee23893b6c549d40b85"
+    },
+    {
+      "path": "src/api/precheck.ts",
+      "sha256": "4690caaea4155a14b2d8869961bc450aa1ca689449f00b20438dab7743d69fd2"
+    },
+    {
+      "path": "src/api/types.ts",
+      "sha256": "e35e13382894823240f72bd63db0f6b66d9f2068befb9cff79f6ac365dd04db5"
+    }
+  ],
+  "nativeInput": {
+    "path": "/tmp/issue107-native-openapi-defense12.json",
+    "sha256": "99b9622d17a71062a5922cc04d2e790169cb6d8434d249bd8f3f1eeed4df6799",
+    "semanticEqualToWorkingSnapshot": true,
+    "runtimeProvenance": "Implementation native fixture captured after defensive12 phase. Admission/NUL final source expected no API delta; exact final runtime-manifest equivalence must be checked."
+  },
+  "existingBasePathComparison": {
+    "base": "local git HEAD:openapi/meet-me.openapi.json",
+    "basePaths": 26,
+    "currentPaths": 36,
+    "missingPaths": [],
+    "existingPathChanges": [
+      "/api/rooms/{inviteCode}/analysis/retry operationId retry becomes retry_1 to maintain globally unique generated IDs; URL, method and response contracts unchanged."
+    ],
+    "priorWorking31PathClaim": "Withdrawn by implementer: no independent prior working31 snapshot archive found. Verified claims are local git HEAD26 existing paths preserved, final native36 paths, and5 precheck paths."
+  },
+  "conclusions": [
+    "Five precheck paths have explicit required CAS/idempotency fields, raw_text String, optional nullable direct_text/question_id/choice_id and own-view responses. Create/answer/retry202, cancel/current200 match controller.",
+    "All nullable object references are OpenAPI3.1 oneOf(ref,null), including private candidate/accepted/check/operation_outcome and check.question; required keys remain present.",
+    "Accepted required confirmation_source enum PRECHECK|LEGACY_CORRECTION reflects actual version-link provenance. Status enum includes all12 stored outcomes.",
+    "RFC9457 error schema matches ApiProblem shape; specified400/401/403/404/409/429 response bodies reference ApiProblemSchema.",
+    "Generated aliases derive all DTO field types; Complete only removes undefined and preserves null. Nested DTO normalization adds required properties without reinterpreting candidate versus accepted revision clocks.",
+    "Additive room submission_protocol is optional on web backward reads and future nonempty unknown protocol remains guarded by unchanged RoomPage behavior.",
+    "Four behavioral source hashes match the independently reviewed67-case/11-fault frozen snapshot."
+  ],
+  "originalProductionEdits": 0,
+  "originalTestEdits": 0,
+  "externalProviderCalls": 0,
+  "realOAuthCalls": 0,
+  "postAliasFocusedRun": {
+    "tests": 67,
+    "failures": 0,
+    "source": "Implementer report; immutable final writer manifest/raw result to be verified at final gate."
+  },
+  "finalNativeInput": {
+    "path": "/tmp/issue107-native-openapi-final.json",
+    "sha256": "93f68e592f8067487af6be0d0839fe0db7082feff8435835be1f8d423cb60d26",
+    "semanticEqualToWorkingSnapshot": true,
+    "paths": 36,
+    "runtimeManifest": "/tmp/issue107-native-runtime-manifest.json",
+    "retainedManifest": ".tdd/verification/issue-107-native-runtime-source-manifest.json",
+    "runtimeManifestEntries": 216,
+    "missingEntries": [],
+    "fingerprintMismatches": [],
+    "testHarnessEntries": [
+      "src/test/kotlin/com/meetme/server/submission/adapter/input/web/PreSubmissionCheckNativeBrowserServer.kt"
+    ]
+  },
+  "nativeFormatSupersession": "Before-final-format12 PASS retained separately. Final formatted35 source manifest f54e1283 and216-entry runtime03bb749 were re-exported/retested; current12 PASS is19:26:14Z, not inherited from older runtime.",
+  "nativeBeforeFormatEvidence": "docs/verification/issue-107-native-browser-before-final-format.json",
+  "finalFormattedNativeInput": {
+    "contractGate": ".tdd/verification/issue-107-final-native-contract-gate.json",
+    "finalManifestSha256": "03bb749dad1461b5096a17c7a6bc0dd76bb4fbd437bfb176ac75d7ce044ce9a0",
+    "runtimeEntries": 216,
+    "runtimeCurrentMismatches": 0,
+    "nativeTests": 12,
+    "nativeAt": "2026-10-17T19:26:14.757Z",
+    "webSourceAssetMismatches": 0
+  }
+}

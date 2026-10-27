@@ -1,0 +1,16 @@
+{
+  "workItem": "issue-109-web-account-authority",
+  "role": "Independent auth contract test author /root/auth_tests; root implements production change; identity_db_tests owns prior fixture expectation supersession",
+  "authority": "User #109 member HOST name is the authenticated server profile; member does not re-enter name/password. Root explicitly chose omission of ignored legacy optional host_display_name.",
+  "publicContract": [
+    "Both a normal name and actual fifty-emoji profile are product-valid member inputs",
+    "createRoomBody must omit host_display_name entirely because server profile alone decides HOST name and legacy UTF-16 validation otherwise rejects fifty-emoji profiles before ignoring that field",
+    "All seven other room payload fields retain exact semantics and serialization",
+    "Unicode code-point validation and trimming remain independently tested by existing eight account-name cases; this narrow serializer test does not replace those checks"
+  ],
+  "red": ".tdd/red/issue-109-web-account-authority.json",
+  "verification": ".tdd/verification/issue-109-web-account-authority.json",
+  "status": "PASS valid2assertionRED, implementation2GREEN, deliberate legacyfield re-add2assertionfailures, exactsource restore2GREEN",
+  "remaining": "Prior affected fixture payload expectations require explicit supersession by their author; original full web gates and final review remain root-owned",
+  "recordedAt": "2026-10-17T15:25:09.497117Z"
+}

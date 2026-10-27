@@ -1,0 +1,282 @@
+{
+  "workItem": "issue-109-web-final-manifest",
+  "sourceRevision": "9b183978d5987f8fa8a5f02d542b17181e4929b4",
+  "branch": "feature/issue-109-account-archive",
+  "runtimeSources": [
+    {
+      "path": "src/App.tsx",
+      "sha256": "de4b805b52c525e623479b90899b65af2ae3919b8edbffa707c0bb98edb2bb95"
+    },
+    {
+      "path": "src/api/client.ts",
+      "sha256": "74609f280b3318a92ed4af35f0345a498f04ce58cf51f40418a034469f38e9aa"
+    },
+    {
+      "path": "src/api/recovery.ts",
+      "sha256": "e4154303d46629f512b6583beab67a4632f07cd1ff08042e9eac5f9f69332a3a"
+    },
+    {
+      "path": "src/api/types.ts",
+      "sha256": "c8541b0965c185d184f7b1193163b65bee135cf29d5a2751ef96ec6b1c65075d"
+    },
+    {
+      "path": "src/assets/favicon.svg",
+      "sha256": "cf1f8ed7dc4da2af8250d48bf63bab813aa9e855d86edda6f833b24db91742bd"
+    },
+    {
+      "path": "src/auth/AccountBoundary.tsx",
+      "sha256": "ab40be7f077b74e66be64cc44d7f88bee2732e4ef1617159e906ec4c006c8dd5"
+    },
+    {
+      "path": "src/auth/AccountViews.tsx",
+      "sha256": "b9ebcfcb56a999f38f520b79b1d8b6ee9fd9c7dbffe47adb10ba922ec9192a73"
+    },
+    {
+      "path": "src/auth/authCookieLock.ts",
+      "sha256": "0436f72645a38d1c540758f0515469c199d9b0ca91c2cddada2f1a91db00bde1"
+    },
+    {
+      "path": "src/auth/loginReturn.ts",
+      "sha256": "1d8285e11a38660c46dd841a8886368ed782bbbbc756b1c9a0d48b4e885a953a"
+    },
+    {
+      "path": "src/auth/session.ts",
+      "sha256": "b4c9cedd6132ebf497348b2e7c34baa7a2f8bb86ae7e0db4462e9f2a692ba18b"
+    },
+    {
+      "path": "src/auth/useAccount.ts",
+      "sha256": "54816c097b9403a4dfb30b27e33bd08716df6c0dfd7ba174f5bda873a10ec2f0"
+    },
+    {
+      "path": "src/components/AnalysisRecoveryPanel.tsx",
+      "sha256": "33454e85d12722c9b644e457ae841e09bf00be8d9e7592d73e66e30c056517fd"
+    },
+    {
+      "path": "src/components/CandidateCard.tsx",
+      "sha256": "521eee5d0b3033bf4aa06afbfe2db8b88452e1a11710605896c9e3a6bcd25a96"
+    },
+    {
+      "path": "src/components/LandingStory.tsx",
+      "sha256": "61439eaa6ae22191e8e6e3c18b287656cfa6e4d83af6fd18871c500c369caef4"
+    },
+    {
+      "path": "src/components/MeetMeLogo.tsx",
+      "sha256": "2187ff59837ddef4b413ffacdd8debea0e7ec41e9a01a0deaaec3581e9bb1cc0"
+    },
+    {
+      "path": "src/components/RecentRooms.tsx",
+      "sha256": "ea20e9e64b0b757dba93fece7cfe83310509a2eece7fc03e5a8c6da2cddcc734"
+    },
+    {
+      "path": "src/components/RecommendationChoices.tsx",
+      "sha256": "62d3e734f0079a2f2fb7569ac8d172518b4a775bb3e04d2be117e74b6ea657fe"
+    },
+    {
+      "path": "src/components/RecommendationsPanel.tsx",
+      "sha256": "16eb1fcaf60b125ac4811ac1efeb16a0a0ef447c7c3d6baab4b1ad3c787f94cc"
+    },
+    {
+      "path": "src/components/recommendationView.ts",
+      "sha256": "3f13f9639a13aa0aeb6106cb5400af3bbdc0e813fc35aa16325d23744ed3aa3b"
+    },
+    {
+      "path": "src/hooks/useRecentRooms.ts",
+      "sha256": "39a64a9bb63872981d703992004ed2c14e74aacb7964768f4336f994f6e34b50"
+    },
+    {
+      "path": "src/main.tsx",
+      "sha256": "7d7b52c035c4718a62feeb25d35d92f46fa8a8f12ba5469829e4ceca8a4b7f30"
+    },
+    {
+      "path": "src/pages/LandingPage.tsx",
+      "sha256": "4e8c9c54cc0e52bcfd4fec34eda8887db1cecd33d89f44feeeaecde02edac47e"
+    },
+    {
+      "path": "src/pages/RoomPage.tsx",
+      "sha256": "28748fa4da686f6af296bab20d426ef988f75febdbd84b0452456580b2085b9b"
+    },
+    {
+      "path": "src/styles.css",
+      "sha256": "bd11d27a28d06805652aa5e126e3be0a6c4f6b47e12f6294cb43933c2acdf17f"
+    },
+    {
+      "path": "src/utils/createRoom.ts",
+      "sha256": "1b845f9ef42dcff212d000328d8470da00c4b30bb6ca20c50f90e610e1d264c7"
+    },
+    {
+      "path": "src/utils/recentRooms.ts",
+      "sha256": "6671e5f81644afcba1a167aef6db712d7518ccd3810ab9257774322a3e24f4f1"
+    },
+    {
+      "path": "src/utils/recommendationTime.ts",
+      "sha256": "fdc847ef644f10232a827b44467e93fc94bfd9dedd9cebde83f3c4471738c28a"
+    },
+    {
+      "path": "src/utils/submission.ts",
+      "sha256": "23775123fdc8d39549c52fdabbd1efb2c8f99736656712309904b498435b7481"
+    },
+    {
+      "path": "src/utils/time.ts",
+      "sha256": "8e54c0f460732f90dd3d22211c27147d8e378b9068df90162d07df6cfe90c864"
+    }
+  ],
+  "buildInputs": [
+    {
+      "path": "index.html",
+      "sha256": "96023fb38352fde0a43f69224f7954366a392bf5e4b4fae5b6875a736a176dc2"
+    },
+    {
+      "path": "vite.config.ts",
+      "sha256": "8af4b46598126c5b0041660347ef9059df00ff613e799da998e1faa60148905a"
+    },
+    {
+      "path": "package.json",
+      "sha256": "404340f002a709517367b49ceaafba6ba5cab23468d0d699c94e300e0a1e44da"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "61d46dad7cee0cbd51d336e23ce011a62e8ce5c0be15685c51d94d00034c9a52"
+    },
+    {
+      "path": "tsconfig.app.json",
+      "sha256": "d21792a48dccf67493470e84385b19161106714c8188f5e2543829bdef4f84b1"
+    }
+  ],
+  "generatedApiContracts": [
+    {
+      "path": "openapi/meet-me.openapi.json",
+      "sha256": "924b0683f5f48de3fe3fd3d1d130c6212a511912db31b284f9e697ba840fd19e"
+    },
+    {
+      "path": "src/api/schema.d.ts",
+      "sha256": "62f50276b0c163ef965869d456120ab70a4a203a88084f396060f0405608ffc1"
+    }
+  ],
+  "e2eSources": [
+    {
+      "path": "e2e/analysis-recovery.spec.ts",
+      "sha256": "86b0ed23fbbd073d826a2c54d467a05e3178377768e56571c7dfb13201c11ce1"
+    },
+    {
+      "path": "e2e/create-form.spec.ts",
+      "sha256": "81ff3593ffa4425df0d359b90da04c28672f14c393cd0902c472a284e9096e6c"
+    },
+    {
+      "path": "e2e/diverse-recommendations.spec.ts",
+      "sha256": "c18b4851224d26c75bd3f209c6c645cdc1e0bb94870432bfec5e282a7e52334a"
+    },
+    {
+      "path": "e2e/host-creation.spec.ts",
+      "sha256": "7285cee3339262e2f08309c77eb951dd5ce88ff8853cc988826ecc0e22ab8614"
+    },
+    {
+      "path": "e2e/landing.spec.ts",
+      "sha256": "95d5416d0fe1f36fcc240943e7544f5dd5c867c80c368bf29443f876c2949b76"
+    },
+    {
+      "path": "e2e/plan-accuracy.spec.ts",
+      "sha256": "82af1a56b3118dfaefe90041fe835196d83224850069caeed03f76e5f1fbacbc"
+    },
+    {
+      "path": "e2e/recent-rooms.spec.ts",
+      "sha256": "669e6e52dfbc1ef760df8e95a8a80acf60669c574dda62b4a0dc9a0796b8e423"
+    },
+    {
+      "path": "e2e/room-states.spec.ts",
+      "sha256": "01cb6cc69173ff9c004c9d43630b0990ba09e4a5325becc186749940a7d72ec0"
+    },
+    {
+      "path": "e2e/saved-input.spec.ts",
+      "sha256": "0ecb5c56a3369cddadce9c49836e4aec343f9476e51d88bff00eac9545bc76d7"
+    },
+    {
+      "path": "e2e/submission-flow.spec.ts",
+      "sha256": "d0ae765cf9961a691dded56f01cd7409db11de7ac53c16e6ab194457a745c624"
+    },
+    {
+      "path": "e2e/submission.spec.ts",
+      "sha256": "300a9ace3bcb193e8cfc29ddfcde98006166586da0e9a787d5a6aebc6006dab7"
+    },
+    {
+      "path": "e2e/ux-integration.spec.ts",
+      "sha256": "49653ea1d79286655af40d9af7fb407ee80d15888250b8b2f5f725e96d53a5db"
+    },
+    {
+      "path": "e2e/accountFixture.ts",
+      "sha256": "fe372124e74f01a72379e7b894571eb7a1aa3eec2f8903ae86ddfb9e14c9b100"
+    }
+  ],
+  "dist": [
+    {
+      "path": "dist/assets/favicon-DjtCOTlh.svg",
+      "sha256": "cf1f8ed7dc4da2af8250d48bf63bab813aa9e855d86edda6f833b24db91742bd"
+    },
+    {
+      "path": "dist/assets/index-By9lmPRX.js",
+      "sha256": "16b756899fa639b18911800f2388c32542dd86a4ec5222dbaf34d23c7d42f9b3"
+    },
+    {
+      "path": "dist/assets/index-DfMJutKC.css",
+      "sha256": "3b0662cb0de9ccdfc609dc2e9a0b6c2d1d62137a2023d13a54c5cce6b09b5c38"
+    },
+    {
+      "path": "dist/index.html",
+      "sha256": "1714df01b96c2859fe85b424f9f56bebea5898ddca946fc34878112fca9a3b0c"
+    }
+  ],
+  "browserTestedDistEqualsPostSchemaBuild": true,
+  "gates": {
+    "unit": "364/364 PASS,29 files,37.47s after final account-authority payload fix",
+    "e2e": "383 PASS,1 pre-existing intentional desktop mobile-layout skip,0 FAIL,4.5min on final source/dist",
+    "typecheckAndBuildAfterFinalSchema": "PASS; final schema and account-authority runtime fix included in browser-tested compiled artifact",
+    "apiSnapshotGenerateCheck": "Parent regenerated final API snapshot/types; independent node scripts/check-openapi-generated.mjs PASS on final workspace",
+    "eslint": "PASS on final complete workspace"
+  },
+  "logs": {
+    "unit": "/tmp/meetme-109-web-unit-account-authority-final.log",
+    "e2e": "/tmp/meetme-109-e2e-account-authority-final.log",
+    "build": "/tmp/meetme-109-web-account-authority-build.log",
+    "eslint": "/tmp/meetme-109-web-account-authority-eslint.log",
+    "apiCheck": "/tmp/meetme-109-web-account-authority-api-check.log"
+  },
+  "operationalOAuthVerified": false,
+  "recordedAt": "2026-10-17T15:31:16.505284Z",
+  "priorBoundaryHistory": [
+    {
+      "gates": {
+        "unit": "362/362 PASS,28 files after R109-06",
+        "e2e": "383 PASS,1 pre-existing intentional desktop mobile-layout skip,0 FAIL after R109-06,5.0min",
+        "typecheckAndBuildAfterFinalSchema": "PASS; all4dist artifacts byte-identical to browser-tested compiled artifact",
+        "apiSnapshotGenerateCheck": "Parent reports final regenerated OpenAPI snapshot/types/check PASS after response-documentation-only changes",
+        "eslint": "PASS on final complete workspace"
+      },
+      "logs": {
+        "unit": "/tmp/meetme-109-web-unit-r10906-final.log",
+        "e2e": "/tmp/meetme-109-e2e-r10906-final.log",
+        "build": "/tmp/meetme-109-web-post-schema-build.log",
+        "eslint": "/tmp/meetme-109-web-eslint-r10906-final.log"
+      },
+      "dist": [
+        {
+          "path": "dist/assets/favicon-DjtCOTlh.svg",
+          "sha256": "cf1f8ed7dc4da2af8250d48bf63bab813aa9e855d86edda6f833b24db91742bd"
+        },
+        {
+          "path": "dist/assets/index-DWM7P9ZD.js",
+          "sha256": "7d56bce47862746d288533715fe177ec24d61154df656fd4bcf918c00b79943b"
+        },
+        {
+          "path": "dist/assets/index-DfMJutKC.css",
+          "sha256": "3b0662cb0de9ccdfc609dc2e9a0b6c2d1d62137a2023d13a54c5cce6b09b5c38"
+        },
+        {
+          "path": "dist/index.html",
+          "sha256": "afc1df1142c3371360cea8936eca0b52e73939122034a477eb93787ad16f0161"
+        }
+      ],
+      "recordedAt": "2026-10-17T15:20:04Z"
+    }
+  ],
+  "finalBoundary": "Account HOST name is server-authoritative; frontend omits ignored legacy host_display_name. Includes R109-06 strict account expiry/no-store policy and final regenerated API schema.",
+  "sourceDistUnchangedThroughoutFinalBrowserGate": true
+}

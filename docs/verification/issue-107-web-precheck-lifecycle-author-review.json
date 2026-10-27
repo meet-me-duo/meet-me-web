@@ -1,0 +1,17 @@
+{
+  "workItem": "issue-107-web-precheck-lifecycle",
+  "testFile": "src/components/SubmissionCheckPanel.lifecycle.test.tsx",
+  "sha256": "a82c63dadb2597e53c839f76339ef2c78bfb6e67fbe55ad1b83c01f75e56fe93",
+  "passed": 7,
+  "failed": 0,
+  "recordedAt": "2026-10-17T18:19:37.524396+00:00",
+  "notes": [
+    "Independent supplemental tests first current-fingerprint run is GREEN; do not claim pre-implementation RED for these seven.",
+    "First other-tab conflict assertion preceded React Query observer notification and was invalid as a product RED. Added wait for actual newer snapshot.",
+    "Next synchronized version overconstrained editor persistence; clarified public oracle permits explicitly reopening editor while requiring draft preservation and conflict warning. Current seven pass after implementation progress.",
+    "Earlier attempted lifecycle RED manifest withdrawn; raw local logs retained. UI epoch/late-JSON/correction/API tests have separate valid RED. Mutation review should verify current other-tab oracle by deliberate draft-loss fault.",
+    "UUID-valid current fingerprint additionally checked by explicitly reconstructed scratch skeleton; not chronological original RED."
+  ],
+  "modelCalls": 0,
+  "realBackend": false
+}

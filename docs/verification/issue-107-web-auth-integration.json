@@ -1,0 +1,116 @@
+{
+  "work_item": "issue-107-109-web-auth-integration",
+  "recorded_at": "2026-10-17T16:25:13.641804+00:00",
+  "base": "95f09c0a98c6538b0f19ed381fdf11a2f5b844d9",
+  "applied_without_commit": "de82a7dd84002d76ac5d0a97cf2c4b1a629b1fc0",
+  "original_worktree_unchanged": {
+    "path": "/workspace/meet-me-web",
+    "head": "de82a7dd84002d76ac5d0a97cf2c4b1a629b1fc0"
+  },
+  "test_files": [
+    {
+      "path": "src/api/client.clarifications-account.test.ts",
+      "sha256": "1b7254635dc42244005363c1c89f521113db620734bfea90b00fb019379f1921"
+    },
+    {
+      "path": "src/api/client.clarifications-expiry.test.ts",
+      "sha256": "b6e15b3b76101d0fbf1983ce9285f8e7763ab01a58a9a2d23ca1b1da3a7ae56c"
+    },
+    {
+      "path": "src/pages/RoomPage.clarifications-account.test.tsx",
+      "sha256": "2f1601284eaf8b4e03feb28c3469a84c88f551b086321939d611eff6a83f9f16"
+    }
+  ],
+  "http_red": {
+    "total": 28,
+    "failed": 18,
+    "passed": 10,
+    "exit": 1,
+    "command": "node node_modules/vitest/vitest.mjs run src/api/client.clarifications-account.test.ts src/api/client.clarifications-expiry.test.ts --configLoader runner --pool threads --maxWorkers 1",
+    "baseline_source": "Exact #107 de82 client.ts and schema.d.ts temporarily substituted in integration worktree, with actual #109 session modules available. Both conflict files exactly restored after run.",
+    "strict_typecheck_exit": 0,
+    "strict_typecheck_log": "/tmp/issue107-web-auth-integration-typecheck.log",
+    "raw_log": "/tmp/issue107-web-auth-integration-red.log",
+    "raw_log_sha256": "36dc215d92a9656ed15325766cf8bcd02bd58e218ccaf04e16c76cc63b514918",
+    "failed_tests": [
+      "src/api/client.clarifications-account.test.ts > #107 clarification methods use #109's shared account request boundary > applies current Bearer/cookie/no-store/locale and exact GET contract",
+      "src/api/client.clarifications-account.test.ts > #107 clarification methods use #109's shared account request boundary > applies current Bearer/cookie/no-store/locale and exact POST contract",
+      "src/api/client.clarifications-account.test.ts > #107 clarification methods use #109's shared account request boundary > reads the current token for each clarification operation and omits Authorization for a guest",
+      "src/api/client.clarifications-account.test.ts > #107 clarification methods use #109's shared account request boundary > discards late 'GET' HTTP 200 after an account switch without leaking its body",
+      "src/api/client.clarifications-account.test.ts > #107 clarification methods use #109's shared account request boundary > discards late 'POST' HTTP 200 after an account switch without leaking its body",
+      "src/api/client.clarifications-account.test.ts > #107 clarification methods use #109's shared account request boundary > discards late 'GET' HTTP 401 after an account switch without leaking its body",
+      "src/api/client.clarifications-account.test.ts > #107 clarification methods use #109's shared account request boundary > discards late 'GET' HTTP 403 after an account switch without leaking its body",
+      "src/api/client.clarifications-account.test.ts > #107 clarification methods use #109's shared account request boundary > discards late 'POST' HTTP 401 after an account switch without leaking its body",
+      "src/api/client.clarifications-account.test.ts > #107 clarification methods use #109's shared account request boundary > discards late 'POST' HTTP 403 after an account switch without leaking its body",
+      "src/api/client.clarifications-account.test.ts > #107 clarification methods use #109's shared account request boundary > rechecks account identity after 'GET' HTTP 200 JSON decoding",
+      "src/api/client.clarifications-account.test.ts > #107 clarification methods use #109's shared account request boundary > rechecks account identity after 'POST' HTTP 200 JSON decoding",
+      "src/api/client.clarifications-account.test.ts > #107 clarification methods use #109's shared account request boundary > rechecks account identity after 'GET' HTTP 403 JSON decoding",
+      "src/api/client.clarifications-account.test.ts > #107 clarification methods use #109's shared account request boundary > rechecks account identity after 'POST' HTTP 403 JSON decoding",
+      "src/api/client.clarifications-account.test.ts > #107 clarification methods use #109's shared account request boundary > sends an explicitly retried answer once per click with the same operation UUID and the newly rotated same-account token",
+      "src/api/client.clarifications-expiry.test.ts > #107 clarification operations honor real #109 Access expiry > stops GET at exact account expiry before a guest-capable network request",
+      "src/api/client.clarifications-expiry.test.ts > #107 clarification operations honor real #109 Access expiry > stops POST at exact account expiry before a guest-capable network request",
+      "src/api/client.clarifications-expiry.test.ts > #107 clarification operations honor real #109 Access expiry > uses the real restored service account for GET without persisting its token or private input",
+      "src/api/client.clarifications-expiry.test.ts > #107 clarification operations honor real #109 Access expiry > uses the real restored service account for POST without persisting its token or private input"
+    ]
+  },
+  "http_initial_attempt": {
+    "status": "INVALIDATED",
+    "reason": "Dynamic-import ApiError value was incorrectly used as a type in expiry fixture. Focused strict typecheck detected it. A type-only InstanceType<typeof ApiError> correction was made, then strict typecheck passed and RED was recaptured. Expectations unchanged.",
+    "raw_log": "/tmp/issue107-web-auth-integration-initial-runtime-only-invalid.log"
+  },
+  "ui_red": {
+    "total": 7,
+    "failed": 4,
+    "passed": 3,
+    "exit": 1,
+    "command": "node node_modules/vitest/vitest.mjs run src/pages/RoomPage.clarifications-account.test.tsx --configLoader runner --pool threads --maxWorkers 1",
+    "baseline_source": "Exact #107 de82 App.tsx and schema temporarily substituted while real #109 session modules and integrated client/RoomPage remained. Original #109 App and schema conflict bytes exactly restored after run.",
+    "strict_typecheck_exit": 0,
+    "strict_typecheck_log": "/tmp/issue107-web-auth-ui-typecheck.log",
+    "raw_log": "/tmp/issue107-web-auth-ui-red.log",
+    "raw_log_sha256": "200e6b816060faf53a2bb2139592f3d6d097a79005fc5d86edc5ab2e87eba92b",
+    "failed_tests": [
+      "src/pages/RoomPage.clarifications-account.test.tsx > #107 clarification UI inside #109's real account boundary > purges A's draft and caches on A→B even when room, name, role and viewer context hint are identical",
+      "src/pages/RoomPage.clarifications-account.test.tsx > #107 clarification UI inside #109's real account boundary > does not let A's pending answer HTTP 200 contaminate B's new private draft or authorization",
+      "src/pages/RoomPage.clarifications-account.test.tsx > #107 clarification UI inside #109's real account boundary > does not let A's pending answer HTTP 403 contaminate B's new private draft or authorization",
+      "src/pages/RoomPage.clarifications-account.test.tsx > #107 clarification UI inside #109's real account boundary > keeps guest MEMBER participation until explicit login and never auto-claims its question for an unjoined account"
+    ]
+  },
+  "combined_green": {
+    "total": 35,
+    "passed": 35,
+    "exit": 0,
+    "command": "node node_modules/vitest/vitest.mjs run src/api/client.clarifications-account.test.ts src/api/client.clarifications-expiry.test.ts src/pages/RoomPage.clarifications-account.test.tsx --configLoader runner --pool threads --maxWorkers 1",
+    "raw_log": "/tmp/issue107-web-auth-focused-green.log",
+    "production_implementation_owner": "Parent resolved client conflict by preserving existing #109 request and both #107 methods; author only resolved additive CSS conflict. App/session auth source unchanged."
+  },
+  "remaining": [
+    "Combined browser-to-actual-server native E2E and real provider operations were not run in this scope.",
+    "Integrated-source fault injection not run in this phase; published-source FI remains separate evidence."
+  ],
+  "limits": [
+    "Only synthetic tokens and transport were used. Real #109 session/AccountBoundary/Routes/privacy boundary consumed by new App suite.",
+    "No server Gradle, real provider, AI, operations, commit, push or PR action performed.",
+    "Prior independent #107 and #109 pass counts do not represent combined source completion."
+  ],
+  "native_schema": {
+    "bytes": 57137,
+    "sha256": "ccb1da582cbdc8bd5fc2d7f3ee400f2a1a09993c06a6a1ebb0505d5315cd24be",
+    "paths": 25,
+    "exact_union_of_published_paths": true,
+    "api_check_exit": 0
+  },
+  "whole_unit": {
+    "files": 37,
+    "passed": 466,
+    "exit": 0,
+    "raw_log": "/tmp/issue107-web-auth-full-unit.log"
+  },
+  "final_gates": {
+    "all_six_exit_zero": true,
+    "unit_passed": 466,
+    "browser_passed": 391,
+    "browser_intentional_skipped": 1,
+    "evidence": "docs/verification/issue-107-web-auth-final-gate.json"
+  }
+}

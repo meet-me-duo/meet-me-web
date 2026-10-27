@@ -1,0 +1,292 @@
+{
+  "issue": "https://github.com/meet-me-duo/meet-me-web/issues/22",
+  "date": "2026-10-17",
+  "branch": "feature/22-local-host-integration",
+  "scope": "New web integration files only; fixed backend archive; no existing tracked file edits",
+  "acceptedRun": {
+    "sourceRevision": "91eb2505ddf6b4db549a5bc2b8b07f11e514d0b0",
+    "webRevision": "9b183978d5987f8fa8a5f02d542b17181e4929b4",
+    "completed": true,
+    "actualProviderCalls": 0,
+    "checks": {
+      "webBuild": true,
+      "runtimeProviderKeysEmptyAndWorkersDisabled": true,
+      "internalRuntimeNetwork": true,
+      "certificateChain": true,
+      "untrustedCaRejected": true,
+      "zeroAdmittedAttempts": true,
+      "stableInputFingerprints": true,
+      "privateKeysAndProfilesRemoved": true
+    },
+    "limitations": [
+      "Local Chromium desktop/mobile viewport; not a real mobile device",
+      "Worker, rate limit and retention disabled only for this isolated run",
+      "Localhost ports test cross-origin CORS, not production subdomain host isolation",
+      "No provider interpretation, recommendations, social login or production verification"
+    ],
+    "inputSha256": {
+      "scripts/run-host-integration.mjs": "91ddb2526aa00a86dfa8b67c18598ee58cafe1eb24f33dc5a6d3af33d60a528a",
+      "playwright.host-integration.config.ts": "5768b34352516bf9ee986abc43a61a2a87eb07ce4391fd67a4ae2f83c9ecc7ad",
+      "integration/host-creation/compose.yml": "22f8d376d6ecb1aa34047856da5a52abd976d46100001953d26b7e04db656da9",
+      "integration/host-creation/fixtures.ts": "03cabb180e3277a19e2772a49fc21c50490f54101fcea426b707183b931bc11d",
+      "integration/host-creation/host-creation.spec.ts": "4d794228cabd90df4c40c6076f87eaae57aba164e4572e2704e48607f5096c8f"
+    },
+    "serverJarSha256": "ffa36173edc0b6bb2aaaeac45c7dac2c8ae12f597447b6a408de6aa079676ebd",
+    "browserVersion": "151.0.7922.173",
+    "admittedAttempts": 0,
+    "tests": {
+      "expected": 8,
+      "unexpected": 0,
+      "flaky": 0,
+      "skipped": 0
+    }
+  },
+  "checks": {
+    "apiCheck": "PASS",
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "webBuild": "PASS",
+    "integrationStandaloneStrictTypeScript": "PASS",
+    "runnerNodeSyntax": "PASS",
+    "unit": {
+      "files": 18,
+      "passed": 308
+    },
+    "existingMockBrowser": {
+      "startTime": "2026-10-17T09:25:14.923Z",
+      "duration": 313616.668,
+      "expected": 383,
+      "skipped": 1,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "realBrowser": {
+      "startTime": "2026-10-17T09:37:33.860Z",
+      "duration": 50584.515,
+      "expected": 8,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    }
+  },
+  "timestampBoundary": {
+    "samples": [
+      {
+        "project": "chromium-desktop",
+        "kind": "timestamp-boundary-submission",
+        "written": {
+          "seconds": 1792229858,
+          "nanoseconds": 516802990,
+          "precision": 9
+        },
+        "persisted": {
+          "seconds": 1792229858,
+          "nanoseconds": 516803000,
+          "precision": 6
+        },
+        "deltaNanoseconds": 10,
+        "exactStringEqual": false,
+        "withinPgMicrosecond": true,
+        "pgProjectionEqual": true
+      },
+      {
+        "project": "chromium-desktop",
+        "kind": "timestamp-boundary-close",
+        "written": {
+          "seconds": 1792229864,
+          "nanoseconds": 876724637,
+          "precision": 9
+        },
+        "persisted": {
+          "seconds": 1792229864,
+          "nanoseconds": 876725000,
+          "precision": 6
+        },
+        "deltaNanoseconds": 363,
+        "exactStringEqual": false,
+        "withinPgMicrosecond": true,
+        "pgProjectionEqual": true
+      },
+      {
+        "project": "chromium-desktop",
+        "kind": "timestamp-boundary-close",
+        "written": {
+          "seconds": 1792229870,
+          "nanoseconds": 672884474,
+          "precision": 9
+        },
+        "persisted": {
+          "seconds": 1792229870,
+          "nanoseconds": 672884000,
+          "precision": 6
+        },
+        "deltaNanoseconds": -474,
+        "exactStringEqual": false,
+        "withinPgMicrosecond": true,
+        "pgProjectionEqual": true
+      },
+      {
+        "project": "chromium-desktop",
+        "kind": "timestamp-boundary-close",
+        "written": {
+          "seconds": 1792229878,
+          "nanoseconds": 883345518,
+          "precision": 9
+        },
+        "persisted": {
+          "seconds": 1792229878,
+          "nanoseconds": 883346000,
+          "precision": 6
+        },
+        "deltaNanoseconds": 482,
+        "exactStringEqual": false,
+        "withinPgMicrosecond": true,
+        "pgProjectionEqual": true
+      },
+      {
+        "project": "chromium-mobile-viewport",
+        "kind": "timestamp-boundary-submission",
+        "written": {
+          "seconds": 1792229883,
+          "nanoseconds": 458384412,
+          "precision": 9
+        },
+        "persisted": {
+          "seconds": 1792229883,
+          "nanoseconds": 458384000,
+          "precision": 6
+        },
+        "deltaNanoseconds": -412,
+        "exactStringEqual": false,
+        "withinPgMicrosecond": true,
+        "pgProjectionEqual": true
+      },
+      {
+        "project": "chromium-mobile-viewport",
+        "kind": "timestamp-boundary-close",
+        "written": {
+          "seconds": 1792229889,
+          "nanoseconds": 402690078,
+          "precision": 9
+        },
+        "persisted": {
+          "seconds": 1792229889,
+          "nanoseconds": 402690000,
+          "precision": 6
+        },
+        "deltaNanoseconds": -78,
+        "exactStringEqual": false,
+        "withinPgMicrosecond": true,
+        "pgProjectionEqual": true
+      },
+      {
+        "project": "chromium-mobile-viewport",
+        "kind": "timestamp-boundary-close",
+        "written": {
+          "seconds": 1792229895,
+          "nanoseconds": 157077186,
+          "precision": 9
+        },
+        "persisted": {
+          "seconds": 1792229895,
+          "nanoseconds": 157077000,
+          "precision": 6
+        },
+        "deltaNanoseconds": -186,
+        "exactStringEqual": false,
+        "withinPgMicrosecond": true,
+        "pgProjectionEqual": true
+      },
+      {
+        "project": "chromium-mobile-viewport",
+        "kind": "timestamp-boundary-close",
+        "written": {
+          "seconds": 1792229903,
+          "nanoseconds": 732053810,
+          "precision": 9
+        },
+        "persisted": {
+          "seconds": 1792229903,
+          "nanoseconds": 732054000,
+          "precision": 6
+        },
+        "deltaNanoseconds": 190,
+        "exactStringEqual": false,
+        "withinPgMicrosecond": true,
+        "pgProjectionEqual": true
+      }
+    ],
+    "allPgProjectionEqual": true,
+    "minimumDeltaNanoseconds": -474,
+    "maximumDeltaNanoseconds": 482,
+    "contract": "First-write instants compare exactly in PostgreSQL TIMESTAMPTZ; persisted GET-before/replay/GET-after compare as exact strings and unchanged version/batch fingerprints"
+  },
+  "cleanup": {
+    "ca.key": true,
+    "localhost.key": true,
+    "profiles": true,
+    "untrusted-profile": true
+  },
+  "existingTrackedFilesUnchanged": {
+    "meet-me-web": true,
+    "meet-me-server": true
+  },
+  "localEvidence": [
+    {
+      "path": "/tmp/meetme-host-integration-FtlXAG/evidence.json",
+      "sha256": "913aa6e8b96b20b81caa7c473968599bca34e8cc4094ab84e3e0bee3b3dad3b4"
+    },
+    {
+      "path": "/tmp/meetme-host-integration-FtlXAG/playwright.json",
+      "sha256": "e8f7f4d35ba9b31eb8c5ad7cc52c9c79593b0ab69333ed7464d404d789cb7bb9"
+    },
+    {
+      "path": "/tmp/meetme-host-integration-FtlXAG/build.log",
+      "sha256": "2696e1150dadf323ebc98e8842669d16f90dd1dd6a9be55141da8de1314bd64b"
+    },
+    {
+      "path": "/workspace/scratch/host-integration/unit.log",
+      "sha256": "9d0034c3093bdaeac42a99c04b74e984bf3999e8099b950eabc6870a45f83751"
+    },
+    {
+      "path": "/workspace/scratch/host-integration/legacy-report.json",
+      "sha256": "f775e48d1f43035dc628d026000b313d4a87bc9447019d59062734b20f13fdc4"
+    },
+    {
+      "path": "/workspace/scratch/host-integration/web-build.log",
+      "sha256": "155338274b23f44997dd3e5642724ba7f497304e4ece747d2de6ff25d351f808"
+    },
+    {
+      "path": "/workspace/scratch/host-integration/run-verified.log",
+      "sha256": "0e88c4424ec3902aa67e2c9f8f3c2277bc50bcedd0a227387d020023bb0b8a98"
+    }
+  ],
+  "documentationSha256": "a8452ac7f785da3e3ed2418d996a7b7108cf020fa33d3f3385929a10334fefa5",
+  "independentReview": {
+    "status": "PASS",
+    "testAuthor": "contract_tests",
+    "reviewer": "review_integration",
+    "mandatoryFindingsRemaining": 0,
+    "verified": [
+      "8 real integration cases and timestamp observations",
+      "Existing unit308/browser383+skip1 results",
+      "Five input source hashes and seven raw evidence hashes",
+      "Fixed backend archive and JAR provenance",
+      "Only seven new web files; existing tracked files unchanged",
+      "No API interception or certificate verification bypass",
+      "Private keys/profiles/containers/network cleanup"
+    ],
+    "scope": "Authorized keyless local browser/API/DB integration only"
+  },
+  "remainingLimits": [
+    "Chromium 151.0.7922.173 internal certificate-store schema dependency",
+    "Narrow viewport, not a physical mobile device",
+    "Localhost ports do not prove production subdomain cookie isolation",
+    "Rate limit/retention/worker/provider quality and recommendation flow not tested here",
+    "Social-login linkage depends on server issue 109",
+    "Existing deadline-before-scheduler and lost creation-response replay limits unchanged"
+  ],
+  "externalWrites": false,
+  "operationalKeysImported": false,
+  "commitPushPrMergeDeploy": false
+}

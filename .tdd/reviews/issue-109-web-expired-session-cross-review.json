@@ -1,0 +1,25 @@
+{
+  "workItem": "issue-109-web-expired-session-cross-review",
+  "reviewer": "/root/identity_db_tests",
+  "independence": "Reviewer did not author the expiry API tests or strict API client/session production change",
+  "verdict": "APPROVED_TEST_DESIGN",
+  "testFiles": [
+    {
+      "path": "src/api/client.expired-session.test.ts",
+      "sha256": "8d723636f28ffd6368d9946b01d12cfac65be1ccec4d6bbae239a688ed47f896"
+    }
+  ],
+  "checks": [
+    "Real session and API client modules used; only transport and wall clock synthetic",
+    "In-memory authenticated account restored while Access valid; exact15minute expiry advanced without clearing the account object",
+    "Private GET and submission PUT both reject401 AUTH_ACCESS_EXPIRED before any guest-capable request; fetch count remains only initialrefresh",
+    "Valid account private GET explicitly cache no-store plus current AuthorizationBearer and cookies",
+    "Tests do not read implementation private state or couple to incidental calls; account ownership precedence is observable at transport boundary",
+    "Frozen test fingerprint matches RED summary"
+  ],
+  "scopeLimits": [
+    "Guest/null-session behavior remains covered by existing API contracts and full384case browser suite using real frontend modules",
+    "Deliberate strict-token/cache faults and restoredGREEN are author execution evidence; complete runtime verification follows latest build"
+  ],
+  "recordedAt": "2026-10-17T15:12:35Z"
+}

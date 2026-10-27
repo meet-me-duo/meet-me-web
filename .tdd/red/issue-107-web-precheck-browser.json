@@ -1,0 +1,26 @@
+{
+  "workItem": "issue-107-web-precheck-browser",
+  "sourceRevision": "e9e81efe2c75813623729e4a9b8214bd8430c8b9",
+  "testFiles": [
+    {
+      "path": "e2e/precheck.spec.ts",
+      "sha256": "c4910b1000a976489613f91941fa869ebfde8f4f41e111eae7535ac8f6b65acb"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/@playwright/test/cli.js",
+    "test",
+    "e2e/precheck.spec.ts",
+    "--config=/tmp/meetme-precheck-browser-refined-red.config.mjs",
+    "--grep",
+    "one card retains"
+  ],
+  "failedTests": [
+    "one card retains text and shows pending without false completion after a double click"
+  ],
+  "expectedFailureCategory": "MISSING_BEHAVIOR",
+  "recordedAt": "2026-10-17T18:36:10.540706+00:00",
+  "notes": "Current UUID-valid, explicit accepted PRECHECK metadata browser file copied byte-for-byte to scratch. Normal5000ms explicit visibility assertion fails against fixed reconstructed throw-skeleton artifact, not test/transport timeout. Current fingerprints recaptured after metadata hardening. Representative1 RED only; full desktop/mobile22 defined. Model0/backend0.",
+  "provenance": "RECONSTRUCTED_SKELETON_AFTER_FIXTURE_HARDENING"
+}

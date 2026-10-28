@@ -421,12 +421,17 @@ fieldset.field legend { margin-bottom: 9px; }
 .login-card { margin: 0; padding: 24px; }
 .login-card h1 { margin: 0; font-size: clamp(1.375rem, 3vw, 1.5rem); letter-spacing: -.04em; line-height: 1.4; word-break: keep-all; overflow-wrap: anywhere; }
 .login-card p { margin: 0; color: var(--muted); word-break: keep-all; overflow-wrap: anywhere; }
-.login-card .social-actions { display: grid; gap: 10px; width: min(100%, 224px); margin: 0 auto var(--space-6); }
+.social-login-actions .social-actions { display: grid; gap: 10px; width: min(100%, 224px); margin: 0 auto; }
+.social-login-actions--recovery .social-actions { margin-inline: 0; }
+.social-login-feedback { min-height: 3em; margin: 10px 0 14px; font-size: .85rem; line-height: 1.5; overflow-wrap: anywhere; }
+.login-card .social-login-feedback { margin: 10px 0 14px; }
 .social-login { display: flex; align-items: center; min-height: 46px; width: min(100%, 224px); align-self: center; border-radius: 6px; transition: box-shadow .15s; }
 .social-login img { display: block; width: 100%; height: auto; }
 .social-login--kakao:not([aria-disabled="true"]):hover { box-shadow: var(--shadow); }
 .social-login:focus-visible { outline: 3px solid var(--sky-dark); outline-offset: 3px; }
+.social-login:not([aria-disabled="true"]):active { box-shadow: 0 0 0 3px var(--sky-dark); }
 .social-login[aria-disabled="true"] { cursor: default; }
+.social-login[aria-busy="true"] { outline: 3px solid var(--sky-dark); outline-offset: 3px; cursor: progress; }
 .login-card .login-note { padding-top: var(--space-6); border-top: 1px solid var(--border); font-size: .85rem; overflow-wrap: anywhere; }
 .account-actions { display: flex; gap: .8rem; flex-wrap: wrap; margin: 1.5rem 0; }
 .archive-list { list-style: none; padding: 0; display: grid; gap: 1rem; margin: 2rem 0; }
@@ -522,23 +527,18 @@ fieldset.field legend { margin-bottom: 9px; }
   right: 0;
   top: 0;
 }
-.social-login[aria-disabled="true"] .gsi-material-button {
+.social-login[aria-disabled="true"]:not([data-pending]) .gsi-material-button {
   cursor: default;
   background-color: #ffffff61;
 }
-.social-login[aria-disabled="true"] .gsi-material-button .gsi-material-button-state {
+.social-login[aria-disabled="true"]:not([data-pending]) .gsi-material-button .gsi-material-button-state {
   background-color: #1f1f1f1f;
 }
-.social-login[aria-disabled="true"] .gsi-material-button .gsi-material-button-contents {
+.social-login[aria-disabled="true"]:not([data-pending]) .gsi-material-button .gsi-material-button-contents {
   opacity: 38%;
 }
-.social-login[aria-disabled="true"] .gsi-material-button .gsi-material-button-icon {
+.social-login[aria-disabled="true"]:not([data-pending]) .gsi-material-button .gsi-material-button-icon {
   opacity: 38%;
-}
-.social-login--google:not([aria-disabled="true"]):active .gsi-material-button-state,
-.social-login--google:not([aria-disabled="true"]):focus .gsi-material-button-state {
-  background-color: #001d35;
-  opacity: 12%;
 }
 .social-login--google:not([aria-disabled="true"]):hover .gsi-material-button {
   -webkit-box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .30), 0 1px 3px 1px rgba(60, 64, 67, .15);
@@ -548,5 +548,11 @@ fieldset.field legend { margin-bottom: 9px; }
   background-color: #001d35;
   opacity: 8%;
 }
+.social-login--google:not([aria-disabled="true"]):active .gsi-material-button-state,
+.social-login--google:not([aria-disabled="true"]):focus-visible .gsi-material-button-state {
+  background-color: #001d35;
+  opacity: 12%;
+}
 
 .social-login > .gsi-material-button { display: block; width: 100%; min-width: 0; }
+.social-login[data-pending] .gsi-material-button { cursor: inherit; }

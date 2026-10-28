@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-28",
+  "remoteMain": "59a5b104cfb14992bd25c5775f65bb4af136a6b8",
+  "baseDevelop": "c5641a6147833a6d28d9485ce9c3d0edb2b1e2ee",
+  "branch": "feature/oauth-button-feedback",
+  "scope": "web-only; local commit, no remote publication/PR/merge/deployment",
+  "gates": {
+    "unit": {
+      "total": 762,
+      "passed": 762,
+      "failed": 0,
+      "files": 69
+    },
+    "e2e": {
+      "startTime": "2026-10-28T13:14:39.643Z",
+      "duration": 318153.617,
+      "expected": 483,
+      "skipped": 1,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "socialLoginE2E": {
+      "specs": 12,
+      "projectRuns": 12,
+      "statuses": [
+        "expected",
+        "expected",
+        "expected",
+        "expected",
+        "expected",
+        "expected",
+        "expected",
+        "expected",
+        "expected",
+        "expected",
+        "expected",
+        "expected"
+      ]
+    },
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "apiCheck": "PASS",
+    "build": "PASS; existing Zod annotation and chunk-size warnings",
+    "diffCheck": "PASS",
+    "independentReview": "PASS after document-wide lock and Google cursor corrections; no remaining blocker"
+  },
+  "browser": "system Chromium 151.0.7922.173; Desktop Chrome and Pixel 7 emulation; retries=0",
+  "boundaries": {
+    "auth": "synthetic local refresh/OAuth fixtures only; no real signin/signup",
+    "bfCache": "native back navigation plus explicit persisted pageshow test; no claim of actual BFCache hit",
+    "popup": "system browser bypassed context.route for initial popup; loopback-only GET fixture on 127.0.0.1:8080",
+    "blockedDownload": "Chrome for Testing download denied with HTTP 403 Domain forbidden at cdn.playwright.dev; no bypass",
+    "serverChanges": false,
+    "remoteWrites": false
+  },
+  "files": {
+    "src/components/SocialLoginActions.tsx": "2ae2b387250af6612af25b64a81e1b74ffe8411b1d87c042d1edc6dcbb4db3f3",
+    "src/components/useSocialLoginNavigation.ts": "f44b5029768b4d72d3f8cbea0405cf57bea862c6ca7c1280278d13abe9ee56c0",
+    "src/components/SocialLoginLink.tsx": "aab5565cc7b93e46bd517193d2e826437ea8871f7b14045054d20516b8872674",
+    "src/auth/AccountViews.tsx": "0d90baac89084ecd86eff5e03858d221a4385d8fe9c5e88f59a03ea3b7ef17aa",
+    "src/auth/AccountBoundary.tsx": "9b3239275ae562a56031c48b29c7691779b769d160ca043486677d334fd35054",
+    "src/styles.css": "7774cb0c1abc5e7eb194478063603eaa176dcf1b11d84794f32ce3396129ab2d",
+    "src/components/SocialLoginActions.test.tsx": "2c41da262e286595aafccbcbbcf4e23c84482331e8456a775ee6b2f4bb0cc68c",
+    "src/auth/AccountRecovery.flow.test.tsx": "f6ccef59489b95227479375b5d50a1c62c22c353095de2c8cb044d9f2b53e50a",
+    "e2e/social-login-feedback.spec.ts": "efbd25dd0067a670e9be48b0457a7656dff2e0a6db331bf05081f217c393aeb7"
+  }
+}

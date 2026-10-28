@@ -77,7 +77,7 @@ async function dirty() { const input = await verified(); fireEvent.change(input,
 const noPrivateRaw = () => { expect(screen.queryByDisplayValue(raw)).not.toBeInTheDocument(); expect(document.body.textContent).not.toContain(raw); };
 const noCompletion = () => expect(screen.queryByRole("heading", { name: "조건 제출을 완료했어요" })).not.toBeInTheDocument();
 const beforeUnload = () => { const event = new Event("beforeunload", { cancelable: true }); window.dispatchEvent(event); return event.defaultPrevented; };
-function preventNativeNavigation(link: HTMLElement) { link.addEventListener("click", event => event.preventDefault(), { once: true }); }
+function preventNativeNavigation() { document.addEventListener("click", event => event.preventDefault(), { once: true }); }
 function privateStorageAbsent() { const dump = JSON.stringify({ ...localStorage, ...sessionStorage }); for (const value of [raw, savedRaw, A.id, contextA, "synthetic-access-A"]) expect(dump).not.toContain(value); }
 
 describe("issue132 neutral recovery and honest restoration failure UI", () => {
@@ -101,8 +101,10 @@ describe("issue132 neutral recovery and honest restoration failure UI", () => {
     for (const provider of ["Google", "Kakao"]) {
       const link = within(note).getByRole("link", { name: new RegExp(provider) });
       expect(link).toHaveAttribute("href", expect.stringMatching(new RegExp(`/api/auth/${provider.toLowerCase()}/start$`)));
-      expect(link).not.toHaveAttribute("target", "_blank"); preventNativeNavigation(link); fireEvent.click(link);
+      expect(link).not.toHaveAttribute("target", "_blank"); preventNativeNavigation(); fireEvent.click(link);
       expect(sessionStorage.getItem("meetme.login-return")).toBe(path);
+      // A return from OAuth must release the document-wide navigation lock.
+      act(() => window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: true })));
     }
     privateStorageAbsent(); expect(mutationCalls).toEqual([]);
   });
@@ -118,7 +120,7 @@ describe("issue132 neutral recovery and honest restoration failure UI", () => {
     mount(); const note = await screen.findByRole("region", { name: "계정 복구" }); const initial = fetchMock.mock.calls.filter(([url]) => String(url).endsWith("/api/auth/refresh")).length;
     fireEvent(window, new Event("focus")); await act(async () => { await Promise.resolve(); });
     expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith("/api/auth/refresh"))).toHaveLength(initial);
-    const tab = within(note).getByRole("link", { name: "새 탭에서 로그인" }); preventNativeNavigation(tab); fireEvent.click(tab);
+    const tab = within(note).getByRole("link", { name: "새 탭에서 로그인" }); preventNativeNavigation(); fireEvent.click(tab);
     const pending = deferred<Response>(); refreshQueue.push(() => pending.promise);
     fireEvent(window, new Event("focus")); fireEvent.click(within(note).getByRole("button", { name: "로그인 상태 다시 확인" })); fireEvent(window, new Event("focus"));
     await waitFor(() => expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith("/api/auth/refresh"))).toHaveLength(initial + 1));

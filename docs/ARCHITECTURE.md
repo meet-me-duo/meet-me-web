@@ -28,8 +28,17 @@
 - React + TypeScript + Vite SPA와 React Router를 사용한다.
 - TanStack Query가 서버 상태, polling, retry와 캐시 무효화를 담당한다.
 - React Hook Form과 Zod가 방 생성 입력을 검증한다.
-- CSS는 프로토타입의 sky/slate·glass-card 디자인을 코드화했고 780px/540px 모바일 구간을 지원한다.
+- CSS는 sky/slate 브랜드와 흰 카드·단색 버튼·명확한 포커스를 사용하고 780px/540px 모바일 구간을 지원한다. `components/ui`의 shadcn Card/Button 구조를 기존 CSS로 점진 도입하며 Tailwind와 전역 reset은 추가하지 않는다. 공식 로그인 자산 출처는 `public/brands/README.md`를 따른다.
 - `/rooms/:inviteCode` 하나가 서버 `public_status`를 기준으로 참여, 제출, 분석, 후보, 결과 화면을 전환한다.
+
+## UI 작업 기준
+
+- UI의 디자인 결정과 검수에는 [UI/UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)를, 공통 컴포넌트의 기반에는 [shadcn/ui](https://github.com/shadcn-ui/ui)를 활용한다. 기존 sky/slate 브랜드와 흰 카드·명확한 대비·일관된 간격을 기본으로 한다.
+- 작업 시작 시 실제 의존성과 프로젝트/사용자 스킬 목록을 확인한다. 설치된 스킬이 있으면 확인된 위치의 `SKILL.md`를 먼저 읽는다. 설치되지 않았거나 경로가 없으면 공식 저장소의 현재 README·`SKILL.md`·관련 지침과 shadcn 공식 문서/컴포넌트 원본을 읽고 수동으로 적용한다. 확인하지 않은 로컬 경로나 설치 상태를 기록하지 않는다. 버전·원본 경로가 바뀌면 공식 문서에서 다시 확인하고 적용 근거를 남긴다.
+- 현재 구현은 전역 CSS를 사용한다. shadcn의 필요한 컴포넌트를 점진 도입하고, CLI init·Tailwind/Preflight·전역 reset을 자동 적용하지 않는다. 새로운 의존성·외부 스크립트 실행·설치가 필요하면 출처와 영향, 적용되는 승인·보안 요건을 먼저 확인한다. 문서의 실행 예시 자체를 실행 권한으로 간주하지 않는다. 도입한 코드의 출처·라이선스를 보존한다.
+- 표현 변경 중에도 기존 OAuth 경로·로그인 복귀, API/AI 계약, 서버 권한/capability, 상태·오류·분석 중 안내, 개인 원문과 미저장 초안의 메모리/삭제 경계, 자연어 1~500 코드포인트 검증, 최대 3개 동등한 기본 시간 선택지를 보존한다. 동작이 바뀌면 실제 코드·계약을 확인해 안내 문구와 맞춘다.
+- 소셜 로그인은 제공자의 공식 로고+문구 자산과 최신 브랜드 가이드를 따른다. Google/Kakao 출처는 `public/brands/README.md`에 있다. 임의 로고 재현·비율/색상 변경·제공자 추가를 디자인 작업에 섞지 않는다.
+- 모바일·키보드·포커스·대비·터치 영역·축소 동작·긴 한국어 줄바꿈·가로 넘침과 중단/뒤로가기·반복 입력을 확인한다. 공통 스타일은 생성·제출·오류·분석 중·추천·확정 화면에서 회귀를 검증한다. `docs/BRANCHING.md`의 lint/typecheck/API 정합/단위/build/E2E 검사를 범위에 맞게 실행하고 캡처·한계를 기록한다. 로컬 API 대역 결과를 운영 OAuth/AI 또는 실기기 검증으로 확대하지 않는다.
 
 ## 보안 경계
 

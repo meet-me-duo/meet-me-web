@@ -31,7 +31,7 @@ API 계약은 [openapi/meet-me.openapi.json](openapi/meet-me.openapi.json)에 �
 
 ## 문서
 
-- [아키텍처와 결정](docs/ARCHITECTURE.md)
+- [아키텍처와 결정 · 지속적인 UI 작업 기준](docs/ARCHITECTURE.md)
 - [브랜치와 배포 흐름](docs/BRANCHING.md)
 - [구현 기록](docs/IMPLEMENTATION_LOG.md)
 - [배포 절차](docs/DEPLOYMENT.md)

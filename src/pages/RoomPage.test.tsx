@@ -94,16 +94,17 @@ describe("natural-language conditions screen", () => {
   });
 
   it.each([
-    [4, "2026-09-25T10:00:00Z", false, "목표 4명 제출 시", true],
-    [null, "2026-09-25T10:00:00Z", false, "자동 마감 시간", false],
-    [null, null, true, "주최자 직접 마감", false],
-  ] as const)("shows every configured closure condition (%s / %s)", async (expected, deadline, manual, label, both) => {
+    [4, "2026-09-25T10:00:00Z", false, "목표 4명 제출 시"],
+    [null, "2026-09-25T10:00:00Z", false, "자동 마감 시간"],
+    [null, null, true, "주최자 직접 마감"],
+  ] as const)("keeps room options without restoring the removed closure sidebar (%s / %s)", async (expected, deadline, manual, label) => {
     vi.spyOn(api, "getRoom").mockResolvedValue({ ...room, expected_participants: expected, submission_deadline: deadline, manual_only: manual });
     vi.spyOn(api, "getSubmission").mockResolvedValue(submission("화요일 저녁"));
     mount();
-    await screen.findByText(label);
-    if (deadline) expect(screen.getByText(/오후 7:00/)).toBeInTheDocument();
-    if (both) expect(screen.getByText(/먼저 충족되는 조건/)).toBeInTheDocument();
+    await screen.findByRole("heading", { name: "조건 제출을 완료했어요" });
+    expect(screen.queryByText(label)).not.toBeInTheDocument();
+    expect(document.querySelector(".submission-layout > aside")).toBeNull();
+    expect(document.querySelector(".room-header h1")).toHaveTextContent(room.purpose);
     expect(screen.queryByText("4명 제출", { exact: true })).not.toBeInTheDocument();
   });
 

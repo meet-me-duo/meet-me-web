@@ -16,16 +16,16 @@ function current(status: string | null = null) {
     room: { collection_status: "COLLECTING", state_version: 1, submission_deadline: "2026-10-31T10:00:00Z" }, operation_outcome: null };
 }
 const ownRoom = { invite_code: code, purpose: "제출 전 확인 브라우저 합성", meeting_mode: "REMOTE", time_zone_id: "Asia/Seoul", search_start_date: "2026-10-17", search_end_date: "2026-10-31", search_range_source: "HOST_SPECIFIED", expected_participants: 4, submission_deadline: "2026-10-31T10:00:00Z", manual_only: false, collection_status: "COLLECTING", closure_reason: null, closed_at: null, public_status: "COLLECTING", state_version: 1, viewer: { joined: true, display_name: "본인", role: "MEMBER", context_id: participantId }, input_disclosure_policy: "HOST_ON_PARTIAL_RESULT", submission_protocol: "PRE_SUBMIT_V1" };
-async function fixture(page: Page, baseURL: string, initial = current(), joined = true) {
+async function fixture(page: Page, baseURL: string, initial = current(), joined = true, role: "HOST" | "MEMBER" = "MEMBER") {
   const origin = new URL(baseURL).origin;
   let state = initial; const writes: { path: string; body: Record<string, unknown> }[] = []; const reads: string[] = []; const unexpected: string[] = []; const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
   await page.route("**/*", async route => {
     const request = route.request(); const url = new URL(request.url());
     if (url.origin !== origin) { unexpected.push(request.method() + " " + request.url()); return route.abort(); }
-    if (await fulfillAccountRefresh(route, null)) return;
+    if (await fulfillAccountRefresh(route, role === "HOST" ? "합성 주최자" : null)) return;
     if (!url.pathname.startsWith("/api/")) return route.continue();
-    if (request.method() === "GET" && url.pathname === path) return route.fulfill({ json: { ...ownRoom, viewer: joined ? ownRoom.viewer : { joined: false, display_name: null, role: null } } });
+    if (request.method() === "GET" && url.pathname === path) return route.fulfill({ json: { ...ownRoom, viewer: joined ? { ...ownRoom.viewer, role } : { joined: false, display_name: null, role: null } } });
     if (request.method() === "GET" && url.pathname === path + "/guest-records") return route.fulfill({ json: { records: [{ participant_id: participantId, display_name: "본인" }] } });
     if (request.method() === "GET" && url.pathname === path + "/submission/checks/current") { reads.push(url.pathname); return route.fulfill({ json: state }); }
     if (request.method() === "POST" && url.pathname === path + "/guest-records/reaccess") return route.fulfill({ json: { participant_id: participantId, level: "REPLACE_ONLY" } });
@@ -60,7 +60,7 @@ test.describe("#107 synthetic browser pre-submit", () => {
     const mock = await fixture(page, baseURL!, current("CHECKING")); await page.goto(`/rooms/${code}`);
     await expect(page.getByText(raw, { exact: true })).toBeVisible(); await page.reload();
     await expect(page.getByText(raw, { exact: true })).toBeVisible(); expect(mock.reads.length).toBeGreaterThanOrEqual(2); expect(mock.writes).toEqual([]);
-    await expect(page.getByText(/조건 제출을 완료했어요/)).toHaveCount(0); expect(mock.unexpected).toEqual([]);
+    await expect(page.getByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).toHaveCount(0); expect(mock.unexpected).toEqual([]);
   });
 
   for (const status of ["FAILED", "TIMED_OUT", "FAILED_QUEUE", "CANCELLED", "LIMIT_REACHED"]) test(`${status} keeps saved text and never declares completion`, async ({ page, baseURL }) => {
@@ -72,7 +72,7 @@ test.describe("#107 synthetic browser pre-submit", () => {
   test("synthetic CLEAR preserves broad intent, asks no unnecessary question and displays accepted text", async ({ page, baseURL }) => {
     const value = current("CLEAR"); value.candidate = textVersion("주말 아무 때나 가능"); value.accepted = { ...textVersion("주말 아무 때나 가능", 8), confirmation_source: "PRECHECK" }; value.submission_complete = true;
     const mock = await fixture(page, baseURL!, value); await page.goto(`/rooms/${code}`);
-    await expect(page.getByText(/조건 제출을 완료했어요/)).toBeVisible(); await expect(page.getByText("주말 아무 때나 가능", { exact: true })).toBeVisible();
+    await expect(page.getByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).toBeVisible(); await expect(page.getByText("주말 아무 때나 가능", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: /오전|오후|직접 수정/ })).toHaveCount(0); expect(mock.writes).toEqual([]); expect(mock.unexpected).toEqual([]);
   });
 
@@ -100,3 +100,34 @@ test.describe("#107 synthetic browser pre-submit", () => {
     expect(mock.writes).toEqual([]); expect(mock.unexpected).toEqual([]);
   });
 });
+
+for (const width of [320, 390, 1440]) {
+  test(`saved precheck hierarchy and cancellable HOST confirmation at ${width}px`, async ({ page, baseURL }, info) => {
+    const mock = await fixture(page, baseURL!, current("CHECKING"), true, "HOST");
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(`/rooms/${code}`);
+    await expect(page.getByRole("heading", { name: "저장된 조건", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "가능한 조건을 알려주세요" })).toHaveCount(0);
+    await expect(page.locator(".room-header h1")).toHaveText(ownRoom.purpose);
+    await expect(page.locator(".room-header").getByRole("button", { name: "초대 링크 복사" })).toBeVisible();
+    await expect(page.locator(".submission-layout > aside")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /이 브라우저의.*참여 연결/ })).toHaveCount(0);
+    const cancel = page.getByRole("button", { name: "확인 취소", exact: true });
+    const tools = page.locator(".host-tools-inline");
+    expect(await cancel.evaluate((element) => !!(element.compareDocumentPosition(document.querySelector(".host-tools-inline")!) & Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true);
+    await expect(tools.getByRole("heading", { name: "주최자 도구" })).toBeVisible();
+    await page.screenshot({ path: info.outputPath("saved-condition-hierarchy.png"), fullPage: true });
+    const trigger = tools.getByRole("button", { name: "입력 마감하기" });
+    await trigger.click(); const dialog = page.getByRole("dialog", { name: "지금 입력을 마감할까요?" });
+    const back = dialog.getByRole("button", { name: "돌아가기" });
+    await expect(back).toBeFocused(); await page.keyboard.press("Shift+Tab");
+    await expect(dialog.getByRole("button", { name: "지금 입력 마감", exact: true })).toBeFocused();
+    await page.keyboard.press("Tab"); await expect(back).toBeFocused();
+    await page.screenshot({ path: info.outputPath("room-close-confirmation.png"), fullPage: true });
+    await page.keyboard.press("Escape"); await expect(dialog).toHaveCount(0); await expect(trigger).toBeFocused();
+    await trigger.click(); await page.getByRole("dialog").getByRole("button", { name: "돌아가기" }).click();
+    expect(mock.writes).toEqual([]); expect(mock.unexpected).toEqual([]); expect(mock.errors).toEqual([]);
+    await expect(page.getByText(raw, { exact: true })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+  });
+}

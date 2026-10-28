@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import App from "../App";
@@ -18,7 +18,7 @@ vi.mock("./session", () => ({
 let client: QueryClient | undefined;
 afterEach(() => { cleanup(); client?.clear(); vi.restoreAllMocks(); localStorage.clear(); });
 
-it("#109 explicitly connects an existing closed guest HOST after login and then finds it in the account archive", async () => {
+it("keeps closed guest records unchanged and offers no account-claim entry after login", async () => {
   const room: Room = {
     invite_code: "abcdefghijklmnopqrstuv", purpose: "이전 게스트 모임", meeting_mode: "EITHER", time_zone_id: "Asia/Seoul",
     search_start_date: "2026-10-17", search_end_date: "2026-10-31", search_range_source: "DEFAULTED",
@@ -27,9 +27,8 @@ it("#109 explicitly connects an existing closed guest HOST after login and then 
     public_status: "INSUFFICIENT_PARTICIPANTS", viewer: { joined: false, display_name: null, role: null },
     input_disclosure_policy: "HOST_ON_PARTIAL_RESULT",
   };
-  const claimed: Room = { ...room, viewer: { joined: true, display_name: "이전 주최자 이름", role: "HOST" } };
   vi.spyOn(api, "getRoom").mockResolvedValue(room);
-  const claim = vi.spyOn(api, "claimGuestRoom").mockResolvedValue(claimed);
+  const claim = vi.spyOn(api, "claimGuestRoom");
   const join = vi.spyOn(api, "joinRoom");
   vi.spyOn(api, "getAccountRooms").mockResolvedValue({ rooms: [{
     invite_code: room.invite_code, purpose: room.purpose,
@@ -38,16 +37,11 @@ it("#109 explicitly connects an existing closed guest HOST after login and then 
   client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[`/rooms/${room.invite_code}`]}><App /></MemoryRouter></QueryClientProvider>);
 
-  const connect = await screen.findByRole("button", { name: "이 브라우저의 기존 참여 연결" });
+  await screen.findByRole("heading", { name: "입력이 마감된 모임이에요" });
   expect(claim).not.toHaveBeenCalled();
   expect(screen.queryByRole("button", { name: "모임 참여하기" })).not.toBeInTheDocument();
-  fireEvent.click(connect);
-  await screen.findByRole("heading", { name: room.purpose });
-  expect(screen.getByText("내가 만든 모임", { selector: ".room-kicker" })).toBeInTheDocument();
-  expect(claim).toHaveBeenCalledExactlyOnceWith(room.invite_code);
+  expect(screen.queryByRole("button", { name: /참여.*연결/ })).not.toBeInTheDocument();
+  expect(screen.queryByText("이 브라우저의 이전 참여 연결")).not.toBeInTheDocument();
   expect(join).not.toHaveBeenCalled();
-
-  fireEvent.click(screen.getByRole("link", { name: "내 모임" }));
-  expect(await screen.findByRole("link", { name: room.purpose })).toHaveAttribute("href", `/rooms/${room.invite_code}`);
-  expect(screen.getByText(/정리 예정/)).toBeInTheDocument();
+  expect(client.getQueryData<Room>(["room", room.invite_code])?.viewer).toEqual(room.viewer);
 });

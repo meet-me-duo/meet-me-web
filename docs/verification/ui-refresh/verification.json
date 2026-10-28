@@ -1,0 +1,85 @@
+{
+  "verified_at_utc": "2026-10-28T02:46:35.5667578Z",
+  "branch": "feature/ui-brand-refresh",
+  "base": "656f757244104482e00605991967e62a12810b63",
+  "runtime": {
+    "node": "24.11.0",
+    "react": "19.3.0",
+    "browser": "Microsoft Edge, desktop and Pixel 7 emulation",
+    "vite": "7.3.6",
+    "playwright": "1.63.0",
+    "pnpm": "10.17.1"
+  },
+  "gates": {
+    "full_vitest": {
+      "passed": 689,
+      "files": 63,
+      "failed": 0
+    },
+    "api_check": "PASS",
+    "final_focused_e2e": {
+      "passed": 74,
+      "skipped": 0,
+      "failed": 0,
+      "specs": [
+        "ui-refresh",
+        "create-form",
+        "plan-accuracy"
+      ]
+    },
+    "full_e2e": {
+      "passed": 433,
+      "skipped": 1,
+      "failed": 0,
+      "note": "before input-border contrast-only change and removal of unused Kakao CSS"
+    },
+    "typecheck": "PASS",
+    "build": "PASS",
+    "lint": "PASS",
+    "final_auth_vitest": {
+      "passed": 28,
+      "files": 3,
+      "failed": 0
+    }
+  },
+  "protected_paths_diff": [],
+  "scope": {
+    "remote_push": 0,
+    "pull_requests": 0,
+    "api_contract_changes": 0,
+    "review_feature_changes": 0,
+    "deploy": 0,
+    "server_changes": 0,
+    "merge": 0
+  },
+  "recovery": {
+    "runtime_changes_after_tests": 0,
+    "confirmed_on_resume": "implementation, final build and passed test artifacts retained; final evidence copies, manifest and commit had not executed",
+    "interruption": "exec-server transport disconnected",
+    "linear": "parent handled existing card; no child create/retry"
+  },
+  "limitations": [
+    "Library attachments: supported materialization failed on Windows os.setxattr; no attachment pixel review",
+    "Real OAuth, paid AI, real devices and Safari not exercised",
+    "Existing Zod annotation and 500KB bundle warnings"
+  ],
+  "source_sha256": {
+    "src/components/LandingStory.tsx": "bd7377321c8af20eda47ded8bcf33ec565fdd80dd9ad2bddd1063bb0b8703aa5",
+    "src/auth/AccountBoundary.tsx": "ccc236c8d1f191b647d212f67bfa30344bbb771d3600e779a92aac9fb85935ad",
+    "e2e/ui-refresh.spec.ts": "3a1ace43373da07ee469e0f24a42ea052b07261de74a16f4ceac7bea8c0d715b",
+    "src/pages/LandingPage.tsx": "b46b218737e5bdc62b90f5bcc6c81bc8b27887ce4408431c2bed4676a3bc8caa",
+    "src/components/ui/card.tsx": "5b63e9a03579515a5b40df9f31b6d72c876753f4e26c3c6ddbedb17e046fbaf8",
+    "src/styles.css": "0b1a7076d87a11dc3056f15462312fc46adc6404c8648b3253e8e6d38f6295cb",
+    "src/components/SocialLoginLink.tsx": "2ac4816540c3f8f79a21b32a0f8615a9fcb232214bb6c2eef45383adbd46eb9b",
+    "src/auth/AccountViews.tsx": "fa1a8cb1df3805a43c030318e6223963f7a9db96bb5970fae744e1088d9e2009",
+    "e2e/landing.spec.ts": "80b7e7cf716e201cfa8cca7ceb7566fdcd70ff4acb8808ab73772fe25df954cf",
+    "src/components/ui/button.tsx": "93eef318f37dc50d34af60dc44eb818ae79225a83b6c6b27b3d16444f0620fe7"
+  },
+  "dist_sha256": {
+    "index-Be1V9azz.js": "d326297942046e2c3e0bccf9d285846e0c8ade0769e9a4f4dd2b4d4b01ea1537",
+    "AccountOperationsPage-D8EFJhTM.js": "047652d57a92939e89b92ec7ecc334d4e33847d657ee23937f0369363274acd8",
+    "favicon-aObUoNjF.svg": "099edb4ddd98ccdd93d2275e9e6b1d7b972fac863c3912e2869bcb8be88e739e",
+    "index-CySeGS_g.css": "967a4f808a60ccea196a025f7a22e773bcc1b12b699a60a5629c2a48458ce9f9",
+    "AccountOperationsPage-BqcY0RhA.css": "0f5aa7736566ff093b65786378628c8dbca778dfc42816014d7514590a117adc"
+  }
+}

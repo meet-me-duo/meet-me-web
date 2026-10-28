@@ -1,5 +1,6 @@
 import type { SubmissionCheckSnapshot, StartSubmissionCheckBody, SubmissionCheckCommand } from "./precheck";
 import { getAccessToken, getSessionVersion } from "../auth/session";
+import { decodeReviewSupport } from "./reviewSupport";
 import type {
   ApiProblem,
   CandidateList,
@@ -30,7 +31,7 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+export async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const startedEpoch = getSessionVersion();
   let token: string | null;
   try { token = getAccessToken(true); } catch (error) {
@@ -85,7 +86,7 @@ export const api = {
   getClarifications: (inviteCode: string, signal?: AbortSignal) => request<ClarificationList>(`/api/rooms/${encode(inviteCode)}/submission/clarifications`, { signal }),
   answerClarification: (inviteCode: string, questionId: string, body: ClarificationAnswer) => request<ClarificationAnswerResult>(`/api/rooms/${encode(inviteCode)}/submission/clarifications/${encode(questionId)}/answer`, { method: "POST", body: JSON.stringify(body) }),
   createRoom: (body: CreateRoomBody) => request<Room>("/api/rooms", { method: "POST", body: JSON.stringify(body) }),
-  getRoom: (inviteCode: string, signal?: AbortSignal) => request<Room>(`/api/rooms/${encode(inviteCode)}`, { signal }),
+  getRoom: (inviteCode: string, signal?: AbortSignal) => request<Room>(`/api/rooms/${encode(inviteCode)}`, { signal }).then(room => decodeReviewSupport(room)),
   joinRoom: (inviteCode: string, displayName?: string, password?: string) =>
     request<Room>(`/api/rooms/${encode(inviteCode)}/participants`, { method: "POST", body: JSON.stringify(displayName === undefined ? {} : { display_name: displayName, ...(password !== undefined ? { password } : {}) }) }),
   getGuestRecords: (inviteCode: string, signal?: AbortSignal) => request<{ records: { participant_id: string; display_name: string }[] }>(`/api/rooms/${encode(inviteCode)}/guest-records`, { signal }),

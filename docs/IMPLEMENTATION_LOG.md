@@ -1,5 +1,13 @@
 # Implementation log
 
+## 2026-10-28 — 승인된 UI 정돈과 공식 소셜 로그인 버튼
+
+- 원본 개인 PC 저장소를 보존하고 독립 clone의 `feature/ui-brand-refresh`에서 develop 656f757을 기준으로 작업했다. 조사 시 main 0c7a29b와 기능 트리가 같았다.
+- sky/slate·흰 카드·단색 버튼·입력 대비·포커스·간격을 정돈하고, 생성/로그인에 shadcn 원본 Card/Button을 기존 CSS로 점진 도입했다. Tailwind reset이나 외부 저장소 스크립트는 실행하지 않았다.
+- Google/Kakao의 공식 완성형 로고+문구 버튼을 로그인 진입과 계정 복구에 적용했다. 기존 OAuth 경로·복귀 처리, 개인 입력·권한·초안·API 계약은 유지했다. 랜딩의 Plan A/B/C·우선순위 설명을 최대 3개 동등 시간안 및 실제 일정 선택에 맞췄다.
+- 후속 사용자 요청으로 기존 아키텍처 문서와 README 진입점에 지속적인 UI 작업 기준을 추가했다. 실제 설치 확인, 미설치/버전 변경 시 공식 원본 확인과 수동 적용, 출처·승인·보안 및 기능/개인정보 경계와 검증 요건을 기록했다.
+- 서버·AWS·운영 설정, 리뷰 기능, main 병합·배포는 변경하지 않았다. 상세 출처·검증과 첨부 materialization 차단은 `docs/UI_REFRESH.md`, 캡처·실행 요약은 `docs/verification/ui-refresh/`를 따른다.
+
 ## 2026-10-20 — 서버와 웹 develop 릴리스 통합 준비
 
 - 사용자 승인에 따라 develop 통합 후 main행 PR을 준비하며, main 병합은 사용자가 직접 한다. 운영 배포·키/권한 변경·추가 유료 호출은 수행하지 않는다. 기존 develop 미사용 방침은 이번 승인부터 docs/BRANCHING.md의 흐름으로 대체한다.

@@ -55,7 +55,7 @@ footer { padding: 28px 16px; color: var(--muted); font-size: .8rem; text-align: 
 .landing-intro { margin: 0 auto 32px; text-align: center; }
 .landing-intro p { max-width: 620px; margin: 18px auto 0; color: #526176; font-size: clamp(.94rem, 2vw, 1.15rem); line-height: 1.8; text-wrap: balance; }
 .landing-sentence { display: block; }
-.button { min-height: 44px; max-width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); border: 1px solid transparent; border-radius: 10px; padding: 10px 17px; cursor: pointer; font-weight: 700; line-height: 1.5; overflow-wrap: anywhere; transition: transform .15s, box-shadow .2s, background .2s; }
+.button { min-height: 44px; max-width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); border: 1px solid transparent; border-radius: 8px; padding: 8px 14px; cursor: pointer; font-size: .875rem; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; transition: transform .15s, box-shadow .2s, background .2s; }
 .button svg { flex-shrink: 0; }
 .button:hover:not(:disabled) { transform: translateY(-1px); }
 .button:active:not(:disabled) { transform: translateY(0); }
@@ -66,10 +66,10 @@ footer { padding: 28px 16px; color: var(--muted); font-size: .8rem; text-align: 
 .button.secondary:hover:not(:disabled) { background: #f1f5f9; }
 .button.danger-outline { border: 1px solid #fecaca; background: #fffafa; color: #b91c1c; }
 .button.wide { width: 100%; }
-.hero-cta { min-height: 56px; min-width: 224px; max-width: 100%; margin-top: 36px; padding-inline: 32px; border-radius: 17px; font-size: 1.05rem; }
-.button.primary.hero-cta { background: #0369a1; box-shadow: 0 10px 24px -12px var(--sky-dark); }
-.button.primary.hero-cta:hover:not(:disabled) { box-shadow: 0 12px 28px -10px var(--sky-dark); }
-.button.primary.hero-cta:active:not(:disabled) { box-shadow: 0 5px 14px -10px var(--sky-dark); }
+.hero-cta { min-height: 48px; min-width: 192px; max-width: 100%; margin-top: 28px; padding-inline: 24px; border-radius: 10px; font-size: 1rem; }
+.button.primary.hero-cta { background: #0369a1; box-shadow: none; }
+.button.primary.hero-cta:hover:not(:disabled) { box-shadow: var(--shadow); }
+.button.primary.hero-cta:active:not(:disabled) { box-shadow: none; }
 .hero-cta:focus-visible { outline-color: #0f172a; outline-offset: 4px; }
 .glass-card, .ui-card { min-width: 0; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); }
 .ui-card-header { display: grid; gap: var(--space-4); }
@@ -180,8 +180,8 @@ fieldset.field legend { margin-bottom: 9px; }
 .create-card .mode-choices { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .create-choice label { position: relative; min-width: 0; cursor: pointer; }
 .create-choice input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-.create-choice span { min-height: 48px; display: flex; align-items: center; justify-content: center; padding: 10px 6px; border: 1px solid #cbd5e1; border-radius: 12px; background: white; color: #475569; font-size: .88rem; }
-.create-choice input:checked + span { border-color: #0284c7; background: #f0f9ff; color: #075985; font-weight: 800; }
+.create-choice span { min-height: 44px; display: flex; align-items: center; justify-content: center; padding: 8px 6px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; color: #475569; font-size: .88rem; }
+.create-choice input:checked + span { border-color: #0284c7; background: #f0f9ff; color: #075985; font-weight: 700; }
 .create-choice input:focus-visible + span { outline: 3px solid #0f172a; outline-offset: 2px; }
 .create-choice input:disabled + span { opacity: .55; cursor: not-allowed; }
 .create-card .create-hint { margin: 0; color: #526176; font-size: .82rem; font-weight: 500; line-height: 1.6; }
@@ -197,7 +197,7 @@ fieldset.field legend { margin-bottom: 9px; }
 .create-card .policy-content { margin: 8px 0 0; }
 .create-card .closure-summary { border-radius: 12px; padding: 12px 14px; background: #f1f5f9; color: #334155; font-size: .85rem; line-height: 1.6; }
 .create-card .closure-summary p { margin: 4px 0 0; }
-.create-card .button { min-height: 48px; }
+.create-card .button { min-height: 44px; }
 .create-card .text-button { min-height: 44px; min-width: 44px; }
 .create-card .field-error { font-size: .82rem !important; }
 .create-card h1:focus-visible { outline: none; }
@@ -356,7 +356,7 @@ fieldset.field legend { margin-bottom: 9px; }
   .header-inner, .page-width { width: min(100% - 24px, 1100px); }
   .mvp-badge { display: none; }
   .hero h1 { font-size: clamp(1.6rem, 6.8vw, 2.3rem); }
-  .hero-cta { width: 100%; }
+  .hero-cta { width: min(100%, 208px); }
   .two-columns, .mode-grid, .room-sidebar { grid-template-columns: 1fr; }
   .mode-grid { gap: 7px; }
   .mode-grid button { min-height: 55px; }
@@ -416,13 +416,13 @@ fieldset.field legend { margin-bottom: 9px; }
 .account-controls .alert { flex-basis: 100%; }
 .account-card { margin-top: 2.5rem; margin-bottom: 2.5rem; padding: 2rem; }
 .account-card p, .claim-card p { line-height: 1.7; }
-.account-entry { margin-block: 32px 48px; }
+.account-entry { max-width: 400px; margin-block: 32px 48px; }
 .login-back { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; margin-bottom: var(--space-4); color: var(--muted); font-size: .9rem; }
-.login-card { margin: 0; padding: clamp(24px, 5vw, 40px); }
-.login-card h1 { margin: 0; font-size: clamp(1.5rem, 4vw, 2rem); letter-spacing: -.04em; line-height: 1.4; word-break: keep-all; overflow-wrap: anywhere; }
+.login-card { margin: 0; padding: 24px; }
+.login-card h1 { margin: 0; font-size: clamp(1.375rem, 3vw, 1.5rem); letter-spacing: -.04em; line-height: 1.4; word-break: keep-all; overflow-wrap: anywhere; }
 .login-card p { margin: 0; color: var(--muted); }
-.login-card .social-actions { display: grid; gap: var(--space-3); width: min(100%, 300px); margin: 0 auto var(--space-6); }
-.social-login { display: block; width: min(100%, 300px); align-self: center; border-radius: 6px; transition: box-shadow .15s; }
+.login-card .social-actions { display: grid; gap: 10px; width: min(100%, 224px); margin: 0 auto var(--space-6); }
+.social-login { display: block; width: min(100%, 224px); align-self: center; border-radius: 6px; transition: box-shadow .15s; }
 .social-login img { display: block; width: 100%; height: auto; }
 .social-login:hover { box-shadow: 0 0 0 3px #e2e8f0; }
 .login-card .login-note { padding-top: var(--space-6); border-top: 1px solid var(--border); font-size: .85rem; overflow-wrap: anywhere; }

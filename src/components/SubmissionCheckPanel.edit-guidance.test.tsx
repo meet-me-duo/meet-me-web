@@ -51,6 +51,18 @@ it.each([undefined, null, "", " \n ", 42, { text: "not a string" }])("keeps the 
   expect(screen.getByText(raw, { exact: true })).toBeInTheDocument();
 });
 
+it("shows the reported 160-character contract boundary intact with no A/B question or automatic command", async () => {
+  const guidance = "가".repeat(160);
+  const value = snapshot(guidance);
+  expect(value.check?.question).toBeNull();
+  const start = mount(value);
+  const message = await screen.findByText(guidance);
+  expect(message.textContent?.trim()).toBe(guidance);
+  expect(screen.queryByRole("button", { name: /선택한 내용으로 확인|직접 수정/ })).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "내 조건 수정" })).toBeEnabled();
+  expect(start).not.toHaveBeenCalled();
+});
+
 it("does not reuse NEEDS_EDIT guidance after cancellation", async () => {
   const text = "날짜 범위를 직접 적어 주세요.";
   mount(snapshot(text)); await screen.findByText(text);

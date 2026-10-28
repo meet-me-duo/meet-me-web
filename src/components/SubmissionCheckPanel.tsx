@@ -77,7 +77,7 @@ export default function SubmissionCheckPanel({ room, onRoomChanged, onAccessDeni
   });
   const current = query.data;
   const check = current?.check;
-  // Optional compatibility path; generated server contract is still pending.
+  // Optional compatibility with older responses; generated artifact alignment is pending locally.
   const editGuidance = check?.status === "NEEDS_EDIT" && "edit_guidance" in check && typeof check.edit_guidance === "string" && check.edit_guidance.trim() ? check.edit_guidance : null;
   const question = check?.status === "NEEDS_CHOICE" ? check.question : null;
   const closed = room.collection_status === "CLOSED" || current?.room.collection_status === "CLOSED";

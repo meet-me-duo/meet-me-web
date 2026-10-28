@@ -5,14 +5,16 @@ const assets = {
   kakao: { src: "/brands/kakao-login.svg", width: 224, height: 46, label: "카카오 로그인" },
 };
 
-export function SocialLoginLink({ provider, label, href, onClick, tabIndex, ...props }: Omit<ComponentProps<"a">, "children" | "className"> & {
+export function SocialLoginLink({ provider, label, href, onClick, tabIndex, pending = false, ...props }: Omit<ComponentProps<"a">, "children" | "className"> & {
   provider: keyof typeof assets;
   label: string;
+  pending?: boolean;
 }) {
   const asset = assets[provider];
   const disabled = props["aria-disabled"] === true || props["aria-disabled"] === "true";
-  return <a className={`social-login social-login--${provider}`} aria-label={label} {...props}
-    href={disabled ? undefined : href} role={disabled ? "link" : props.role} tabIndex={disabled ? -1 : tabIndex}
+  return <a className={`social-login social-login--${provider}`} aria-label={label} {...props} data-pending={pending || undefined}
+    // Keep the native destination during pending: React commits before the anchor's default action.
+    href={disabled && !pending ? undefined : href} role={disabled ? "link" : props.role} tabIndex={disabled ? -1 : tabIndex}
     onClick={event => { if (disabled) { event.preventDefault(); return; } onClick?.(event); }}>
     {provider === "google" ? <span className="gsi-material-button">
       <span className="gsi-material-button-state" />

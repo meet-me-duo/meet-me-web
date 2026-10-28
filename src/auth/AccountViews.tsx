@@ -6,7 +6,7 @@ import type { Room } from "../api/types";
 import { formatDateTime } from "../utils/time";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { Card, CardContent, CardHeader } from "../components/ui/card";
-import { SocialLoginLink } from "../components/SocialLoginLink";
+import { SocialLoginActions } from "../components/SocialLoginActions";
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
 import { rememberLoginReturn } from "./loginReturn";
@@ -20,10 +20,7 @@ export function LoginGate({ returnTo = "/account/rooms" }: { returnTo?: string }
         <p>내가 만든 모임을 다른 기기에서도 다시 찾을 수 있어요. 참여자는 로그인 없이 초대 링크로 참여할 수 있어요.</p>
       </CardHeader>
       <CardContent>
-        <div className="account-actions social-actions" aria-label="로그인 방법">
-          <SocialLoginLink provider="google" label="Google로 로그인" href={`${API_BASE}/api/auth/google/start`} onClick={() => rememberLoginReturn(returnTo)} />
-          <SocialLoginLink provider="kakao" label="Kakao로 로그인" href={`${API_BASE}/api/auth/kakao/start`} onClick={() => rememberLoginReturn(returnTo)} />
-        </div>
+        <SocialLoginActions apiBase={API_BASE} onBeforeNavigate={() => rememberLoginReturn(returnTo)} />
         <p className="login-note">로그인해도 이 브라우저의 기존 참여 기록은 자동으로 연결되지 않아요.</p>
       </CardContent>
     </Card>

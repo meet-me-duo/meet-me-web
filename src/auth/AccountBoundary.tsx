@@ -6,7 +6,7 @@ import { endSession, getSession, getSessionVersion, restoreSession, subscribeSes
 import { hasQuarantinedDraft } from "./draftQuarantine";
 import { useAccountSession } from "./useAccount";
 import { rememberLoginReturn, takeLoginReturn } from "./loginReturn";
-import { SocialLoginLink } from "../components/SocialLoginLink";
+import { SocialLoginActions } from "../components/SocialLoginActions";
 
 export function AccountBoundary({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
@@ -45,9 +45,8 @@ export function AccountBoundary({ children }: { children: React.ReactNode }) {
     <p>같은 계정으로 로그인하면 서버에 저장된 입력을 다시 확인할 수 있어요. 제출 완료 여부는 저장본을 조회한 뒤 확인해 주세요.</p>
     <p>로그인한 계정과 본인 참여를 확인한 상태에서 입력한 내용만 이 탭에 임시 보관해요. 앞뒤 공백을 포함해 500자 이내 한 건만 보관하며, 이를 넘는 원문은 보관하지 않아요. 새로고침하거나 이 탭을 닫으면 미저장 내용은 사라져요. 이 탭을 유지하려면 새 탭에서 현재 방을 열고 로그인해 주세요.</p>
     <div className="account-actions"><a className="button secondary" href={roomPath} target="_blank" rel="noopener noreferrer" onClick={() => { recoveryIntent.current = true; }}>새 탭에서 로그인</a>
-    <SocialLoginLink provider="google" label="같은 계정으로 Google 로그인" href={`${apiBase}/api/auth/google/start`} onClick={() => rememberLoginReturn(roomPath)} />
-    <SocialLoginLink provider="kakao" label="같은 계정으로 Kakao 로그인" href={`${apiBase}/api/auth/kakao/start`} onClick={() => rememberLoginReturn(roomPath)} />
     <button className="button secondary" onClick={() => { recoveryIntent.current = true; void restoreSession(); }}>로그인 상태 다시 확인</button></div>
+    <SocialLoginActions apiBase={apiBase} recovery onBeforeNavigate={() => rememberLoginReturn(roomPath)} />
     {status === "checking" && <p role="status">로그인 상태를 확인하는 중이에요.</p>}
   </section>}{children}</>;
 }

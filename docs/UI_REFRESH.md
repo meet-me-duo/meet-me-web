@@ -71,3 +71,34 @@
 - 실제 휴대전화·Safari와 운영 OAuth/AI는 미검증이다.
 
 검토 캡처와 실행 요약은 `docs/verification/ui-refresh/`에 보관한다.
+
+## Codex Cloud 재개 체크포인트
+
+2026-10-28 사용자가 별도 GitHub 작업 브랜치 commit·push를 이관 대안으로
+승인했다. 원래 UI 커밋은 `3011fb155f0de9db501276891f8d940a29240c44`,
+기준은 `656f757244104482e00605991967e62a12810b63`이다. 이 후속 변경은
+재개 문서만 보완하며 UI 코드·자산·테스트·의존성·계약은 변경하지 않는다.
+기존 로컬 checkout과 Library의 bundle/patch 체크포인트는 보존한다.
+
+- 수신 경로: `meet-me-duo/meet-me-web`의 `feature/ui-brand-refresh`.
+  부모의 전달 보고에 있는 원격 최종 SHA를 fetch한 뒤 정확한 HEAD와
+  깨끗한 상태를 대조한다. 새 checkout에서는 `git fetch origin
+  feature/ui-brand-refresh` 후 보고된 SHA에서 별도 작업 브랜치를 만든다.
+- 이관 대상: 기존 추적 파일 328개에 포함된 UI 코드·공식 브랜드 자산·
+  지속적인 UI 지침·테스트·검토 캡처·검증 manifest. 기준 대비 변경 경로는
+  `git diff --name-status 656f757244104482e00605991967e62a12810b63 HEAD`로
+  확인한다. 준비 시 미추적 파일은 0개였다.
+- 제외: `.env`·자격증명·dependency/build cache·원본 실행 로그·개인 입력
+  원문·Library helper/서명 URL·서버/AWS 작업 디렉터리. 추적된 캡처는
+  로컬 합성 API fixture의 검토 자료다.
+- 구현 범위에서 남겨 둔 미완성 코드/TODO는 없다. 위 검증은 개인 PC에서
+  실행한 결과이며 Cloud의 새 실행 결과가 아니다. Cloud에서는 정확한
+  커밋/파일 수신 확인 후 필요에 따라 기존 검사를 실행한다. 운영 OAuth/AI,
+  실제 휴대전화·Safari와 두 첨부의 픽셀 검토는 여전히 미검증이다.
+- 현재 workflow 확인: CI는 PR 또는 main/develop push, 운영 배포는 main
+  push 또는 수동 실행에서만 시작한다. feature push만으로 CI·운영 배포가
+  시작되지 않는다. workflow와 운영 설정은 수정하지 않는다.
+- 수신자가 최종 SHA·파일·지침·검증 자료를 대조해 회신하기 전까지 이관
+  완료로 표시하지 않는다. 그동안 추가 코드 변경·원본 삭제/reset·force
+  push를 하지 않는다. main/develop 변경·PR 병합·운영 배포·AWS 실행은
+  이번 이관 승인 범위에 포함하지 않는다.

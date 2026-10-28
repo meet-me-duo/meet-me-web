@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertCircle, CheckCircle2, Clock3, Copy, LoaderCircle, LockKeyhole, RefreshCw, Share2, Sparkles, TriangleAlert, Users } from "lucide-react";
+import { AlertCircle, CheckCircle2, Copy, LoaderCircle, LockKeyhole, RefreshCw, Share2, Sparkles, TriangleAlert, Users } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { api, ApiError, errorMessage } from "../api/client";
 import type { Submission } from "../api/types";
@@ -8,6 +8,7 @@ import { correctionOpen, currentRoom, viewerContext, type RecoveryRoom as Room, 
 import AnalysisRecoveryPanel from "../components/AnalysisRecoveryPanel";
 import ClarificationPanel from "../components/ClarificationPanel";
 import SubmissionCheckPanel from "../components/SubmissionCheckPanel";
+import { RoomCloseConfirmation } from "../components/RoomCloseConfirmation";
 import { RecommendationsPanel, RECOMMENDATION_PROTOCOL } from "../components/RecommendationsPanel";
 import { formatRecommendationRange } from "../utils/recommendationTime";
 import { CandidateCard } from "../components/CandidateCard";
@@ -16,7 +17,7 @@ import { submissionText, SUBMISSION_TEXT_LIMIT } from "../utils/submission";
 import { submissionExample, TIME_INPUT_GUIDE } from "../utils/submissionGuidance";
 import { useRecentRooms } from "../hooks/useRecentRooms";
 import { useAccountSession } from "../auth/useAccount";
-import { ClaimGuestParticipation, LoginGate } from "../auth/AccountViews";
+import { LoginGate } from "../auth/AccountViews";
 import { usePrivateDraft } from "../auth/usePrivateDraft";
 import { discardQuarantinedDraftForRoom } from "../auth/draftQuarantine";
 import { getSession, getSessionVersion } from "../auth/session";
@@ -158,14 +159,13 @@ export default function RoomPage() {
   if (room.submission_protocol != null && !["PRE_SUBMIT_V1", "LEGACY"].includes(room.submission_protocol)) return <div className="room-page page-width"><RoomHeader room={room} /><StateCard icon={<RefreshCw />} title="조건 확인 화면 업데이트가 필요해요" body="서버에서 사용하는 조건 제출 버전을 이 화면이 지원하지 않아요. 새로고침해 지원하는 계약을 다시 확인해 주세요." /></div>;
   const showEditor = room.public_status === "COLLECTING" && (!correctionOpen(room) || room.capabilities?.can_edit_own_submission);
 
-  if (!room.viewer.joined) return <div className="form-page page-width narrow">{room.collection_status === "CLOSED" ? <><h1>입력이 마감된 모임이에요</h1><p>{room.purpose}</p></> : <h1>{room.purpose}</h1>}{recent.rooms.some(item => item.inviteCode === inviteCode) && <p className="previous-participation">이 브라우저의 이전 참여 정보를 확인하지 못했어요. 같은 이름으로 새로 참여해도 기존 권한이나 입력은 복구되지 않아요. 기존 기록은 아래에서 기록 번호를 선택해 다시 접근해 주세요.</p>}<GuestAccessPanel room={room} roomKey={`${inviteCode}:auth:${authVersion}:access:${epoch}`} onJoined={joined => { if (!mounted.current || deniedRoom.current === inviteCode || epoch !== accessEpoch.current || currentAccess.current.inviteCode !== inviteCode || currentAccess.current.authVersion !== authVersion || getSessionVersion() !== authVersion) return; rememberRoom(joined); setRoom(joined); }} onVerified={restoreVerifiedGuest} />{accountSession && <ClaimGuestParticipation inviteCode={inviteCode} onClaimed={setRoom} />}</div>;
+  if (!room.viewer.joined) return <div className="form-page page-width narrow">{room.collection_status === "CLOSED" ? <><h1>입력이 마감된 모임이에요</h1><p>{room.purpose}</p></> : <h1>{room.purpose}</h1>}{recent.rooms.some(item => item.inviteCode === inviteCode) && <p className="previous-participation">이 브라우저의 이전 참여 정보를 확인하지 못했어요. 같은 이름으로 새로 참여해도 기존 권한이나 입력은 복구되지 않아요. 기존 기록은 아래에서 기록 번호를 선택해 다시 접근해 주세요.</p>}<GuestAccessPanel room={room} roomKey={`${inviteCode}:auth:${authVersion}:access:${epoch}`} onJoined={joined => { if (!mounted.current || deniedRoom.current === inviteCode || epoch !== accessEpoch.current || currentAccess.current.inviteCode !== inviteCode || currentAccess.current.authVersion !== authVersion || getSessionVersion() !== authVersion) return; rememberRoom(joined); setRoom(joined); }} onVerified={restoreVerifiedGuest} /></div>;
 
-  if (!accountSession && room.viewer.role === "HOST") return <div className="room-page page-width"><RoomHeader room={room} /><LoginGate returnTo={`/rooms/${inviteCode}`} /><p className="privacy-note">기존 기록은 그대로 있어요. 로그인한 뒤 이 브라우저의 참여를 명시적으로 연결하면 주최자 기능을 사용할 수 있어요.</p></div>;
+  if (!accountSession && room.viewer.role === "HOST") return <div className="room-page page-width"><RoomHeader room={room} /><LoginGate returnTo={`/rooms/${inviteCode}`} /><p className="privacy-note">주최자 기능은 로그인 계정으로 만든 모임에서 사용할 수 있어요.</p></div>;
 
   return (
     <div className="room-page page-width">
       <RoomHeader room={room} />
-      {accountSession && <details className="claim-disclosure"><summary>이 브라우저의 이전 참여 연결</summary><ClaimGuestParticipation inviteCode={inviteCode} onClaimed={setRoom} /></details>}
       {roomQuery.isError && <div className="alert warning room-refresh-warning" role="status"><span>모임 상태를 갱신하지 못했어요. 마지막으로 확인한 상태를 보여드려요.</span><button className="button secondary" disabled={roomQuery.isFetching} onClick={() => roomQuery.refetch()}>진행 상태 다시 확인</button></div>}
       {room.submission_protocol === "PRE_SUBMIT_V1" && !correctionOpen(room) && <SubmissionCheckPanel key={`check:${ownerKey}:auth:${authVersion}`} room={room} onRoomChanged={setRoom} onAccessDenied={privateAccessDenied} />}
       {showEditor && (room.submission_protocol !== "PRE_SUBMIT_V1" || correctionOpen(room)) && <SubmissionPanel key={`submission:${ownerKey}`} room={room} onRoomChanged={setRoom} onAccessDenied={privateAccessDenied} draft={currentDraft} onDraftChanged={updateDraft} clarificationPending={clarificationPendingOwner === ownerKey} />}
@@ -283,13 +283,15 @@ function CopyRoomLink({ room, primary = false, result = false }: { room: Room; p
 }
 
 function RoomHistoryNotice({ room }: { room: Room }) {
+  const account = useAccountSession();
   const [saved, setSaved] = useState<boolean | null>(null);
   const recent = useRecentRooms();
   const { invite_code, purpose, viewer: { joined } } = room;
   useEffect(() => { setSaved(rememberRoom({ invite_code, purpose, viewer: { joined } })); }, [invite_code, purpose, joined]);
+  if (account) return <p className="room-history-note">계정으로 주최하거나 참여한 모임은 <Link to="/account/rooms">내 모임</Link>에서 다시 찾을 수 있어요.</p>;
   return <p className={`room-history-note ${saved === false ? "alert warning" : ""}`} role="status">
     {saved === false ? "이 브라우저에 모임 주소를 보관하지 못했어요. 초대 링크를 복사하거나 북마크해 주세요." : recent.rooms.some(item => item.inviteCode === invite_code) ? <>홈의 <Link to="/">이 기기의 최근 모임</Link>에서 다시 열 수 있어요. 초대 링크도 복사하거나 북마크해 보관해 주세요.</> : "초대 링크를 복사하거나 북마크해 보관해 주세요."}
-    {" "}주최자 기능은 모임을 만든 브라우저에서 사용할 수 있어요. 시크릿 모드 종료·데이터 삭제·만료·다른 기기에서는 기존 참여 권한이 이어지지 않을 수 있어요.
+    {" "}게스트 참여 기록은 이 브라우저에만 보관돼요. 시크릿 모드 종료·데이터 삭제·만료·다른 기기에서는 기존 참여 권한이 이어지지 않을 수 있어요.
   </p>;
 }
 
@@ -305,6 +307,8 @@ function SubmissionPanel({ room, onRoomChanged, onAccessDenied, draft, onDraftCh
   const submittedRawInput = useRef<string | null>(null);
   const conditionInput = useRef<HTMLTextAreaElement>(null);
   const saving = useRef(false);
+  const closing = useRef(false);
+  const latestRoom = useRef(room); latestRoom.current = room;
   const mounted = useRef(true);
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   const submissionQuery = useQuery<Submission | null>({
@@ -345,15 +349,10 @@ function SubmissionPanel({ room, onRoomChanged, onAccessDenied, draft, onDraftCh
     mutationKey: ["room", room.invite_code],
     mutationFn: (confirmEarly: boolean) => api.closeRoom(room.invite_code, confirmEarly),
     onSuccess: refreshed => { if (mounted.current) onRoomChanged(refreshed); },
+    onSettled: () => { closing.current = false; },
     onError: (error) => {
       if (!mounted.current) return;
       if (error instanceof ApiError && [401, 403, 404].includes(error.status)) { onAccessDenied(error); return; }
-      if (error instanceof ApiError && error.problem.code === "EARLY_CLOSE_CONFIRMATION_REQUIRED") {
-        const submitted = error.problem.submitted_participants ?? "현재";
-        const expected = error.problem.expected_participants ? ` / 목표 ${error.problem.expected_participants}명` : "";
-        const deadline = error.problem.submission_deadline ? `\n마감: ${formatDateTime(error.problem.submission_deadline)}` : "";
-        if (window.confirm(`${submitted}명 제출${expected}${deadline}\n아직 자동 마감 조건 전입니다. 지금 마감할까요?`)) close.mutate(true);
-      }
     },
   });
   useEffect(() => {
@@ -375,7 +374,7 @@ function SubmissionPanel({ room, onRoomChanged, onAccessDenied, draft, onDraftCh
   const saveUncertain = !(save.error instanceof ApiError) || save.error.status >= 500 || save.error.status === 408;
   const saveConfirmedByRead = save.variables !== undefined && submissionQuery.data?.raw_text === save.variables;
 
-  return <div className="submission-layout"><section className={"glass-card submission-card " + (completed ? "submission-complete" : "")}>
+  return <div className="submission-layout submission-layout--single"><section className={"glass-card submission-card " + (completed ? "submission-complete" : "")}>
     {host && !correcting && save.isIdle && submissionQuery.isSuccess && submissionQuery.data === null && loadedRevision === null && <div className="submission-next">
       <span className="eyebrow success"><CheckCircle2 size={15} /> 방 생성 완료</span>
       <h2>모임이 만들어졌어요</h2>
@@ -404,14 +403,11 @@ function SubmissionPanel({ room, onRoomChanged, onAccessDenied, draft, onDraftCh
     <p className="submission-privacy">{correcting ? "저장은 분석 완료를 뜻하지 않아요. 주최자가 다시 분석하면 저장한 조건을 사용해요." : "저장은 분석 완료를 뜻하지 않아요. 입력 마감 후 조건을 분석해요."}</p>
     {refreshRoom.isError && <div className="alert warning refresh-warning" role="status"><span>조건은 저장됐지만 모임 진행 상태를 갱신하지 못했어요.</span><button className="button secondary" onClick={() => refreshRoom.mutate()}>진행 상태 다시 확인</button></div>}
     {save.isError && !saveConfirmedByRead && <div className="alert error"><p>{saveUncertain ? "조건 저장 결과를 확인하지 못했어요. 모임을 다시 만들 필요는 없어요. 저장 여부를 확인한 뒤 이 방에서 다시 시도해 주세요." : "조건 저장 요청이 거절됐어요. 아래 내용을 확인해 주세요."}</p>{errorMessage(save.error)}</div>}
-  </section><aside className="room-sidebar">{correcting ? <RecoveryActions room={room} onRoomChanged={onRoomChanged} onAccessDenied={onAccessDenied} blocked={dirty || save.isPending || clarificationPending} /> : <><div className="glass-card side-card"><h3>마감 조건</h3>
-    {room.manual_only ? <StatusLine icon={<Users />} label="마감 방식" value="주최자 직접 마감" /> : <>
-      {room.expected_participants != null && <StatusLine icon={<Users />} label="자동 마감 목표 · 주최자 포함" value={"목표 " + room.expected_participants + "명 제출 시"} />}
-      {room.submission_deadline && <StatusLine icon={<Clock3 />} label="자동 마감 시간" value={formatDateTime(room.submission_deadline)} />}
-      {room.expected_participants != null && room.submission_deadline && <p className="closure-note">먼저 충족되는 조건에 따라 마감돼요.</p>}
-    </>}
-    <StatusLine icon={<Clock3 />} label="탐색 기간" value={formatDate(room.search_start_date) + " ~ " + formatDate(room.search_end_date) + " 전"} />
-  </div>{host && <div className="glass-card side-card host-tools"><h3>주최자 도구</h3><p>필요한 입력이 모였다면 자동 조건 전에도 마감할 수 있어요.</p><button className="button danger-outline wide" onClick={() => close.mutate(false)} disabled={close.isPending}>{close.isPending ? "마감 중…" : "입력 마감하기"}</button>{close.isError && !(close.error instanceof ApiError && close.error.problem.code === "EARLY_CLOSE_CONFIRMATION_REQUIRED") && <div className="alert error">{errorMessage(close.error)}</div>}</div>}</>}</aside></div>;
+    {correcting ? <div className="host-tools-inline"><RecoveryActions room={room} onRoomChanged={onRoomChanged} onAccessDenied={onAccessDenied} blocked={dirty || save.isPending || clarificationPending} /></div> : host && <div className="host-tools-inline"><h3>주최자 도구</h3>
+      <RoomCloseConfirmation disabled={close.isPending || save.isPending || clarificationPending} pending={close.isPending} unsaved={dirty} error={close.isError ? errorMessage(close.error) : undefined}
+        onConfirm={() => { if (closing.current || !mounted.current || latestRoom.current.viewer.role !== "HOST" || latestRoom.current.collection_status === "CLOSED") return; closing.current = true; close.mutate(true); }} />
+    </div>}
+  </section></div>;
 }
 
 function DelayedState({ room, onRetried, onAccessDenied }: { room: Room; onRetried: (room: Room) => void; onAccessDenied: (error: ApiError) => void }) {
@@ -469,4 +465,3 @@ function ResultPanel({ room, onAccessDenied }: { room: Room; onAccessDenied: (er
 }
 
 function StateCard({ icon, title, body, action, error }: { icon: React.ReactNode; title: string; body?: string; action?: React.ReactNode; error?: string }) { return <div className="center-state glass-card"><div className="large-icon">{icon}</div><h1>{title}</h1>{body && <p>{body}</p>}{error && <div className="alert error">{error}</div>}{action}<Link className="text-link" to="/">새 모임 만들기</Link></div>; }
-function StatusLine({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) { return <div className="status-line"><span>{icon}</span><div><small>{label}</small><strong>{value}</strong></div></div>; }

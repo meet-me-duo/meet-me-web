@@ -80,9 +80,8 @@ for (const width of [1440, 320, 390]) {
         await expect(page.getByRole("heading", { name: "조건 제출을 완료했어요" })).toBeVisible();
         await expect(page.getByRole("textbox")).toHaveCount(0);
         await expect(page.getByText(role === "HOST" ? "초대 링크를 공유해 주세요" : "입력 마감을 기다려 주세요")).toBeVisible();
-        await expect(page.getByText("목표 4명 제출 시", { exact: true })).toBeVisible();
-        await expect(page.getByText(/오후 7:00/)).toBeVisible();
-        await expect(page.getByText(/먼저 충족되는 조건/)).toBeVisible();
+        await expect(page.locator(".room-header h1")).toHaveText("제출 후 다음 행동 확인");
+        await expect(page.locator(".submission-layout > aside")).toHaveCount(0);
         await expect(page.getByRole("button", { name: "입력 마감하기" })).toHaveCount(role === "HOST" ? 1 : 0);
         await checkLayout(page);
         await page.screenshot({ path: info.outputPath(`${role}-completed.png`), fullPage: true });
@@ -210,21 +209,25 @@ for (const width of [1440, 320, 390]) {
     test("close errors and early close use actual response counts, member cannot close", async ({ page }) => {
       const state = await fixture(page, "HOST", "COLLECTING", true);
       await page.goto(`/rooms/${code}`);
+      const trigger = page.getByRole("button", { name: "입력 마감하기" });
+      await trigger.click();
+      const dialog = page.getByRole("dialog", { name: "지금 입력을 마감할까요?" });
+      await expect(dialog.getByRole("button", { name: "돌아가기" })).toBeFocused();
+      expect(state.writes).toHaveLength(0);
+      await dialog.getByRole("button", { name: "돌아가기" }).click();
+      await expect(trigger).toBeFocused();
+      expect(state.writes).toHaveLength(0);
+      await trigger.click(); await page.keyboard.press("Escape");
+      await expect(dialog).toHaveCount(0); expect(state.writes).toHaveLength(0);
       state.failClose = true;
-      await page.getByRole("button", { name: "입력 마감하기" }).click();
-      await expect(page.getByText("마감 처리 실패")).toBeVisible();
-      await expect(page.getByRole("heading", { name: "조건 제출을 완료했어요" })).toBeVisible();
+      await trigger.click();
+      await dialog.getByRole("button", { name: "지금 입력 마감", exact: true }).click();
+      await expect(dialog.getByText("마감 처리 실패")).toBeVisible();
+      expect(state.status).toBe("COLLECTING"); expect(state.writes).toHaveLength(1);
+      await dialog.getByRole("button", { name: "돌아가기" }).click();
       state.failClose = false;
-      const cancelled = page.waitForEvent("dialog").then(async dialog => {
-        expect(dialog.message()).toContain("2명 제출 / 목표 4명");
-        expect(dialog.message()).toContain("마감:");
-        await dialog.dismiss();
-      });
-      await Promise.all([cancelled, page.getByRole("button", { name: "입력 마감하기" }).click()]);
-      await expect(page.getByRole("button", { name: "입력 마감하기" })).toBeEnabled();
-      expect(state.status).toBe("COLLECTING");
-      const accepted = page.waitForEvent("dialog").then(dialog => dialog.accept());
-      await Promise.all([accepted, page.getByRole("button", { name: "입력 마감하기" }).click()]);
+      await trigger.click();
+      await dialog.getByRole("button", { name: "지금 입력 마감", exact: true }).click();
       await expect(page.getByRole("heading", { name: "모두의 조건을 분석하고 있어요" })).toBeVisible();
       expect(state.writes.at(-1)?.body).toEqual({ confirm_early: true });
       expect(state.unexpected).toEqual([]);
@@ -237,9 +240,8 @@ for (const closure of ["count", "time", "manual"]) {
     const state = await fixture(page, "MEMBER", "COLLECTING", true, closure);
     await page.goto(`/rooms/${code}`); await page.reload();
     await expect(page.getByRole("heading", { name: "조건 제출을 완료했어요" })).toBeVisible();
-    await expect(page.getByText("목표 4명 제출 시", { exact: true })).toHaveCount(closure === "count" ? 1 : 0);
-    await expect(page.getByText("자동 마감 시간", { exact: true })).toHaveCount(closure === "time" ? 1 : 0);
-    await expect(page.getByText("주최자 직접 마감", { exact: true })).toHaveCount(closure === "manual" ? 1 : 0);
+    await expect(page.locator(".submission-layout > aside")).toHaveCount(0);
+    await expect(page.locator(".room-header h1")).toHaveText("제출 후 다음 행동 확인");
     expect(state.writes).toEqual([]); expect(state.unexpected).toEqual([]);
   });
 }

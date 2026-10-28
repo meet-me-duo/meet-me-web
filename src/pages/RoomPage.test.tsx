@@ -80,7 +80,7 @@ describe("natural-language conditions screen", () => {
     complete(submission("목요일 저녁", existing ? 2 : 1));
     await screen.findByText(`저장된 입력 #${existing ? 2 : 1}`);
     expect(input).toHaveValue("금요일 저녁");
-    expect(screen.queryByRole("heading", { name: "조건 제출을 완료했어요" })).not.toBeInTheDocument();
+    expect(screen.queryByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).not.toBeInTheDocument();
     fireEvent.change(input, { target: { value: "목요일 저녁" } });
     expect(screen.getByRole("textbox")).toBe(input);
     fireEvent.click(screen.getByRole("button", { name: "수정 취소" }));
@@ -94,16 +94,17 @@ describe("natural-language conditions screen", () => {
   });
 
   it.each([
-    [4, "2026-09-25T10:00:00Z", false, "목표 4명 제출 시", true],
-    [null, "2026-09-25T10:00:00Z", false, "자동 마감 시간", false],
-    [null, null, true, "주최자 직접 마감", false],
-  ] as const)("shows every configured closure condition (%s / %s)", async (expected, deadline, manual, label, both) => {
+    [4, "2026-09-25T10:00:00Z", false, "목표 4명 제출 시"],
+    [null, "2026-09-25T10:00:00Z", false, "자동 마감 시간"],
+    [null, null, true, "주최자 직접 마감"],
+  ] as const)("keeps room options without restoring the removed closure sidebar (%s / %s)", async (expected, deadline, manual, label) => {
     vi.spyOn(api, "getRoom").mockResolvedValue({ ...room, expected_participants: expected, submission_deadline: deadline, manual_only: manual });
     vi.spyOn(api, "getSubmission").mockResolvedValue(submission("화요일 저녁"));
     mount();
-    await screen.findByText(label);
-    if (deadline) expect(screen.getByText(/오후 7:00/)).toBeInTheDocument();
-    if (both) expect(screen.getByText(/먼저 충족되는 조건/)).toBeInTheDocument();
+    await screen.findByRole("heading", { name: "조건 제출을 완료했어요" });
+    expect(screen.queryByText(label)).not.toBeInTheDocument();
+    expect(document.querySelector(".submission-layout > aside")).toBeNull();
+    expect(document.querySelector(".room-header h1")).toHaveTextContent(room.purpose);
     expect(screen.queryByText("4명 제출", { exact: true })).not.toBeInTheDocument();
   });
 
@@ -223,7 +224,7 @@ describe("saved conditions and plan accuracy", () => {
     expect(screen.getByRole("button", { name: "수정 취소" })).toBeEnabled();
     fireEvent.change(input, { target: { value: "목요일 저녁" } });
     expect(screen.getByRole("textbox")).toBe(input);
-    expect(screen.queryByRole("heading", { name: "조건 제출을 완료했어요" })).not.toBeInTheDocument();
+    expect(screen.queryByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "수정 취소" }));
     await screen.findByRole("heading", { name: "조건 제출을 완료했어요" });
   });

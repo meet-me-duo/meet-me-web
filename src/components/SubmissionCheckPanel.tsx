@@ -9,7 +9,7 @@ import { usePrivateDraft } from "../auth/usePrivateDraft";
 import { getSessionVersion } from "../auth/session";
 import { submissionText } from "../utils/submission";
 import { submissionExample, TIME_INPUT_GUIDE } from "../utils/submissionGuidance";
-import { formatDateTime } from "../utils/time";
+import { RoomCloseConfirmation } from "./RoomCloseConfirmation";
 
 type Operation = ({ kind: "start"; body: StartSubmissionCheckBody } | { kind: "answer" | "retry" | "cancel"; id: string; body: SubmissionCheckCommand }) & { draftAtDispatch?: string };
 type Props = { room: Room; onRoomChanged: (room: Room) => void; onAccessDenied: (error: ApiError) => void };
@@ -170,20 +170,19 @@ export default function SubmissionCheckPanel({ room, onRoomChanged, onAccessDeni
     if (direct && question) command("answer", { question_id: question.id, direct_text: input.text });
     else void execute({ kind: "start", draftAtDispatch: latestDraft.current, body: { request_id: crypto.randomUUID(), expected_revision: candidate?.revision ?? 0, raw_text: input.text } });
   }
-  async function closeRoom(confirmEarly = false) {
-    if (busy.current || !active()) return;
+  async function closeRoom() {
+    if (busy.current || !active() || latestRoom.current.viewer.role !== "HOST" || latestRoom.current.collection_status === "CLOSED") return;
     busy.current = true; setPending(true); setCloseError(null);
-    try { const refreshed = await api.closeRoom(room.invite_code, confirmEarly); if (active()) { onRoomChanged(refreshed); void query.refetch(); } }
+    try { const refreshed = await api.closeRoom(room.invite_code, true); if (active()) { onRoomChanged(refreshed); void query.refetch(); } }
     catch (error) {
       if (!active()) return;
       if (error instanceof ApiError && [401, 403, 404].includes(error.status)) onAccessDenied(error);
-      else if (error instanceof ApiError && error.problem.code === "EARLY_CLOSE_CONFIRMATION_REQUIRED" && window.confirm("확인 완료되지 않은 입력은 이번 결과에 포함되지 않아요. 지금 마감할까요?")) { busy.current = false; await closeRoom(true); return; }
       else setCloseError(error);
     } finally { if (active()) { busy.current = false; setPending(false); } }
   }
   if (denied) return null;
-  return <div className="submission-layout"><section className={`glass-card submission-card precheck-card ${complete ? "submission-complete" : ""}`} aria-label="제출 전 조건 확인">
-    <div className="section-heading"><h2>{closed ? "마감된 내 입력 확인" : complete ? "조건 제출을 완료했어요" : "가능한 조건을 알려주세요"}</h2>
+  return <div className="submission-layout submission-layout--single"><section className={`glass-card submission-card precheck-card ${complete ? "submission-complete" : ""}`} aria-label="제출 전 조건 확인">
+    <div className="section-heading"><h2>{closed ? "마감된 내 입력 확인" : candidate ? showEditor ? "조건 수정" : "저장된 조건" : "가능한 조건을 알려주세요"}</h2>
       {complete && !closed && <p role="status"><CheckCircle2 size={16} /> 제출 완료 · 다른 참여자를 기다려 주세요.</p>}
       {!closed && !complete && check && !editing && !draftEdited.current && <p role="status">{running.has(check.status) && <LoaderCircle className="spin" size={16} />} {messages[check.status] ?? "현재 확인 상태를 다시 조회해 주세요."}</p>}
     </div>
@@ -200,12 +199,14 @@ export default function SubmissionCheckPanel({ room, onRoomChanged, onAccessDeni
     {privateDraft.conflictPanel}
     {draftEdited.current && <p className="alert warning" role="status">새 수정 내용은 아직 저장하지 않았어요. 이 화면에만 보관하며 새 조건으로 반영되지 않았어요.</p>}
     {draftEdited.current && candidate && candidate.revision > draftBaseRevision.current && input.text !== candidate.raw_text && <p className="alert warning" role="status">최신 입력이 갱신됐어요. 다른 탭의 저장 내용과 이 화면의 미저장 입력을 구분해 확인해 주세요. 내 임시 입력은 이 화면에 보존했어요.</p>}
-    {showEditor && <><label className="field"><span>시간·장소 조건 <small>필수</small></span><textarea rows={4} value={draft} aria-describedby="precheck-input-hint precheck-count" aria-invalid={!input.valid && input.length > 500} placeholder={submissionExample(room.meeting_mode)} onChange={event => { if (!draftEdited.current) draftBaseRevision.current = candidate?.revision ?? 0; draftEdited.current = true; privateDraft.remember(event.target.value, draftBaseRevision.current); setDraft(event.target.value); }} /><small id="precheck-count" className={input.length > 500 ? "field-error" : "character-count"}>{input.length}/500</small></label>
+    {showEditor && <><label className="field"><span>시간·장소 조건 <small>필수</small></span><textarea autoFocus={editing || direct} rows={4} value={draft} aria-describedby="precheck-input-hint precheck-count" aria-invalid={!input.valid && input.length > 500} placeholder={submissionExample(room.meeting_mode)} onChange={event => { if (!draftEdited.current) draftBaseRevision.current = candidate?.revision ?? 0; draftEdited.current = true; privateDraft.remember(event.target.value, draftBaseRevision.current); setDraft(event.target.value); }} /><small id="precheck-count" className={input.length > 500 ? "field-error" : "character-count"}>{input.length}/500</small></label>
       <p id="precheck-input-hint" className="field-hint">{TIME_INPUT_GUIDE} 앞뒤 공백을 제외하고 1~500자로 입력해 주세요.</p><button className="button primary" disabled={!commandAllowed || !input.valid || !!uncertain} onClick={submit}>{pending ? "확인 요청 중…" : direct ? "수정한 내용 확인" : candidate ? "수정 내용 확인" : "조건 제출하기"}</button></>}
     {!closed && candidate && !question && !showEditor && <button className="button secondary" disabled={pending} onClick={() => { setEditing(true); setDraft(candidate?.raw_text ?? ""); draftEdited.current = false; }}>내 조건 수정</button>}
     {!closed && check && check.retry_allowed && <button className="button secondary" disabled={!commandAllowed} onClick={() => command("retry")}>다시 확인</button>}
     {!closed && check && !["CLEAR", "CANCELLED", "SUPERSEDED", "CLOSED_BEFORE_COMPLETION"].includes(check.status) && <button className="button secondary" disabled={!commandAllowed} onClick={() => command("cancel")}>확인 취소</button>}
+    {!closed && check && !["CLEAR", "CANCELLED", "SUPERSEDED", "CLOSED_BEFORE_COMPLETION"].includes(check.status) && <p className="field-hint">확인 취소는 이 입력의 확인 작업만 그만둬요. 저장한 원문과 이전 확인 완료본은 유지돼요.</p>}
     {failure != null && <div className="alert error" role="alert"><p>{uncertain ? "요청 결과를 확인하지 못했어요. 현재 상태를 조회한 뒤 같은 요청을 다시 보낼 수 있어요." : errorMessage(failure)}</p><button className="button secondary" disabled={query.isFetching} onClick={() => { void recover(); }}>현재 상태 확인</button>{uncertain && !closed && <button className="button secondary" disabled={pending || query.isFetching || !recovered} onClick={() => { if (uncertain) void execute(uncertain); }}>같은 요청 다시 보내기</button>}</div>}
     {!closed && <p className="field-hint">저장과 제출 완료는 달라요. 마감까지 확인이 끝나지 않은 입력은 이번 결과에 반영되지 않을 수 있어요. 수정본을 검사하다 마감되면 마지막 확인 완료본을 사용해요.</p>}
-  </section>{!closed && <aside className="room-sidebar"><div className="glass-card side-card"><h3>마감 조건</h3>{room.expected_participants != null && <p>확인 완료 {room.expected_participants}명 제출 시 자동 마감</p>}{room.submission_deadline && <p>{formatDateTime(room.submission_deadline)}</p>}<p>확인이나 답변을 기다리느라 마감을 연장하지 않아요.</p></div>{room.viewer.role === "HOST" && <div className="glass-card side-card"><h3>주최자 도구</h3><button className="button danger-outline" disabled={pending} onClick={() => { void closeRoom(); }}>입력 마감하기</button>{closeError != null && <p className="alert error" role="alert">{errorMessage(closeError)}</p>}</div>}</aside>}</div>;
+    {!closed && room.viewer.role === "HOST" && <div className="host-tools-inline"><h3>주최자 도구</h3><RoomCloseConfirmation disabled={pending} pending={pending} unsaved={draftEdited.current} error={closeError != null ? errorMessage(closeError) : undefined} onConfirm={() => { void closeRoom(); }} /></div>}
+  </section></div>;
 }

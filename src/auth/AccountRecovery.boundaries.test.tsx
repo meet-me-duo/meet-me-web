@@ -74,7 +74,7 @@ function mount(initialPath = path) {
 async function restore(factory: ReplyFactory) { refreshQueue.push(factory); await act(async () => { await session.restoreSession(); }); }
 async function verified(initial = snapshot()) { privateA = () => json(initial); await restore(() => auth()); mount(); return screen.findByRole("textbox", { name: /시간·장소 조건/ }); }
 async function dirty() { const input = await verified(); fireEvent.change(input, { target: { value: raw } }); return input; }
-const noCompletion = () => expect(screen.queryByRole("heading", { name: "조건 제출을 완료했어요" })).not.toBeInTheDocument();
+const noCompletion = () => expect(screen.queryByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).not.toBeInTheDocument();
 const binding = (kind: "PRECHECK" | "LEGACY", revision: number) => ({ verifiedAccountId: A.id, room: code, viewerContext: JSON.stringify([true, "HOST", A.displayName, contextA]), candidateRevision: revision, editorKind: kind });
 
 describe("issue132 exact pending drafts and irreversible fresh ownership denial", () => {

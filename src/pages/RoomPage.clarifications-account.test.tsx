@@ -93,7 +93,8 @@ describe("#107 clarification UI inside #109's real account boundary", () => {
 
   it("keeps guest MEMBER participation until explicit login and never auto-claims its question for an unjoined account", async () => {
     const mock = await fixture({ guest: true, unjoinedB: true }); await screen.findByText("G 본인 질문"); await mock.switchToB();
-    await screen.findByRole("button", { name: "이 브라우저의 기존 참여 연결" });
+    await screen.findByText("합성 계정과 보완 질문 통합");
+    expect(screen.queryByRole("button", { name: /이 브라우저의.*참여 연결/ })).not.toBeInTheDocument();
     expect(screen.queryByText("G_only_question_excerpt")).not.toBeInTheDocument(); expect(screen.queryByRole("radio")).not.toBeInTheDocument();
     expect(mock.reads.some(read => read.path.endsWith("/clarifications") && read.token === "Bearer synthetic-B")).toBe(false);
     expect(mock.writes).toEqual([]);

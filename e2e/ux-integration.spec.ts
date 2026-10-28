@@ -67,9 +67,8 @@ for (const width of [1440, 320, 390]) test(`create, save, share, partial selecti
   await page.getByRole("button", { name: "방 만들기", exact: true }).click();
   await expect(page).toHaveURL(`/rooms/${code}`);
   expect(state.created[0]).toMatchObject({ expected_participants: 4, submission_deadline: "2099-12-31T09:30:00.000Z", manual_only: false, search_start_date: null, search_end_date: null });
-  await expect(page.getByText("목표 4명 제출 시", { exact: true })).toBeVisible();
-  await expect(page.getByText("자동 마감 시간", { exact: true })).toBeVisible();
-  await expect(page.getByText(/먼저 충족되는 조건/)).toBeVisible();
+  await expect(page.locator(".room-header h1")).toHaveText("통합 흐름 검증");
+  await expect(page.locator(".submission-layout > aside")).toHaveCount(0);
   await expect(page.getByText(/반영하지 못한 원문은 주최자에게 공개/)).toBeVisible();
   await page.getByRole("textbox").fill("화요일 저녁");
   await page.getByRole("button", { name: "조건 제출하기" }).click();
@@ -89,6 +88,7 @@ for (const width of [1440, 320, 390]) test(`create, save, share, partial selecti
   await page.getByRole("button", { name: "수정 취소" }).click();
   await expect(page.locator(".submitted-text")).toHaveText("목요일 저녁");
   await page.getByRole("button", { name: "입력 마감하기" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "지금 입력 마감", exact: true }).click();
   await expect(page.getByRole("heading", { name: "일부 조건으로 만든 후보 플랜이에요" })).toBeVisible();
   const member = await context.newPage();
   await member.setViewportSize({ width, height: 844 }); await member.clock.install(); await fixture(member, "MEMBER");

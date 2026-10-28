@@ -17,6 +17,7 @@ async function fixture(context: BrowserContext, options: { joined?: boolean; rol
     const request = route.request(), pathname = new URL(request.url()).pathname;
     if (await fulfillAccountRefresh(route, joined && role === "HOST" ? "로컬 사용자" : null)) return;
     const response = () => ({ ...room, public_status: options.status ?? room.public_status, viewer: { joined, role: joined ? role : null, display_name: joined ? "로컬 사용자" : null } });
+    if (pathname === "/api/account/rooms" && request.method() === "GET") return route.fulfill({ json: { rooms: [{ invite_code: code, purpose: room.purpose, role, created_at: "2026-10-01T10:00:00Z", expires_at: "2026-11-01T10:00:00Z" }], has_more: false, next_cursor: null } });
     if (pathname === `/api/rooms/${code}/guest-records` && request.method() === "GET") return route.fulfill({ json: { records: [] } });
     if (pathname === "/api/rooms" && request.method() === "POST") { joined = true; role = "HOST"; return route.fulfill({ status: 201, json: response() }); }
     if (pathname.endsWith("/participants") && request.method() === "POST") { joined = true; role = "MEMBER"; return route.fulfill({ status: 201, json: response() }); }
@@ -41,7 +42,8 @@ test("creation is recorded before opening and a new tab returns to a selectable 
   await page.getByRole("button", { name: /다음 단계/ }).click();
   await page.getByRole("button", { name: "방 만들기", exact: true }).click();
   await expect(page).toHaveURL(`/rooms/${code}`);
-  await expect(page.getByText(/홈의.*이 기기의 최근 모임/)).toBeVisible();
+  await expect(page.locator(".room-history-note")).toContainText("계정으로 주최하거나 참여한 모임");
+  await expect(page.locator(".room-history-note").getByRole("link", { name: "내 모임" })).toHaveAttribute("href", "/account/rooms");
   const data = await page.evaluate(key => JSON.parse(localStorage.getItem(key)!), key);
   expect(Object.keys(data.rooms[0]).sort()).toEqual(["inviteCode", "lastOpenedAt", "title"]);
   await page.close();
@@ -88,7 +90,7 @@ test("a saved address never supplies authority after participation is lost", asy
   await expect(page.getByRole("heading", { name: "주최자 도구" })).toHaveCount(0);
 });
 
-test("storage rejection preserves successful creation and explains link preservation", async ({ page, context }) => {
+test("storage rejection preserves account creation and server history access", async ({ page, context }) => {
   await fixture(context);
   await page.addInitScript(() => { Storage.prototype.setItem = () => { throw new DOMException("denied", "QuotaExceededError"); }; });
   await page.goto("/create");
@@ -97,8 +99,23 @@ test("storage rejection preserves successful creation and explains link preserva
   await page.getByRole("button", { name: /다음 단계/ }).click();
   await page.getByRole("button", { name: "방 만들기", exact: true }).click();
   await expect(page).toHaveURL(`/rooms/${code}`);
-  await expect(page.getByRole("status")).toContainText("모임 주소를 보관하지 못했어요");
+  await expect(page.locator(".room-history-note")).toContainText("계정으로 주최하거나 참여한 모임");
   await expect(page.getByRole("heading", { name: "주최자 도구" })).toBeVisible();
+  expect(await page.evaluate(key => localStorage.getItem(key), key)).toBeNull();
+  await page.getByRole("navigation", { name: "계정과 내 모임" }).getByRole("link", { name: "내 모임" }).click();
+  await expect(page.getByRole("heading", { name: "내 모임", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: /다시 찾을 모임/ })).toBeVisible();
+});
+
+test("guest storage rejection still warns and preserves invitation access", async ({ page, context }) => {
+  await fixture(context, { joined: false });
+  await page.addInitScript(() => { Storage.prototype.setItem = () => { throw new DOMException("denied", "QuotaExceededError"); }; });
+  await page.goto(`/rooms/${code}`);
+  await page.getByLabel("이름", { exact: true }).fill("합성 게스트");
+  await page.getByRole("button", { name: "참여하기" }).click();
+  await expect(page.locator(".room-history-note")).toContainText("모임 주소를 보관하지 못했어요");
+  await expect(page.locator(".room-header").getByRole("button", { name: "초대 링크 복사" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "주최자 도구" })).toHaveCount(0);
 });
 
 test("clipboard failure offers a selectable public link and keyboard can reopen a room", async ({ page, context }) => {

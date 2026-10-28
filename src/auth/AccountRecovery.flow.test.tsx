@@ -75,7 +75,7 @@ async function restore(factory: ReplyFactory) { refreshQueue.push(factory); awai
 async function verified(initial = snapshot()) { privateA = () => json(initial); await restore(() => auth()); mount(); return screen.findByRole("textbox", { name: /시간·장소 조건/ }); }
 async function dirty() { const input = await verified(); fireEvent.change(input, { target: { value: raw } }); return input; }
 const noPrivateRaw = () => { expect(screen.queryByDisplayValue(raw)).not.toBeInTheDocument(); expect(document.body.textContent).not.toContain(raw); };
-const noCompletion = () => expect(screen.queryByRole("heading", { name: "조건 제출을 완료했어요" })).not.toBeInTheDocument();
+const noCompletion = () => expect(screen.queryByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).not.toBeInTheDocument();
 const beforeUnload = () => { const event = new Event("beforeunload", { cancelable: true }); window.dispatchEvent(event); return event.defaultPrevented; };
 function preventNativeNavigation() { document.addEventListener("click", event => event.preventDefault(), { once: true }); }
 function privateStorageAbsent() { const dump = JSON.stringify({ ...localStorage, ...sessionStorage }); for (const value of [raw, savedRaw, A.id, contextA, "synthetic-access-A"]) expect(dump).not.toContain(value); }
@@ -163,7 +163,7 @@ describe("issue132 original-tab private draft quarantine across authentication r
   });
 
   it("clears quarantine on explicit logout and refuses later same-account resurrection", async () => {
-    await dirty(); fireEvent.click(screen.getByRole("button", { name: "로그아웃" })); await screen.findByRole("region", { name: "계정 복구" }); noPrivateRaw();
+    await dirty(); fireEvent.click(screen.getByRole("button", { name: /계정 메뉴/ })); fireEvent.click(screen.getByRole("button", { name: "로그아웃" })); await screen.findByRole("region", { name: "계정 복구" }); noPrivateRaw();
     await restore(() => auth()); expect(await screen.findByRole("textbox", { name: /시간·장소 조건/ })).toHaveValue(""); noPrivateRaw();
   });
 
@@ -224,7 +224,7 @@ describe("issue132 original-tab private draft quarantine across authentication r
     await restore(() => json({ code: "AUTH_REFRESH_INVALID" }, 401)); expect(screen.queryByText(savedRaw)).not.toBeInTheDocument();
     const own = deferred<Response>(); privateA = () => own.promise; const before = privateCalls; await restore(() => auth()); await waitFor(() => expect(privateCalls).toBeGreaterThan(before));
     expect(screen.queryByText(savedRaw)).not.toBeInTheDocument(); await act(async () => { own.resolve(json(snapshot(1, savedRaw, accepted))); }); await screen.findByText(savedRaw);
-    if (accepted) expect(screen.getByRole("heading", { name: "조건 제출을 완료했어요" })).toBeInTheDocument(); else noCompletion();
+    if (accepted) expect(screen.getByText("제출 완료 · 다른 참여자를 기다려 주세요.")).toBeInTheDocument(); else noCompletion();
     expect(mutationCalls).toEqual([]); privateStorageAbsent();
   });
 });

@@ -1,9 +1,9 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import App from "../App";
-import { api, ApiError } from "../api/client";
+import { api } from "../api/client";
 import type { Room } from "../api/types";
 
 const session = vi.hoisted(() => ({
@@ -17,7 +17,7 @@ vi.mock("./session", () => ({
 let client: QueryClient | undefined;
 afterEach(() => { cleanup(); client?.clear(); vi.restoreAllMocks(); localStorage.clear(); });
 
-it("#109 shows an explicit claim conflict without replacing an account member already in the room", async () => {
+it("preserves the account member and saved input without exposing a guest-claim action", async () => {
   const room: Room = {
     invite_code: "abcdefghijklmnopqrstuv", purpose: "계정 참여가 있는 모임", meeting_mode: "EITHER", time_zone_id: "Asia/Seoul",
     search_start_date: "2026-10-17", search_end_date: "2026-10-31", search_range_source: "DEFAULTED",
@@ -28,17 +28,15 @@ it("#109 shows an explicit claim conflict without replacing an account member al
   };
   vi.spyOn(api, "getRoom").mockResolvedValue(room);
   vi.spyOn(api, "getSubmission").mockResolvedValue({ raw_text: "계정의 기존 입력", revision: 1, locale: "ko-KR", created_at: "2026-10-17T00:00:00Z", editable: true });
-  const claim = vi.spyOn(api, "claimGuestRoom").mockRejectedValue(new ApiError(409, { code: "PARTICIPANT_CONFLICT", detail: "이미 같은 방에 계정 참여가 있어요." }));
+  const claim = vi.spyOn(api, "claimGuestRoom");
   const join = vi.spyOn(api, "joinRoom");
   client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[`/rooms/${room.invite_code}`]}><App /></MemoryRouter></QueryClientProvider>);
 
-  const disclosure = await screen.findByText("이 브라우저의 이전 참여 연결", { selector: "summary" });
+  await screen.findByText("기존 회원 참여 이름님이 참여한 모임");
   expect(claim).not.toHaveBeenCalled();
-  fireEvent.click(disclosure);
-  fireEvent.click(screen.getByRole("button", { name: "이 브라우저의 기존 참여 연결" }));
-  await screen.findByText("이미 같은 방에 계정 참여가 있어요.");
-  expect(claim).toHaveBeenCalledExactlyOnceWith(room.invite_code);
+  expect(screen.queryByText("이 브라우저의 이전 참여 연결")).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: /참여.*연결/ })).not.toBeInTheDocument();
   expect(join).not.toHaveBeenCalled();
   expect(client.getQueryData<Room>(["room", room.invite_code])?.viewer).toEqual(room.viewer);
   expect(screen.getByText("기존 회원 참여 이름님이 참여한 모임")).toBeInTheDocument();

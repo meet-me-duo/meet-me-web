@@ -1,0 +1,251 @@
+{
+  "main_commit": "91c3e9f117344eb6cd513720717b0c7fe0f56bba",
+  "feature_pr": 47,
+  "promotion_pr": 48,
+  "feature_ci": 40711382092,
+  "develop_ci": 40712650976,
+  "promotion_ci": 40712869801,
+  "main_ci": 40713862793,
+  "deployment": 40713862796,
+  "deployment_status": "success",
+  "public_assets": {
+    "origin": "https://app.meet-me.co.kr",
+    "assets": [
+      {
+        "path": "assets/AccountOperationsPage-BqcY0RhA.css",
+        "status": 200,
+        "localBytes": 1582,
+        "publicBytes": 1582,
+        "localSha256": "0f5aa7736566ff093b65786378628c8dbca778dfc42816014d7514590a117adc",
+        "publicSha256": "0f5aa7736566ff093b65786378628c8dbca778dfc42816014d7514590a117adc",
+        "match": true,
+        "cacheControl": null,
+        "age": null
+      },
+      {
+        "path": "assets/AccountOperationsPage-CBiDYbMt.js",
+        "status": 200,
+        "localBytes": 16700,
+        "publicBytes": 16700,
+        "localSha256": "670a5364b0bfa74d54206547a3d7ddecf700ca6576110c7917aab482f630b3e8",
+        "publicSha256": "670a5364b0bfa74d54206547a3d7ddecf700ca6576110c7917aab482f630b3e8",
+        "match": true,
+        "cacheControl": null,
+        "age": null
+      },
+      {
+        "path": "assets/favicon-DjtCOTlh.svg",
+        "status": 200,
+        "localBytes": 744,
+        "publicBytes": 744,
+        "localSha256": "cf1f8ed7dc4da2af8250d48bf63bab813aa9e855d86edda6f833b24db91742bd",
+        "publicSha256": "cf1f8ed7dc4da2af8250d48bf63bab813aa9e855d86edda6f833b24db91742bd",
+        "match": true,
+        "cacheControl": null,
+        "age": null
+      },
+      {
+        "path": "assets/index-DlCQTHfa.js",
+        "status": 200,
+        "localBytes": 559497,
+        "publicBytes": 559497,
+        "localSha256": "b9c6205beb96f913f48b00366dbed29cc4a422da06ae84830252406b10d6ac89",
+        "publicSha256": "b9c6205beb96f913f48b00366dbed29cc4a422da06ae84830252406b10d6ac89",
+        "match": true,
+        "cacheControl": null,
+        "age": null
+      },
+      {
+        "path": "assets/index-ZCZu4mMV.css",
+        "status": 200,
+        "localBytes": 39520,
+        "publicBytes": 39520,
+        "localSha256": "4bd705240bba7c018526e0d671be40003af600d91db56e4dfbe808a1aabf8d2b",
+        "publicSha256": "4bd705240bba7c018526e0d671be40003af600d91db56e4dfbe808a1aabf8d2b",
+        "match": true,
+        "cacheControl": null,
+        "age": null
+      },
+      {
+        "path": "brands/GOOGLE-CODE-LICENSE.txt",
+        "status": 200,
+        "localBytes": 11358,
+        "publicBytes": 11358,
+        "localSha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+        "publicSha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+        "match": true,
+        "cacheControl": null,
+        "age": null
+      },
+      {
+        "path": "brands/README.md",
+        "status": 200,
+        "localBytes": 2119,
+        "publicBytes": 2119,
+        "localSha256": "649aaa209ab8787850a476539e17dd5a360db3fa13b83a1c0efd2ae463d9964e",
+        "publicSha256": "649aaa209ab8787850a476539e17dd5a360db3fa13b83a1c0efd2ae463d9964e",
+        "match": true,
+        "cacheControl": null,
+        "age": null
+      },
+      {
+        "path": "brands/google-g.svg",
+        "status": 200,
+        "localBytes": 862,
+        "publicBytes": 862,
+        "localSha256": "08f09062fe81e2734edf0ec303e6498feea14237855f330902081157b80b60a6",
+        "publicSha256": "08f09062fe81e2734edf0ec303e6498feea14237855f330902081157b80b60a6",
+        "match": true,
+        "cacheControl": null,
+        "age": null
+      },
+      {
+        "path": "brands/google-signin.png",
+        "status": 200,
+        "localBytes": 9671,
+        "publicBytes": 9671,
+        "localSha256": "8a053b4c34e0dcb58079b84e08414a8b2de78b6b8c2f54d61aed64a89ab7aa7b",
+        "publicSha256": "8a053b4c34e0dcb58079b84e08414a8b2de78b6b8c2f54d61aed64a89ab7aa7b",
+        "match": true,
+        "cacheControl": null,
+        "age": null
+      },
+      {
+        "path": "brands/kakao-login.svg",
+        "status": 200,
+        "localBytes": 2681,
+        "publicBytes": 2681,
+        "localSha256": "ab90ab44616f14a671844cd991b3fbb33277f42c5bb2cc5a9422344a854c9398",
+        "publicSha256": "ab90ab44616f14a671844cd991b3fbb33277f42c5bb2cc5a9422344a854c9398",
+        "match": true,
+        "cacheControl": null,
+        "age": null
+      },
+      {
+        "path": "index.html",
+        "status": 200,
+        "localBytes": 708,
+        "publicBytes": 708,
+        "localSha256": "5c1c42af3fc84bb506952ad7c56aa2b7b68c0a364764cf87e5056c3867634649",
+        "publicSha256": "5c1c42af3fc84bb506952ad7c56aa2b7b68c0a364764cf87e5056c3867634649",
+        "match": true,
+        "cacheControl": null,
+        "age": null
+      }
+    ],
+    "matches": 11,
+    "total": 11
+  },
+  "public_ui": {
+    "origin": "https://app.meet-me.co.kr",
+    "apiMode": "all /api requests intercepted; synthetic refresh401/start204, no real OAuth or account login",
+    "tlsLimit": "Chromium rejected site chain with ERR_CERT_AUTHORITY_INVALID; UI-only context ignores HTTPS errors. Independent public asset downloads retain default TLS verification.",
+    "results": [
+      {
+        "project": "desktop",
+        "assets": [
+          "/assets/index-DlCQTHfa.js",
+          "/assets/index-ZCZu4mMV.css"
+        ],
+        "providers": [
+          {
+            "provider": "Google",
+            "href": "https://api.meet-me.co.kr/api/auth/google/start",
+            "touchHeight": 46,
+            "hover": "PASS",
+            "pressed": "PASS",
+            "focus": "PASS",
+            "pending": "PASS",
+            "duplicates": "PASS",
+            "pageshow": "PASS"
+          },
+          {
+            "provider": "Kakao",
+            "href": "https://api.meet-me.co.kr/api/auth/kakao/start",
+            "touchHeight": 46,
+            "hover": "PASS",
+            "pressed": "PASS",
+            "focus": "PASS",
+            "pending": "PASS",
+            "duplicates": "PASS",
+            "pageshow": "PASS"
+          }
+        ],
+        "intercepted": [
+          {
+            "method": "POST",
+            "origin": "https://api.meet-me.co.kr",
+            "path": "/api/auth/refresh"
+          },
+          {
+            "method": "GET",
+            "origin": "https://api.meet-me.co.kr",
+            "path": "/api/auth/google/start"
+          },
+          {
+            "method": "GET",
+            "origin": "https://api.meet-me.co.kr",
+            "path": "/api/auth/kakao/start"
+          }
+        ],
+        "startsIntercepted": [
+          "/api/auth/google/start",
+          "/api/auth/kakao/start"
+        ]
+      },
+      {
+        "project": "mobile",
+        "assets": [
+          "/assets/index-DlCQTHfa.js",
+          "/assets/index-ZCZu4mMV.css"
+        ],
+        "providers": [
+          {
+            "provider": "Google",
+            "href": "https://api.meet-me.co.kr/api/auth/google/start",
+            "touchHeight": 46,
+            "hover": "PASS",
+            "pressed": "PASS",
+            "focus": "PASS",
+            "pending": "PASS",
+            "duplicates": "PASS",
+            "pageshow": "PASS"
+          },
+          {
+            "provider": "Kakao",
+            "href": "https://api.meet-me.co.kr/api/auth/kakao/start",
+            "touchHeight": 46,
+            "hover": "PASS",
+            "pressed": "PASS",
+            "focus": "PASS",
+            "pending": "PASS",
+            "duplicates": "PASS",
+            "pageshow": "PASS"
+          }
+        ],
+        "intercepted": [
+          {
+            "method": "POST",
+            "origin": "https://api.meet-me.co.kr",
+            "path": "/api/auth/refresh"
+          },
+          {
+            "method": "GET",
+            "origin": "https://api.meet-me.co.kr",
+            "path": "/api/auth/google/start"
+          },
+          {
+            "method": "GET",
+            "origin": "https://api.meet-me.co.kr",
+            "path": "/api/auth/kakao/start"
+          }
+        ],
+        "startsIntercepted": [
+          "/api/auth/google/start",
+          "/api/auth/kakao/start"
+        ]
+      }
+    ]
+  },
+  "main_ci_status": "pending at capture"
+}

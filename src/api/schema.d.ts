@@ -610,7 +610,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** 현재 계정이 주최자인 보관 방 목록 */
+        /**
+         * 현재 계정의 주최·참여 모임 목록
+         * @description 역할 생략은 전체. 생성일은 KST 양끝 포함 날짜이며 생성 시각 DESC, 방 ID ASC 커서 페이지를 사용한다. 기존 30일 보관 정책을 적용한다.
+         */
         get: operations["accountRooms"];
         put?: never;
         post?: never;
@@ -2063,27 +2066,36 @@ export interface components {
             /** @description RECORDED_ADMISSIONS. 실제 dispatch 집계 분모가 아님 */
             coverage_basis?: string;
         };
-        /** @description 30일 보관 정책의 본인 주최 방 */
+        /** @description 기존 30일 보관 정책의 본인 주최 또는 참여 모임 */
         AccountRoomResponse: {
-            /** @description 모임 목적 */
+            /** @description 모임 이름(목적) */
             purpose?: string;
+            /**
+             * @description 현재 계정 본인의 모임 역할
+             * @enum {string}
+             */
+            role?: "HOST" | "MEMBER";
             /** @description 방 초대 코드 */
             invite_code?: string;
             /**
              * Format: date-time
-             * @description 방 생성 시각
+             * @description 방 생성 시각, UTC ISO-8601
              */
             created_at?: string;
             /**
              * Format: date-time
-             * @description 마감된 방은 마감 시각, 수집 중 방은 생성 시각에서 30일 후 정리 기준 시각
+             * @description 마감된 방은 마감 시각, 수집 중 방은 생성 시각에서 30일 후 정리 기준 시각. 정확한 경계는 포함
              */
             expires_at?: string;
         };
-        /** @description 본인 주최 방 보관 목록 */
+        /** @description 계정 본인의 주최·참여 모임 목록. 생성 시각 DESC, 방 ID ASC 커서 정렬 */
         AccountRoomsResponse: {
-            /** @description 만료되지 않은 본인 주최 방 */
+            /** @description 계정 소유권과 기존 30일 보관 범위를 만족하는 모임 */
             rooms?: components["schemas"]["AccountRoomResponse"][];
+            /** @description 다음 페이지 존재 여부 */
+            has_more?: boolean;
+            /** @description 다음 페이지 커서. has_more가 false면 null. 필터 변경 시 초기화 */
+            next_cursor?: string | null;
         };
         ClaimReviewRequest: {
             /**
@@ -4690,7 +4702,20 @@ export interface operations {
     };
     accountRooms: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description 생략 시 전체, HOST는 주최, MEMBER는 참여 */
+                role?: "HOST" | "MEMBER";
+                /** @description KST 모임 생성일 시작(포함), YYYY-MM-DD, 0001~9998년 */
+                created_from?: string;
+                /** @description KST 모임 생성일 종료(포함), 시작일 이상, YYYY-MM-DD */
+                created_to?: string;
+                /** @description 모임 이름의 대소문자 무시 부분 검색. 앞뒤 공백 제거, 최대 100 Unicode code point, 빈 값은 전체. %, _, 역슬래시는 문자 그대로 검색 */
+                query?: string;
+                /** @description 페이지 크기 1~100, 기본 20 */
+                limit?: number;
+                /** @description 이전 응답의 next_cursor. 첫 페이지와 필터·검색 변경 시 생략 */
+                cursor?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -4704,6 +4729,15 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AccountRoomsResponse"];
+                };
+            };
+            /** @description 잘못된 역할·생성일·기간·검색 길이·페이지 크기·커서 (VALIDATION_FAILED) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
                 };
             };
             /** @description 로그인 필요 */

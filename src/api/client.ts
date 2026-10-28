@@ -17,6 +17,7 @@ import type {
 } from "./types";
 import type { ReanalyzeBody, ReanalyzeResponse, ReopenBody, ReopenResponse } from "./recovery";
 import type { ClarificationAnswer, ClarificationAnswerResult, ClarificationList } from "./clarifications";
+import { accountRoomsPath, type AccountRoomFilters, type AccountRoomsResponse } from "./accountRooms";
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
 
@@ -81,7 +82,7 @@ export const api = {
   answerSubmissionCheck: (inviteCode: string, checkId: string, body: SubmissionCheckCommand) => request<SubmissionCheckSnapshot>(`/api/rooms/${encode(inviteCode)}/submission/checks/${encode(checkId)}/answer`, { method: "POST", body: JSON.stringify(body) }),
   retrySubmissionCheck: (inviteCode: string, checkId: string, body: SubmissionCheckCommand) => request<SubmissionCheckSnapshot>(`/api/rooms/${encode(inviteCode)}/submission/checks/${encode(checkId)}/retry`, { method: "POST", body: JSON.stringify(body) }),
   cancelSubmissionCheck: (inviteCode: string, checkId: string, body: SubmissionCheckCommand) => request<SubmissionCheckSnapshot>(`/api/rooms/${encode(inviteCode)}/submission/checks/${encode(checkId)}/cancel`, { method: "POST", body: JSON.stringify(body) }),
-  getAccountRooms: () => request<{ rooms: { invite_code: string; purpose: string; created_at: string; expires_at: string }[] }>("/api/account/rooms"),
+  getAccountRooms: (filters?: AccountRoomFilters, cursor?: string, signal?: AbortSignal) => request<AccountRoomsResponse>(accountRoomsPath(filters, cursor), { signal }),
   claimGuestRoom: (code: string) => request<Room>(`/api/rooms/${encode(code)}/claim`, { method: "POST" }),
   getClarifications: (inviteCode: string, signal?: AbortSignal) => request<ClarificationList>(`/api/rooms/${encode(inviteCode)}/submission/clarifications`, { signal }),
   answerClarification: (inviteCode: string, questionId: string, body: ClarificationAnswer) => request<ClarificationAnswerResult>(`/api/rooms/${encode(inviteCode)}/submission/clarifications/${encode(questionId)}/answer`, { method: "POST", body: JSON.stringify(body) }),

@@ -34,7 +34,7 @@ test("authenticated header and /login route expose an account menu instead of a 
   await trigger.press("Escape");
   await expect(trigger).toBeFocused();
   await trigger.click();
-  await page.getByRole("heading", { name: "내가 만든 모임" }).click();
+  await page.getByRole("heading", { name: "내 모임", exact: true }).click();
   await expect(trigger).toHaveAttribute("aria-expanded", "false");
 });
 

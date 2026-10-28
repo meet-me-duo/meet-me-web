@@ -123,6 +123,19 @@ describe("account state and guarded account actions", () => {
     expect(screen.queryByText(account.displayName)).not.toBeInTheDocument();
   });
 
+  it("keeps the security dialog escapable while a background refresh is held", async () => {
+    await signedIn(); mount(); const dialog = openSecurity();
+    const pending = deferred<Response>(); fetchMock.mockReturnValueOnce(pending.promise);
+    let work!: ReturnType<typeof restoreSession>;
+    act(() => { work = restoreSession(); });
+    expect(within(dialog).getByRole("button", { name: "모든 기기에서 로그아웃" })).toBeDisabled();
+    expect(within(dialog).getByRole("button", { name: "취소" })).not.toBeDisabled();
+    fireEvent.keyDown(dialog, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    await act(async () => { pending.resolve(auth()); await work; });
+    expect(fetchMock.mock.calls.some(([url]) => String(url).endsWith("/logout-all"))).toBe(false);
+  });
+
   it("never displays the previous account's logout error after a new account signs in", async () => {
     await signedIn(); mount(); const pending = deferred<Response>(); fetchMock.mockReturnValueOnce(pending.promise);
     fireEvent.click(within(openSecurity()).getByRole("button", { name: "모든 기기에서 로그아웃" }));

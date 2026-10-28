@@ -26,7 +26,7 @@ export default function AccountSecurityPage() {
     element.querySelector<HTMLButtonElement>("button")?.focus();
     return () => { if (element.open && typeof element.close === "function") element.close(); if (returnFocus?.isConnected) returnFocus.focus(); };
   }, [confirm]);
-  const close = () => { if (!disabled) setConfirm(false); };
+  const close = () => { if (!busy) setConfirm(false); };
   const keyboard = (event: KeyboardEvent<HTMLDialogElement>) => {
     if (event.key === "Escape") { event.preventDefault(); close(); }
     if (event.key !== "Tab") return;
@@ -48,7 +48,7 @@ export default function AccountSecurityPage() {
       onCancel={event => { event.preventDefault(); close(); }} onKeyDown={keyboard}>
       <div className="account-security-content"><ShieldCheck size={22} aria-hidden="true" /><h2 id={`${id}-title`}>모든 기기에서 로그아웃할까요?</h2>
         <div id={`${id}-description`}><p>현재 기기를 포함한 모든 기기의 로그인을 종료해요. 다른 기기의 접근은 최대 15분간 이어질 수 있어요.</p><p>Google·Kakao 계정 연결은 유지돼요.</p></div>
-        <div className="account-security-actions"><Button variant="secondary" disabled={disabled} onClick={close}>취소</Button>
+        <div className="account-security-actions"><Button variant="secondary" disabled={busy} onClick={close}>취소</Button>
           <Button variant="danger-outline" disabled={disabled} onClick={() => void logout(true, session.account.id)}>모든 기기에서 로그아웃</Button></div>
       </div>
     </dialog>}

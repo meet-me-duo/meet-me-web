@@ -1,7 +1,9 @@
-export type AccountRoomRole = "HOST" | "MEMBER";
+import type { components, operations } from "./schema";
+
+export type AccountRoomRole = NonNullable<components["schemas"]["AccountRoomResponse"]["role"]>;
 export interface AccountRoomRecord { invite_code: string; purpose: string; created_at: string; expires_at: string; role?: AccountRoomRole }
 export interface AccountRoomsResponse { rooms: AccountRoomRecord[]; has_more?: boolean; next_cursor?: string | null }
-export interface AccountRoomFilters { role?: AccountRoomRole; created_from?: string; created_to?: string; query?: string; limit?: number }
+export type AccountRoomFilters = Omit<NonNullable<operations["accountRooms"]["parameters"]["query"]>, "cursor">;
 export interface AccountRoomPage { kind: "history" | "legacy"; rooms: (AccountRoomRecord & { role: AccountRoomRole })[]; has_more: boolean; next_cursor: string | null }
 
 export function accountRoomsPath(filters: AccountRoomFilters = {}, cursor?: string) {
@@ -22,7 +24,7 @@ export function decodeAccountRooms(value: unknown): AccountRoomPage {
   let hasMore = false; let nextCursor: string | null = null;
   if (history) {
     if (!("has_more" in value) || typeof value.has_more !== "boolean" || !("next_cursor" in value)
-      || !(value.next_cursor === null || typeof value.next_cursor === "string" && value.next_cursor.length > 0)
+      || !(value.next_cursor === null || typeof value.next_cursor === "string" && value.next_cursor.length > 0 && value.next_cursor.length <= 200)
       || value.has_more !== (value.next_cursor !== null)) throw invalid();
     hasMore = value.has_more; nextCursor = value.next_cursor;
   }

@@ -628,3 +628,4 @@ fieldset.field legend { margin-bottom: 9px; }
   .account-history-filters { padding: 16px; }
   .account-history-list .ui-card { padding: 14px; }
 }
+@media (max-width: 390px) { .account-history-fields { grid-template-columns: minmax(0, 1fr); } }

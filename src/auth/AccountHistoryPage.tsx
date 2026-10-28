@@ -14,7 +14,8 @@ const roles = { ALL: "전체", HOST: "주최", MEMBER: "참여" };
 function validDate(value: string) {
   if (!value) return true;
   const date = new Date(`${value}T00:00:00Z`);
-  return /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
+  const year = Number(value.slice(0, 4));
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) && year >= 1 && year <= 9998 && Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
 }
 
 export function AccountArchive() {
@@ -60,12 +61,12 @@ export function AccountArchive() {
 
   return <section className="page-width account-card account-history" aria-labelledby="account-history-title">
     <div className="account-history-heading"><div><span className="eyebrow"><List size={17} aria-hidden="true" />계정 기록</span><h1 id="account-history-title">내 모임</h1><p>주최하거나 참여한 모임을 계정으로 다시 찾을 수 있어요.</p></div><Link className="button primary" to="/create">모임 만들기</Link></div>
-    <p className="field-hint">모임은 기존 보관 정책에 따라 생성 또는 마감 후 30일이 지나면 삭제돼요. 익명으로 참여한 과거 기록은 자동으로 연결되지 않아요.</p>
+    <p className="field-hint">모임은 기존 보관 정책에 따라 생성 또는 마감 후 30일이 지나면 삭제돼요.</p>
     {denied ? <div className="alert error" role="alert">{errorMessage(query.error)}</div> : <>
       {(supportsHistory || first?.kind === "history") && <Card className="account-history-filters"><CardHeader><h2>모임 찾기</h2></CardHeader><CardContent><form onSubmit={submit}>
         <fieldset className="account-history-roles"><legend>모임 구분</legend>{(Object.keys(roles) as (keyof typeof roles)[]).map(role => <label key={role}><input type="radio" name="history-role" value={role} checked={draft.role === role} onChange={() => setDraft(current => ({ ...current, role }))} />{roles[role]}</label>)}</fieldset>
-        <div className="account-history-fields"><label className="field"><span><CalendarDays size={16} aria-hidden="true" />생성일 시작</span><input ref={from} type="date" value={draft.from} aria-describedby="history-date-hint" onChange={event => setDraft(current => ({ ...current, from: event.target.value }))} /></label>
-          <label className="field"><span>생성일 종료</span><input type="date" value={draft.to} aria-describedby="history-date-hint" onChange={event => setDraft(current => ({ ...current, to: event.target.value }))} /></label>
+        <div className="account-history-fields"><label className="field"><span><CalendarDays size={16} aria-hidden="true" />생성일 시작</span><input ref={from} type="date" min="0001-01-01" max="9998-12-31" value={draft.from} aria-describedby="history-date-hint" onChange={event => setDraft(current => ({ ...current, from: event.target.value }))} /></label>
+          <label className="field"><span>생성일 종료</span><input type="date" min="0001-01-01" max="9998-12-31" value={draft.to} aria-describedby="history-date-hint" onChange={event => setDraft(current => ({ ...current, to: event.target.value }))} /></label>
           <label className="field account-history-search"><span><Search size={16} aria-hidden="true" />모임 이름</span><input ref={search} type="search" value={draft.query} onChange={event => setDraft(current => ({ ...current, query: event.target.value }))} placeholder="이름으로 검색" /></label></div>
         <p id="history-date-hint" className="field-hint">모임 생성일 기준 · 한국 시간 · 시작일과 종료일 모두 포함해요. 날짜를 비워 두면 보관 중인 전체 기간을 조회해요.</p>
         {formError && <p className="alert error" role="alert">{formError}</p>}

@@ -163,7 +163,7 @@ describe("issue132 original-tab private draft quarantine across authentication r
   });
 
   it("clears quarantine on explicit logout and refuses later same-account resurrection", async () => {
-    await dirty(); fireEvent.click(screen.getByRole("button", { name: "로그아웃" })); await screen.findByRole("region", { name: "계정 복구" }); noPrivateRaw();
+    await dirty(); fireEvent.click(screen.getByRole("button", { name: /계정 메뉴/ })); fireEvent.click(screen.getByRole("button", { name: "로그아웃" })); await screen.findByRole("region", { name: "계정 복구" }); noPrivateRaw();
     await restore(() => auth()); expect(await screen.findByRole("textbox", { name: /시간·장소 조건/ })).toHaveValue(""); noPrivateRaw();
   });
 

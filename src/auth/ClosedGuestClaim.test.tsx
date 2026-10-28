@@ -47,7 +47,7 @@ it("#109 explicitly connects an existing closed guest HOST after login and then 
   expect(claim).toHaveBeenCalledExactlyOnceWith(room.invite_code);
   expect(join).not.toHaveBeenCalled();
 
-  fireEvent.click(screen.getByRole("link", { name: "내가 만든 모임" }));
+  fireEvent.click(screen.getByRole("link", { name: "내 모임" }));
   expect(await screen.findByRole("link", { name: room.purpose })).toHaveAttribute("href", `/rooms/${room.invite_code}`);
   expect(screen.getByText(/정리 예정/)).toBeInTheDocument();
 });

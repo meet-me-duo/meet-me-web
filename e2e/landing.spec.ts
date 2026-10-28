@@ -7,13 +7,9 @@ async function keyboardToHero(page: import("@playwright/test").Page) {
   await page.keyboard.press("Tab");
   await expect(page.getByRole("link", { name: "Meet me 홈" })).toBeFocused();
   await page.keyboard.press("Tab");
-  await expect(page.getByRole("link", { name: "내가 만든 모임", exact: true })).toBeFocused();
+  await expect(page.getByRole("link", { name: "내 모임", exact: true })).toBeFocused();
   await page.keyboard.press("Tab");
-  await expect(page.getByRole("link", { name: "로그인", exact: true })).toBeFocused();
-  await page.keyboard.press("Tab");
-  await expect(page.getByRole("button", { name: "로그아웃", exact: true })).toBeFocused();
-  await page.keyboard.press("Tab");
-  await expect(page.getByRole("button", { name: "모든 기기 로그아웃", exact: true })).toBeFocused();
+  await expect(page.getByRole("button", { name: /계정 메뉴/ })).toBeFocused();
   await page.keyboard.press("Tab");
 }
 

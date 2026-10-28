@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
-import { Link, Route, Routes } from "react-router-dom";
+import { Link, Navigate, Route, Routes } from "react-router-dom";
+import { List } from "lucide-react";
 import LandingPage from "./pages/LandingPage";
 import RoomPage from "./pages/RoomPage";
 import { AccountBoundary, AccountControls, AuthCallback } from "./auth/AccountBoundary";
@@ -7,6 +8,8 @@ import { LoginGate, AccountArchive } from "./auth/AccountViews";
 import { getSessionVersion } from "./auth/session";
 import { useAccountSession } from "./auth/useAccount";
 import { MeetMeLogo } from "./components/MeetMeLogo";
+import { AccountActionsProvider } from "./auth/AccountActionsProvider";
+import AccountSecurityPage from "./auth/AccountSecurityPage";
 
 const OperationsPage = lazy(() => import("./pages/AccountOperationsPage"));
 
@@ -19,7 +22,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             <MeetMeLogo />
             <span><strong>Meet me</strong><small>스마트 일정 조율</small></span>
           </Link>
-          <nav className="account-navigation"><Link to="/account/rooms">내가 만든 모임</Link><Link to="/login">로그인</Link><AccountControls /></nav>
+          <nav className="account-navigation" aria-label="계정과 내 모임"><Link to="/account/rooms" className="account-history-link"><List size={18} aria-hidden="true" /><span>내 모임</span></Link><AccountControls /></nav>
         </div>
       </header>
       <main>{children}</main>
@@ -29,21 +32,23 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 function AccountRoomsRoute() { return useAccountSession() ? <AccountArchive /> : <LoginGate returnTo="/account/rooms" />; }
+function AccountLoginRoute() { return useAccountSession() ? <Navigate to="/account/rooms" replace /> : <LoginGate />; }
 
 export default function App() {
   useAccountSession();
   return (
-    <AccountBoundary><Shell>
+    <AccountBoundary><AccountActionsProvider><Shell>
       <Routes key={getSessionVersion()}>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<LoginGate />} />
+        <Route path="/login" element={<AccountLoginRoute />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/account/rooms" element={<AccountRoomsRoute />} />
+        <Route path="/account/security" element={<AccountSecurityPage />} />
         <Route path="/create" element={<LandingPage key="create" creating />} />
         <Route path="/rooms/:inviteCode" element={<RoomPage />} />
         <Route path="/operations" element={<Suspense fallback={<p role="status">운영 요약 화면을 불러오는 중입니다.</p>}><OperationsPage /></Suspense>} />
         <Route path="*" element={<div className="center-state"><h1>페이지를 찾을 수 없어요</h1><Link className="button primary" to="/">홈으로 돌아가기</Link></div>} />
       </Routes>
-    </Shell></AccountBoundary>
+    </Shell></AccountActionsProvider></AccountBoundary>
   );
 }

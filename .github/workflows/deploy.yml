@@ -30,7 +30,12 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm test && pnpm lint && pnpm api:check && pnpm build
+      - name: Verify application with isolated API fixtures
+        run: pnpm test && pnpm lint && pnpm api:check
+        env:
+          VITE_API_BASE_URL: ""
+      - name: Build production bundle
+        run: pnpm build
         env:
           VITE_API_BASE_URL: ${{ vars.API_BASE_URL }}
       - uses: aws-actions/configure-aws-credentials@v4

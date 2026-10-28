@@ -78,8 +78,8 @@ for (const [width, height] of [[320, 568], [360, 640], [390, 844], [430, 932], [
     const buttonBox = (await action.boundingBox())!;
     expect(buttonBox.y).toBeGreaterThanOrEqual(68);
     expect(buttonBox.y + buttonBox.height).toBeLessThanOrEqual(height);
-    expect(buttonBox.height).toBeCloseTo(56, 2);
-    if (width <= 540) expect(buttonBox.width).toBeCloseTo(width - 24, 2);
+    expect(buttonBox.height).toBeCloseTo(48, 2);
+    if (width <= 540) expect(buttonBox.width).toBeCloseTo(208, 2);
     expect((await details.boundingBox())!.y).toBeGreaterThanOrEqual(height);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
 

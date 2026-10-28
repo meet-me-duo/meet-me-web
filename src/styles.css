@@ -180,7 +180,7 @@ fieldset.field legend { margin-bottom: 9px; }
 .create-card .mode-choices { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .create-choice label { position: relative; min-width: 0; cursor: pointer; }
 .create-choice input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-.create-choice span { min-height: 44px; display: flex; align-items: center; justify-content: center; padding: 8px 6px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; color: #475569; font-size: .88rem; }
+.create-choice span { min-height: 45px; display: flex; align-items: center; justify-content: center; padding: 8px 6px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; color: #475569; font-size: .88rem; }
 .create-choice input:checked + span { border-color: #0284c7; background: #f0f9ff; color: #075985; font-weight: 700; }
 .create-choice input:focus-visible + span { outline: 3px solid #0f172a; outline-offset: 2px; }
 .create-choice input:disabled + span { opacity: .55; cursor: not-allowed; }

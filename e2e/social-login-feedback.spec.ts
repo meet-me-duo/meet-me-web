@@ -57,9 +57,12 @@ test("both providers show hover, press, keyboard focus and reduced-motion feedba
   for (const name of ["Google", "Kakao"]) {
     const link = page.getByRole("link", { name: `${name}로 로그인` });
     await link.hover();
+    const state = link.locator(name === "Google" ? ".gsi-material-button-state" : ".social-login-state");
+    await expect(state).toHaveCSS("opacity", "0.08");
     const before = await link.boundingBox();
     await page.mouse.down();
-    await expect(link).toHaveCSS("box-shadow", "rgb(3, 105, 161) 0px 0px 0px 3px");
+    await expect(state).toHaveCSS("opacity", "0.12");
+    await expect(link).toHaveCSS("box-shadow", "none");
     expect(await link.boundingBox()).toEqual(before);
     await page.screenshot({ path: testInfo.outputPath(`${name}-pressed.png`), fullPage: true });
     await page.mouse.move(0, 0);

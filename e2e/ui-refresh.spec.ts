@@ -32,6 +32,14 @@ for (const width of [320, 390, 1440]) {
       expect(box.x + box.width).toBeLessThanOrEqual(width);
     }
     expect(Math.abs((await google.boundingBox())!.width - (await kakao.boundingBox())!.width)).toBeLessThan(1);
+    const googleSurface = google.locator(".gsi-material-button");
+    await expect(googleSurface).toHaveCSS("background-color", "rgb(242, 242, 242)");
+    await expect(googleSurface).toHaveCSS("border-style", "none");
+    await expect(googleSurface).toHaveCSS("height", "40px");
+    await expect(google.locator(".gsi-material-button-contents")).toHaveText("Google로 로그인");
+    expect((await google.locator("img").boundingBox())!.width).toBe(20);
+    expect((await google.locator("img").boundingBox())!.height).toBe(20);
+    await expect(google.locator("button")).toHaveCount(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await google.focus();
     await expect(google).toHaveCSS("outline-style", "solid");
@@ -41,6 +49,11 @@ for (const width of [320, 390, 1440]) {
     await page.route("**/api/auth/kakao/start", route => route.fulfill({ contentType: "text/html", body: "<p>Local OAuth navigation fixture</p>" }));
     await page.keyboard.press("Enter");
     await expect(page).toHaveURL(/\/api\/auth\/kakao\/start$/);
+    expect(await page.evaluate(() => sessionStorage.getItem("meetme.login-return"))).toBe("/create");
+    await page.goBack();
+    await page.route("**/api/auth/google/start", route => route.fulfill({ contentType: "text/html", body: "<p>Local Google OAuth navigation fixture</p>" }));
+    await page.getByRole("link", { name: "Google로 로그인" }).click();
+    await expect(page).toHaveURL(/\/api\/auth\/google\/start$/);
     expect(await page.evaluate(() => sessionStorage.getItem("meetme.login-return"))).toBe("/create");
     await page.goBack();
     await page.getByRole("link", { name: "홈으로 돌아가기" }).click();

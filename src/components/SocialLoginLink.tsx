@@ -1,14 +1,26 @@
 import type { ComponentProps } from "react";
 
 const assets = {
-  google: { src: "/brands/google-signin.png", width: 540, height: 120, label: "Google로 로그인" },
+  google: { src: "/brands/google-g.svg", width: 20, height: 20, label: "Google로 로그인" },
   kakao: { src: "/brands/kakao-login.svg", width: 224, height: 46, label: "카카오 로그인" },
 };
 
-export function SocialLoginLink({ provider, label, ...props }: Omit<ComponentProps<"a">, "children" | "className"> & {
+export function SocialLoginLink({ provider, label, href, onClick, tabIndex, ...props }: Omit<ComponentProps<"a">, "children" | "className"> & {
   provider: keyof typeof assets;
   label: string;
 }) {
   const asset = assets[provider];
-  return <a className="social-login" aria-label={label} {...props}><img src={asset.src} width={asset.width} height={asset.height} alt={asset.label} /></a>;
+  const disabled = props["aria-disabled"] === true || props["aria-disabled"] === "true";
+  return <a className={`social-login social-login--${provider}`} aria-label={label} {...props}
+    href={disabled ? undefined : href} role={disabled ? "link" : props.role} tabIndex={disabled ? -1 : tabIndex}
+    onClick={event => { if (disabled) { event.preventDefault(); return; } onClick?.(event); }}>
+    {provider === "google" ? <span className="gsi-material-button">
+      <span className="gsi-material-button-state" />
+      <span className="gsi-material-button-content-wrapper">
+        <span className="gsi-material-button-icon"><img src={asset.src} width={asset.width} height={asset.height} alt="" aria-hidden="true" /></span>
+        <span className="gsi-material-button-contents">Google로 로그인</span>
+        <span style={{ display: "none" }}>Google로 로그인</span>
+      </span>
+    </span> : <img src={asset.src} width={asset.width} height={asset.height} alt={asset.label} />}
+  </a>;
 }

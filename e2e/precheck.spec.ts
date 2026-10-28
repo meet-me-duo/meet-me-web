@@ -131,3 +131,29 @@ for (const width of [320, 390, 1440]) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
   });
 }
+
+for (const width of [320, 390, 1440]) {
+  test(`optional NEEDS_EDIT guidance stays plain text and falls back for an older server at ${width}px`, async ({ page, baseURL }, info) => {
+    const value = current("NEEDS_EDIT");
+    const guidance = '가능한 날짜 범위를 적어 주세요.\n<a href="https://example.invalid">오전인지 오후인지</a>도 알려 주세요.';
+    Object.assign(value.check!, { edit_guidance: guidance });
+    const mock = await fixture(page, baseURL!, value);
+    await page.setViewportSize({ width, height: 900 }); await page.goto(`/rooms/${code}`);
+    const message = page.locator(".precheck-edit-guidance");
+    await expect(message).toHaveText(guidance);
+    await expect(message.locator("a,script,img")).toHaveCount(0);
+    await expect(message).toHaveAttribute("role", "status");
+    await expect(page.getByText(raw, { exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: /선택한 내용으로 확인/ })).toHaveCount(0);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.screenshot({ path: info.outputPath("edit-guidance.png"), fullPage: true });
+    await page.getByRole("button", { name: "내 조건 수정" }).click();
+    await expect(page.getByRole("textbox", { name: /시간·장소 조건/ })).toBeFocused();
+    await expect(page.getByRole("textbox", { name: /시간·장소 조건/ })).toHaveValue(raw);
+    await expect(message).toHaveCount(0); expect(mock.writes).toEqual([]);
+    mock.set(current("NEEDS_EDIT")); await page.reload();
+    await expect(page.getByText("원문은 저장됐지만 확인을 완료하지 못했어요. 조건을 직접 수정해 주세요.")).toBeVisible();
+    await expect(message).toHaveCount(0); expect(mock.writes).toEqual([]); expect(mock.unexpected).toEqual([]); expect(mock.errors).toEqual([]);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+  });
+}

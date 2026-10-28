@@ -14,7 +14,7 @@ export type MeetingMode = "IN_PERSON" | "REMOTE" | "EITHER";
 export type PublicStatus = "COLLECTING" | "ANALYZING" | "INSUFFICIENT_PARTICIPANTS" | "ANALYSIS_DELAYED" | "NO_MATCH" | "READY" | "READY_WITH_WARNINGS" | "CONFIRMED";
 // Additive read fields may be absent while the web is served with the previous server.
 // DTO members remain generated; only their backward-read presence is relaxed here.
-type RecoveryKeys = "state_version" | "analysis_id" | "revision_generation" | "revision_round" | "remaining_correction_analyses" | "capabilities" | "recommendation_protocol" | "clarification_protocol" | "submission_protocol";
+type RecoveryKeys = "state_version" | "analysis_id" | "revision_generation" | "revision_round" | "remaining_correction_analyses" | "capabilities" | "recommendation_protocol" | "clarification_protocol" | "submission_protocol" | "review_prompt_supported";
 type SubmissionKeys = "revision_round_id" | "state_version";
 export type Viewer = Omit<Complete<RawViewer>, "context_id" | "participant_id"> & Partial<Pick<Complete<RawViewer>, "context_id" | "participant_id">>;
 export type RevisionRound = Complete<components["schemas"]["RevisionRoundResponse"]>;

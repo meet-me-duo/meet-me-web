@@ -30,4 +30,17 @@ describe("API client", () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ code: "RATE_LIMITED", detail: "잠시 후 다시 시도", retry_after_seconds: 7 }), { status: 429, headers: { "Content-Type": "application/problem+json" } })));
     await expect(api.getRoom("abcdefghijklmnopqrstuv")).rejects.toMatchObject({ status: 429, retryAfterSeconds: 7, problem: { code: "RATE_LIMITED" } } satisfies Partial<ApiError>);
   });
+
+  it.each([
+    { label: "true", value: true }, { label: "missing", value: undefined }, { label: "false", value: false },
+    { label: "string", value: "true" }, { label: "number", value: 1 }, { label: "null", value: null }, { label: "object", value: { enabled: true } },
+  ])("decodes optional review support from the actual room response: $label", async ({ value }) => {
+    const body = { invite_code: "abcdefghijklmnopqrstuv", purpose: "합성 기존 모임" };
+    if (value !== undefined) Object.assign(body, { review_prompt_supported: value });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify(body), { status: 200 })));
+    const room = await api.getRoom("abcdefghijklmnopqrstuv");
+    expect(room.invite_code).toBe(body.invite_code); expect(room.purpose).toBe(body.purpose);
+    expect(room.review_prompt_supported === true).toBe(value === true);
+    if (value === undefined) expect(Object.hasOwn(room, "review_prompt_supported")).toBe(false);
+  });
 });

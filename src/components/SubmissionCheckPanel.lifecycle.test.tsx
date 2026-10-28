@@ -80,7 +80,7 @@ describe("#107 independent pre-submit lifecycle fences", () => {
     const view = setup(); view.start.mockRejectedValue(new DOMException("UI request aborted", "AbortError")); await fillAndSubmit();
     await screen.findByRole("alert"); expect(view.cancel).not.toHaveBeenCalled();
     expect(screen.queryByText(/확인을 취소했어요|확인 취소 완료/)).not.toBeInTheDocument();
-    expect(screen.queryByText(/조건 제출을 완료했어요/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).not.toBeInTheDocument();
   });
 
   it("discards current-owner private content on denial and never renders the server's private error detail", async () => {

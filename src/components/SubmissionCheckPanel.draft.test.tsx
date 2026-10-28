@@ -21,7 +21,7 @@ it("#107 distinguishes an unsaved edit from the prior accepted completion", asyn
   fireEvent.click(await screen.findByRole("button", { name: "내 조건 수정" }));
   fireEvent.change(screen.getByRole("textbox", { name: /시간·장소 조건/ }), { target: { value: "아직 저장하지 않은 새 조건" } });
   expect(screen.getByRole("textbox", { name: /시간·장소 조건/ })).toHaveValue("아직 저장하지 않은 새 조건");
-  expect(screen.queryByRole("heading", { name: "조건 제출을 완료했어요" })).not.toBeInTheDocument();
+  expect(screen.queryByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).not.toBeInTheDocument();
   expect(document.body).toHaveTextContent(/아직.*저장|미저장|새.*조건.*반영되지/);
   expect(document.body).toHaveTextContent("기존 확인 완료 원문"); expect(start).not.toHaveBeenCalled();
 });

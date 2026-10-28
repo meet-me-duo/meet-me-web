@@ -47,6 +47,7 @@ for (const width of [320, 390, 1440]) {
     await expect(page.getByRole("link", { name: /Team 참여 모임/ })).toHaveCount(0);
     expect(Object.fromEntries(requests.at(-1)!)).toEqual({ role: "HOST", created_from: "2026-10-28", created_to: "2026-10-28", query: "team" });
     await expect(page.getByText(/주최 · 불러온 모임 1개/)).toBeVisible();
+    await page.evaluate(() => window.scrollTo(0, 0));
     await page.screenshot({ path: testInfo.outputPath("history-filtered.png"), fullPage: true });
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await page.getByRole("radio", { name: "참여", exact: true }).check();

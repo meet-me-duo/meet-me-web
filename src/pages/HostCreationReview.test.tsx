@@ -173,7 +173,7 @@ describe("independent review: truthful write outcomes", () => {
     await screen.findByText("조건 저장 결과를 확인하지 못했어요.", { exact: false });
     expect(screen.getByRole("textbox")).toHaveValue(raw);
     expect(screen.queryByText(/아직 내 조건은 제출하지 않았어요/)).not.toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "조건 제출을 완료했어요" })).not.toBeInTheDocument();
+    expect(screen.queryByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).not.toBeInTheDocument();
     expect(create).not.toHaveBeenCalled(); expect(join).not.toHaveBeenCalled(); expect(save).toHaveBeenCalledTimes(1);
   });
 
@@ -212,7 +212,7 @@ describe("independent review: truthful write outcomes", () => {
     own.mockRejectedValue(new ApiError(status, status === 404 ? { code: "SUBMISSION_NOT_FOUND" } : { detail: "합성 조회 실패" }));
     await act(async () => { await client.invalidateQueries({ queryKey: ["submission", code] }); });
     expect(screen.getByText(/조건 저장 결과를 확인하지 못했어요/)).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "조건 제출을 완료했어요" })).not.toBeInTheDocument();
+    expect(screen.queryByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).not.toBeInTheDocument();
     expect(save).toHaveBeenCalledTimes(1);
   });
 
@@ -226,7 +226,7 @@ describe("independent review: truthful write outcomes", () => {
     await act(async () => { await client.invalidateQueries({ queryKey: ["submission", code] }); });
     await screen.findByText("저장된 입력 #1");
     expect(screen.getByRole("textbox")).toHaveValue(next);
-    expect(screen.queryByRole("heading", { name: "조건 제출을 완료했어요" })).not.toBeInTheDocument();
+    expect(screen.queryByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).not.toBeInTheDocument();
     expect(screen.queryByText(/조건 저장 결과를 확인하지 못했어요/)).not.toBeInTheDocument();
     expect(save).toHaveBeenCalledTimes(1);
   });

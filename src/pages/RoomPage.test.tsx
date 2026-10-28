@@ -80,7 +80,7 @@ describe("natural-language conditions screen", () => {
     complete(submission("목요일 저녁", existing ? 2 : 1));
     await screen.findByText(`저장된 입력 #${existing ? 2 : 1}`);
     expect(input).toHaveValue("금요일 저녁");
-    expect(screen.queryByRole("heading", { name: "조건 제출을 완료했어요" })).not.toBeInTheDocument();
+    expect(screen.queryByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).not.toBeInTheDocument();
     fireEvent.change(input, { target: { value: "목요일 저녁" } });
     expect(screen.getByRole("textbox")).toBe(input);
     fireEvent.click(screen.getByRole("button", { name: "수정 취소" }));
@@ -224,7 +224,7 @@ describe("saved conditions and plan accuracy", () => {
     expect(screen.getByRole("button", { name: "수정 취소" })).toBeEnabled();
     fireEvent.change(input, { target: { value: "목요일 저녁" } });
     expect(screen.getByRole("textbox")).toBe(input);
-    expect(screen.queryByRole("heading", { name: "조건 제출을 완료했어요" })).not.toBeInTheDocument();
+    expect(screen.queryByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "수정 취소" }));
     await screen.findByRole("heading", { name: "조건 제출을 완료했어요" });
   });

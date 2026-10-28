@@ -18,3 +18,9 @@
 독립 Chromium 검토에서도 두 표면의 색 변화·실제 높이·클리핑과 포인터/키보드 분리를 확인했고 차단 사항 없이 통과했다. 로컬 API는 합성 대역이며 실제 사용자 로그인·로그아웃·claim·방 마감은 실행하지 않았다. 새 탭의 시스템 Chromium 대역 한계와 loopback fixture는 기존 버튼 검증 기록에 남아 있다.
 
 원래 공식 자산/브랜드 근거는 `public/brands/README.md`, 작업 지침은 `docs/ARCHITECTURE.md`를 따른다. 새 SDK·의존성·서버/API 계약 변경은 없다. 공개 운영 재검증은 실제 배포 SHA와 함께 PR에 기록한다.
+
+## 운영 반영
+
+[PR47](https://github.com/meet-me-duo/meet-me-web/pull/47) → [PR48](https://github.com/meet-me-duo/meet-me-web/pull/48), main `91c3e9f117344eb6cd513720717b0c7fe0f56bba`의 [배포40713862796](https://github.com/meet-me-duo/meet-me-web/actions/runs/40713862796)이 성공했다. 공개 자산11/11이 SHA256과 크기까지 일치한다. 공개 desktop/Pixel7 ×Google/Kakao 표면 음영·pressed·포커스·pending·중복 방지·pageshow 복원을 재검증했다. 모든 /api 요청은 합성 대역으로 차단해 실제 OAuth나 계정 작업을 실행하지 않았다. Chromium UI 컨텍스트에만 인증서 체인 한계로 ignoreHTTPSErrors를 사용했고 자산 다운로드는 기본 TLS 검증을 유지했다.
+
+[운영 Google hover](oauth-surface-images/production-google-hover.png) · [운영 Kakao hover](oauth-surface-images/production-kakao-hover.png) · [배포·자산·UI 검증 JSON](oauth-surface-production.json)

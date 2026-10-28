@@ -4,7 +4,7 @@ import { installAccountRefresh } from "./accountFixture";
 // Synthetic service sessions and local API fixtures only. Never a real account logout.
 async function authenticated(page: Page, name = "합성 회원") {
   await installAccountRefresh(page, name);
-  await page.route("**/api/account/rooms", route => route.fulfill({ json: { rooms: [] } }));
+  await page.route("**/api/account/rooms", route => route.fulfill({ json: { rooms: [], has_more: false, next_cursor: null } }));
 }
 async function security(page: Page) {
   await page.getByRole("button", { name: /계정 메뉴/ }).click();

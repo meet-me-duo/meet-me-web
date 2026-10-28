@@ -283,13 +283,15 @@ function CopyRoomLink({ room, primary = false, result = false }: { room: Room; p
 }
 
 function RoomHistoryNotice({ room }: { room: Room }) {
+  const account = useAccountSession();
   const [saved, setSaved] = useState<boolean | null>(null);
   const recent = useRecentRooms();
   const { invite_code, purpose, viewer: { joined } } = room;
   useEffect(() => { setSaved(rememberRoom({ invite_code, purpose, viewer: { joined } })); }, [invite_code, purpose, joined]);
+  if (account) return <p className="room-history-note">계정으로 주최하거나 참여한 모임은 <Link to="/account/rooms">내 모임</Link>에서 다시 찾을 수 있어요.</p>;
   return <p className={`room-history-note ${saved === false ? "alert warning" : ""}`} role="status">
     {saved === false ? "이 브라우저에 모임 주소를 보관하지 못했어요. 초대 링크를 복사하거나 북마크해 주세요." : recent.rooms.some(item => item.inviteCode === invite_code) ? <>홈의 <Link to="/">이 기기의 최근 모임</Link>에서 다시 열 수 있어요. 초대 링크도 복사하거나 북마크해 보관해 주세요.</> : "초대 링크를 복사하거나 북마크해 보관해 주세요."}
-    {" "}주최자 기능은 모임을 만든 브라우저에서 사용할 수 있어요. 시크릿 모드 종료·데이터 삭제·만료·다른 기기에서는 기존 참여 권한이 이어지지 않을 수 있어요.
+    {" "}게스트 참여 기록은 이 브라우저에만 보관돼요. 시크릿 모드 종료·데이터 삭제·만료·다른 기기에서는 기존 참여 권한이 이어지지 않을 수 있어요.
   </p>;
 }
 

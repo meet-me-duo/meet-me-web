@@ -415,7 +415,7 @@ fieldset.field legend { margin-bottom: 9px; }
 .account-controls > span { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
 .account-controls .alert { flex-basis: 100%; }
 .account-card { margin-top: 2.5rem; margin-bottom: 2.5rem; padding: 2rem; }
-.account-card p, .claim-card p { line-height: 1.7; }
+.account-card p { line-height: 1.7; }
 .account-entry { max-width: 400px; margin-block: 32px 48px; }
 .login-back { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; margin-bottom: var(--space-4); color: var(--muted); font-size: .9rem; }
 .login-card { margin: 0; padding: 24px; }
@@ -435,7 +435,6 @@ fieldset.field legend { margin-bottom: 9px; }
 .archive-list { list-style: none; padding: 0; display: grid; gap: 1rem; margin: 2rem 0; }
 .archive-list li { display: grid; gap: .4rem; border-bottom: 1px solid var(--border, #e6e6eb); padding-bottom: 1rem; }
 .archive-list small { opacity: .72; }
-.claim-card { max-width: 620px; margin: 1.5rem auto; padding: 1.5rem; }
 @media (max-width: 600px) { .account-navigation { gap: 0 .5rem; max-width: 60%; font-size: .75rem; } .account-controls { gap: .4rem; } .account-card { padding: 1.25rem; } .account-entry { margin-top: 16px; } .site-header:has(.account-controls > span) { position: static; } }
 
 .guest-record-notice { overflow-wrap: anywhere; }

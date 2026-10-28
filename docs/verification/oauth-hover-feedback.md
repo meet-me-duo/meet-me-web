@@ -29,3 +29,5 @@
 ## 지침
 
 저장소 `docs/ARCHITECTURE.md`의 UI/UX Pro Max 상호작용·접근성 및 shadcn 기반 기존 구조를 따른다. 적용한 공식 원문은 기존 [버튼 검증 기록](oauth-button-feedback.md)에 있다. [Google 브랜드 가이드](https://developers.google.com/identity/branding-guidelines)와 [Kakao 디자인 가이드](https://developers.kakao.com/docs/ko/kakaologin/design-guide)의 공식 자산·색상·비율과 동등한 강조를 유지하며 앱 링크 외곽에 상태만 추가한다.
+
+이 외곽선 안은 사용자 후속 피드백으로 폐기했다. 최종 디자인과 검증은 [버튼 표면 음영](oauth-surface-feedback.md)을 따른다.

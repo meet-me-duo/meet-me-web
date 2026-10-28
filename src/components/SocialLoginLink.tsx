@@ -17,12 +17,12 @@ export function SocialLoginLink({ provider, label, href, onClick, tabIndex, pend
     href={disabled && !pending ? undefined : href} role={disabled ? "link" : props.role} tabIndex={disabled ? -1 : tabIndex}
     onClick={event => { if (disabled) { event.preventDefault(); return; } onClick?.(event); }}>
     {provider === "google" ? <span className="gsi-material-button">
-      <span className="gsi-material-button-state" />
+      <span className="gsi-material-button-state" aria-hidden="true" />
       <span className="gsi-material-button-content-wrapper">
         <span className="gsi-material-button-icon"><img src={asset.src} width={asset.width} height={asset.height} alt="" aria-hidden="true" /></span>
         <span className="gsi-material-button-contents">Google로 로그인</span>
         <span style={{ display: "none" }}>Google로 로그인</span>
       </span>
-    </span> : <img src={asset.src} width={asset.width} height={asset.height} alt={asset.label} />}
+    </span> : <span className="kakao-login-surface"><img src={asset.src} width={asset.width} height={asset.height} alt={asset.label} /><span className="social-login-state" aria-hidden="true" /></span>}
   </a>;
 }

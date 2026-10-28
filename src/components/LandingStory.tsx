@@ -3,8 +3,8 @@ import { Layers3, MessageSquare, ShieldCheck } from "lucide-react";
 
 const features = [
   { icon: MessageSquare, title: "말하듯 조건 작성", description: "“화·목 저녁 봉천역 근처”처럼 일상 언어로 편하게 입력하세요." },
-  { icon: ShieldCheck, title: "블라인드 일정 입력", description: "서로의 조건은 후보가 나오기 전까지 누구에게도 공개되지 않아요." },
-  { icon: Layers3, title: "Plan A·B·C 제안", description: "복잡한 비교 대신 우선순위가 정해진 후보 중 하나만 고르면 돼요." },
+  { icon: ShieldCheck, title: "비공개 조건 입력", description: "참여자의 원문은 서로 공개하지 않아요. 주최자는 분석에 반영되지 않은 조건을 확인할 수 있어요." },
+  { icon: Layers3, title: "최대 3개 시간 선택지", description: "우열 없는 시간 선택지에서 참석 인원과 방식을 비교하고, 실제 시작·종료 시간을 골라 확정해요." },
 ];
 
 export function LandingStory() {
@@ -73,7 +73,7 @@ export function LandingStory() {
             <span className="story-symbol"><Icon /></span>
             {index === 0 && <div className="story-quote">“화·목 저녁 봉천역 근처”</div>}
             {index === 1 && <div className="story-private"><MessageSquare /><ShieldCheck /><MessageSquare /></div>}
-            {index === 2 && <div className="story-plans"><span>Plan C</span><span>Plan B</span><span>Plan A</span></div>}
+            {index === 2 && <div className="story-plans"><span>시간 선택지 1</span><span>시간 선택지 2</span><span>시간 선택지 3</span></div>}
           </div>
         </article>)}
       </div>

@@ -4,11 +4,30 @@ import { Link } from "react-router-dom";
 import { api, errorMessage } from "../api/client";
 import type { Room } from "../api/types";
 import { formatDateTime } from "../utils/time";
+import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { Card, CardContent, CardHeader } from "../components/ui/card";
+import { SocialLoginLink } from "../components/SocialLoginLink";
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
 import { rememberLoginReturn } from "./loginReturn";
 export function LoginGate({ returnTo = "/account/rooms" }: { returnTo?: string }) {
-  return <section className="glass-card account-card page-width narrow"><h1>로그인하고 모임을 만들어 보세요</h1><p>내가 만든 모임을 다른 기기에서도 다시 찾을 수 있어요. 참여자는 로그인 없이 초대 링크로 참여할 수 있어요.</p><div className="account-actions"><a className="button secondary" href={`${API_BASE}/api/auth/google/start`} onClick={() => rememberLoginReturn(returnTo)}>Google로 로그인</a><a className="button kakao" href={`${API_BASE}/api/auth/kakao/start`} onClick={() => rememberLoginReturn(returnTo)}>Kakao로 로그인</a></div><p className="muted">로그인해도 이 브라우저의 기존 참여 기록은 자동으로 연결되지 않아요.</p></section>;
+  return <section className="account-entry page-width narrow" aria-labelledby="login-title">
+    <Link to="/" className="login-back"><ArrowLeft size={18} aria-hidden="true" /> 홈으로 돌아가기</Link>
+    <Card className="account-card login-card">
+      <CardHeader>
+        <span className="eyebrow"><ShieldCheck size={16} aria-hidden="true" /> 주최자 로그인</span>
+        <h1 id="login-title">로그인하고 모임을 만들어 보세요</h1>
+        <p>내가 만든 모임을 다른 기기에서도 다시 찾을 수 있어요. 참여자는 로그인 없이 초대 링크로 참여할 수 있어요.</p>
+      </CardHeader>
+      <CardContent>
+        <div className="account-actions social-actions" aria-label="로그인 방법">
+          <SocialLoginLink provider="google" label="Google로 로그인" href={`${API_BASE}/api/auth/google/start`} onClick={() => rememberLoginReturn(returnTo)} />
+          <SocialLoginLink provider="kakao" label="Kakao로 로그인" href={`${API_BASE}/api/auth/kakao/start`} onClick={() => rememberLoginReturn(returnTo)} />
+        </div>
+        <p className="login-note">로그인해도 이 브라우저의 기존 참여 기록은 자동으로 연결되지 않아요.</p>
+      </CardContent>
+    </Card>
+  </section>;
 }
 export function AccountArchive() {
   const query = useQuery({ queryKey: ["account-rooms"], queryFn: api.getAccountRooms, retry: false });

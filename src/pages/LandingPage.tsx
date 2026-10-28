@@ -9,6 +9,8 @@ import type { MeetingMode } from "../api/types";
 import { createRoomBody, createRoomSchema, defaultSearchDates, type CreateRoomValues } from "../utils/createRoom";
 import { LandingStory } from "../components/LandingStory";
 import { RecentRooms } from "../components/RecentRooms";
+import { Button } from "../components/ui/button";
+import { Card } from "../components/ui/card";
 import { useRecentRooms } from "../hooks/useRecentRooms";
 import { LoginGate } from "../auth/AccountViews";
 import { useAccountSession } from "../auth/useAccount";
@@ -78,19 +80,19 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
     <div className="landing page-width">
       <section className="hero">
         <h1><span className="hero-line">조건만 말하세요,</span><span className="hero-line">결정은 <span className="hero-accent">Meet me</span>가 할게요</span></h1>
-        <button className="button primary hero-cta" onClick={() => navigate("/create")}>모임 만들기 <ArrowRight size={20} /></button>
+        <Button className="hero-cta" onClick={() => navigate("/create")}>모임 만들기 <ArrowRight size={20} aria-hidden="true" /></Button>
         {recent.rooms.length > 0 && <a className="recent-shortcut" href="#recent-rooms">이 기기의 최근 모임 {recent.rooms.length}개 보기</a>}
       </section>
       <RecentRooms recent={recent} />
       <div className="landing-details">
         <div className="landing-intro">
           <div className="eyebrow"><Sparkles size={16} /> 자연어 조건 입력 & 스마트 조율</div>
-          <p><span className="landing-sentence">일정 색칠하기와 눈치게임은 이제 그만.</span><span className="landing-sentence">각자의 조건을 비공개로 모아 최적의 약속 플랜을 제안해요.</span></p>
+          <p><span className="landing-sentence">일정 색칠하기와 눈치게임은 이제 그만.</span><span className="landing-sentence">각자의 조건을 비공개로 모아 함께할 시간을 찾아요.</span></p>
         </div>
         <LandingStory />
         <section className="how-card">
           <h2>링크 하나로 시작하는 일정 조율</h2>
-          <div><How number="1" icon={<Link2 />} title="방 생성 & 공유" /><How number="2" icon={<CalendarRange />} title="각자 조건 제출" /><How number="3" icon={<Sparkles />} title="플랜 선택 & 확정" /></div>
+          <div><How number="1" icon={<Link2 />} title="방 생성 & 공유" /><How number="2" icon={<CalendarRange />} title="각자 조건 제출" /><How number="3" icon={<Sparkles />} title="시간 선택 & 확정" /></div>
         </section>
       </div>
     </div>
@@ -100,7 +102,7 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
 
   return (
     <div className="form-page page-width narrow">
-      <div className="glass-card create-card">
+      <Card className="create-card">
         <div className="progress-head"><span>Step {step} of 2</span><button className="text-button" disabled={mutation.isPending} onClick={() => navigate("/")}>취소</button></div>
         <div className="progress-track"><div style={{ width: `${step * 50}%` }} /></div>
         {step === 1 ? (
@@ -114,7 +116,7 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
               <button type="button" className="text-button period-toggle" aria-expanded={values.customSearch} aria-controls="search-dates" onClick={changePeriod}>{values.customSearch ? "기본 14일로 되돌리기" : "기간 변경"}</button>
               {values.customSearch && <div id="search-dates"><div className="two-columns"><label>시작일<input type="date" aria-invalid={Boolean(form.formState.errors.searchEnd)} aria-describedby="search-date-help search-date-error" {...form.register("searchStart")} /></label><label>마지막 날 (포함)<input type="date" aria-invalid={Boolean(form.formState.errors.searchEnd)} aria-describedby="search-date-help search-date-error" {...form.register("searchEnd")} /></label></div><p id="search-date-help" className="create-hint">마지막 날을 포함해 최대 31일 · 한국 시간</p><ErrorText id="search-date-error" text={form.formState.errors.searchEnd?.message} /></div>}
             </fieldset>
-            <div className="actions end"><button type="button" className="button primary" onClick={next}>다음 단계 <ArrowRight size={18} /></button></div>
+            <div className="actions end"><Button onClick={next}>다음 단계 <ArrowRight size={18} aria-hidden="true" /></Button></div>
           </div>
         ) : (
           <form className="form-step" onSubmit={submit}>
@@ -127,10 +129,10 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
             </fieldset>}
             <div className="closure-summary" role="status"><strong>적용되는 마감</strong><p>{values.manualOnly ? "자동 마감 없이 주최자가 직접 마감해요." : values.useExpected && values.useDeadline ? `주최자를 포함해 ${expectedLabel} 제출 또는 지정 시각 중 먼저 충족되면 마감해요.` : values.useExpected ? `주최자를 포함한 ${expectedLabel}이 모두 제출하면 마감해요.` : values.useDeadline ? "지정 시각이 되면 마감해요." : "자동 마감 조건을 선택해 주세요."}{!values.manualOnly && values.useDeadline && values.deadline && ` (${values.deadline.replace("T", " ")} 한국 시간)`}</p></div>
             {mutation.isError && <div className="alert error" role="alert"><p>{creationUncertain ? "방 생성 결과를 확인하지 못했어요. 이미 만들어졌을 수 있어요. 다시 시도하면 새 모임이 추가될 수 있어요." : "방 생성 요청이 거절됐어요."}</p>{errorMessage(mutation.error)}</div>}
-            <div className="actions between"><button type="button" className="button secondary" disabled={mutation.isPending} onClick={() => { setStep(1); window.setTimeout(() => form.setFocus("purpose"), 0); }}><ArrowLeft size={18} /> 이전</button><button className="button primary" disabled={mutation.isPending}>{mutation.isPending ? "방 만드는 중…" : "방 만들기"}</button></div>
+            <div className="actions between"><Button variant="secondary" disabled={mutation.isPending} onClick={() => { setStep(1); window.setTimeout(() => form.setFocus("purpose"), 0); }}><ArrowLeft size={18} aria-hidden="true" /> 이전</Button><Button type="submit" disabled={mutation.isPending}>{mutation.isPending ? "방 만드는 중…" : "방 만들기"}</Button></div>
           </form>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

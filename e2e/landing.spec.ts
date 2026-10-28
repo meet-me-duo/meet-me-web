@@ -172,7 +172,7 @@ test("landing details stay readable with reduced motion and no observer", async 
     await expect(feature).toHaveCSS("transform", "none");
     await expect(feature).toHaveCSS("animation-name", "none");
   }
-  await expect(page.getByRole("heading", { name: "블라인드 일정 입력" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "비공개 조건 입력" })).toBeVisible();
 });
 
 test("sticky story holds a complete explanation and its layers move at different speeds", async ({ page }) => {
@@ -215,11 +215,11 @@ test("normal wheel and a fast jump resolve the story from current position, incl
   const target = position.start + position.distance * .9;
   const current = await page.evaluate(() => scrollY);
   await page.mouse.wheel(0, target - current);
-  await expect(story.getByRole("heading", { name: "Plan A·B·C 제안" })).toBeVisible();
-  await expect(story.getByText("복잡한 비교 대신 우선순위가 정해진 후보 중 하나만 고르면 돼요.")).toBeVisible();
-  await expect(story.getByRole("button", { name: /Plan A/ })).toHaveAttribute("aria-current", "step");
+  await expect(story.getByRole("heading", { name: "최대 3개 시간 선택지" })).toBeVisible();
+  await expect(story.getByText("우열 없는 시간 선택지에서 참석 인원과 방식을 비교하고, 실제 시작·종료 시간을 골라 확정해요.")).toBeVisible();
+  await expect(story.getByRole("button", { name: /최대 3개/ })).toHaveAttribute("aria-current", "step");
   await page.mouse.wheel(0, -(position.distance * .4));
-  await expect(story.getByRole("heading", { name: "블라인드 일정 입력" })).toBeVisible();
+  await expect(story.getByRole("heading", { name: "비공개 조건 입력" })).toBeVisible();
   await expect(story.locator('[data-current="true"]')).toHaveCSS("opacity", "1");
 });
 
@@ -227,11 +227,11 @@ test("story steps can be revisited with the keyboard without a scroll lock", asy
   await page.goto("/");
   const story = page.locator(".story");
   await expect(story).toHaveAttribute("data-enhanced", "true");
-  const button = story.getByRole("button", { name: /Plan A/ });
+  const button = story.getByRole("button", { name: /최대 3개/ });
   await button.focus();
   await page.keyboard.press("Enter");
   await expect(button).toBeFocused();
-  await expect(story.getByRole("heading", { name: "Plan A·B·C 제안" })).toBeInViewport();
+  await expect(story.getByRole("heading", { name: "최대 3개 시간 선택지" })).toBeInViewport();
   await page.keyboard.press("End");
   await expect(page.getByRole("heading", { name: "링크 하나로 시작하는 일정 조율" })).toBeInViewport();
 });
@@ -248,6 +248,6 @@ test("story animation failure and short viewports leave all three static panels 
   await page.setViewportSize({ width: 844, height: 320 });
   await page.reload();
   await expect(story.locator(".story-stage")).toHaveCSS("position", "static");
-  await expect(story.getByRole("heading", { name: "블라인드 일정 입력" })).toBeVisible();
+  await expect(story.getByRole("heading", { name: "비공개 조건 입력" })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(844);
 });

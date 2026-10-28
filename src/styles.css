@@ -427,11 +427,9 @@ fieldset.field legend { margin-bottom: 9px; }
 .login-card .social-login-feedback { margin: 10px 0 14px; }
 .social-login { display: flex; align-items: center; min-height: 46px; width: min(100%, 224px); align-self: center; border-radius: 6px; transition: box-shadow .15s; }
 .social-login img { display: block; width: 100%; height: auto; }
-.social-login:not([aria-disabled="true"]):hover { box-shadow: 0 0 0 2px #64748b, 0 2px 6px rgba(15, 23, 42, .15); }
 .social-login:focus-visible { outline: 3px solid var(--sky-dark); outline-offset: 3px; }
-.social-login:not([aria-disabled="true"]):active { box-shadow: 0 0 0 3px var(--sky-dark); }
 .social-login[aria-disabled="true"] { cursor: default; }
-.social-login[aria-busy="true"] { outline: 3px solid var(--sky-dark); outline-offset: 3px; cursor: progress; }
+.social-login[aria-busy="true"] { cursor: progress; }
 .login-card .login-note { padding-top: var(--space-6); border-top: 1px solid var(--border); font-size: .85rem; overflow-wrap: anywhere; }
 .account-actions { display: flex; gap: .8rem; flex-wrap: wrap; margin: 1.5rem 0; }
 .archive-list { list-style: none; padding: 0; display: grid; gap: 1rem; margin: 2rem 0; }
@@ -639,3 +637,10 @@ fieldset.field legend { margin-bottom: 9px; }
 .room-close-content p { line-height: 1.7; color: #475569; word-break: keep-all; overflow-wrap: anywhere; }
 .room-close-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
 @media (max-width: 540px) { .room-close-content { padding: 20px; } .room-close-actions { flex-direction: column-reverse; } .room-close-actions .button { width: 100%; } }
+.kakao-login-surface { display: block; position: relative; width: 100%; border-radius: 8px; overflow: hidden; }
+.social-login-state { position: absolute; inset: 0; pointer-events: none; background: #000; opacity: 0; transition: opacity .218s; }
+.social-login--kakao:not([aria-disabled="true"]):hover .social-login-state { opacity: .08; }
+.social-login--kakao:not([aria-disabled="true"]):active .social-login-state,
+.social-login--kakao:not([aria-disabled="true"]):focus-visible .social-login-state,
+.social-login--kakao[aria-busy="true"] .social-login-state { opacity: .12; }
+.social-login--google[aria-busy="true"] .gsi-material-button-state { background-color: #001d35; opacity: .12; }

@@ -1,0 +1,23 @@
+.meetme-review { box-sizing: border-box; width: min(32rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); overflow: auto; margin: auto; padding: 1.5rem; border: 1px solid #d5dce5; border-radius: 1rem; background: #fff; color: #172535; box-shadow: 0 20px 70px #15293833; font: inherit; }
+.meetme-review::backdrop { background: #14263866; }
+.meetme-review h2 { margin: 0 0 .75rem; font-size: 1.3rem; line-height: 1.4; }
+.meetme-review p { line-height: 1.6; }
+.meetme-review fieldset { padding: 0; margin: 1.25rem 0; border: 0; min-width: 0; }
+.meetme-review legend { font-size: .875rem; margin-bottom: .75rem; }
+.meetme-review-choices { display: grid; gap: .5rem; }
+.meetme-review-choices label { display: flex; align-items: flex-start; gap: .65rem; min-height: 2.75rem; padding: .65rem; border: 1px solid #d5dce5; border-radius: .6rem; cursor: pointer; }
+.meetme-review input { flex-shrink: 0; width: 1rem; height: 1rem; margin: .2rem 0 0; accent-color: #1764ac; }
+.meetme-review-hint, .meetme-review-text span { color: #53657a; font-size: .8rem; }
+.meetme-review-text { display: grid; gap: .5rem; margin-top: 1rem; font-size: .875rem; }
+.meetme-review textarea { width: 100%; box-sizing: border-box; resize: vertical; border: 1px solid #9baec2; border-radius: .5rem; padding: .65rem; font: inherit; min-height: 6rem; }
+.meetme-review button, .meetme-review-notice button { font: inherit; cursor: pointer; min-height: 2.75rem; padding: .5rem .85rem; border-radius: .5rem; }
+.meetme-review-submit { display: flex; justify-content: flex-end; }
+.meetme-review-submit button { border: 0; background: #1764ac; color: white; }
+.meetme-review-footer { display: flex; justify-content: space-between; align-items: center; gap: .75rem; margin-top: 1rem; }
+.meetme-review-footer label { display: flex; align-items: center; gap: .4rem; font-size: .75rem; color: #53657a; min-height: 2.75rem; cursor: pointer; }
+.meetme-review-footer button { border: 1px solid #d5dce5; background: white; color: #34485e; }
+.meetme-review :focus-visible { outline: 3px solid #1764ac; outline-offset: 3px; }
+.meetme-review :disabled { cursor: default; opacity: .65; }
+.meetme-review-error { color: #9c2736; font-size: .875rem; }
+.meetme-review-notice { padding: .75rem; font-size: .875rem; }
+@media (max-width: 400px) { .meetme-review { padding: 1rem; width: calc(100vw - 1rem); max-height: calc(100dvh - 1rem); } }

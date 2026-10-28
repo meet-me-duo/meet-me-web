@@ -21,6 +21,7 @@ import { usePrivateDraft } from "../auth/usePrivateDraft";
 import { discardQuarantinedDraftForRoom } from "../auth/draftQuarantine";
 import { getSession, getSessionVersion } from "../auth/session";
 import GuestAccessPanel from "../components/GuestAccessPanel";
+import { ReviewPrompt } from "../features/review/ReviewPrompt";
 import { rememberRoom, roomLink } from "../utils/recentRooms";
 
 const UNAPPLIED_REASON_MESSAGES: Record<string, string> = {
@@ -462,9 +463,9 @@ function ResultPanel({ room, onAccessDenied }: { room: Room; onAccessDenied: (er
   if (saved) {
     if (saved.protocol !== RECOMMENDATION_PROTOCOL) return <StateCard icon={<RefreshCw />} title="추천 화면 업데이트가 필요해요" body="새로고침해 최신 화면을 확인해 주세요." />;
     const candidate = result.data.candidate;
-    return <section className="results-section"><div className="section-heading centered"><span className="eyebrow success"><CheckCircle2 size={15} /> 일정 확정 완료</span><h2>실제 모임 일정이 확정됐어요</h2></div><div className="candidate-list single"><article className="candidate-card recommendation-card" aria-label="확정된 모임 일정"><h3>확정된 모임 일정</h3><p>{formatRecommendationRange(saved.start_at, saved.end_at, room.time_zone_id)}</p><p>{candidate.attendance_count}/{candidate.total_participants}명 참석 가능 · {candidate.meeting_mode === "REMOTE" ? "온라인 · 접속 정보 별도 공지" : `대면 · ${candidate.place?.display_name ?? "장소 협의"}`}</p></article></div><CopyRoomLink room={room} result /></section>;
+    return <><section className="results-section"><div className="section-heading centered"><span className="eyebrow success"><CheckCircle2 size={15} /> 일정 확정 완료</span><h2>실제 모임 일정이 확정됐어요</h2></div><div className="candidate-list single"><article className="candidate-card recommendation-card" aria-label="확정된 모임 일정"><h3>확정된 모임 일정</h3><p>{formatRecommendationRange(saved.start_at, saved.end_at, room.time_zone_id)}</p><p>{candidate.attendance_count}/{candidate.total_participants}명 참석 가능 · {candidate.meeting_mode === "REMOTE" ? "온라인 · 접속 정보 별도 공지" : `대면 · ${candidate.place?.display_name ?? "장소 협의"}`}</p></article></div><CopyRoomLink room={room} result /></section><ReviewPrompt inviteCode={room.invite_code} viewerKey={viewerContext(room)} /></>;
   }
-  return <section className="results-section"><div className="section-heading centered"><span className="eyebrow success"><CheckCircle2 size={15} /> 플랜 선택 완료</span><h2>주최자가 선택한 플랜이에요</h2><p>{formatDateTime(result.data.confirmed_at)}에 주최자가 Plan {result.data.candidate.plan_type}을 선택했어요.</p></div><div className="candidate-list single"><CandidateCard candidate={result.data.candidate} canConfirm={false} confirmed /></div><CopyRoomLink room={room} result /></section>;
+  return <><section className="results-section"><div className="section-heading centered"><span className="eyebrow success"><CheckCircle2 size={15} /> 플랜 선택 완료</span><h2>주최자가 선택한 플랜이에요</h2><p>{formatDateTime(result.data.confirmed_at)}에 주최자가 Plan {result.data.candidate.plan_type}을 선택했어요.</p></div><div className="candidate-list single"><CandidateCard candidate={result.data.candidate} canConfirm={false} confirmed /></div><CopyRoomLink room={room} result /></section><ReviewPrompt inviteCode={room.invite_code} viewerKey={viewerContext(room)} /></>;
 }
 
 function StateCard({ icon, title, body, action, error }: { icon: React.ReactNode; title: string; body?: string; action?: React.ReactNode; error?: string }) { return <div className="center-state glass-card"><div className="large-icon">{icon}</div><h1>{title}</h1>{body && <p>{body}</p>}{error && <div className="alert error">{error}</div>}{action}<Link className="text-link" to="/">새 모임 만들기</Link></div>; }

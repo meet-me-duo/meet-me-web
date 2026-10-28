@@ -115,3 +115,11 @@
 - [ ] 해당 정확 HEAD의 원격CI 성공 확인
 
 근거: `docs/verification/issue-110-account-integration-independent.md`, `docs/verification/issue-110-native.json`. 운영 provider 로그인·실제운영자등록·병합·배포는 이번 성공 범위에 포함하지 않는다.
+
+
+## 2026-10-28 리뷰 Cloud 이관 체크포인트
+
+- 사용자 승인으로 미완성 리뷰 작업을 별도 feature/review-cloud-checkpoint-20261028에 commit·push하여 Cloud에서 정확한 SHA로 재개한다. 원본/Library/기존 미커밋 작업은 보존한다.
+- 서버 ReviewService TODO·HTTP16 중15 RED/명세1PASS, 미실행10개 및 기존 commit guard의 ktlint 실패를 숨기지 않는다. 웹 기능19·합성 Edge4 PASS와 최종 타입검사2개 오류를 구분한다.
+- 비밀/실행 로그/스크린샷은 제외하고 docs/checkpoints/confirmed-review-20261028의 파일 체크섬·원본 zip·재개 문서로 동일성을 확인한다. checkpoint commit은 기능 완료나 품질 게이트 통과가 아니다.
+- Cloud 수신 검증 전에는 이관 완료가 아니다. main/develop 변경·PR 병합·운영 배포·AWS 실행은 하지 않는다.

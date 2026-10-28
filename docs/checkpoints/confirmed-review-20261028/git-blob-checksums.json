@@ -1,0 +1,127 @@
+{
+  "base_sha": "656f757244104482e00605991967e62a12810b63",
+  "branch": "feature/review-cloud-checkpoint-20261028",
+  "self_note": "This manifest excludes its own bytes to avoid self-reference; verify its Git object through final commit SHA",
+  "files": [
+    {
+      "path": "docs/checkpoints/confirmed-review-20261028/FROZEN_RESUME.md",
+      "git_blob_sha256": "c9700385a97142019abe47e1ce19f2f469719779871599210f91de677456583b",
+      "working_copy_sha256": "352e091665109fef75aa97514afab5e4019c4f1a751c19f83a35ecf159556909",
+      "size_git_blob": 4006
+    },
+    {
+      "path": "docs/checkpoints/confirmed-review-20261028/README.md",
+      "git_blob_sha256": "8626c2d53f92798d5843927d9b18bf26892f7ef9b6ed65266940ee812d9b590d",
+      "working_copy_sha256": "04223f5ef67f5ffbfe137f5a109fa7b8e19b8fe944a0e4d0339294fb1db87047",
+      "size_git_blob": 4076
+    },
+    {
+      "path": "docs/checkpoints/confirmed-review-20261028/commit-gate-status.json",
+      "git_blob_sha256": "b2f3e5668bc470ad8c9b44b1baed2a52c2dcf8fd0e8beba877d2834936779ba5",
+      "working_copy_sha256": "2c277978a903f774195001e2aa0ca18ef979ec90f2bd2c94f9ac3bf5e1586060",
+      "size_git_blob": 793
+    },
+    {
+      "path": "docs/checkpoints/confirmed-review-20261028/frozen-manifest.json",
+      "git_blob_sha256": "d6dad38d7c6323ce23e656cb600e853e350adb4c3513dde93cd4f92fc8d5c662",
+      "working_copy_sha256": "ef55ba7da5669084bbfb402a3ac0723e314d39f114c7be03e2d1b45e491c0df7",
+      "size_git_blob": 13262
+    },
+    {
+      "path": "docs/checkpoints/confirmed-review-20261028/meet-me-review-cloud-checkpoint-20261028.zip",
+      "git_blob_sha256": "e12a0a9cce361c792febc5948d4e4bfa21a2f3d01a306a801bd4e3878bcbc13e",
+      "working_copy_sha256": "e12a0a9cce361c792febc5948d4e4bfa21a2f3d01a306a801bd4e3878bcbc13e",
+      "size_git_blob": 59812
+    },
+    {
+      "path": "docs/checkpoints/confirmed-review-20261028/restore_checkpoint.py",
+      "git_blob_sha256": "dcd510bb0753c5d08090fc759e17be6ae95f05891c45a2b8dfb7e56a0d1bfd77",
+      "working_copy_sha256": "0800d796d818b93c892b796af9a3f9800618e5c4fd744a760dda58c126aa693e",
+      "size_git_blob": 1166
+    },
+    {
+      "path": "docs/checkpoints/confirmed-review-20261028/secret-scan.json",
+      "git_blob_sha256": "e1e91856942e62d1b57798e3b08446dead7d175ff4b19de42c24b94a15a9374d",
+      "working_copy_sha256": "a1271e34b004add1318d7cf5a4dcae6fd5688a5d1a85d24400cffd2dd07c4ae3",
+      "size_git_blob": 506
+    },
+    {
+      "path": "docs/verification/review-browser/review.spec.ts",
+      "git_blob_sha256": "695b111c675d8f024f03a822659564fb871314d02c4bf7e06945cd28a52a6869",
+      "working_copy_sha256": "695b111c675d8f024f03a822659564fb871314d02c4bf7e06945cd28a52a6869",
+      "size_git_blob": 3419
+    },
+    {
+      "path": "docs/verification/review-playwright.config.ts",
+      "git_blob_sha256": "2c4943f29a796b653bf42bc189bec01f466163252273bada83920acac7ff9b90",
+      "working_copy_sha256": "2c4943f29a796b653bf42bc189bec01f466163252273bada83920acac7ff9b90",
+      "size_git_blob": 613
+    },
+    {
+      "path": "docs/verification/review-preview.html",
+      "git_blob_sha256": "51e70893644279905e83d753e5d6750f412d4a5f531e275001f0f30dbd59a640",
+      "working_copy_sha256": "51e70893644279905e83d753e5d6750f412d4a5f531e275001f0f30dbd59a640",
+      "size_git_blob": 285
+    },
+    {
+      "path": "docs/verification/review-preview.tsx",
+      "git_blob_sha256": "a04b2f7914c6c55297620148f20585a0650f021209f44bdceb7a83fcaf8fb9b6",
+      "working_copy_sha256": "a04b2f7914c6c55297620148f20585a0650f021209f44bdceb7a83fcaf8fb9b6",
+      "size_git_blob": 1438
+    },
+    {
+      "path": "implementation_plan.md",
+      "git_blob_sha256": "2fa764fbd649b7b0167a262769b2ef5f74c4ad88b5c8bdcd185fea4b5909acd7",
+      "working_copy_sha256": "1034a6380257446d9b80b6e0f165fbcb87739294896b3ebe5909469a5d33561d",
+      "size_git_blob": 15248
+    },
+    {
+      "path": "src/api/client.ts",
+      "git_blob_sha256": "455a9fdb7da6f5a406996912f60d4b91e0570cbad6a5b5c6e717e82a6bbe41c2",
+      "working_copy_sha256": "6f920611c07bab64ba41673487db19054c6e0591c0b420dc4f6a3453363a29b1",
+      "size_git_blob": 9885
+    },
+    {
+      "path": "src/features/review/ReviewPrompt.contract.test.tsx",
+      "git_blob_sha256": "942c96fb21ec763cb3eaf9d7ce0aba26908d3d4e024269b8ba647c1963381a07",
+      "working_copy_sha256": "942c96fb21ec763cb3eaf9d7ce0aba26908d3d4e024269b8ba647c1963381a07",
+      "size_git_blob": 7681
+    },
+    {
+      "path": "src/features/review/ReviewPrompt.test.tsx",
+      "git_blob_sha256": "fb03425094e0047e4e9d383b1a6aeaaec8ea3839c4cc11545f6ae2389d5de8fc",
+      "working_copy_sha256": "fb03425094e0047e4e9d383b1a6aeaaec8ea3839c4cc11545f6ae2389d5de8fc",
+      "size_git_blob": 5796
+    },
+    {
+      "path": "src/features/review/ReviewPrompt.tsx",
+      "git_blob_sha256": "f73d77cf948f0d7a7481781b5f93737d05ff5d90579733446892b93e95059a76",
+      "working_copy_sha256": "f73d77cf948f0d7a7481781b5f93737d05ff5d90579733446892b93e95059a76",
+      "size_git_blob": 8431
+    },
+    {
+      "path": "src/features/review/RoomPage.review.test.tsx",
+      "git_blob_sha256": "e2235f8467df897894ae9970286372c4342d5f63c9b5511401240cccdba0ebfe",
+      "working_copy_sha256": "e2235f8467df897894ae9970286372c4342d5f63c9b5511401240cccdba0ebfe",
+      "size_git_blob": 3424
+    },
+    {
+      "path": "src/features/review/api.ts",
+      "git_blob_sha256": "067f943a6857cbba2f1bb3a97f7b772bee6be3f677d3efacbac82779fe06ae2f",
+      "working_copy_sha256": "067f943a6857cbba2f1bb3a97f7b772bee6be3f677d3efacbac82779fe06ae2f",
+      "size_git_blob": 973
+    },
+    {
+      "path": "src/features/review/review.css",
+      "git_blob_sha256": "f8b30cbb8bb22710914a53587b8c12e552078a4938d307dc20ced04052493d50",
+      "working_copy_sha256": "f8b30cbb8bb22710914a53587b8c12e552078a4938d307dc20ced04052493d50",
+      "size_git_blob": 2391
+    },
+    {
+      "path": "src/pages/RoomPage.tsx",
+      "git_blob_sha256": "97c3ba3c1f12a042698fae0e6ba75974a21b0f30f35353bedda02612869618e0",
+      "working_copy_sha256": "3203b9c740b3f87d534bf12728655205251f9c96d81b8e05172a57dcf85ef0d4",
+      "size_git_blob": 53254
+    }
+  ]
+}

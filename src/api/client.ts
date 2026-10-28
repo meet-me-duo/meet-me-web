@@ -30,7 +30,7 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+export async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const startedEpoch = getSessionVersion();
   let token: string | null;
   try { token = getAccessToken(true); } catch (error) {

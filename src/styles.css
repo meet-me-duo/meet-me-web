@@ -427,7 +427,7 @@ fieldset.field legend { margin-bottom: 9px; }
 .login-card .social-login-feedback { margin: 10px 0 14px; }
 .social-login { display: flex; align-items: center; min-height: 46px; width: min(100%, 224px); align-self: center; border-radius: 6px; transition: box-shadow .15s; }
 .social-login img { display: block; width: 100%; height: auto; }
-.social-login--kakao:not([aria-disabled="true"]):hover { box-shadow: var(--shadow); }
+.social-login:not([aria-disabled="true"]):hover { box-shadow: 0 0 0 2px #64748b, 0 2px 6px rgba(15, 23, 42, .15); }
 .social-login:focus-visible { outline: 3px solid var(--sky-dark); outline-offset: 3px; }
 .social-login:not([aria-disabled="true"]):active { box-shadow: 0 0 0 3px var(--sky-dark); }
 .social-login[aria-disabled="true"] { cursor: default; }

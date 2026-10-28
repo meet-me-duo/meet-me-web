@@ -77,8 +77,9 @@ export default function SubmissionCheckPanel({ room, onRoomChanged, onAccessDeni
   });
   const current = query.data;
   const check = current?.check;
-  // Optional compatibility with older responses; generated artifact alignment is pending locally.
-  const editGuidance = check?.status === "NEEDS_EDIT" && "edit_guidance" in check && typeof check.edit_guidance === "string" && check.edit_guidance.trim() ? check.edit_guidance : null;
+  // The generated field is required on new servers; older responses may omit it.
+  const guidance = check && "edit_guidance" in check ? check.edit_guidance : null;
+  const editGuidance = check?.status === "NEEDS_EDIT" && typeof guidance === "string" && guidance.trim() && Array.from(guidance).length <= 160 ? guidance : null;
   const question = check?.status === "NEEDS_CHOICE" ? check.question : null;
   const closed = room.collection_status === "CLOSED" || current?.room.collection_status === "CLOSED";
   const legacyCorrectionAccepted = current?.accepted?.confirmation_source === "LEGACY_CORRECTION";

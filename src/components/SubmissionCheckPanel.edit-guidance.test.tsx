@@ -8,7 +8,7 @@ import * as session from "../auth/session";
 import { viewerContext } from "../api/recovery";
 import SubmissionCheckPanel from "./SubmissionCheckPanel";
 
-// Proposed optional server field; no generated-schema claim until artifact arrives.
+// Generated required nullable field, with backward compatibility for older servers.
 const room: Room = { invite_code: "abcdefghijklmnopqrstuv", purpose: "수정 안내 합성", meeting_mode: "REMOTE", time_zone_id: "Asia/Seoul", search_start_date: "2026-10-17", search_end_date: "2026-10-31", search_range_source: "HOST_SPECIFIED", expected_participants: 4, submission_deadline: null, manual_only: false, collection_status: "COLLECTING", closure_reason: null, closed_at: null, public_status: "COLLECTING", state_version: 1, viewer: { joined: true, display_name: "본인", role: "MEMBER", context_id: "11111111-1111-4111-8111-111111111111" }, input_disclosure_policy: "HOST_ON_PARTIAL_RESULT", submission_protocol: "PRE_SUBMIT_V1" };
 const raw = "주말 저녁 비대면으로 가능해요";
 const fallback = "원문은 저장됐지만 확인을 완료하지 못했어요. 조건을 직접 수정해 주세요.";
@@ -45,14 +45,13 @@ it("shows server-provided guidance as plain text, retaining raw input and explic
   expect(start).not.toHaveBeenCalled();
 });
 
-it.each([undefined, null, "", " \n ", 42, { text: "not a string" }])("keeps the old-server fallback for absent or invalid guidance: %s", async guidance => {
+it.each([undefined, null, "", " \n ", 42, { text: "not a string" }, "가".repeat(161), "😀".repeat(161)])("keeps the old-server fallback for absent or invalid guidance: %s", async guidance => {
   mount(snapshot(guidance));
   await screen.findByText(fallback);
   expect(screen.getByText(raw, { exact: true })).toBeInTheDocument();
 });
 
-it("shows the reported 160-character contract boundary intact with no A/B question or automatic command", async () => {
-  const guidance = "가".repeat(160);
+it.each(["가".repeat(160), "😀".repeat(160)])("shows a 160-codepoint guidance intact with no A/B question or automatic command", async guidance => {
   const value = snapshot(guidance);
   expect(value.check?.question).toBeNull();
   const start = mount(value);
@@ -67,8 +66,26 @@ it("does not reuse NEEDS_EDIT guidance after cancellation", async () => {
   const text = "날짜 범위를 직접 적어 주세요.";
   mount(snapshot(text)); await screen.findByText(text);
   await act(async () => { client!.setQueryData(["submission-check", room.invite_code, viewerContext(room), 1], { ...snapshot(text), check: { ...snapshot(text).check!, status: "CANCELLED", version: 2 } }); });
+  await screen.findByText(/확인을 취소했어요/);
   expect(screen.queryByText(text)).not.toBeInTheDocument();
   expect(screen.getByText(/확인을 취소했어요/)).toBeInTheDocument();
+});
+
+it("keeps an A/B choice question separate from retained edit guidance", async () => {
+  const text = "직접 수정 안내를 A/B 질문으로 해석하지 마세요.";
+  const value = snapshot(text);
+  value.check!.status = "NEEDS_CHOICE";
+  value.check!.question = { id: "33333333-3333-4333-8333-333333333333", text: "오전과 오후 중 언제인가요?", source_excerpt: "저녁", options: [
+    { id: "AM", text: "오전", proposed_text: "주말 오전 비대면 가능" },
+    { id: "PM", text: "오후", proposed_text: "주말 오후 비대면 가능" },
+  ] };
+  const start = mount(value);
+  await screen.findByRole("heading", { name: "오전과 오후 중 언제인가요?" });
+  expect(screen.queryByText(text)).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "오전" })).toBeEnabled();
+  expect(screen.getByRole("button", { name: "오후" })).toBeEnabled();
+  expect(screen.queryByRole("button", { name: "선택한 내용으로 확인" })).not.toBeInTheDocument();
+  expect(start).not.toHaveBeenCalled();
 });
 
 it("hides guidance when collection is closed without inferring a cause", async () => {

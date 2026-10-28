@@ -7,8 +7,12 @@ export type AcceptedSubmissionCheckVersion = Complete<components["schemas"]["Pre
 export type SubmissionCheckQuestion = Omit<Complete<components["schemas"]["PrecheckQuestionResponse"]>, "options"> & {
   options: Complete<components["schemas"]["PrecheckOptionResponse"]>[];
 };
-type CheckState = Omit<Complete<components["schemas"]["PrecheckStateResponse"]>, "question"> & {
+type GeneratedCheckState = Complete<components["schemas"]["PrecheckStateResponse"]>;
+// New servers require edit_guidance. Older deployed responses may omit it;
+// preserve that compatibility only at this runtime-facing normalization layer.
+type CheckState = Omit<GeneratedCheckState, "question" | "edit_guidance"> & {
   question: SubmissionCheckQuestion | null;
+  edit_guidance?: GeneratedCheckState["edit_guidance"];
 };
 // Normalize nested required fields through the generated native DTOs. Candidate
 // and accepted revisions remain independent and are never compared to each other.

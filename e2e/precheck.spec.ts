@@ -154,6 +154,15 @@ for (const width of [320, 390, 1440]) {
     mock.set(current("NEEDS_EDIT")); await page.reload();
     await expect(page.getByText("원문은 저장됐지만 확인을 완료하지 못했어요. 조건을 직접 수정해 주세요.")).toBeVisible();
     await expect(message).toHaveCount(0); expect(mock.writes).toEqual([]); expect(mock.unexpected).toEqual([]); expect(mock.errors).toEqual([]);
+    const maximum = current("NEEDS_EDIT"); Object.assign(maximum.check!, { edit_guidance: "😀".repeat(160) });
+    mock.set(maximum); await page.reload();
+    await expect(message).toHaveText("😀".repeat(160));
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    const invalid = current("NEEDS_EDIT"); Object.assign(invalid.check!, { edit_guidance: "😀".repeat(161) });
+    mock.set(invalid); await page.reload();
+    await expect(page.getByText("원문은 저장됐지만 확인을 완료하지 못했어요. 조건을 직접 수정해 주세요.")).toBeVisible();
+    await expect(message).toHaveCount(0);
+    expect(mock.writes).toEqual([]); expect(mock.unexpected).toEqual([]); expect(mock.errors).toEqual([]);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
   });
 }

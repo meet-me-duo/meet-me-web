@@ -12,14 +12,18 @@ export function LandingStory() {
   useEffect(() => {
     if (typeof IntersectionObserver === "undefined") return;
     const media = matchMedia("(prefers-reduced-motion: reduce)");
-    const panels = Array.from(rootRef.current!.querySelectorAll(".story-panel"));
+    const panels = Array.from(rootRef.current!.querySelectorAll<HTMLElement>(".story-panel"));
     const observer = new IntersectionObserver(entries => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        if (!media.matches) entry.target.classList.add("story-entered");
-        observer.unobserve(entry.target);
-      }
-    }, { threshold: .15 });
+      const visible = new Set(entries.filter(entry => entry.isIntersecting && entry.intersectionRatio >= .3).map(entry => entry.target));
+      // Stagger only cards entering together; a later mobile card starts immediately.
+      panels.filter(panel => visible.has(panel)).forEach((panel, index) => {
+        if (!media.matches) {
+          panel.style.animationDelay = `${index * 180}ms`;
+          panel.classList.add("story-entered");
+        }
+        observer.unobserve(panel);
+      });
+    }, { threshold: .3, rootMargin: "0px 0px -48px 0px" });
     // Content is visible before enhancement, on unsupported browsers and on failure.
     for (const panel of panels) observer.observe(panel);
     const reduce = () => { if (media.matches) panels.forEach(panel => panel.classList.remove("story-entered")); };

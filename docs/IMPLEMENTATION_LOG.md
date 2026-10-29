@@ -540,3 +540,7 @@
 별도 `feature/ui-deepseek-experiment`에서 밝은 hero·자연어 예시·세 개 설명 카드, 공통 12px 카드와 pill CTA, 짧은 등장/표면 반응을 구현했다. 기존 생성/방/로그인/리뷰 로직·API 계약은 유지하고, Node loopback 합성 프리뷰 15개 상태를 제품 번들과 분리했다. Figma 정적 근거와 별도 브라우저 관측, Meet me용 선택을 `docs/UI_EXPERIMENT_DEEPSEEK.md`에 구분했다. 로컬 실행은 `docs/UI_PREVIEW.md` 참조.
 
 api/type/lint/build 통과. 단위 783/784 첫 회 통과 후 timeout 파일 16/16 재실행 통과. 최초 E2E 481통과/26실패/1skip에서 CSS 문제를 수정했고 최종 관련130개는127통과/2실패/1skip이다. 남은 OAuth 새 탭2개는 변경 전 main 빌드에서도 동일 실패로 확인했다. 프리뷰10/10, 45개 화면 가로넘침·JS오류·외부요청0. 정확한 범위·초기 실패는 `docs/verification/ui-deepseek-light.md`에 기록했다. 사용자 피처 브랜치 검토와 후속 승인 전 develop/main 병합·배포 금지, 원격 push/PR 없음.
+
+### 2026-10-29 UTC — 로컬 UI 검토 피드백 반영
+
+hero를 “조건만 말하세요, 결정은 Meet me가 할게요”로 복원했다. 설명 카드의 500ms 동시 등장을 850ms와 같은 관측 묶음당 180ms 순차 등장으로 바꾸고, 모바일 단독 카드에는 지연을 누적하지 않는다. reduced-motion과 observer 미지원의 정적 가독성을 유지했다. 하단 안내는 22px의 차분한 번호 배지와 16px 동일 stroke의 링크/조건 입력/확정 체크 아이콘으로 정돈했다. 별도 feature에만 게시하며 PR·develop/main 병합·운영 배포는 하지 않는다. 실측과 회귀 결과는 `docs/verification/ui-deepseek-light.md` 참조.

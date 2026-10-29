@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, CalendarRange, Clock3, Link2, LockKeyhole, MessageSquare, Sparkles, Users } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Clock3, Link2, LockKeyhole, MessageSquare, MessageSquareText, Users } from "lucide-react";
 import { api, ApiError, errorMessage } from "../api/client";
 import type { MeetingMode } from "../api/types";
 import { createRoomBody, createRoomSchema, defaultSearchDates, type CreateRoomValues } from "../utils/createRoom";
@@ -76,7 +76,7 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
       <section className="hero" aria-labelledby="hero-title">
         <div className="hero-copy">
           <p className="hero-kicker">함께할 시간을 찾는 더 편한 방법</p>
-          <h1 id="hero-title"><span className="hero-line">조건만 말하세요,</span><span className="hero-line">함께할 시간을 <span className="hero-accent">찾아요.</span></span></h1>
+          <h1 id="hero-title"><span className="hero-line">조건만 말하세요,</span>{" "}<span className="hero-line">결정은 <span className="hero-accent">Meet me</span>가 할게요</span></h1>
           <p className="hero-description">각자의 시간·장소 조건을 비공개로 모아<br className="hero-break" /> 함께할 수 있는 시간을 제안해요.</p>
           <div className="hero-actions">
             <Button className="hero-cta" onClick={() => navigate("/create")}>모임 만들기 <ArrowRight size={18} aria-hidden="true" /></Button>
@@ -102,7 +102,7 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
         <LandingStory />
         <section className="how-card">
           <h2>링크 하나로 시작하는 일정 조율</h2>
-          <div><How number="1" icon={<Link2 />} title="방 생성 & 공유" /><How number="2" icon={<CalendarRange />} title="각자 조건 제출" /><How number="3" icon={<Sparkles />} title="시간 선택 & 확정" /></div>
+          <ol className="how-steps"><How number="1" icon={<Link2 />} title="방 생성 & 공유" /><How number="2" icon={<MessageSquareText />} title="각자 조건 제출" /><How number="3" icon={<Check />} title="시간 선택 & 확정" /></ol>
         </section>
       </div>
     </div>
@@ -147,7 +147,7 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
   );
 }
 
-function How({ number, icon, title }: { number: string; icon: React.ReactNode; title: string }) { return <div className="how-step"><b>{number}</b><span>{icon}</span><strong>{title}</strong></div>; }
+function How({ number, icon, title }: { number: string; icon: React.ReactNode; title: string }) { return <li className="how-step"><b aria-hidden="true">{number}</b><span aria-hidden="true">{icon}</span><strong>{title}</strong></li>; }
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) { return <label className="field"><span>{label}</span>{children}<ErrorText text={error} /></label>; }
 function ErrorText({ text, id }: { text?: string; id?: string }) { return text ? <small id={id} className="field-error" role="alert">{text}</small> : null; }
 function Policy({ icon, checked, title, detail, onChange, children }: { icon: React.ReactNode; checked: boolean; title: string; detail: string; onChange: (value: boolean) => void; children?: React.ReactNode }) { return <div className={`policy-card ${checked ? "selected" : ""}`}><label><input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} /><span className="policy-icon">{icon}</span><span><strong>{title}</strong><small>{detail}</small></span></label>{children && <div className="policy-content">{children}</div>}</div>; }

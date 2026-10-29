@@ -38,3 +38,17 @@
 - 초기 E2E 실패 자료 `initial-e2e/`와 초기 미리보기 테스트 로그 보존
 
 사용자 전달용 bundle/patch/설명과 대표 PNG는 별도 로컬 전달 패키지로 만든다. 원격 게시·PR·병합·운영 배포는 수행하지 않는다. 캡처의 Library 첨부는 전송 helper가 `hosted apps tools/list request failed: network`로 실패해 미완료다. 로컬 원본은 보존했고 다른 업로드 경로로 우회하지 않았다.
+
+## 2026-10-29 사용자 로컬 피드백 — 카드 모션·하단 아이콘·hero 문구
+
+- 기준은 원격 `f3902cc93d0078ea0a05714f146e3e451b5d8fea`다. 새로 보이는 카드에 같은 프레임에 효과를 적용해 첫 세 카드가 사실상 동시에 끝나던 점을 수정했다.
+- 이전: threshold .15, 별도 rootMargin 없음, 500ms ease-out, 16px, opacity .65→1, stagger 0. 초기 관측 callback은 intersectionRatio를 검사하지 않았다.
+- 이후: intersectionRatio ≥.30와 하단 rootMargin -48px, 850ms cubic-bezier(.2,.65,.3,1), 24px, opacity .75→1. 같은 callback에서 새로 들어온 카드만 DOM 순서로 0/180/360ms 지연한다. 모바일에서 뒤늦게 단독으로 들어오는 카드는 0ms부터 시작한다. 콘텐츠를 미리 숨기거나 스크롤을 고정하지 않는다.
+- Chromium 1440×900 실측: 이전 시작 이벤트 41.8/41.9/42.0ms로 사실상 동시, 이후 77.3/232.9/416.6ms로 순차 시작. 애니메이션 elapsedTime은 .5→.85초, 세 카드의 시작~마지막 종료 구간은 약 .56→1.20초다. 이벤트 dispatch는 프레임·캡처 부하에 따라 달라지므로 명목 180ms와 측정값을 구분한다.
+- 390×900에서는 앞의 두 카드가 0/180ms 지연으로 들어오고, 스크롤 후 세 번째는 자체 trigger에서 0ms 지연으로 시작했다. desktop/mobile reduced-motion에서 세 카드 모두 animation none·opacity1·transform none을 확인했다.
+- 하단 단계는 순서 있는 목록으로 정리했다. 번호 배지는 25→22px의 낮은 강조 테두리로, 보조 아이콘은 24→16px·stroke1.75로 통일했다. Link2 / MessageSquareText / Check를 사용하며 단계 문구는 유지한다. 아이콘은 aria-hidden으로 텍스트 중복 낭독을 피한다.
+- hero는 요청대로 정확히 “조건만 말하세요, 결정은 Meet me가 할게요”로 복원했다. 320/390/1440px에서 실제 화면·문구·가로 넘침을 확인한다.
+
+실측 JSON·전후 캡처: `/workspace/shared/ui-motion-refinement/`. 기존 API/인증/공식 로그인 버튼은 수정하지 않았다.
+
+후속 최종 검증: lint·production build(tsc 포함) 통과. landing/ui-refresh desktop·mobile 56개 중 **55통과·기존 desktop 전용 skip1·실패0**. 실제 진행률을 비교하는 순차 등장 검사와 모바일 뒤늦은 카드의 지연 없는 시작, reduced-motion 전환 검사를 포함한다. 320/390/1440px 화면은 모두 가로 넘침0, 정확한 hero textContent, 16px/stroke1.75 아이콘을 확인했다. 첫 회에는 inline-block 강조 span 때문에 접근성 이름에 `Meet me 가` 공백이 생겨 정확한 이름 검사2개가 실패했고, inline으로 보정해 전체 관련 검사를 재실행했다. 기능/API/인증 변경은 없어 전체 비관련 단위·브라우저 suite는 반복하지 않았다.

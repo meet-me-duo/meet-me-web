@@ -18,7 +18,7 @@ async function keyboardToHero(page: import("@playwright/test").Page) {
 test("landing page starts the two-step room flow", async ({ page }) => {
   await installAccountRefresh(page, "민수");
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /조건만 말하세요/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "조건만 말하세요, 결정은 Meet me가 할게요", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "모임 만들기" }).click();
   await expect(page).toHaveURL(/\/create$/);
   await expect(page.getByText("Step 1 of 2")).toBeVisible();
@@ -204,5 +204,39 @@ test("changing motion preference stops decorative entrances", async ({ page }) =
   for (const panel of await page.locator(".story-panel").all()) {
     await expect(panel).toHaveCSS("animation-name", "none");
     await expect(panel).toHaveCSS("opacity", "1");
+  }
+});
+
+test("cards entering together visibly progress in sequence", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  const cards = page.locator(".story-panel");
+  await cards.first().evaluate(element => scrollTo(0, element.getBoundingClientRect().top + scrollY - innerHeight * .45));
+  await expect.poll(() => cards.evaluateAll(elements => {
+    const progress = elements.map(element => element.getAnimations()[0]?.effect?.getComputedTiming().progress ?? 0);
+    return progress[0] > progress[1] && progress[1] > progress[2] && progress[0] < 1;
+  })).toBe(true);
+  for (const card of await cards.all()) await expect(card).toHaveCSS("opacity", "1");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(1440);
+});
+
+test("a later mobile card starts without waiting for offscreen cards", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 640 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  const cards = page.locator(".story-panel");
+  await cards.first().evaluate(element => scrollTo(0, element.getBoundingClientRect().top + scrollY - 300));
+  await expect(cards.first()).toHaveClass(/story-entered/);
+  await expect(cards.first()).toHaveCSS("opacity", "1");
+  await expect(cards.last()).not.toHaveClass(/story-entered/);
+  await cards.last().scrollIntoViewIfNeeded();
+  await expect(cards.last()).toHaveClass(/story-entered/);
+  await expect(cards.last()).toHaveCSS("animation-delay", "0s");
+  await expect(cards.last()).toHaveCSS("opacity", "1");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  for (const card of await cards.all()) {
+    await expect(card).toHaveCSS("animation-name", "none");
+    await expect(card).toHaveCSS("transform", "none");
   }
 });

@@ -534,3 +534,9 @@
 ### 계정 복구 게시 전 독립 리뷰 PASS
 
 승인된 A 흐름과 최종 제품7/신규 독립55의 지문, FI9의 실제 assertion 탐지·매회 복구55PASS, 전체 unit682·mock browser425PASS/기존skip1 및 실제 로컬 HTTPS 명시복구6PASS를 읽기 대조했다. 최종 manifest17개와 unit134/HTTPS120 입력의 현재 지문 불일치0이며 새 P1/P2는 없다. 원8 빠른 전체이탈·native 자동focus 미검증, 고정 runtime 선행 준비와 Primary대역의 TwoStage/금융graph 우회 한계는 유지한다. 이 판정은 로컬 게시 준비에 한하며 후속 commit/push·정확 HEAD CI는 별도 게이트다. 리뷰 중 제품·테스트·실행·원격 변경0이다.
+
+## 2026-10-29 UTC — DeepSeek 참고 밝은 UI 실험
+
+별도 `feature/ui-deepseek-experiment`에서 밝은 hero·자연어 예시·세 개 설명 카드, 공통 12px 카드와 pill CTA, 짧은 등장/표면 반응을 구현했다. 기존 생성/방/로그인/리뷰 로직·API 계약은 유지하고, Node loopback 합성 프리뷰 15개 상태를 제품 번들과 분리했다. Figma 정적 근거와 별도 브라우저 관측, Meet me용 선택을 `docs/UI_EXPERIMENT_DEEPSEEK.md`에 구분했다. 로컬 실행은 `docs/UI_PREVIEW.md` 참조.
+
+api/type/lint/build 통과. 단위 783/784 첫 회 통과 후 timeout 파일 16/16 재실행 통과. 최초 E2E 481통과/26실패/1skip에서 CSS 문제를 수정했고 최종 관련130개는127통과/2실패/1skip이다. 남은 OAuth 새 탭2개는 변경 전 main 빌드에서도 동일 실패로 확인했다. 프리뷰10/10, 45개 화면 가로넘침·JS오류·외부요청0. 정확한 범위·초기 실패는 `docs/verification/ui-deepseek-light.md`에 기록했다. 사용자 피처 브랜치 검토와 후속 승인 전 develop/main 병합·배포 금지, 원격 push/PR 없음.

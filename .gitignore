@@ -16,3 +16,6 @@ test-results/
 *.tfstate.*
 # Local raw #110 test output; tracked manifests contain concise results and hashes.
 docs/verification/issue-110-web-logs/
+
+# Isolated local UI review build
+.ui-preview-dist/

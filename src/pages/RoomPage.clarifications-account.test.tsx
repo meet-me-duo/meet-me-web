@@ -101,7 +101,7 @@ describe("#107 clarification UI inside #109's real account boundary", () => {
   });
 
   it("keeps a legacy guest HOST behind login before requesting a private clarification", async () => {
-    const mock = await fixture({ guestHost: true }); await screen.findByRole("heading", { name: "로그인하고 모임을 만들어 보세요" });
+    const mock = await fixture({ guestHost: true }); await screen.findByRole("heading", { name: "로그인" });
     expect(mock.reads.some(read => read.path.endsWith("/clarifications"))).toBe(false); expect(screen.queryByRole("radio")).not.toBeInTheDocument(); expect(mock.writes).toEqual([]);
   });
 

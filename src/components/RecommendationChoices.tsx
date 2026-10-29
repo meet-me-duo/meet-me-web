@@ -1,7 +1,7 @@
 import type { RecommendationOptionView, RecommendationSelection, RecommendationVariantView } from "./recommendationView";
 import { useEffect, useId, useRef, useState } from "react";
 import { CalendarDays, MapPin, Monitor, Users } from "lucide-react";
-import { formatRecommendationInstant, formatRecommendationRange, recommendationInputValue, localDateTimeInstants, validateSelection } from "../utils/recommendationTime";
+import { formatRecommendationInstant, formatRecommendationRange, recommendationTimeZoneLabel, recommendationInputValue, localDateTimeInstants, validateSelection } from "../utils/recommendationTime";
 export type { RecommendationOptionView, RecommendationVariantView, RecommendationSelection } from "./recommendationView";
 
 export interface RecommendationChoicesProps {
@@ -33,6 +33,7 @@ function ChoicesSession({ options, alternatives = [], timeZone, canConfirm, pend
   const primary = options.slice(0, 3);
   const other = [...options.slice(3), ...alternatives];
   const allOptions = [...primary, ...other];
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [showOther, setShowOther] = useState(false);
   const [requestingMore, setRequestingMore] = useState(false);
   const moreLock = useRef(false);
@@ -76,10 +77,10 @@ function ChoicesSession({ options, alternatives = [], timeZone, canConfirm, pend
 
   if (variant && option) return <section className="actual-time-form glass-card" aria-labelledby={`${id}-title`}>
     <h3 id={`${id}-title`} tabIndex={-1} ref={heading}>{primary.some(item => item.id === option.id) ? "추천안" : "다른 가능한 시간"} {option.rank}의 실제 일정 선택</h3>
-    <p className="field-hint">시간대: {timeZone}. 가능한 범위 안에서 실제 시작·종료 시간을 직접 선택해 주세요.</p>
+    <p className="field-hint">{recommendationTimeZoneLabel(timeZone)} · 실제 시작·종료 시간을 선택해 주세요.</p>
     <p className="recommendation-range"><CalendarDays size={18} aria-hidden="true" /> 가능한 범위 · {formatRecommendationRange(variant.startAt, variant.endAt, timeZone)}</p>
     <p>{variant.attendanceCount}/{variant.totalParticipants}명 참석 가능 · {variant.meetingMode === "REMOTE" ? "온라인 · 접속 정보 별도 공지" : `대면 · ${variant.place ?? "장소 협의"}`}</p>
-    <p>{attendanceDescription(variant)}</p>
+    {!!variant.excludedParticipantNames?.length && <p>{attendanceDescription(variant)}</p>}
     <form onSubmit={event => {
       event.preventDefault();
       if (!canConfirm || !valid || busy || submitLock.current) return;
@@ -93,7 +94,6 @@ function ChoicesSession({ options, alternatives = [], timeZone, canConfirm, pend
         setEnd(recommendationInputValue(variant.endAt, timeZone));
         setStartInstant(""); setEndInstant("");
       }}>가능한 범위 전체 선택</button>
-      {exactBounds?.startAt && exactBounds?.endAt && <p className="field-hint">전체 범위의 정확한 시작·종료를 선택했어요. 아래 미리보기에서 초 미만 시각까지 확인해 주세요. 입력을 수정하면 해당 시각을 직접 선택한 값으로 바꿔요.</p>}
       <div className="actual-time-inputs">
         <label className="field"><span>시작 시간</span><input type="datetime-local" step="1" value={start} disabled={busy} required aria-describedby={`${id}-hint`} aria-invalid={invalidStart} onChange={event => { setStart(event.target.value); setStartInstant(""); setExactBounds(previous => previous ? { ...previous, startAt: "" } : null); }} /></label>
         <label className="field"><span>종료 시간</span><input type="datetime-local" step="1" value={end} disabled={busy} required aria-describedby={`${id}-hint`} aria-invalid={invalidEnd} onChange={event => { setEnd(event.target.value); setEndInstant(""); setExactBounds(previous => previous ? { ...previous, endAt: "" } : null); }} /></label>
@@ -107,16 +107,20 @@ function ChoicesSession({ options, alternatives = [], timeZone, canConfirm, pend
   </section>;
 
   return <div className="recommendation-choices">
-    <p className="field-hint">시간대: {timeZone}. 각 추천안의 가능한 시간·참석 인원·방식을 확인해 주세요.</p>
-    <p className="field-hint">각 추천안은 우열 없는 시간 선택지예요. 함께할 인원과 시간을 비교해 골라 주세요.</p>
-    <div className="candidate-list">{(showOther ? allOptions : primary).map(item => <article key={item.id} className="candidate-card recommendation-card" aria-labelledby={`${id}-${item.id}`}>
+    <p className="field-hint recommendation-zone">{recommendationTimeZoneLabel(timeZone)} · 우열 없는 시간 선택지예요.</p>
+    <div className="candidate-list">{(showOther ? allOptions : primary).map(item => <article key={item.id} className={`candidate-card recommendation-card ${selectedOption === item.id ? "is-selected" : ""}`} aria-labelledby={`${id}-${item.id}`}>
       <h3 id={`${id}-${item.id}`}>{primary.some(option => option.id === item.id) ? "추천안" : "다른 가능한 시간"} {item.rank}</h3>
       <fieldset className="recommendation-variants"><legend>가능한 방식과 장소</legend>{item.variants.map(choice => <label className="recommendation-variant" key={choice.id}>
-        <input type="radio" name={`${id}-${item.id}-variant`} checked={(item.variants.find(variant => variant.id === variants[item.id]) ?? item.variants[0])?.id === choice.id} disabled={!canConfirm || pending} onChange={() => setVariants(previous => ({ ...previous, [item.id]: choice.id }))} />
-        <span><span className="candidate-meta"><span><Users size={17} aria-hidden="true" /> {choice.attendanceCount}/{choice.totalParticipants}명 참석 가능</span><span>{choice.meetingMode === "REMOTE" ? <Monitor size={17} aria-hidden="true" /> : <MapPin size={17} aria-hidden="true" />} {choice.meetingMode === "REMOTE" ? "온라인 · 접속 정보 별도 공지" : `대면 · ${choice.place ?? "장소 협의"}`}</span></span><span className="recommendation-range">가능한 범위 · {formatRecommendationRange(choice.startAt, choice.endAt, timeZone)}</span><span className="field-hint">{attendanceDescription(choice)}</span></span>
+        {item.variants.length > 1 && <input type="radio" name={`${id}-${item.id}-variant`} checked={(item.variants.find(variant => variant.id === variants[item.id]) ?? item.variants[0])?.id === choice.id} disabled={!canConfirm || pending} onChange={() => setVariants(previous => ({ ...previous, [item.id]: choice.id }))} />}
+        <span><span className="candidate-meta"><span><Users size={17} aria-hidden="true" /> {choice.attendanceCount}/{choice.totalParticipants}명 참석 가능</span><span>{choice.meetingMode === "REMOTE" ? <Monitor size={17} aria-hidden="true" /> : <MapPin size={17} aria-hidden="true" />} {choice.meetingMode === "REMOTE" ? "온라인 · 접속 정보 별도 공지" : `대면 · ${choice.place ?? "장소 협의"}`}</span></span><span className="recommendation-range">가능한 범위 · {formatRecommendationRange(choice.startAt, choice.endAt, timeZone)}</span>{!!choice.excludedParticipantNames?.length && <span className="field-hint">{attendanceDescription(choice)}</span>}</span>
       </label>)}</fieldset>
-      {canConfirm && <button ref={button => { if (button) buttons.current.set(item.id, button); else buttons.current.delete(item.id); }} type="button" className="button primary wide" disabled={pending || !item.variants.length} onClick={() => { const selected = item.variants.find(variant => variant.id === variants[item.id]) ?? item.variants[0]; if (selected) setChosen({ optionId: item.id, variantId: selected.id, snapshot: JSON.stringify(selected) }); }}>이 시간 선택</button>}
+      {canConfirm && <button ref={button => { if (button) buttons.current.set(item.id, button); else buttons.current.delete(item.id); }} type="button" className="button secondary wide recommendation-select" aria-pressed={selectedOption === item.id} disabled={pending || !item.variants.length} onClick={() => setSelectedOption(item.id)}>이 시간 선택</button>}
     </article>)}</div>
+    {canConfirm && <button className="button primary recommendation-continue" disabled={pending || !allOptions.some(item => item.id === selectedOption && item.variants.length)} onClick={() => {
+      const item = allOptions.find(item => item.id === selectedOption);
+      const selected = item?.variants.find(variant => variant.id === variants[item.id]) ?? item?.variants[0];
+      if (item && selected) setChosen({ optionId: item.id, variantId: selected.id, snapshot: JSON.stringify(selected) });
+    }}>선택한 시간 확정하기</button>}
     {(hasMore || (!showOther && other.length > 0)) && <button type="button" className="button secondary more-times" disabled={loadingMore || requestingMore || pending} onClick={() => {
       if (moreLock.current) return;
       setShowOther(true);

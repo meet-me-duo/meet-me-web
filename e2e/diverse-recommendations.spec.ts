@@ -71,7 +71,7 @@ async function fixture(page: Page, baseURL: string, options: { count?: number; r
 }
 async function enter(page: Page) {
   await page.getByRole("radio", { name: /온라인/ }).check();
-  await page.getByRole("button", { name: "이 시간 선택" }).click();
+  await page.getByRole("button", { name: "이 시간 선택" }).click(); await page.getByRole("button", { name: "선택한 시간 확정하기" }).click();
   await expect(page.getByLabel("시작 시간", { exact: true })).toHaveValue("");
   await expect(page.getByLabel("종료 시간", { exact: true })).toHaveValue("");
   await page.getByLabel("시작 시간", { exact: true }).fill("2026-10-08T10:30");
@@ -92,7 +92,7 @@ for (const width of [1440, 390, 320]) test.describe(`native recommendation ${wid
   });
   test("explicit whole-range action preserves microsecond bounds in the browser and saved result", async ({ page, baseURL }) => {
     const mock = await fixture(page, baseURL!, { precise: true }); await page.goto(`/rooms/${code}`);
-    await page.getByRole("radio", { name: /온라인/ }).check(); await page.getByRole("button", { name: "이 시간 선택" }).click();
+    await page.getByRole("radio", { name: /온라인/ }).check(); await page.getByRole("button", { name: "이 시간 선택" }).click(); await page.getByRole("button", { name: "선택한 시간 확정하기" }).click();
     await expect(page.getByLabel("시작 시간", { exact: true })).toHaveValue(""); await expect(page.getByLabel("종료 시간", { exact: true })).toHaveValue("");
     await page.getByRole("button", { name: "가능한 범위 전체 선택" }).click();
     await expect(page.getByText(/확정할 일정/)).toContainText("10:00:00.000001"); await expect(page.getByText(/확정할 일정/)).toContainText("10:00:00.000002");
@@ -112,7 +112,7 @@ for (const width of [1440, 390, 320]) test.describe(`native recommendation ${wid
   });
   test("keyboard return restores focus and keeps native boundaries accessible without horizontal overflow", async ({ page, baseURL }) => {
     const mock = await fixture(page, baseURL!); await page.goto(`/rooms/${code}`);
-    const choice = page.getByRole("button", { name: "이 시간 선택" }); await choice.focus(); await page.keyboard.press("Enter");
+    const choice = page.getByRole("button", { name: "이 시간 선택" }); await choice.focus(); await page.keyboard.press("Enter"); await page.getByRole("button", { name: "선택한 시간 확정하기" }).click();
     await expect(page.getByRole("heading", { name: /실제 일정 선택/ })).toBeFocused();
     const back = page.getByRole("button", { name: "추천안으로 돌아가기" }); await back.focus(); await page.keyboard.press("Enter"); await expect(choice).toBeFocused();
     expect((await choice.boundingBox())?.height).toBeGreaterThanOrEqual(44);

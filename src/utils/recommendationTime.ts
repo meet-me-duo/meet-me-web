@@ -35,7 +35,10 @@ function instantMicros(value: string): bigint | undefined {
 }
 
 export function formatRecommendationRange(startAt: string, endAt: string, timeZone: string): string {
-  return `${formatRecommendationInstant(startAt, timeZone)} – ${formatRecommendationInstant(endAt, timeZone)}`;
+  const ambiguous = [startAt, endAt].some(value => localDateTimeInstants(recommendationInputValue(value, timeZone), timeZone).length > 1);
+  const start = formatRecommendationInstant(startAt, timeZone, ambiguous);
+  const end = formatRecommendationInstant(endAt, timeZone, ambiguous);
+  return `${start} – ${!ambiguous && start.slice(0, 10) === end.slice(0, 10) ? end.slice(11) : end}`;
 }
 
 function wallTime(instant: number, timeZone: string): string {
@@ -44,14 +47,14 @@ function wallTime(instant: number, timeZone: string): string {
   return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}:${get("second")}`;
 }
 
-export function formatRecommendationInstant(value: string, timeZone: string): string {
+export function formatRecommendationInstant(value: string, timeZone: string, showOffset = true): string {
   const instant = new Date(value).getTime();
   const wall = wallTime(instant, timeZone);
   const minutes = Math.round((new Date(`${wall}Z`).getTime() - instant) / 60_000);
   const offset = `${minutes < 0 ? "-" : "+"}${String(Math.floor(Math.abs(minutes) / 60)).padStart(2, "0")}:${String(Math.abs(minutes) % 60).padStart(2, "0")}`;
   const fraction = /\.(\d+)(?:Z|[+-]\d{2}:\d{2})$/.exec(value)?.[1]?.replace(/0+$/, "") ?? "";
   const seconds = fraction ? `${wall.slice(16)}.${fraction}` : wall.endsWith(":00") ? "" : wall.slice(16);
-  return `${wall.slice(0, 10)} ${wall.slice(11, 16)}${seconds} (UTC${offset})`;
+  return `${wall.slice(0, 10)} ${wall.slice(11, 16)}${seconds}${showOffset ? ` (UTC${offset})` : ""}`;
 }
 
 export function recommendationInputValue(value: string, timeZone: string): string {
@@ -61,4 +64,8 @@ export function recommendationInputValue(value: string, timeZone: string): strin
 export function sameRecommendationInstant(first: string, second: string): boolean {
   const instant = instantMicros(first);
   return instant !== undefined && instant === instantMicros(second);
+}
+
+export function recommendationTimeZoneLabel(timeZone: string): string {
+  return timeZone === "Asia/Seoul" ? "한국 시간" : `${timeZone} 현지 시간`;
 }

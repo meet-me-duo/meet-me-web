@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { CalendarDays, List, Search } from "lucide-react";
+import { CalendarDays, Search } from "lucide-react";
 import { api, ApiError, errorMessage } from "../api/client";
 import { decodeAccountRooms, type AccountRoomFilters, type AccountRoomRole } from "../api/accountRooms";
-import { Card, CardContent, CardHeader } from "../components/ui/card";
+import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { formatDateTime } from "../utils/time";
 
@@ -60,10 +60,9 @@ export function AccountArchive() {
     {query.isError && <p className="alert error" role="alert">{errorMessage(query.error)}</p>}<Link className="button primary" to="/create">모임 만들기</Link></section>;
 
   return <section className="page-width account-card account-history" aria-labelledby="account-history-title">
-    <div className="account-history-heading"><div><span className="eyebrow"><List size={17} aria-hidden="true" />계정 기록</span><h1 id="account-history-title">내 모임</h1><p>주최하거나 참여한 모임을 계정으로 다시 찾을 수 있어요.</p></div><Link className="button primary" to="/create">모임 만들기</Link></div>
-    <p className="field-hint">모임은 기존 보관 정책에 따라 생성 또는 마감 후 30일이 지나면 삭제돼요.</p>
+    <div className="account-history-heading"><div><h1 id="account-history-title">내 모임</h1></div><Link className="button primary" to="/create">모임 만들기</Link></div>
     {denied ? <div className="alert error" role="alert">{errorMessage(query.error)}</div> : <>
-      {(supportsHistory || first?.kind === "history") && <Card className="account-history-filters"><CardHeader><h2>모임 찾기</h2></CardHeader><CardContent><form onSubmit={submit}>
+      {(supportsHistory || first?.kind === "history") && <details className="account-history-filters ui-card"><summary>모임 찾기 · 검색 및 필터</summary><CardContent><form onSubmit={submit}>
         <fieldset className="account-history-roles"><legend>모임 구분</legend>{(Object.keys(roles) as (keyof typeof roles)[]).map(role => <label key={role}><input type="radio" name="history-role" value={role} checked={draft.role === role} onChange={() => setDraft(current => ({ ...current, role }))} />{roles[role]}</label>)}</fieldset>
         <div className="account-history-fields"><label className="field"><span><CalendarDays size={16} aria-hidden="true" />생성일 시작</span><input ref={from} type="date" min="0001-01-01" max="9998-12-31" value={draft.from} aria-describedby="history-date-hint" onChange={event => setDraft(current => ({ ...current, from: event.target.value }))} /></label>
           <label className="field"><span>생성일 종료</span><input type="date" min="0001-01-01" max="9998-12-31" value={draft.to} aria-describedby="history-date-hint" onChange={event => setDraft(current => ({ ...current, to: event.target.value }))} /></label>
@@ -71,7 +70,7 @@ export function AccountArchive() {
         <p id="history-date-hint" className="field-hint">모임 생성일 기준 · 한국 시간 · 시작일과 종료일 모두 포함해요. 날짜를 비워 두면 보관 중인 전체 기간을 조회해요.</p>
         {formError && <p className="alert error" role="alert">{formError}</p>}
         <div className="account-history-filter-actions"><Button variant="secondary" onClick={() => { setDraft(initial); setApplied(initial); setFormError(null); }}>초기화</Button><Button type="submit">조회</Button></div>
-      </form></CardContent></Card>}
+      </form></CardContent></details>}
       {query.isPending ? <p role="status">모임을 불러오는 중이에요.</p> : query.isError && !query.isFetchNextPageError ? <div className="alert error" role="alert"><p>{errorMessage(query.error)}</p><Button variant="secondary" onClick={() => void query.refetch()}>목록 다시 불러오기</Button></div> : <>
         <p className="account-history-summary" role="status">{roles[applied.role]} · 불러온 모임 {rows.length}개{applied.query ? ` · 이름 “${applied.query}”` : ""}</p>
         {rows.length === 0 ? <Card className="account-history-empty"><h2>조건에 맞는 모임이 없어요</h2><p>조회 조건을 바꾸거나 새 모임을 만들어 보세요.</p></Card> : <ul className="account-history-list">{rows.map(row => <li key={row.invite_code}><Card>
@@ -82,5 +81,6 @@ export function AccountArchive() {
         {query.hasNextPage && <Button className="account-history-more" variant="secondary" disabled={query.isFetchingNextPage} onClick={() => void query.fetchNextPage({ cancelRefetch: false })}>{query.isFetchingNextPage ? "추가 모임을 불러오는 중…" : query.isFetchNextPageError ? "다음 모임 다시 불러오기" : "더 보기"}</Button>}
       </>}
     </>}
+    <p className="field-hint">모임은 생성 또는 마감 후 30일이 지나면 삭제돼요.</p>
   </section>;
 }

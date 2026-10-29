@@ -45,3 +45,22 @@ corepack pnpm test:ui-preview
 브라우저 테스트는 Playwright Chromium 설치가 필요하다. 기존 `test:e2e` 설정은 로컬 msedge를 사용한다. 별도 미리보기 테스트는 기본 Chromium을 쓰며, 설치된 Chromium 경로를 `PLAYWRIGHT_CHROMIUM_EXECUTABLE`로 지정할 수도 있다. `test:ui-preview` 전에 수동 `preview:ui` 서버를 종료한다.
 
 브랜치의 로컬 확인과 채택 여부 결정이 목적이다. 원격 push/PR·develop/main 병합·운영 배포·공개 프리뷰는 별도 단계다.
+
+### 화면 밀도 검토 업데이트
+
+내 모임 장면에는 합성 모임 5개가 표시됩니다. 검색 및 필터는 제목을 눌러 펼칠 수 있습니다.
+조건 입력의 `주최자 도구`와 결과 아래 `내 저장 입력 확인`도 기본적으로 접혀 있습니다.
+추천 카드 선택 → `선택한 시간 확정하기` → 실제 시작/종료 선택 → `일정 확정` 순서입니다.
+전체 가능한 범위를 그대로 쓰려면 시간 확인 화면의 `가능한 범위 전체 선택`을 누릅니다.
+
+Windows CMD에서 같은 브랜치를 이미 내려받았다면 미리보기 창에서 Ctrl+C 후:
+
+```cmd
+git switch feature/ui-deepseek-experiment
+git pull --ff-only origin feature/ui-deepseek-experiment
+corepack pnpm install --frozen-lockfile
+corepack pnpm preview:ui
+```
+
+Node.js 22 이상, pnpm 10.17.1. 로컬 주소는 `http://127.0.0.1:4175/__preview`입니다.
+미리보기는 실행할 때 새로 빌드하므로 이전 서버를 종료하고 다시 실행해야 변경이 반영됩니다.

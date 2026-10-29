@@ -87,6 +87,7 @@ for (const width of [1440, 320, 390]) test(`create, save, share, partial selecti
   await expect(page.getByText("수정한 내용이 아직 저장되지 않았어요.")).toBeVisible();
   await page.getByRole("button", { name: "수정 취소" }).click();
   await expect(page.locator(".submitted-text")).toHaveText("목요일 저녁");
+  await page.locator(".host-tools-inline > summary").click();
   await page.getByRole("button", { name: "입력 마감하기" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "지금 입력 마감", exact: true }).click();
   await expect(page.getByRole("heading", { name: "일부 조건으로 만든 후보 플랜이에요" })).toBeVisible();

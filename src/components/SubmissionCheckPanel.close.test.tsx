@@ -25,6 +25,7 @@ it("keeps raw input on cancel and sends one explicitly confirmed close request",
   mount();
   const input = await screen.findByRole("textbox", { name: /시간·장소 조건/ });
   fireEvent.change(input, { target: { value: "아직 저장하지 않은 수요일 오후 조건" } });
+  fireEvent.click(screen.getByText("주최자 도구", { selector: "summary" }));
   const trigger = screen.getByRole("button", { name: "입력 마감하기" }); fireEvent.click(trigger);
   let dialog = screen.getByRole("dialog", { name: "지금 입력을 마감할까요?" });
   expect(close).not.toHaveBeenCalled(); expect(dialog).toHaveTextContent("자동 마감 조건 전이라도");
@@ -54,7 +55,7 @@ it("shows saved input and places HOST tools below cancellation, without a deadli
   expect(screen.queryByRole("heading", { name: "가능한 조건을 알려주세요" })).not.toBeInTheDocument();
   expect(screen.queryByRole("heading", { name: "마감 조건" })).not.toBeInTheDocument();
   const stop = screen.getByRole("button", { name: "확인 취소" });
-  const tools = screen.getByRole("heading", { name: "주최자 도구" });
+  const tools = screen.getByText("주최자 도구", { selector: "summary" });
   expect(stop.compareDocumentPosition(tools) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   fireEvent.click(stop);
   await waitFor(() => expect(cancel).toHaveBeenCalledTimes(1));
@@ -69,5 +70,5 @@ it("never exposes a close action to a MEMBER", async () => {
   const close = vi.spyOn(api, "closeRoom"); mount(empty, { ...room, viewer: { ...room.viewer, role: "MEMBER" } });
   await screen.findByRole("textbox", { name: /시간·장소 조건/ });
   expect(screen.queryByRole("button", { name: "입력 마감하기" })).not.toBeInTheDocument();
-  expect(screen.queryByRole("heading", { name: "주최자 도구" })).not.toBeInTheDocument(); expect(close).not.toHaveBeenCalled();
+  expect(screen.queryByText("주최자 도구", { selector: "summary" })).not.toBeInTheDocument(); expect(close).not.toHaveBeenCalled();
 });

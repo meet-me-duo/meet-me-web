@@ -653,3 +653,89 @@ fieldset.field legend { margin-bottom: 9px; }
 .button:active:not(:disabled)::before { opacity: 1; transform: scale(1); }
 .site-header { background: rgb(255 255 255 / .96); }
 @media (prefers-reduced-motion: reduce) { .story-entered { animation: none; } .button::before { transition: none; transform: none; } }
+
+/* Compact task screens: content grows naturally; no viewport clipping. */
+.login-card .ui-card-header { text-align: center; }
+.login-card .ui-card-content { margin-top: 24px; }
+.social-login > .gsi-material-button { height: 46px; }
+.account-security-page .ui-card-content > p { margin: 8px 0; }
+.account-security-page .ui-card-content > .button { margin-top: 16px; }
+.account-security-content p { margin: 8px 0; }
+.account-history { margin-block: 24px; }
+.account-history-heading h1 { margin: 0; }
+.account-history-filters { margin-block: 16px 12px; padding: 0; }
+.account-history-filters > summary { padding: 10px 16px; min-height: 44px; cursor: pointer; font-size: .9rem; font-weight: 600; }
+.account-history-filters .ui-card-content { margin: 0; padding: 16px; border-top: 1px solid var(--border); }
+.account-history-summary { margin-block: 10px; }
+.account-history-list { gap: 8px; margin: 10px 0 16px; }
+.account-history-list .ui-card { padding: 8px 16px; }
+.account-history-list dl { margin-top: 0; gap: 4px 20px; }
+.room-page { display: flex; flex-direction: column; gap: 16px; max-width: 1040px; padding-block: 24px; }
+.room-page > * { min-width: 0; }
+.room-header { margin: 0; padding: 16px 20px; }
+.room-header h1 { font-size: clamp(1.3rem, 3vw, 1.65rem); }
+.room-input-primary, .room-input-secondary { width: 100%; max-width: 720px; margin-inline: auto; }
+.room-input-secondary { order: 2; }
+.room-page > .room-history-note { order: 3; margin-block: 0; text-align: center; }
+.submission-disclosure > summary { min-height: 44px; padding: 10px 16px; cursor: pointer; font-weight: 600; color: #475569; }
+.submission-disclosure.is-collecting > summary { display: none; }
+.submission-disclosure.is-closed { border: 1px solid var(--border); border-radius: 12px; background: white; }
+.submission-disclosure.is-closed .precheck-card { border: 0; box-shadow: none; }
+.precheck-card { gap: 10px; padding: 20px; }
+.precheck-card h2 { font-size: 1.35rem; }
+.precheck-card h3 { margin: 0 0 6px; font-size: 1rem; }
+.precheck-card p { margin-block: 0; }
+.precheck-card .submission-privacy { font-size: .8rem; }
+.precheck-card .submitted-text { margin-top: 4px; font-size: .94rem; line-height: 1.6; }
+.precheck-card .field textarea { min-height: 112px; }
+.precheck-card > .button { margin: 0; }
+.precheck-card .host-tools-inline { margin: 0; padding-top: 0; }
+.host-tools-inline > summary, .submission-help > summary { cursor: pointer; min-height: 44px; padding-block: 10px; color: #475569; font-size: .85rem; }
+.host-tools-inline[open] > summary, .submission-help[open] > summary { margin-bottom: 8px; }
+.submission-help .field-hint { margin-bottom: 10px; }
+.room-page .center-state { margin: 0 auto; padding: 28px; }
+.room-page .center-state .large-icon { width: 44px; height: 44px; margin-bottom: 12px; }
+.room-page .center-state h1 { font-size: 1.5rem; }
+.room-page .center-state p { margin-bottom: 12px; }
+.room-page .results-section { padding: 8px 0; }
+.room-page .section-heading.centered { margin-bottom: 16px; }
+.room-page .results-section .section-heading h2 { font-size: 1.5rem; }
+.recommendation-choices { max-width: none; }
+.recommendation-zone { margin-bottom: 14px; text-align: center; }
+.recommendation-choices .candidate-list { max-width: none; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.recommendation-card { padding: 18px; box-shadow: none; }
+.recommendation-card::before { display: none; }
+.recommendation-card h3 { margin: 0 0 12px; }
+.recommendation-card.is-selected { border-color: #0369a1; box-shadow: 0 0 0 1px #0369a1; background: #f0f9ff; }
+.recommendation-variants legend { font-size: .8rem; margin-bottom: 4px; }
+.recommendation-variant { padding: 10px 0; margin-block: 0 10px; border: 0; }
+.recommendation-variant:has(input:checked) { background: transparent; }
+.recommendation-card .candidate-meta { gap: 6px; font-size: .85rem; }
+.recommendation-range { margin-block: 10px 0; font-size: .94rem; }
+.recommendation-select[aria-pressed="true"] { color: #075985; border-color: #0369a1; background: #e0f2fe; }
+.recommendation-continue { display: flex; margin: 18px auto 0; min-width: 224px; }
+.actual-time-form { width: 100%; padding: 20px 24px; }
+.actual-time-form > p { margin-block: 8px; }
+.actual-time-form form { display: grid; gap: 12px; }
+.actual-time-form .actual-time-inputs { margin: 0; }
+.actual-time-form .field { gap: 6px; }
+.actual-time-form .selected-time { margin: 0; }
+.confirmed-time { font-size: 1.3rem; line-height: 1.6; font-weight: 700; }
+@media (max-width: 780px) {
+  .room-page { padding-block: 16px; }
+  .room-header { gap: 12px; padding: 16px; }
+  .precheck-card { padding: 20px; }
+  .recommendation-choices .candidate-list { grid-template-columns: minmax(0, 1fr); }
+  .recommendation-continue { width: 100%; }
+  .account-history-list .ui-card { padding: 10px 14px; }
+  .account-history-heading { flex-direction: row; align-items: center; }
+  .account-history-heading h1 { font-size: 1.5rem; }
+}
+/* The card's native selection button also targets the surrounding card surface. */
+.recommendation-select { position: static; }
+.recommendation-select::before { display: none; }
+.recommendation-select::after { position: absolute; inset: 0; content: ""; }
+.recommendation-card:has(.recommendation-select:focus-visible) { outline: 3px solid #0f172a; outline-offset: 3px; }
+.recommendation-variants:has(input) { position: relative; z-index: 1; }
+/* The time editor has its own focused heading; avoid repeating the results heading. */
+.results-section:has(.actual-time-form) > .section-heading { display: none; }

@@ -18,6 +18,9 @@ export function fixture(scene) {
   let account = !['landing', 'login'].includes(scene);
   let status = ({ analyzing: 'ANALYZING', ready: 'READY', confirmed: 'CONFIRMED', review: 'CONFIRMED', no_match: 'NO_MATCH' })[scene] ?? 'COLLECTING';
   let purpose = '함께 준비하는 주말 모임';
+  let activeCode = code;
+  let activeRole = "HOST";
+  const titles = [purpose, '팀 프로젝트 회의', '친구들과 저녁 약속', '함께하는 독서 모임', '주말 산책'];
   let submitted = scene === 'saved' || status !== 'COLLECTING';
   let candidateText = raw;
   let checkState = scene === 'checking' ? 'CHECKING' : submitted ? 'CLEAR' : null;
@@ -30,22 +33,24 @@ export function fixture(scene) {
   }));
   let result = { confirmed_at: now(), selection: { protocol: 'diverse-time-v1', analysis_id: id, option_id: options[0].option_id, variant_id: variantId, start_at: time(1, '10'), end_at: time(1, '11') },
     candidate: { candidate_id: null, plan_type: 'A', rank: 1, meeting_mode: 'REMOTE', attendance_count: 4, total_participants: 4, place: null, summary: '모두 함께할 수 있는 온라인 모임', time_ranges: [{ start_at: time(1, '10'), end_at: time(1, '11') }] } };
-  const room = () => ({ invite_code: code, purpose, meeting_mode: 'EITHER', time_zone_id: 'Asia/Seoul', search_start_date: date(0), search_end_date: date(7), search_range_source: 'HOST_SPECIFIED', expected_participants: 4, submission_deadline: null, manual_only: false,
+  const room = () => ({ invite_code: activeCode, purpose, meeting_mode: 'EITHER', time_zone_id: 'Asia/Seoul', search_start_date: date(0), search_end_date: date(7), search_range_source: 'HOST_SPECIFIED', expected_participants: 4, submission_deadline: null, manual_only: false,
     collection_status: status === 'COLLECTING' ? 'COLLECTING' : 'CLOSED', closure_reason: status === 'COLLECTING' ? null : 'MANUAL', closed_at: status === 'COLLECTING' ? null : now(), public_status: status,
-    viewer: { joined: true, role: 'HOST', display_name: '합성 주최자', context_id: variantId }, input_disclosure_policy: 'HOST_ON_PARTIAL_RESULT', state_version: 1, revision_generation: 0, revision_round: null,
+    viewer: { joined: true, role: activeRole, display_name: activeRole === 'HOST' ? '합성 주최자' : '합성 참여자', context_id: variantId }, input_disclosure_policy: 'HOST_ON_PARTIAL_RESULT', state_version: 1, revision_generation: 0, revision_round: null,
     analysis_id: id, remaining_correction_analyses: 3, recommendation_protocol: 'diverse-time-v1', submission_protocol: 'PRE_SUBMIT_V1', review_prompt_supported: scene === 'review',
-    capabilities: { can_edit_own_submission: status === 'COLLECTING', can_confirm: status === 'READY', can_open_revision: false, can_analyze_revision: false, can_force_reparse: false } });
+    capabilities: { can_edit_own_submission: status === 'COLLECTING', can_confirm: activeRole === 'HOST' && status === 'READY', can_open_revision: false, can_analyze_revision: false, can_force_reparse: false } });
   const snapshot = () => ({ candidate: checkState ? { revision: 1, raw_text: candidateText, created_at: now(), interpretation_reference_at: now() } : null,
     accepted: submitted ? { revision: 1, raw_text: candidateText, created_at: now(), interpretation_reference_at: now(), confirmation_source: 'PRECHECK' } : null,
     check: checkState ? { id, status: checkState, version: 1, retry_allowed: false, failure_code: null, question: null } : null,
     submission_complete: submitted, applied_to_result: submitted && ['READY', 'CONFIRMED'].includes(status), room: { collection_status: room().collection_status, state_version: 1, submission_deadline: null }, operation_outcome: null });
   return async (method, url, body) => {
-    const path = url.pathname;
+    let path = url.pathname;
+    const historyIndex = Array.from({ length: 5 }, (_, i) => i ? code.slice(0, -1) + i : code).findIndex(value => path === `/api/rooms/${value}` || path.startsWith(`/api/rooms/${value}/`));
+    if (historyIndex >= 0) { activeCode = historyIndex ? code.slice(0, -1) + historyIndex : code; if (scene === 'history') { purpose = titles[historyIndex]; activeRole = historyIndex % 2 ? 'MEMBER' : 'HOST'; } path = path.replace(`/api/rooms/${activeCode}`, root); }
     if (path === '/api/auth/refresh' && method === 'POST') return account ? [200, { accessToken: 'ui-preview-synthetic-token', expiresAt: new Date(Date.now() + 900000).toISOString(), account: { id, displayName: '합성 주최자' } }] : [401, { code: 'AUTH_REFRESH_INVALID' }];
     if (['/api/auth/logout', '/api/auth/logout-all'].includes(path) && method === 'POST') { account = false; return [204, null]; }
     if (/^\/api\/auth\/(google|kakao)\/start$/.test(path)) return [409, { detail: '실제 로그인은 연결하지 않습니다. 화면 목록에서 합성 계정 화면을 선택하세요.' }];
     if (path === '/api/account/rooms' && method === 'GET') {
-      const rows = scene === 'empty' ? [] : [{ invite_code: code, purpose, role: 'HOST', created_at: now(), expires_at: new Date(Date.now() + 30 * 86400000).toISOString() }];
+      const rows = scene === 'empty' ? [] : Array.from({ length: 5 }, (_, i) => ({ invite_code: i ? code.slice(0, -1) + i : code, purpose: titles[i], role: i % 2 ? 'MEMBER' : 'HOST', created_at: now(), expires_at: new Date(Date.now() + 30 * 86400000).toISOString() }));
       const q = url.searchParams;
       return [200, { rooms: rows.filter(row => (!q.get('query') || row.purpose.includes(q.get('query'))) && (!q.get('role') || q.get('role') === row.role) && (!q.get('created_from') || date(0) >= q.get('created_from')) && (!q.get('created_to') || date(0) <= q.get('created_to'))), has_more: false, next_cursor: null }];
     }

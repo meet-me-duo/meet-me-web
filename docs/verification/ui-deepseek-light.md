@@ -62,3 +62,36 @@
 1440×900 최종 표본의 animationstart는 73.3/244.0/425.7ms, end는1222.0/1388.8/1572.4ms다. 이벤트 elapsedTime은 각각1.15초, 첫 시작~마지막 종료는 약1.50초(이전 약1.20초)였다. 실제 event dispatch 간격과 명목180ms를 구분한다. 390×900의 뒤늦은 세 번째 카드는 delay0ms, desktop/mobile reduced-motion은 animation none·opacity1·transform none, 가로 넘침0을 확인했다. 캡처·실측은 `/workspace/shared/ui-motion-refinement/slower-spaced*`에 보존한다.
 
 최종 검증: production build(tsc 포함)·lint·diff check 통과, landing desktop/mobile **45통과·기존 desktop skip1·실패0**. 순차 진행률·이동 중 패널 경계·11개 화면 크기·키보드·observer 미지원·reduced-motion을 확인했다. 행 간격 보강 후의 중간 실행에서는 예전 모바일 스크롤 위치가 두 카드를 동시에 진입시켜 단독 카드 delay0 assertion2개가 실패했다. 두 번째 카드를 먼저 관측한 뒤 세 번째로 이동하는 실제 순차 스크롤 절차로 테스트를 보정하고 전체 landing 검사를 다시 통과했다. `.github/workflows`, hero JSX, 단계 아이콘, observer 로직은 기준 커밋과 동일하다.
+
+## 화면 밀도 후속 검토 — 2026-10-29
+
+- 변경: 간단한 로그인과 224×46px OAuth 표면, 접힌 내 모임 필터 및 5행 목록,
+  계정 보안 설명 간격, 중앙 조건 패널, 접힌 HOST 마감 도구, 결과 우선 배치와
+  접힌 마감 입력, 3열 추천 선택·공통 진행 버튼, 방 시간대에 맞춘 간단한 시간 표시.
+- 검증 환경: Node 24.19.0 / pnpm 10.17.1 / 시스템 Chromium. 실제 API를 호출하지 않는
+  기존 route fixture E2E와 별도의 loopback 합성 미리보기만 사용했다.
+- `lint`, TypeScript 포함 프로덕션 `build`, `git diff --check`: 통과.
+- 전체 단위 테스트: 71 파일 / 784 테스트 통과. 마지막 설명·접힘 조정 후 관련
+  RecommendationChoices, SubmissionCheckPanel close, 시간 변환 72 테스트 재검증 통과.
+- 전체 E2E: 501 통과 / 10 실패 / 1 기존 건너뜀(512개). 새 단계·접힌 안내·버튼 높이의
+  기존 UI 기대값 8건을 갱신한 뒤 관련 키보드/제출/hover 14건 모두 통과했다.
+  남은 2건은 이미 main에서도 재현한 Google 새 탭 fixture 실패(데스크톱/모바일)다.
+  새 탭의 첫 요청이 page route fixture를 벗어나 `chrome-error://chromewebdata/`로
+  이동하는 기존 환경 문제이며, 이번 작업에서 OAuth 계약/인증 코드를 변경하지 않았다.
+  전체 E2E가 한 번에 모두 통과했다고 주장하지 않는다.
+- 합성 미리보기 16건 통과. 마지막 시간 확인 화면 압축과 목록 HOST/MEMBER 이동을
+  추가로 6건 검증해 모두 통과했다. API 차단, 외부 연결 없음, 운영 산출물에 fixture
+  문자열 없음, 기존 제출·마감·확정·리뷰 동작도 검사했다.
+- 1366×768 / 1440×900: 합성 내 모임 5행, 추천 3카드와 진행 버튼, 조건 입력·확인·제출,
+  분석/불일치의 핵심 상태, 확정 일정 및 복사 버튼, 실제 시간 확인/확정 버튼이 첫 화면에
+  들어옴을 bounding box로 검증했다. 로컬 미리보기 배너도 포함한 높이다.
+- 320×740 / 390×844: 자연스러운 세로 흐름, 내용 잘림 없는 배치. 10장면×4크기
+  40개 전체 화면 캡처에서 가로 넘침·런타임 오류 없음. 추천 선택/실제 시간 확인 추가 캡처.
+  긴 이름·많은 장소 변형·긴 제외 명단은 정보를 자르지 않고 필요한 만큼 스크롤한다.
+- HOST 도구는 실제 `viewer.role === HOST` 조건이다. 기존 방 fixture가 HOST라 보였으며,
+  MEMBER에게 마감 기능을 노출하지 않는다. 원문·확인본을 접어도 컴포넌트의 접근 거절 및
+  요청 수명 처리는 계속 유지한다. DOM 읽기/키보드 순서도 결과 다음에 내 저장 입력이다.
+- 정상 서울 표시에서 UTC 접미사 제거는 실제 IANA 변환 후에만 한다. DST 중복 시각은
+  구별할 오프셋을 보존한다. 자정 넘김, DST gap/overlap, 초 미만 범위, 명시적 선택 계약 유지.
+- 로컬 증거: `/workspace/shared/ui-compact-evidence/`의 로그·PNG·`screens.json`.
+  서버 분석/API 스키마, landing 애니메이션과 문구/아이콘, 의존성은 그대로다.

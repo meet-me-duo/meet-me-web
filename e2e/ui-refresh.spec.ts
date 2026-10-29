@@ -35,7 +35,7 @@ for (const width of [320, 390, 1440]) {
     const googleSurface = google.locator(".gsi-material-button");
     await expect(googleSurface).toHaveCSS("background-color", "rgb(242, 242, 242)");
     await expect(googleSurface).toHaveCSS("border-style", "none");
-    await expect(googleSurface).toHaveCSS("height", "40px");
+    await expect(googleSurface).toHaveCSS("height", "46px");
     await expect(google.locator(".gsi-material-button-contents")).toHaveText("Google로 로그인");
     expect((await google.locator("img").boundingBox())!.width).toBe(20);
     expect((await google.locator("img").boundingBox())!.height).toBe(20);

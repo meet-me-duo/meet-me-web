@@ -548,3 +548,15 @@ hero를 “조건만 말하세요, 결정은 Meet me가 할게요”로 복원�
 ### 2026-10-29 UTC — 카드 상승을 더 느리고 크게 조정
 
 사용자 추가 요청으로 등장 이동을 24→56px, duration850→1150ms와 끝에서 부드럽게 감속하는 easing으로 조정했다. 180ms 순차 등장·모바일 개별 trigger·모션 감소의 정적 표시·기존 문구/아이콘은 유지한다. 실제 캡처에서 드러난 아래 패널과의 겹침은 모바일 행 간격56px·다음 패널 간격64px로 해소하고 이동 중 경계 검사를 보강했다. 별도 feature 게시만 진행하며 PR·develop/main 병합·운영 배포는 하지 않는다.
+
+## 2026-10-29 — UI experiment: compact task screens
+
+Implemented the user's screen-by-screen review on `feature/ui-deepseek-experiment`:
+concise OAuth entry, equal provider surfaces, five-row history with disclosed filters,
+compact account security paragraphs, centered input and state panels, disclosed HOST
+closing tools, result-first reading order and disclosed saved input, selectable recommendation
+cards with one continuation action, and timezone-aware compact range presentation.
+The explicit actual start/end selection and API authorization contracts remain intact.
+Desktop viewport checks include 1366×768 and 1440×900; mobile reflows without clipping.
+See `docs/verification/ui-deepseek-light.md` for test totals and the known pre-existing
+OAuth popup fixture limitation. No merge, PR or deployment is part of this change.

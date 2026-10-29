@@ -1,7 +1,7 @@
 import { getSessionRestoreStatus, setSessionRestoreStatus, type SessionRestoreStatus } from "./sessionRestoration";
 import { clearQuarantinedDraft, retainQuarantinedDraftForAccount } from "./draftQuarantine";
 import { runAuthCookieRequest } from "./authCookieLock";
-export interface Account { id: string; displayName: string }
+export interface Account { id: string; displayName: string; capabilities?: { canViewOperations: boolean } }
 export interface AuthSession { accessToken: string; expiresAt: string; account: Account }
 export { getSessionRestoreStatus } from "./sessionRestoration";
 export type { SessionRestoreStatus } from "./sessionRestoration";

@@ -568,3 +568,12 @@ Following local review, retained the login heading for assistive technology with
 navigation and provider labels, equal 224×46px surfaces, assets and OAuth behavior
 remain unchanged. Verified the production build, lint and existing responsive
 login keyboard/navigation checks.
+
+## 2026-10-29 — Align room-stage card widths
+
+Aligned the shared production room layout to one container per stage: 720px for
+input/checking/submitted, analysis/status/error, actual-time selection and confirmed
+results; 1040px while the three recommendation cards are displayed. Headers, body
+cards and saved-input/unapplied disclosures inherit the same edges. Mobile uses
+the existing page gutters. Only width rules changed; API, state logic, text, motion,
+button sizing and the collapsed analysis disclosure remain intact.

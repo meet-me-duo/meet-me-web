@@ -218,7 +218,7 @@ fieldset.field legend { margin-bottom: 9px; }
 
 .field-hint { margin: 0; color: var(--muted); font-size: .8rem; line-height: 1.6; }
 
-.center-state { width: min(610px, calc(100% - 32px)); margin: 70px auto; padding: clamp(30px, 6vw, 52px); border-radius: var(--radius); text-align: center; }
+.center-state { width: min(720px, calc(100% - 32px)); margin: 70px auto; padding: clamp(30px, 6vw, 52px); border-radius: var(--radius); text-align: center; }
 .center-state h1 { margin: 0 0 10px; font-size: clamp(1.4rem, 4vw, 1.9rem); letter-spacing: -.035em; }
 .center-state > p { max-width: 450px; margin: 0 auto 23px; color: #64748b; font-size: .85rem; line-height: 1.65; }
 .center-state .button { margin-top: 5px; }
@@ -295,6 +295,7 @@ fieldset.field legend { margin-bottom: 9px; }
 
 @media (max-width: 540px) {
   .header-inner, .page-width { width: min(100% - 24px, 1100px); }
+  .center-state { width: min(720px, calc(100% - 24px)); }
   .mvp-badge { display: none; }
   .hero h1 { font-size: clamp(1.6rem, 6.8vw, 2.3rem); }
   .hero-cta { width: min(100%, 208px); }
@@ -669,11 +670,12 @@ fieldset.field legend { margin-bottom: 9px; }
 .account-history-list { gap: 8px; margin: 10px 0 16px; }
 .account-history-list .ui-card { padding: 8px 16px; }
 .account-history-list dl { margin-top: 0; gap: 4px 20px; }
-.room-page { display: flex; flex-direction: column; gap: 16px; max-width: 1040px; padding-block: 24px; }
+.room-page { display: flex; flex-direction: column; gap: 16px; max-width: 720px; padding-block: 24px; }
+.room-page:has(.recommendation-choices) { max-width: 1040px; }
 .room-page > * { min-width: 0; }
 .room-header { margin: 0; padding: 16px 20px; }
 .room-header h1 { font-size: clamp(1.3rem, 3vw, 1.65rem); }
-.room-input-primary, .room-input-secondary { width: 100%; max-width: 720px; margin-inline: auto; }
+.room-input-primary, .room-input-secondary { width: 100%; margin-inline: auto; }
 .room-input-secondary { order: 2; }
 .room-page > .room-history-note { order: 3; margin-block: 0; text-align: center; }
 .submission-disclosure > summary { min-height: 44px; padding: 10px 16px; cursor: pointer; font-weight: 600; color: #475569; }
@@ -692,7 +694,8 @@ fieldset.field legend { margin-bottom: 9px; }
 .host-tools-inline > summary, .submission-help > summary { cursor: pointer; min-height: 44px; padding-block: 10px; color: #475569; font-size: .85rem; }
 .host-tools-inline[open] > summary, .submission-help[open] > summary { margin-bottom: 8px; }
 .submission-help .field-hint { margin-bottom: 10px; }
-.room-page .center-state { margin: 0 auto; padding: 28px; }
+.room-page .center-state { width: 100%; margin: 0 auto; padding: 28px; }
+.room-page .candidate-list, .room-page .actual-time-form, .room-page .unapplied { width: 100%; max-width: none; }
 .room-page .center-state .large-icon { width: 44px; height: 44px; margin-bottom: 12px; }
 .room-page .center-state h1 { font-size: 1.5rem; }
 .room-page .center-state p { margin-bottom: 12px; }

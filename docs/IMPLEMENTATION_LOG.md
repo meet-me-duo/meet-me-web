@@ -560,3 +560,11 @@ The explicit actual start/end selection and API authorization contracts remain i
 Desktop viewport checks include 1366×768 and 1440×900; mobile reflows without clipping.
 See `docs/verification/ui-deepseek-light.md` for test totals and the known pre-existing
 OAuth popup fixture limitation. No merge, PR or deployment is part of this change.
+
+## 2026-10-29 — Remove the visible login-card title
+
+Following local review, retained the login heading for assistive technology with
+`sr-only` styling and removed its header wrapper and top content margin. The global
+navigation and provider labels, equal 224×46px surfaces, assets and OAuth behavior
+remain unchanged. Verified the production build, lint and existing responsive
+login keyboard/navigation checks.

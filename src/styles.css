@@ -360,7 +360,7 @@ fieldset.field legend { margin-bottom: 9px; }
 .account-entry { max-width: 400px; margin-block: 32px 48px; }
 .login-back { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; margin-bottom: var(--space-4); color: var(--muted); font-size: .9rem; }
 .login-card { margin: 0; padding: 24px; }
-.login-card h1 { margin: 0; font-size: clamp(1.375rem, 3vw, 1.5rem); letter-spacing: -.04em; line-height: 1.4; word-break: keep-all; overflow-wrap: anywhere; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 .login-card p { margin: 0; color: var(--muted); word-break: keep-all; overflow-wrap: anywhere; }
 .social-login-actions .social-actions { display: grid; gap: 10px; width: min(100%, 224px); margin: 0 auto; }
 .social-login-actions--recovery .social-actions { margin-inline: 0; }
@@ -655,8 +655,7 @@ fieldset.field legend { margin-bottom: 9px; }
 @media (prefers-reduced-motion: reduce) { .story-entered { animation: none; } .button::before { transition: none; transform: none; } }
 
 /* Compact task screens: content grows naturally; no viewport clipping. */
-.login-card .ui-card-header { text-align: center; }
-.login-card .ui-card-content { margin-top: 24px; }
+.login-card .ui-card-content { margin-top: 0; }
 .social-login > .gsi-material-button { height: 46px; }
 .account-security-page .ui-card-content > p { margin: 8px 0; }
 .account-security-page .ui-card-content > .button { margin-top: 16px; }

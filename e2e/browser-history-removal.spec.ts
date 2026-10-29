@@ -97,7 +97,7 @@ test("shared URL retains guest cookie ownership, private edits, cancellation and
   await auditStorage(page, context);
   await page.goto(`/rooms/${code}?tracking=remove#private`);
   await expect(page.locator(".submitted-text")).toHaveText("토요일 오후 온라인 가능");
-  await expect(page.getByRole("heading", { name: "주최자 도구" })).toHaveCount(0);
+  await expect(page.locator(".host-tools-inline > summary")).toHaveCount(0);
   await page.getByRole("button", { name: "내 조건 수정" }).click();
   await page.getByRole("textbox", { name: /시간·장소 조건/ }).fill("취소할 임시 조건");
   await page.getByRole("button", { name: "수정 취소" }).click();
@@ -127,19 +127,19 @@ test("old browser metadata cannot grant participant or HOST authority", async ({
   await page.goto(`/rooms/${code}`);
   await expect(page.getByLabel("이름", { exact: true })).toBeVisible();
   await expect(page.getByText("토요일 오후 온라인 가능", { exact: true })).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: "주최자 도구" })).toHaveCount(0);
+  await expect(page.locator(".host-tools-inline > summary")).toHaveCount(0);
   expect(mock.reads()).toBe(0); expect(mock.writes).toEqual([]); await preserved(page); expect(mock.unexpected).toEqual([]);
 });
 
 test("anonymous hosting remains gated through cancel and back navigation", async ({ page, context, baseURL }) => {
   const mock = await fixture(context, baseURL!); await auditStorage(page, context);
   await page.goto("/create");
-  await expect(page.getByRole("heading", { name: "로그인하고 모임을 만들어 보세요" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "로그인" })).toBeVisible();
   await expect(page.getByLabel("모임 목적 / 이름")).toHaveCount(0);
   await page.getByRole("link", { name: "홈으로 돌아가기" }).click();
   await expect(page).toHaveURL("/"); await expect(page.getByRole("heading", { name: /조건만 말하세요/ })).toBeVisible();
   await page.goBack(); await expect(page).toHaveURL("/create");
-  await expect(page.getByRole("heading", { name: "로그인하고 모임을 만들어 보세요" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "로그인" })).toBeVisible();
   expect(mock.writes).toEqual([]); await preserved(page); expect(mock.unexpected).toEqual([]);
 });
 

@@ -13,8 +13,11 @@ for (const provider of ["google", "kakao"] as const) {
     await page.goto("/create");
     const link = page.getByRole("link", { name: `${name}로 로그인` });
     const other = page.getByRole("link", { name: `${name === "Google" ? "Kakao" : "Google"}로 로그인` });
+    const initialButton = await link.boundingBox();
     await link.click({ noWaitAfter: true });
     await expect(page.getByRole("status")).toHaveText(`${name} 로그인 화면으로 이동 중…`);
+    await expect(page.getByRole("status")).toBeVisible();
+    expect(await link.boundingBox()).toEqual(initialButton);
     await expect(link).toHaveAttribute("aria-busy", "true");
     for (const button of [link, other]) await expect(button).toHaveAttribute("aria-disabled", "true");
     await expect.poll(() => requests).toBe(1);
@@ -26,6 +29,12 @@ for (const provider of ["google", "kakao"] as const) {
     await page.screenshot({ path: testInfo.outputPath(`${provider}-pending.png`), fullPage: true });
     await page.clock.fastForward(15_000);
     await expect(page.getByRole("alert")).toContainText("이동이 지연되고 있어요");
+    await expect(page.getByRole("alert")).toBeVisible();
+    expect(await link.boundingBox()).toEqual(initialButton);
+    const card = (await page.locator(".login-card").boundingBox())!;
+    const message = (await page.getByRole("alert").boundingBox())!;
+    expect(message.y + message.height).toBeLessThan(card.y + card.height);
+    await page.screenshot({ path: testInfo.outputPath(`${provider}-delayed.png`), fullPage: true });
     await expect(link).not.toHaveAttribute("aria-disabled");
     await other.click({ noWaitAfter: true });
     await expect.poll(() => requests).toBe(2);
@@ -34,6 +43,9 @@ for (const provider of ["google", "kakao"] as const) {
     await expect(link).not.toHaveAttribute("aria-disabled");
     await expect(other).not.toHaveAttribute("aria-disabled");
     await expect(page.getByRole("status")).toBeEmpty();
+    const restoredCard = (await page.locator(".login-card").boundingBox())!;
+    const group = (await page.getByRole("group", { name: "로그인 방법" }).boundingBox())!;
+    expect(Math.abs((group.y - restoredCard.y) - (restoredCard.y + restoredCard.height - group.y - group.height))).toBeLessThan(1);
   });
 
   test(`${name}: Enter follows the unchanged OAuth URL and back permits another provider`, async ({ page }) => {

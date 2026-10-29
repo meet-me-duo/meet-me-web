@@ -32,6 +32,7 @@ for (const width of [320, 390, 1440]) {
     await page.goto("/account/rooms");
     await expect(page.getByRole("heading", { name: "내 모임", exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: /Team 참여 모임/ })).toBeVisible();
+    if (!await page.locator(".account-history-filters").evaluate(el => (el as HTMLDetailsElement).open)) await page.getByText("모임 찾기 · 검색 및 필터", { exact: true }).click();
     await expect(page.getByRole("radio", { name: "전체", exact: true })).toBeChecked();
     expect([...requests[0].keys()]).toEqual([]);
     await page.getByRole("button", { name: "더 보기", exact: true }).click();
@@ -55,6 +56,7 @@ for (const width of [320, 390, 1440]) {
     await expect(page.getByRole("link", { name: /Team 참여 모임/ })).toBeVisible();
     expect(requests.at(-1)!.has("cursor")).toBe(false);
     await page.getByRole("button", { name: "초기화" }).click();
+    if (!await page.locator(".account-history-filters").evaluate(el => (el as HTMLDetailsElement).open)) await page.getByText("모임 찾기 · 검색 및 필터", { exact: true }).click();
     await expect(page.getByRole("radio", { name: "전체", exact: true })).toBeChecked();
     await expect(page.getByLabel("모임 이름")).toHaveValue("");
     await expect(page.getByRole("link", { name: /TEAM 주최 모임/ })).toBeVisible();

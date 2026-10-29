@@ -1,0 +1,139 @@
+# 밝은 UI 실험 검증
+
+2026-10-29 UTC. 기준 `22eb625b32056e0762efdc81b168cf31d4fa827a`, 브랜치 `feature/ui-deepseek-experiment`. Linux system Chromium을 사용했다. 기존 Playwright 설정의 로컬 msedge 대신 실행 파일 경로만 임시 설정으로 바꾸었으며 이 임시 설정은 커밋하지 않는다.
+
+## 결과
+
+| 검사 | 결과 |
+| --- | --- |
+| `pnpm api:check` | OpenAPI 생성 타입 일치 |
+| `pnpm typecheck`, `pnpm lint`, `git diff --check` | 통과 |
+| `pnpm build` | 통과. 기존 Zod 주석·500kB chunk 경고 유지 |
+| 전체 단위 테스트 | 71파일·784개 중 783 통과, 게스트 재접속 1개 5초 timeout. 해당 파일을 다시 실행해 16/16 통과. 단일 실행 784/784 통과로 표기하지 않음 |
+| 최초 전체 E2E | 508개 중 481 통과·26 실패·1 기존 desktop skip. 이 최초 실행은 아래 CSS 보정 이전 빌드 |
+| 최종 빌드의 관련 E2E 재검증 | landing/ui-refresh/submission-flow/social-login-feedback 130개: **127 통과·2 실패·1 기존 skip**. 초기 랜딩 overflow/CTA 높이와 room poll 실패는 재검증 통과 |
+| 합성 미리보기 | desktop/mobile 총 **10/10 통과**. 15개 화면, 생성→제출→마감, 추천 선택→확정→새 세션 초기화, 리뷰, OAuth 로컬 안내, Host/Origin 경계, CSP, production 번들 격리 |
+| 화면 캡처 | 320/390/1440px × 15상태 = **45개**. 가로 넘침 0, JS 오류 0, 외부 요청 0, 미지원 API(501) 0. reduced-motion 사용 |
+
+최종 E2E의 두 실패는 `social-login-feedback.spec.ts`의 “a new-tab click leaves the source page available” desktop/mobile이다. Control+클릭 팝업의 fixture가 해당 Chromium 실행에서 처리되지 않아 로컬 Vite proxy의 연결 거절과 `chrome-error://chromewebdata/`가 나타났다. **변경 전 main 전체 소스를 별도 `/tmp`에 추출·빌드해 같은 두 테스트를 실행했을 때도 동일하게 실패했다.** OAuth 제품 코드·자산·테스트를 이 현상 때문에 수정하지 않았다. 다른 공식 버튼 크기·hover/focus·Enter 이동·복귀 검사는 통과했다. 실제 OAuth 성공을 검증한 것은 아니다.
+
+최초 전체 E2E 실패 구성은 랜딩 22개(320~430px 4px overflow 및 큰 화면 CTA 48.5px), 모바일 ui-refresh overflow 1개, HOST 결과 poll 1개, 위 OAuth 새 탭 2개다. 배경의 실제 컨테이너 폭과 CTA padding을 수정했고 카드 모바일 CSS 충돌도 수정했다. 이후 관련 전체 파일을 재검증했다. 최초 실패를 숨기거나 최종 전체 E2E 508개가 모두 통과했다고 주장하지 않는다.
+
+## 검증 범위
+
+- 랜딩 11개 화면 크기, 짧은 가로 화면, 키보드 Tab/Enter·앵커 이동, 모션 감소·동적 변경, observer 미지원, 스크롤 왕복, 주 CTA 텍스트 대비 및 focus.
+- API/auth/분석/데이터 계약 파일 변경 없음. 공식 provider 버튼 전용 클래스와 자산 변경 없음.
+- `.ui-preview-dist`는 일반 `dist`와 분리. UI 프리뷰 테스트는 잘못된 외부 API base 환경 변수를 일부러 주어도 loopback으로 고정되는지 확인한다.
+- 모든 production JS에서 합성 token·미지원 fixture code·scene URL marker가 없음을 검사했다.
+- 미리보기는 정해진 합성 상태다. 실제 OAuth, 서버의 해석 품질·보안·성능, 운영 데이터 동작을 검증하지 않는다.
+- 참고 DeepSeek 사이트의 모바일·reduced-motion 관측은 차단 때문에 미완료지만 Meet me 자체 검증과 혼동하지 않는다.
+
+## 증거 보존
+
+실행 로그·45개 PNG·화면 JSON: `/workspace/shared/ui-experiment-light-evidence/`.
+
+- `build-final.log`, `final-regression.log`, `preview-verified.log`
+- `unit-reaccess-rerun.log`, `baseline-build.log`, `baseline-oauth.log`
+- `screens.json`, `meet-me-light-1440.png`, `meet-me-light-390.png`
+- 초기 E2E 실패 자료 `initial-e2e/`와 초기 미리보기 테스트 로그 보존
+
+사용자 전달용 bundle/patch/설명과 대표 PNG는 별도 로컬 전달 패키지로 만든다. 원격 게시·PR·병합·운영 배포는 수행하지 않는다. 캡처의 Library 첨부는 전송 helper가 `hosted apps tools/list request failed: network`로 실패해 미완료다. 로컬 원본은 보존했고 다른 업로드 경로로 우회하지 않았다.
+
+## 2026-10-29 사용자 로컬 피드백 — 카드 모션·하단 아이콘·hero 문구
+
+- 기준은 원격 `f3902cc93d0078ea0a05714f146e3e451b5d8fea`다. 새로 보이는 카드에 같은 프레임에 효과를 적용해 첫 세 카드가 사실상 동시에 끝나던 점을 수정했다.
+- 이전: threshold .15, 별도 rootMargin 없음, 500ms ease-out, 16px, opacity .65→1, stagger 0. 초기 관측 callback은 intersectionRatio를 검사하지 않았다.
+- 이후: intersectionRatio ≥.30와 하단 rootMargin -48px, 850ms cubic-bezier(.2,.65,.3,1), 24px, opacity .75→1. 같은 callback에서 새로 들어온 카드만 DOM 순서로 0/180/360ms 지연한다. 모바일에서 뒤늦게 단독으로 들어오는 카드는 0ms부터 시작한다. 콘텐츠를 미리 숨기거나 스크롤을 고정하지 않는다.
+- Chromium 1440×900 실측: 이전 시작 이벤트 41.8/41.9/42.0ms로 사실상 동시, 이후 77.3/232.9/416.6ms로 순차 시작. 애니메이션 elapsedTime은 .5→.85초, 세 카드의 시작~마지막 종료 구간은 약 .56→1.20초다. 이벤트 dispatch는 프레임·캡처 부하에 따라 달라지므로 명목 180ms와 측정값을 구분한다.
+- 390×900에서는 앞의 두 카드가 0/180ms 지연으로 들어오고, 스크롤 후 세 번째는 자체 trigger에서 0ms 지연으로 시작했다. desktop/mobile reduced-motion에서 세 카드 모두 animation none·opacity1·transform none을 확인했다.
+- 하단 단계는 순서 있는 목록으로 정리했다. 번호 배지는 25→22px의 낮은 강조 테두리로, 보조 아이콘은 24→16px·stroke1.75로 통일했다. Link2 / MessageSquareText / Check를 사용하며 단계 문구는 유지한다. 아이콘은 aria-hidden으로 텍스트 중복 낭독을 피한다.
+- hero는 요청대로 정확히 “조건만 말하세요, 결정은 Meet me가 할게요”로 복원했다. 320/390/1440px에서 실제 화면·문구·가로 넘침을 확인한다.
+
+실측 JSON·전후 캡처: `/workspace/shared/ui-motion-refinement/`. 기존 API/인증/공식 로그인 버튼은 수정하지 않았다.
+
+후속 최종 검증: lint·production build(tsc 포함) 통과. landing/ui-refresh desktop·mobile 56개 중 **55통과·기존 desktop 전용 skip1·실패0**. 실제 진행률을 비교하는 순차 등장 검사와 모바일 뒤늦은 카드의 지연 없는 시작, reduced-motion 전환 검사를 포함한다. 320/390/1440px 화면은 모두 가로 넘침0, 정확한 hero textContent, 16px/stroke1.75 아이콘을 확인했다. 첫 회에는 inline-block 강조 span 때문에 접근성 이름에 `Meet me 가` 공백이 생겨 정확한 이름 검사2개가 실패했고, inline으로 보정해 전체 관련 검사를 재실행했다. 기능/API/인증 변경은 없어 전체 비관련 단위·브라우저 suite는 반복하지 않았다.
+
+## 2026-10-29 추가 피드백 — 더 아래에서 느리게 상승
+
+기준 `5c791888cb7e9d93ecddc7c5571d955640fb05f2`에서 카드 이동을 24→56px, duration을 850→1150ms, easing을 cubic-bezier(.2,.65,.3,1)→cubic-bezier(.22,.61,.36,1)로 조정했다. 끝에서 기울기가 0이 되어 부드럽게 감속한다. opacity .75→1, 동일 관측 묶음의 180ms stagger, 30%/하단48px trigger, 나중에 보이는 모바일 카드의 독립 시작은 유지한다. hero 문구·하단 아이콘·기능 로직은 변경하지 않는다.
+
+420ms 캡처에서 움직이는 카드가 다음 패널과 겹치는 것을 발견해 모바일 카드 행 간격을 24→56px, 하단 안내 패널과의 간격을 32→64px로 확보했다. 스크롤 잠금이나 대기 화면 없이 transform만 움직인다. 순차 등장 도중 카드끼리와 다음 패널의 경계가 겹치지 않는 검사도 추가했다.
+
+1440×900 최종 표본의 animationstart는 73.3/244.0/425.7ms, end는1222.0/1388.8/1572.4ms다. 이벤트 elapsedTime은 각각1.15초, 첫 시작~마지막 종료는 약1.50초(이전 약1.20초)였다. 실제 event dispatch 간격과 명목180ms를 구분한다. 390×900의 뒤늦은 세 번째 카드는 delay0ms, desktop/mobile reduced-motion은 animation none·opacity1·transform none, 가로 넘침0을 확인했다. 캡처·실측은 `/workspace/shared/ui-motion-refinement/slower-spaced*`에 보존한다.
+
+최종 검증: production build(tsc 포함)·lint·diff check 통과, landing desktop/mobile **45통과·기존 desktop skip1·실패0**. 순차 진행률·이동 중 패널 경계·11개 화면 크기·키보드·observer 미지원·reduced-motion을 확인했다. 행 간격 보강 후의 중간 실행에서는 예전 모바일 스크롤 위치가 두 카드를 동시에 진입시켜 단독 카드 delay0 assertion2개가 실패했다. 두 번째 카드를 먼저 관측한 뒤 세 번째로 이동하는 실제 순차 스크롤 절차로 테스트를 보정하고 전체 landing 검사를 다시 통과했다. `.github/workflows`, hero JSX, 단계 아이콘, observer 로직은 기준 커밋과 동일하다.
+
+## 화면 밀도 후속 검토 — 2026-10-29
+
+- 변경: 간단한 로그인과 224×46px OAuth 표면, 접힌 내 모임 필터 및 5행 목록,
+  계정 보안 설명 간격, 중앙 조건 패널, 접힌 HOST 마감 도구, 결과 우선 배치와
+  접힌 마감 입력, 3열 추천 선택·공통 진행 버튼, 방 시간대에 맞춘 간단한 시간 표시.
+- 검증 환경: Node 24.19.0 / pnpm 10.17.1 / 시스템 Chromium. 실제 API를 호출하지 않는
+  기존 route fixture E2E와 별도의 loopback 합성 미리보기만 사용했다.
+- `lint`, TypeScript 포함 프로덕션 `build`, `git diff --check`: 통과.
+- 전체 단위 테스트: 71 파일 / 784 테스트 통과. 마지막 설명·접힘 조정 후 관련
+  RecommendationChoices, SubmissionCheckPanel close, 시간 변환 72 테스트 재검증 통과.
+- 전체 E2E: 501 통과 / 10 실패 / 1 기존 건너뜀(512개). 새 단계·접힌 안내·버튼 높이의
+  기존 UI 기대값 8건을 갱신한 뒤 관련 키보드/제출/hover 14건 모두 통과했다.
+  남은 2건은 이미 main에서도 재현한 Google 새 탭 fixture 실패(데스크톱/모바일)다.
+  새 탭의 첫 요청이 page route fixture를 벗어나 `chrome-error://chromewebdata/`로
+  이동하는 기존 환경 문제이며, 이번 작업에서 OAuth 계약/인증 코드를 변경하지 않았다.
+  전체 E2E가 한 번에 모두 통과했다고 주장하지 않는다.
+- 합성 미리보기 16건 통과. 마지막 시간 확인 화면 압축과 목록 HOST/MEMBER 이동을
+  추가로 6건 검증해 모두 통과했다. API 차단, 외부 연결 없음, 운영 산출물에 fixture
+  문자열 없음, 기존 제출·마감·확정·리뷰 동작도 검사했다.
+- 1366×768 / 1440×900: 합성 내 모임 5행, 추천 3카드와 진행 버튼, 조건 입력·확인·제출,
+  분석/불일치의 핵심 상태, 확정 일정 및 복사 버튼, 실제 시간 확인/확정 버튼이 첫 화면에
+  들어옴을 bounding box로 검증했다. 로컬 미리보기 배너도 포함한 높이다.
+- 320×740 / 390×844: 자연스러운 세로 흐름, 내용 잘림 없는 배치. 10장면×4크기
+  40개 전체 화면 캡처에서 가로 넘침·런타임 오류 없음. 추천 선택/실제 시간 확인 추가 캡처.
+  긴 이름·많은 장소 변형·긴 제외 명단은 정보를 자르지 않고 필요한 만큼 스크롤한다.
+- HOST 도구는 실제 `viewer.role === HOST` 조건이다. 기존 방 fixture가 HOST라 보였으며,
+  MEMBER에게 마감 기능을 노출하지 않는다. 원문·확인본을 접어도 컴포넌트의 접근 거절 및
+  요청 수명 처리는 계속 유지한다. DOM 읽기/키보드 순서도 결과 다음에 내 저장 입력이다.
+- 정상 서울 표시에서 UTC 접미사 제거는 실제 IANA 변환 후에만 한다. DST 중복 시각은
+  구별할 오프셋을 보존한다. 자정 넘김, DST gap/overlap, 초 미만 범위, 명시적 선택 계약 유지.
+- 로컬 증거: `/workspace/shared/ui-compact-evidence/`의 로그·PNG·`screens.json`.
+  서버 분석/API 스키마, landing 애니메이션과 문구/아이콘, 의존성은 그대로다.
+
+### 로그인 제목 후속 의견
+
+중앙 카드의 큰 `로그인` 제목을 `sr-only` heading으로 바꾸고 헤더 래퍼 및 24px
+콘텐츠 위 여백을 제거했다. 글로벌 메뉴와 소셜 로그인 문구·브랜드 자산은 그대로다.
+기존 로그인 E2E를 320/390/1440px에서 데스크톱·모바일 프로젝트로 검증하고 캡처했다.
+
+### 모든 모임 상태의 좌우 폭 정렬
+
+공유 `src/styles.css`에서 모임 컨테이너를 기본 720px, 추천 목록은 1040px로 정하고,
+본문·상태·실제 시간 확정·확정 결과·접힌 부가정보의 개별 최대폭을 제거했다.
+모바일은 기존 페이지 여백(540px 이하 양쪽 12px, 그 이상 16px)을 함께 사용한다.
+미리보기 전용 CSS나 API/기능 변경은 없다. 분석 중 내 저장 입력은 접힌 상태로 보존한다.
+
+빌드·lint 및 기존 합성 미리보기 6개, 프로덕션 산출물의 상태/확정/추천 키보드 E2E
+16개가 통과했다. 1366/1440/700/390/320px에서 입력·확인·제출·분석·추천·확정·불일치·오류·
+실제 시간 확정 9상태, 총 45개 화면의 박스 좌우 좌표를 측정했다. 헤더/본문/부가정보
+끝선이 일치하고 가로 넘침, 런타임 오류, 외부 요청이 없었다. 기존 데스크톱 첫 화면
+요구도 유지한다. 증거와 전체 캡처: `/workspace/shared/ui-aligned-widths/widths.json`,
+동일 폴더의 PNG 및 검증 로그.
+
+### 로그인 카드의 수직 중심 재검증
+
+제목 제거만으로 해결되지 않았던 원인은 빈 `.social-login-feedback`의 `min-height:3em`
+(실측 40.8px)과 상하 margin 24px였다. 로그인 카드에 한해 빈 상태 높이·margin을 0으로
+만들고 실제 메시지만 12px 간격으로 자연스럽게 배치한다. status/alert 요소는 DOM에
+유지하며 버튼의 크기와 위치, OAuth 동작, 다른 화면의 공통 폭은 변경하지 않는다.
+
+카드 테두리를 포함한 버튼 묶음까지의 실제 CSS 픽셀 거리:
+
+| 화면 폭 | 수정 전 위 / 아래 | 수정 후 위 / 아래 | 수정 후 왼쪽 / 오른쪽 |
+| --- | --- | --- | --- |
+| 1366px, 1440px | 25 / 89.8px | 25 / 25px | 88 / 88px |
+| 390px | 21 / 85.8px | 21 / 21px | 71 / 71px |
+| 320px | 21 / 85.8px | 21 / 21px | 36 / 36px |
+
+두 버튼은 각각 224×46px, 버튼 사이 10px로 유지된다. 빈 feedback의 높이와 margin은
+실측 0px다. 기본 상태 4크기의 전후 캡처, 실제 pending 및 지연 오류 캡처를 직접 확인했다.
+빌드·lint·기존 OAuth 키보드 이동 및 새 중앙 정렬/feedback 회귀 E2E 10개 모두 통과했다.
+복원 후에도 중앙 정렬로 돌아오며, pending/error 표시 중 버튼 위치는 이동하지 않는다.
+증거: `/workspace/shared/ui-login-centering/`의 `before.json`, `after.json`, PNG 및 로그;
+상태별 E2E 캡처: `/tmp/meetme-login-centered/`.

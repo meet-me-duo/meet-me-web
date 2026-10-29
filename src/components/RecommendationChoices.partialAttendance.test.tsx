@@ -36,7 +36,7 @@ describe("actual partial attendance rather than a maximum-two-exclusions plan", 
 
   it("retains the selected variant's actual excluded names in the real-time selection form", () => {
     setup();
-    fireEvent.click(screen.getByRole("button", { name: "이 시간 선택" }));
+    fireEvent.click(screen.getByRole("button", { name: "이 시간 선택" })); fireEvent.click(screen.getByRole("button", { name: "선택한 시간 확정하기" }));
     expect(screen.queryByRole("article")).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /실제 일정 선택/ }).parentElement).toHaveTextContent(/2\s*\/\s*5명 참석 가능/);
     const section = screen.getByRole("heading", { name: /실제 일정 선택/ }).parentElement!;
@@ -47,7 +47,7 @@ describe("actual partial attendance rather than a maximum-two-exclusions plan", 
 
   it("does not carry another variant's excluded names into a full-attendance choice", () => {
     setup([variant({ id: "all-five", attendanceCount: 5, excludedParticipantNames: [] }), variant()]);
-    fireEvent.click(screen.getByRole("button", { name: "이 시간 선택" }));
+    fireEvent.click(screen.getByRole("button", { name: "이 시간 선택" })); fireEvent.click(screen.getByRole("button", { name: "선택한 시간 확정하기" }));
     const section = screen.getByRole("heading", { name: /실제 일정 선택/ }).parentElement!;
     expect(section).toHaveTextContent(/5\s*\/\s*5명 참석 가능/);
     expect(section).not.toHaveTextContent("민수"); expect(section).not.toHaveTextContent("다온"); expect(section).not.toHaveTextContent("라온");
@@ -75,7 +75,7 @@ describe("actual partial attendance rather than a maximum-two-exclusions plan", 
     setup([older]);
     expect(screen.getByRole("article")).toHaveTextContent(/2\s*\/\s*5명 참석 가능/);
     expect(screen.getByRole("article")).not.toHaveTextContent(/undefined|null|민수|다온|라온/);
-    fireEvent.click(screen.getByRole("button", { name: "이 시간 선택" }));
+    fireEvent.click(screen.getByRole("button", { name: "이 시간 선택" })); fireEvent.click(screen.getByRole("button", { name: "선택한 시간 확정하기" }));
     expect(screen.getByRole("heading", { name: /실제 일정 선택/ }).parentElement).not.toHaveTextContent(/undefined|null/);
   });
 

@@ -30,7 +30,7 @@ function setup(overrides: Partial<React.ComponentProps<typeof RecommendationChoi
 }
 
 function selectOption(index = 0) {
-  fireEvent.click(screen.getAllByRole("button", { name: "이 시간 선택" })[index]!);
+  fireEvent.click(screen.getAllByRole("button", { name: "이 시간 선택" })[index]!); fireEvent.click(screen.getByRole("button", { name: "선택한 시간 확정하기" }));
 }
 
 function fillTime(start = "2026-10-08T10:30", end = "2026-10-08T11:15") {
@@ -265,7 +265,7 @@ describe("#19 actual meeting selection", () => {
     } : option);
     view.rerender(<RecommendationChoices {...view.props} options={updatedOptions} />);
     expect(screen.queryByRole("radio", { name: /온라인/ })).not.toBeInTheDocument();
-    expect(screen.getByRole("radio", { name: /대면.*강남|강남.*대면/ })).toBeChecked();
+    expect(screen.getByText(/대면.*강남|강남.*대면/)).toBeInTheDocument();
     selectOption();
     expect(screen.queryByLabelText("시작 시간")).toBeInTheDocument();
     expect(screen.getByLabelText("시작 시간")).toHaveValue("");

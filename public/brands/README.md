@@ -24,7 +24,9 @@ The previous complete `google-signin.png` remains unchanged for provenance; it i
 not cropped or used to obtain this independent symbol.
 
 The supplied neutral surface is #F2F2F2 with no stroke, a 20px symbol and 14px
-medium text. Its 40px visible surface is centered in a 46px OAuth link target.
+medium text. Its visible surface and OAuth link target are both 224 × 46px, matching Kakao.
+Only the surface height was adjusted; the official 20px G, colors, 14px text
+and 12px/10px horizontal padding are preserved.
 The label is localized to `Google로 로그인`; the existing server navigation and
 return handler are retained. Noninteractive spans replace the generator's button
 so no button is nested inside a link. Focus is drawn on the link, and disabled

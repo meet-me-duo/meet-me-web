@@ -48,7 +48,9 @@ test.describe("#107 synthetic browser pre-submit", () => {
     const input = page.getByRole("textbox", { name: /시간·장소 조건/ });
     await expect(input).toBeVisible({ timeout: 5000 });
     await input.fill("  토요일  오후\n온라인만  ");
+    await page.locator(".submission-help > summary").click();
     await expect(page.getByText(/마감.*확인.*반영되지|마감.*반영되지.*확인/)).toBeVisible();
+    await page.locator(".submission-help > summary").click();
     await page.getByRole("button", { name: /조건 제출하기/ }).dblclick();
     await expect(page.getByText(/확인 중|확인하고/)).toBeVisible();
     await expect(page.getByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).toHaveCount(0);
@@ -115,7 +117,8 @@ for (const width of [320, 390, 1440]) {
     const cancel = page.getByRole("button", { name: "확인 취소", exact: true });
     const tools = page.locator(".host-tools-inline");
     expect(await cancel.evaluate((element) => !!(element.compareDocumentPosition(document.querySelector(".host-tools-inline")!) & Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true);
-    await expect(tools.getByRole("heading", { name: "주최자 도구" })).toBeVisible();
+    await expect(tools.locator("summary")).toHaveText("주최자 도구");
+    await tools.locator("summary").click();
     await page.screenshot({ path: info.outputPath("saved-condition-hierarchy.png"), fullPage: true });
     const trigger = tools.getByRole("button", { name: "입력 마감하기" });
     await trigger.click(); const dialog = page.getByRole("dialog", { name: "지금 입력을 마감할까요?" });

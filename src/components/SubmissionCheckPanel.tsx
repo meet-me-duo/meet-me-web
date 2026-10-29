@@ -181,7 +181,7 @@ export default function SubmissionCheckPanel({ room, onRoomChanged, onAccessDeni
     } finally { if (active()) { busy.current = false; setPending(false); } }
   }
   if (denied) return null;
-  return <div className="submission-layout submission-layout--single"><section className={`glass-card submission-card precheck-card ${complete ? "submission-complete" : ""}`} aria-label="제출 전 조건 확인">
+  return <details className={`submission-disclosure ${closed ? "is-closed" : "is-collecting"}`} open={closed ? undefined : true}><summary>내 저장 입력 확인</summary><div className="submission-layout submission-layout--single"><section className={`glass-card submission-card precheck-card ${complete ? "submission-complete" : ""}`} aria-label="제출 전 조건 확인">
     <div className="section-heading"><h2>{closed ? "마감된 내 입력 확인" : candidate ? showEditor ? "조건 수정" : "저장된 조건" : "가능한 조건을 알려주세요"}</h2>
       {complete && !closed && <p role="status"><CheckCircle2 size={16} /> 제출 완료 · 다른 참여자를 기다려 주세요.</p>}
       {!closed && !complete && check && !editing && !draftEdited.current && <p role="status">{running.has(check.status) && <LoaderCircle className="spin" size={16} />} {messages[check.status] ?? "현재 확인 상태를 다시 조회해 주세요."}</p>}
@@ -206,7 +206,7 @@ export default function SubmissionCheckPanel({ room, onRoomChanged, onAccessDeni
     {!closed && check && !["CLEAR", "CANCELLED", "SUPERSEDED", "CLOSED_BEFORE_COMPLETION"].includes(check.status) && <button className="button secondary" disabled={!commandAllowed} onClick={() => command("cancel")}>확인 취소</button>}
     {!closed && check && !["CLEAR", "CANCELLED", "SUPERSEDED", "CLOSED_BEFORE_COMPLETION"].includes(check.status) && <p className="field-hint">확인 취소는 이 입력의 확인 작업만 그만둬요. 저장한 원문과 이전 확인 완료본은 유지돼요.</p>}
     {failure != null && <div className="alert error" role="alert"><p>{uncertain ? "요청 결과를 확인하지 못했어요. 현재 상태를 조회한 뒤 같은 요청을 다시 보낼 수 있어요." : errorMessage(failure)}</p><button className="button secondary" disabled={query.isFetching} onClick={() => { void recover(); }}>현재 상태 확인</button>{uncertain && !closed && <button className="button secondary" disabled={pending || query.isFetching || !recovered} onClick={() => { if (uncertain) void execute(uncertain); }}>같은 요청 다시 보내기</button>}</div>}
-    {!closed && <p className="field-hint">저장과 제출 완료는 달라요. 마감까지 확인이 끝나지 않은 입력은 이번 결과에 반영되지 않을 수 있어요. 수정본을 검사하다 마감되면 마지막 확인 완료본을 사용해요.</p>}
-    {!closed && room.viewer.role === "HOST" && <div className="host-tools-inline"><h3>주최자 도구</h3><RoomCloseConfirmation disabled={pending} pending={pending} unsaved={draftEdited.current} error={closeError != null ? errorMessage(closeError) : undefined} onConfirm={() => { void closeRoom(); }} /></div>}
-  </section></div>;
+    {!closed && <details className="submission-help"><summary>저장·제출 안내</summary><p className="field-hint">저장과 제출 완료는 달라요. 마감까지 확인이 끝나지 않은 입력은 이번 결과에 반영되지 않을 수 있어요. 수정본을 검사하다 마감되면 마지막 확인 완료본을 사용해요.</p></details>}
+    {!closed && room.viewer.role === "HOST" && <details className="host-tools-inline"><summary>주최자 도구</summary><RoomCloseConfirmation disabled={pending} pending={pending} unsaved={draftEdited.current} error={closeError != null ? errorMessage(closeError) : undefined} onConfirm={() => { void closeRoom(); }} /></details>}
+  </section></div></details>;
 }

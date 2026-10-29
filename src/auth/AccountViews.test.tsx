@@ -8,11 +8,11 @@ import { api, ApiError } from "../api/client";
 function mount(node: React.ReactNode) { return render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })}><MemoryRouter>{node}</MemoryRouter></QueryClientProvider>); }
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 describe("account entry and archive without guest claim UI", () => {
-  it("offers both providers and explains guest participation without asking for a name", () => {
+  it("offers a concise login entry with both providers and no name field", () => {
     mount(<LoginGate returnTo="/create" />);
     expect(screen.getByRole("link", { name: "Google로 로그인" })).toHaveAttribute("href", expect.stringMatching(/\/api\/auth\/google\/start$/));
     expect(screen.getByRole("link", { name: "Kakao로 로그인" })).toHaveAttribute("href", expect.stringMatching(/\/api\/auth\/kakao\/start$/));
-    expect(screen.getByText(/참여자는 로그인 없이/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /^로그인$/ })).toBeInTheDocument();
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
   });
   it("offers no guest-account connection entry and never claims automatically", () => {

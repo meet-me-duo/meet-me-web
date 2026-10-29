@@ -82,7 +82,9 @@ for (const [name, value] of [["existing records", legacy], ["malformed records",
     const mock = await fixture(context, baseURL!);
     await auditStorage(page, context, value);
     await expect(page.getByRole("heading", { name: /조건만 말하세요/ })).toBeVisible();
-    await expect(page.locator(".landing-details")).toBeVisible();
+    if (page.viewportSize()!.width <= 540) await expect(page.locator(".landing-details")).toBeHidden();
+    else await expect(page.locator(".landing-details")).toBeVisible();
+    await expect(page.getByRole("button", { name: "모임 만들기" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "이 기기의 최근 모임" })).toHaveCount(0);
     await expect(page.getByText("기기 목록 전용 모임", { exact: true })).toHaveCount(0);
     await page.evaluate(() => { window.dispatchEvent(new Event("focus")); window.dispatchEvent(new StorageEvent("storage", { key: "meet-me:recent-rooms:v1" })); });

@@ -8,13 +8,10 @@ import { api, ApiError, errorMessage } from "../api/client";
 import type { MeetingMode } from "../api/types";
 import { createRoomBody, createRoomSchema, defaultSearchDates, type CreateRoomValues } from "../utils/createRoom";
 import { LandingStory } from "../components/LandingStory";
-import { RecentRooms } from "../components/RecentRooms";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
-import { useRecentRooms } from "../hooks/useRecentRooms";
 import { LoginGate } from "../auth/AccountViews";
 import { useAccountSession } from "../auth/useAccount";
-import { rememberRoom } from "../utils/recentRooms";
 
 const MODE_OPTIONS: { value: MeetingMode; label: string; detail: string }[] = [
   { value: "EITHER", label: "상관없음", detail: "대면·비대면 모두" },
@@ -30,7 +27,6 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const creatingRoom = useRef(false);
-  const recent = useRecentRooms();
   const form = useForm<CreateRoomValues>({
     resolver: zodResolver(createRoomSchema),
     defaultValues: { hostName: accountSession?.account.displayName ?? "", purpose: "", meetingMode: "EITHER", customSearch: false, searchStart: "", searchEnd: "", useExpected: true, expectedParticipants: "4", useDeadline: false, deadline: "", manualOnly: false },
@@ -69,7 +65,6 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
     mutation.mutate(createRoomBody(value), {
       onSuccess: (room) => {
         queryClient.setQueryData(["room", room.invite_code], room);
-        rememberRoom(room);
         navigate(`/rooms/${room.invite_code}`, { replace: true });
       },
       onSettled: () => { creatingRoom.current = false; },
@@ -81,9 +76,7 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
       <section className="hero">
         <h1><span className="hero-line">조건만 말하세요,</span><span className="hero-line">결정은 <span className="hero-accent">Meet me</span>가 할게요</span></h1>
         <Button className="hero-cta" onClick={() => navigate("/create")}>모임 만들기 <ArrowRight size={20} aria-hidden="true" /></Button>
-        {recent.rooms.length > 0 && <a className="recent-shortcut" href="#recent-rooms">이 기기의 최근 모임 {recent.rooms.length}개 보기</a>}
       </section>
-      <RecentRooms recent={recent} />
       <div className="landing-details">
         <div className="landing-intro">
           <div className="eyebrow"><Sparkles size={16} /> 자연어 조건 입력 & 스마트 조율</div>

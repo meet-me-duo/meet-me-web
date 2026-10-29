@@ -1,0 +1,38 @@
+{
+  "base_main": "216730f676e16cb05d6f1758528d36ca46979296",
+  "branch": "feature/remove-browser-room-history",
+  "excluded_held_pull_request": 51,
+  "scope": {
+    "removed": [
+      "landing device room list/shortcut",
+      "dedicated storage reads/writes/events",
+      "create/join/room-page address recording",
+      "history-dependent room hints"
+    ],
+    "legacy_storage_migration": "none: no read/write/delete",
+    "preserved": [
+      "account HOST/MEMBER room list and filters",
+      "account-required hosting",
+      "guest HttpOnly cookie and credentials include",
+      "guest own-record reaccess/read/edit",
+      "shared URL copy/navigation",
+      "analysis/ambiguity/result behavior"
+    ]
+  },
+  "verification": {
+    "unit_passed": 784,
+    "unit_files_passed": 71,
+    "full_e2e_passed": 509,
+    "existing_e2e_skipped": 1,
+    "focused_e2e_passed": 12,
+    "retries": 0,
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "build": "PASS",
+    "api_generated_check": "PASS",
+    "independent_review": "PASS",
+    "independent_related_unit_passed": 29,
+    "api_mode": "synthetic API/HttpOnly cookie/account/rooms only, no real account or room operations"
+  },
+  "publication": "exact commit, PR and CI result recorded in PR after publication"
+}

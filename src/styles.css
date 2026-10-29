@@ -629,3 +629,5 @@ fieldset.field legend { margin-bottom: 9px; }
 .social-login--kakao:not([aria-disabled="true"]):focus-visible .social-login-state,
 .social-login--kakao[aria-busy="true"] .social-login-state { opacity: .12; }
 .social-login--google[aria-busy="true"] .gsi-material-button-state { background-color: #001d35; opacity: .12; }
+
+.precheck-edit-guidance { white-space: pre-line; overflow-wrap: anywhere; }

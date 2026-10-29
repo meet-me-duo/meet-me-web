@@ -77,6 +77,9 @@ export default function SubmissionCheckPanel({ room, onRoomChanged, onAccessDeni
   });
   const current = query.data;
   const check = current?.check;
+  // The generated field is required on new servers; older responses may omit it.
+  const guidance = check && "edit_guidance" in check ? check.edit_guidance : null;
+  const editGuidance = check?.status === "NEEDS_EDIT" && typeof guidance === "string" && guidance.trim() && Array.from(guidance).length <= 160 ? guidance : null;
   const question = check?.status === "NEEDS_CHOICE" ? check.question : null;
   const closed = room.collection_status === "CLOSED" || current?.room.collection_status === "CLOSED";
   const legacyCorrectionAccepted = current?.accepted?.confirmation_source === "LEGACY_CORRECTION";
@@ -184,7 +187,7 @@ export default function SubmissionCheckPanel({ room, onRoomChanged, onAccessDeni
   return <div className="submission-layout submission-layout--single"><section className={`glass-card submission-card precheck-card ${complete ? "submission-complete" : ""}`} aria-label="제출 전 조건 확인">
     <div className="section-heading"><h2>{closed ? "마감된 내 입력 확인" : candidate ? showEditor ? "조건 수정" : "저장된 조건" : "가능한 조건을 알려주세요"}</h2>
       {complete && !closed && <p role="status"><CheckCircle2 size={16} /> 제출 완료 · 다른 참여자를 기다려 주세요.</p>}
-      {!closed && !complete && check && !editing && !draftEdited.current && <p role="status">{running.has(check.status) && <LoaderCircle className="spin" size={16} />} {messages[check.status] ?? "현재 확인 상태를 다시 조회해 주세요."}</p>}
+      {!closed && !complete && check && !editing && !draftEdited.current && <p role="status" className={editGuidance ? "precheck-edit-guidance" : undefined}>{running.has(check.status) && <LoaderCircle className="spin" size={16} />} {editGuidance ?? messages[check.status] ?? "현재 확인 상태를 다시 조회해 주세요."}</p>}
     </div>
     <p className="submission-privacy">내 원문과 확인 질문·답변은 다른 참여자에게 공개되지 않아요.</p>
     {query.isPending && <p role="status">내 입력 확인 상태를 불러오는 중…</p>}

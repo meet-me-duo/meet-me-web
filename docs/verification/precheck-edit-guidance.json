@@ -1,0 +1,37 @@
+{
+  "server_contract": {
+    "repository": "meet-me-duo/meet-me-server",
+    "pull_request": 158,
+    "commit": "8d335aa2dec3c1f5e97a54a6d567ac87ff461810",
+    "path": "docs/openapi/precheck-edit-guidance.openapi.json",
+    "sha256": "3028ed968241315c1d4e1c230491a7eb350ea0b9122cfcddf8aa84fdde075145",
+    "git_blob_sha": "e2c5f78183f258d868226aa5a4500a51944a7b62",
+    "raw_bytes": 104596,
+    "changed_web_schemas": [
+      "PrecheckStateResponse"
+    ],
+    "changed_paths": []
+  },
+  "behavior": {
+    "new_server_field": "required string|null, max160 codepoints",
+    "legacy_missing_or_null": "existing fallback",
+    "invalid_or_over160": "existing fallback, no truncation",
+    "rendering": "plain React text, NEEDS_EDIT only",
+    "automatic_commands": false
+  },
+  "verification": {
+    "unit_passed": 805,
+    "unit_files_passed": 73,
+    "related_e2e_passed": 34,
+    "full_e2e_passed": 527,
+    "existing_e2e_skipped": 1,
+    "local_e2e_retries": 0,
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "build": "PASS",
+    "generated_api_check": "PASS",
+    "independent_review": "PASS",
+    "api_mode": "synthetic fixtures only; local OAuth popup loopback fixture for system Chromium interception limitation"
+  },
+  "rollout": "remote PR/CI pending; main rollout after parent server compatibility/order confirmation"
+}

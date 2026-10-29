@@ -1243,6 +1243,8 @@ export interface components {
             retry_allowed: boolean;
             /** @description 기술 실패 코드, 미확인은 null */
             failure_code: string | null;
+            /** @description NEEDS_EDIT에서 본인에게만 제공하는 직접 수정 안내. 일반 텍스트로 표시하며 자동 반영하지 않음. 다른 상태는 null */
+            edit_guidance: string | null;
         };
         /** @description 저장 원문과 의미 기준 시각 */
         PrecheckTextResponse: {

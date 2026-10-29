@@ -115,3 +115,25 @@
 끝선이 일치하고 가로 넘침, 런타임 오류, 외부 요청이 없었다. 기존 데스크톱 첫 화면
 요구도 유지한다. 증거와 전체 캡처: `/workspace/shared/ui-aligned-widths/widths.json`,
 동일 폴더의 PNG 및 검증 로그.
+
+### 로그인 카드의 수직 중심 재검증
+
+제목 제거만으로 해결되지 않았던 원인은 빈 `.social-login-feedback`의 `min-height:3em`
+(실측 40.8px)과 상하 margin 24px였다. 로그인 카드에 한해 빈 상태 높이·margin을 0으로
+만들고 실제 메시지만 12px 간격으로 자연스럽게 배치한다. status/alert 요소는 DOM에
+유지하며 버튼의 크기와 위치, OAuth 동작, 다른 화면의 공통 폭은 변경하지 않는다.
+
+카드 테두리를 포함한 버튼 묶음까지의 실제 CSS 픽셀 거리:
+
+| 화면 폭 | 수정 전 위 / 아래 | 수정 후 위 / 아래 | 수정 후 왼쪽 / 오른쪽 |
+| --- | --- | --- | --- |
+| 1366px, 1440px | 25 / 89.8px | 25 / 25px | 88 / 88px |
+| 390px | 21 / 85.8px | 21 / 21px | 71 / 71px |
+| 320px | 21 / 85.8px | 21 / 21px | 36 / 36px |
+
+두 버튼은 각각 224×46px, 버튼 사이 10px로 유지된다. 빈 feedback의 높이와 margin은
+실측 0px다. 기본 상태 4크기의 전후 캡처, 실제 pending 및 지연 오류 캡처를 직접 확인했다.
+빌드·lint·기존 OAuth 키보드 이동 및 새 중앙 정렬/feedback 회귀 E2E 10개 모두 통과했다.
+복원 후에도 중앙 정렬로 돌아오며, pending/error 표시 중 버튼 위치는 이동하지 않는다.
+증거: `/workspace/shared/ui-login-centering/`의 `before.json`, `after.json`, PNG 및 로그;
+상태별 E2E 캡처: `/tmp/meetme-login-centered/`.

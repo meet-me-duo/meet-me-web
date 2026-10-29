@@ -577,3 +577,13 @@ results; 1040px while the three recommendation cards are displayed. Headers, bod
 cards and saved-input/unapplied disclosures inherit the same edges. Mobile uses
 the existing page gutters. Only width rules changed; API, state logic, text, motion,
 button sizing and the collapsed analysis disclosure remain intact.
+
+## 2026-10-29 — Center the login buttons after removing the title
+
+The previous title removal left an empty feedback paragraph reserving 3em plus
+24px of vertical margins. Scoped the fix to `.login-card`: an empty status region
+now occupies zero space while remaining mounted for accessibility; real pending
+or error feedback grows below the buttons with a 12px gap. Provider dimensions,
+assets, navigation logic and other screen widths are unchanged. Added numerical
+horizontal/vertical centering assertions to the responsive login E2E and verified
+pending/error visibility, stable button position and restored centering after BFCache.

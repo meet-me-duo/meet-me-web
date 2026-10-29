@@ -366,7 +366,8 @@ fieldset.field legend { margin-bottom: 9px; }
 .social-login-actions .social-actions { display: grid; gap: 10px; width: min(100%, 224px); margin: 0 auto; }
 .social-login-actions--recovery .social-actions { margin-inline: 0; }
 .social-login-feedback { min-height: 3em; margin: 10px 0 14px; font-size: .85rem; line-height: 1.5; overflow-wrap: anywhere; }
-.login-card .social-login-feedback { margin: 10px 0 14px; }
+.login-card .social-login-feedback { min-height: 0; margin: 12px 0 0; }
+.login-card .social-login-feedback:empty { margin: 0; }
 .social-login { display: flex; align-items: center; min-height: 46px; width: min(100%, 224px); align-self: center; border-radius: 6px; transition: box-shadow .15s; }
 .social-login img { display: block; width: 100%; height: auto; }
 .social-login:focus-visible { outline: 3px solid var(--sky-dark); outline-offset: 3px; }

@@ -77,7 +77,7 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
         <div className="hero-copy">
           <p className="hero-kicker">함께할 시간을 찾는 더 편한 방법</p>
           <h1 id="hero-title"><span className="hero-line">조건만 말하세요,</span>{" "}<span className="hero-line">결정은 <span className="hero-accent">Meet me</span>가 할게요</span></h1>
-          <p className="hero-description">각자의 시간·장소 조건을 비공개로 모아<br className="hero-break" /> 함께할 수 있는 시간을 제안해요.</p>
+          <p className="hero-description"><span className="hero-description-desktop">각자의 시간·장소 조건을 비공개로 모아<br className="hero-break" /> 함께할 수 있는 시간을 제안해요.</span><span className="hero-description-mobile">시간·장소 조건을 모아, 함께 만날 시간을 찾아요.</span></p>
           <div className="hero-actions">
             <Button className="hero-cta" onClick={() => navigate("/create")}>모임 만들기 <ArrowRight size={18} aria-hidden="true" /></Button>
             <a className="button secondary hero-guide" href="#how-it-works">이용 방법 보기</a>

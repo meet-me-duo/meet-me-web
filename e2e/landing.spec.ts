@@ -74,16 +74,26 @@ for (const [width, height] of [[320, 568], [360, 640], [390, 844], [430, 932], [
     expect(buttonBox.x).toBeGreaterThanOrEqual(0);
     expect(buttonBox.x + buttonBox.width).toBeLessThanOrEqual(width);
     expect(buttonBox.height).toBeCloseTo(48, 2);
-    await expect(page.getByRole("complementary", { name: "자연어 조건 입력 예시" })).toBeVisible();
-    expect((await details.boundingBox())!.y).toBeGreaterThan(buttonBox.y + buttonBox.height);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
-
-    await page.mouse.wheel(0, height);
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
-    await page.getByRole("heading", { name: "말하듯 조건 작성" }).scrollIntoViewIfNeeded();
-    await expect(page.getByRole("heading", { name: "말하듯 조건 작성" })).toBeInViewport();
-    await page.getByRole("heading", { name: "링크 하나로 시작하는 일정 조율" }).scrollIntoViewIfNeeded();
-    await expect(page.getByRole("heading", { name: "링크 하나로 시작하는 일정 조율" })).toBeInViewport();
+    const example = page.getByRole("complementary", { name: "자연어 조건 입력 예시", includeHidden: true });
+    if (width <= 540) {
+      await expect(example).toBeHidden();
+      await expect(details).toBeHidden();
+      await expect(page.locator(".hero-note")).toBeHidden();
+      await expect(page.locator(".hero-guide")).toBeHidden();
+      await expect(page.locator(".hero-description-mobile")).toHaveText("시간·장소 조건을 모아, 함께 만날 시간을 찾아요.");
+      await expect(page.locator(".hero-description-mobile")).toBeVisible();
+      await expect(page.locator(".hero-description-desktop")).toBeHidden();
+    } else {
+      await expect(example).toBeVisible();
+      await expect(page.locator(".hero-description-mobile")).toBeHidden();
+      expect((await details.boundingBox())!.y).toBeGreaterThan(buttonBox.y + buttonBox.height);
+      await page.mouse.wheel(0, height);
+      await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+      await page.getByRole("heading", { name: "말하듯 조건 작성" }).scrollIntoViewIfNeeded();
+      await expect(page.getByRole("heading", { name: "말하듯 조건 작성" })).toBeInViewport();
+      await page.getByRole("heading", { name: "링크 하나로 시작하는 일정 조율" }).scrollIntoViewIfNeeded();
+      await expect(page.getByRole("heading", { name: "링크 하나로 시작하는 일정 조율" })).toBeInViewport();
+    }
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
   });
 }
@@ -153,6 +163,7 @@ test("hero action stays still for reduced motion", async ({ page }) => {
 });
 
 test("landing details stay readable with reduced motion and no observer", async ({ page }) => {
+  await page.setViewportSize({ width: 600, height: 800 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.addInitScript(() => { Object.defineProperty(window, "IntersectionObserver", { value: undefined }); });
   await page.goto("/");
@@ -171,6 +182,7 @@ test("landing details stay readable with reduced motion and no observer", async 
 });
 
 test("feature cards remain readable after forward and reverse scrolling", async ({ page }) => {
+  await page.setViewportSize({ width: 600, height: 800 });
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
   const panels = page.locator(".story-panel");
@@ -188,6 +200,7 @@ test("feature cards remain readable after forward and reverse scrolling", async 
 });
 
 test("keyboard guide link reaches details without a scroll lock", async ({ page }) => {
+  await page.setViewportSize({ width: 600, height: 800 });
   await page.goto("/");
   await page.getByRole("link", { name: "이용 방법 보기" }).focus();
   await page.keyboard.press("Enter");
@@ -198,6 +211,7 @@ test("keyboard guide link reaches details without a scroll lock", async ({ page 
 });
 
 test("changing motion preference stops decorative entrances", async ({ page }) => {
+  await page.setViewportSize({ width: 600, height: 800 });
   await page.goto("/");
   await page.locator(".story-panel").first().scrollIntoViewIfNeeded();
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -226,8 +240,8 @@ test("cards entering together visibly progress in sequence", async ({ page }) =>
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(1440);
 });
 
-test("a later mobile card starts without waiting for offscreen cards", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 640 });
+test("a later narrow-layout card starts without waiting for offscreen cards", async ({ page }) => {
+  await page.setViewportSize({ width: 600, height: 640 });
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
   const cards = page.locator(".story-panel");

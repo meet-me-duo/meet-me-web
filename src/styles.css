@@ -596,6 +596,7 @@ fieldset.field legend { margin-bottom: 9px; }
 .landing .hero h1 { font-size: clamp(2rem, 3.6vw, 3.25rem); font-weight: 600; line-height: 1.35; letter-spacing: -.055em; }
 .landing .hero-accent { display: inline; font-size: inherit; font-weight: inherit; }
 .hero-description { margin: 24px 0 0; color: var(--muted); font-size: 1rem; line-height: 1.8; word-break: keep-all; overflow-wrap: anywhere; }
+.hero-description-mobile { display: none; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
 .landing .hero-cta, .hero-guide { width: auto; margin: 0; min-height: 48px; min-width: 0; padding: 11px 22px; border-radius: 999px; font-size: .9375rem; }
 .hero-note { display: flex; align-items: flex-start; gap: 8px; margin: 20px 0 0; color: var(--muted); font-size: .8125rem; line-height: 1.7; word-break: keep-all; overflow-wrap: anywhere; }
@@ -636,13 +637,14 @@ fieldset.field legend { margin-bottom: 9px; }
   .hero-kicker { margin-bottom: 20px; }
 }
 @media (max-width: 540px) {
-  .landing .hero { padding-block: 40px 24px; gap: 36px; }
+  .landing .hero { min-height: calc(100svh - 69px); align-content: center; padding-block: 40px; gap: 0; }
   .landing .hero h1 { font-size: clamp(1.75rem, 7.6vw, 2.5rem); line-height: 1.4; }
   .hero-description { font-size: .9375rem; margin-top: 20px; }
   .hero-break { display: none; }
   .hero-actions { gap: 10px; margin-top: 24px; }
   .landing .hero-cta, .hero-guide { padding-inline: 17px; font-size: .875rem; }
-  .hero-example { padding: 24px 20px; }
+  .hero-example, .hero-description-desktop, .hero-note, .hero-guide, .landing-details { display: none; }
+  .hero-description-mobile { display: inline; }
   .landing .how-card { padding: 24px 20px; }
 }
 

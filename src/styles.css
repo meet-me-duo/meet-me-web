@@ -90,8 +90,8 @@ footer { padding: 28px 16px; color: var(--muted); font-size: .8rem; text-align: 
 .story-icon { flex: none; width: 44px; height: 44px; display: grid; place-items: center; color: var(--sky-dark); }
 .story-number { white-space: nowrap; color: #64748b; font-size: .75rem; font-variant-numeric: tabular-nums; }
 .story-panel { min-width: 0; }
-.story-entered { animation: story-enter .85s cubic-bezier(.2, .65, .3, 1) both; }
-@keyframes story-enter { from { opacity: .75; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+.story-entered { animation: story-enter 1.15s cubic-bezier(.22, .61, .36, 1) both; }
+@keyframes story-enter { from { opacity: .75; transform: translateY(56px); } to { opacity: 1; transform: none; } }
 .how-card { margin-top: var(--space-6); padding: 28px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
 .how-card h2 { margin: 0 0 22px; color: #0369a1; font-size: .75rem; letter-spacing: .1em; text-align: center; text-transform: uppercase; }
 .how-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin: 0; padding: 0; list-style: none; }
@@ -282,7 +282,7 @@ fieldset.field legend { margin-bottom: 9px; }
 
 @media (max-width: 780px) {
   .feature-grid { grid-template-columns: 1fr; }
-  .story-panels { grid-template-columns: 1fr; }
+  .story-panels { grid-template-columns: 1fr; row-gap: 56px; }
   .story-panel { display: block; }
   .feature { display: grid; grid-template-columns: 44px 1fr; column-gap: 15px; padding: 19px; }
   .feature h2 { align-self: end; margin: 0 0 3px; }
@@ -619,7 +619,7 @@ fieldset.field legend { margin-bottom: 9px; }
 .landing .feature h2 { margin: 24px 0 12px; }
 .landing .feature p { color: var(--muted); font-size: .875rem; line-height: 1.8; }
 .landing .story-icon { border: 1px solid var(--border); border-radius: 12px; background: white; }
-.landing .how-card { margin-top: 32px; padding: 32px 24px; }
+.landing .how-card { margin-top: 64px; padding: 32px 24px; }
 .landing .how-card h2 { color: #334155; font-size: .9375rem; font-weight: 600; letter-spacing: 0; text-transform: none; }
 @media (max-width: 1000px) {
   .landing .hero { gap: 32px; }

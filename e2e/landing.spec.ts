@@ -217,6 +217,11 @@ test("cards entering together visibly progress in sequence", async ({ page }) =>
     const progress = elements.map(element => element.getAnimations()[0]?.effect?.getComputedTiming().progress ?? 0);
     return progress[0] > progress[1] && progress[1] > progress[2] && progress[0] < 1;
   })).toBe(true);
+  const nextSectionTop = (await page.locator(".how-card").boundingBox())!.y;
+  for (const card of await cards.all()) {
+    const box = (await card.boundingBox())!;
+    expect(box.y + box.height).toBeLessThanOrEqual(nextSectionTop);
+  }
   for (const card of await cards.all()) await expect(card).toHaveCSS("opacity", "1");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(1440);
 });
@@ -228,7 +233,13 @@ test("a later mobile card starts without waiting for offscreen cards", async ({ 
   const cards = page.locator(".story-panel");
   await cards.first().evaluate(element => scrollTo(0, element.getBoundingClientRect().top + scrollY - 300));
   await expect(cards.first()).toHaveClass(/story-entered/);
+  const firstBox = (await cards.first().boundingBox())!;
+  expect(firstBox.y + firstBox.height).toBeLessThanOrEqual((await cards.nth(1).boundingBox())!.y);
   await expect(cards.first()).toHaveCSS("opacity", "1");
+  await expect(cards.last()).not.toHaveClass(/story-entered/);
+  await cards.nth(1).evaluate(element => scrollTo(0, element.getBoundingClientRect().top + scrollY - 300));
+  await expect(cards.nth(1)).toHaveClass(/story-entered/);
+  await expect(cards.nth(1)).toHaveCSS("opacity", "1");
   await expect(cards.last()).not.toHaveClass(/story-entered/);
   await cards.last().scrollIntoViewIfNeeded();
   await expect(cards.last()).toHaveClass(/story-entered/);

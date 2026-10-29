@@ -52,3 +52,13 @@
 실측 JSON·전후 캡처: `/workspace/shared/ui-motion-refinement/`. 기존 API/인증/공식 로그인 버튼은 수정하지 않았다.
 
 후속 최종 검증: lint·production build(tsc 포함) 통과. landing/ui-refresh desktop·mobile 56개 중 **55통과·기존 desktop 전용 skip1·실패0**. 실제 진행률을 비교하는 순차 등장 검사와 모바일 뒤늦은 카드의 지연 없는 시작, reduced-motion 전환 검사를 포함한다. 320/390/1440px 화면은 모두 가로 넘침0, 정확한 hero textContent, 16px/stroke1.75 아이콘을 확인했다. 첫 회에는 inline-block 강조 span 때문에 접근성 이름에 `Meet me 가` 공백이 생겨 정확한 이름 검사2개가 실패했고, inline으로 보정해 전체 관련 검사를 재실행했다. 기능/API/인증 변경은 없어 전체 비관련 단위·브라우저 suite는 반복하지 않았다.
+
+## 2026-10-29 추가 피드백 — 더 아래에서 느리게 상승
+
+기준 `5c791888cb7e9d93ecddc7c5571d955640fb05f2`에서 카드 이동을 24→56px, duration을 850→1150ms, easing을 cubic-bezier(.2,.65,.3,1)→cubic-bezier(.22,.61,.36,1)로 조정했다. 끝에서 기울기가 0이 되어 부드럽게 감속한다. opacity .75→1, 동일 관측 묶음의 180ms stagger, 30%/하단48px trigger, 나중에 보이는 모바일 카드의 독립 시작은 유지한다. hero 문구·하단 아이콘·기능 로직은 변경하지 않는다.
+
+420ms 캡처에서 움직이는 카드가 다음 패널과 겹치는 것을 발견해 모바일 카드 행 간격을 24→56px, 하단 안내 패널과의 간격을 32→64px로 확보했다. 스크롤 잠금이나 대기 화면 없이 transform만 움직인다. 순차 등장 도중 카드끼리와 다음 패널의 경계가 겹치지 않는 검사도 추가했다.
+
+1440×900 최종 표본의 animationstart는 73.3/244.0/425.7ms, end는1222.0/1388.8/1572.4ms다. 이벤트 elapsedTime은 각각1.15초, 첫 시작~마지막 종료는 약1.50초(이전 약1.20초)였다. 실제 event dispatch 간격과 명목180ms를 구분한다. 390×900의 뒤늦은 세 번째 카드는 delay0ms, desktop/mobile reduced-motion은 animation none·opacity1·transform none, 가로 넘침0을 확인했다. 캡처·실측은 `/workspace/shared/ui-motion-refinement/slower-spaced*`에 보존한다.
+
+최종 검증: production build(tsc 포함)·lint·diff check 통과, landing desktop/mobile **45통과·기존 desktop skip1·실패0**. 순차 진행률·이동 중 패널 경계·11개 화면 크기·키보드·observer 미지원·reduced-motion을 확인했다. 행 간격 보강 후의 중간 실행에서는 예전 모바일 스크롤 위치가 두 카드를 동시에 진입시켜 단독 카드 delay0 assertion2개가 실패했다. 두 번째 카드를 먼저 관측한 뒤 세 번째로 이동하는 실제 순차 스크롤 절차로 테스트를 보정하고 전체 landing 검사를 다시 통과했다. `.github/workflows`, hero JSX, 단계 아이콘, observer 로직은 기준 커밋과 동일하다.

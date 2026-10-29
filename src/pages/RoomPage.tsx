@@ -15,7 +15,6 @@ import { CandidateCard } from "../components/CandidateCard";
 import { formatDate, formatDateTime } from "../utils/time";
 import { submissionText, SUBMISSION_TEXT_LIMIT } from "../utils/submission";
 import { submissionExample, TIME_INPUT_GUIDE } from "../utils/submissionGuidance";
-import { useRecentRooms } from "../hooks/useRecentRooms";
 import { useAccountSession } from "../auth/useAccount";
 import { LoginGate } from "../auth/AccountViews";
 import { usePrivateDraft } from "../auth/usePrivateDraft";
@@ -23,7 +22,7 @@ import { discardQuarantinedDraftForRoom } from "../auth/draftQuarantine";
 import { getSession, getSessionVersion } from "../auth/session";
 import GuestAccessPanel from "../components/GuestAccessPanel";
 import { ReviewPrompt } from "../features/review/ReviewPrompt";
-import { rememberRoom, roomLink } from "../utils/recentRooms";
+import { roomLink } from "../utils/roomLink";
 
 const UNAPPLIED_REASON_MESSAGES: Record<string, string> = {
   LEGACY_MANUAL_ONLY_UNSUPPORTED: "기존 시간표 입력은 새 분석에서 지원하지 않아 반영되지 않았어요.",
@@ -44,7 +43,6 @@ export default function RoomPage() {
   const mounted = useRef(true);
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   const queryClient = useQueryClient();
-  const recent = useRecentRooms();
   const [draft, setDraft] = useState<{ inviteCode: string; viewer: string; rawText: string } | null>(null);
   const accessEpoch = useRef(0);
   const [clarificationPendingOwner, setClarificationPendingOwner] = useState<string | null>(null);
@@ -159,7 +157,7 @@ export default function RoomPage() {
   if (room.submission_protocol != null && !["PRE_SUBMIT_V1", "LEGACY"].includes(room.submission_protocol)) return <div className="room-page page-width"><RoomHeader room={room} /><StateCard icon={<RefreshCw />} title="조건 확인 화면 업데이트가 필요해요" body="서버에서 사용하는 조건 제출 버전을 이 화면이 지원하지 않아요. 새로고침해 지원하는 계약을 다시 확인해 주세요." /></div>;
   const showEditor = room.public_status === "COLLECTING" && (!correctionOpen(room) || room.capabilities?.can_edit_own_submission);
 
-  if (!room.viewer.joined) return <div className="form-page page-width narrow">{room.collection_status === "CLOSED" ? <><h1>입력이 마감된 모임이에요</h1><p>{room.purpose}</p></> : <h1>{room.purpose}</h1>}{recent.rooms.some(item => item.inviteCode === inviteCode) && <p className="previous-participation">이 브라우저의 이전 참여 정보를 확인하지 못했어요. 같은 이름으로 새로 참여해도 기존 권한이나 입력은 복구되지 않아요. 기존 기록은 아래에서 기록 번호를 선택해 다시 접근해 주세요.</p>}<GuestAccessPanel room={room} roomKey={`${inviteCode}:auth:${authVersion}:access:${epoch}`} onJoined={joined => { if (!mounted.current || deniedRoom.current === inviteCode || epoch !== accessEpoch.current || currentAccess.current.inviteCode !== inviteCode || currentAccess.current.authVersion !== authVersion || getSessionVersion() !== authVersion) return; rememberRoom(joined); setRoom(joined); }} onVerified={restoreVerifiedGuest} /></div>;
+  if (!room.viewer.joined) return <div className="form-page page-width narrow">{room.collection_status === "CLOSED" ? <><h1>입력이 마감된 모임이에요</h1><p>{room.purpose}</p></> : <h1>{room.purpose}</h1>}<GuestAccessPanel room={room} roomKey={`${inviteCode}:auth:${authVersion}:access:${epoch}`} onJoined={joined => { if (!mounted.current || deniedRoom.current === inviteCode || epoch !== accessEpoch.current || currentAccess.current.inviteCode !== inviteCode || currentAccess.current.authVersion !== authVersion || getSessionVersion() !== authVersion) return; setRoom(joined); }} onVerified={restoreVerifiedGuest} /></div>;
 
   if (!accountSession && room.viewer.role === "HOST") return <div className="room-page page-width"><RoomHeader room={room} /><LoginGate returnTo={`/rooms/${inviteCode}`} /><p className="privacy-note">주최자 기능은 로그인 계정으로 만든 모임에서 사용할 수 있어요.</p></div>;
 
@@ -180,7 +178,7 @@ export default function RoomPage() {
       {room.public_status !== "COLLECTING" && <RecoveryActions key={`recovery:${ownerKey}`} room={room} onRoomChanged={setRoom} onAccessDenied={privateAccessDenied} />}
       {(room.submission_protocol !== "PRE_SUBMIT_V1" || correctionOpen(room)) && (room.public_status !== "COLLECTING" || (correctionOpen(room) && !room.capabilities?.can_edit_own_submission)) && <SavedSubmissionPanel key={`saved:${ownerKey}`} room={room} onAccessDenied={privateAccessDenied} />}
       {room.submission_protocol !== "PRE_SUBMIT_V1" && room.clarification_protocol === "owner-clarification-v1" && room.collection_status === "CLOSED" && room.public_status !== "CONFIRMED" && <ClarificationPanel key={`clarification:${ownerKey}`} room={room} onAccessDenied={privateAccessDenied} onPendingChange={pending => setClarificationPendingOwner(previous => pending ? ownerKey : previous === ownerKey ? null : previous)} onSaved={() => { void queryClient.invalidateQueries({ queryKey: ["submission", room.invite_code] }); void queryClient.invalidateQueries({ queryKey: ["room", room.invite_code] }); }} />}
-      <RoomHistoryNotice room={room} />
+      <RoomHistoryNotice />
     </div>
   );
 }
@@ -282,17 +280,10 @@ function CopyRoomLink({ room, primary = false, result = false }: { room: Room; p
   </div>;
 }
 
-function RoomHistoryNotice({ room }: { room: Room }) {
+function RoomHistoryNotice() {
   const account = useAccountSession();
-  const [saved, setSaved] = useState<boolean | null>(null);
-  const recent = useRecentRooms();
-  const { invite_code, purpose, viewer: { joined } } = room;
-  useEffect(() => { setSaved(rememberRoom({ invite_code, purpose, viewer: { joined } })); }, [invite_code, purpose, joined]);
   if (account) return <p className="room-history-note">계정으로 주최하거나 참여한 모임은 <Link to="/account/rooms">내 모임</Link>에서 다시 찾을 수 있어요.</p>;
-  return <p className={`room-history-note ${saved === false ? "alert warning" : ""}`} role="status">
-    {saved === false ? "이 브라우저에 모임 주소를 보관하지 못했어요. 초대 링크를 복사하거나 북마크해 주세요." : recent.rooms.some(item => item.inviteCode === invite_code) ? <>홈의 <Link to="/">이 기기의 최근 모임</Link>에서 다시 열 수 있어요. 초대 링크도 복사하거나 북마크해 보관해 주세요.</> : "초대 링크를 복사하거나 북마크해 보관해 주세요."}
-    {" "}게스트 참여 기록은 이 브라우저에만 보관돼요. 시크릿 모드 종료·데이터 삭제·만료·다른 기기에서는 기존 참여 권한이 이어지지 않을 수 있어요.
-  </p>;
+  return <p className="room-history-note">공유받은 초대 링크로 이 모임을 다시 열 수 있어요. 다른 기기에서 열거나 본인 인증 정보가 만료되면 기존 참여 기록에서 본인 확인이 필요할 수 있어요.</p>;
 }
 
 function SubmissionPanel({ room, onRoomChanged, onAccessDenied, draft, onDraftChanged, clarificationPending = false }: { room: Room; onRoomChanged: (room: Room) => void; onAccessDenied: (error: ApiError) => void; draft: string | null; onDraftChanged: (room: Room, rawText: string | null) => void; clarificationPending?: boolean }) {

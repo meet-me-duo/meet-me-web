@@ -534,3 +534,56 @@
 ### 계정 복구 게시 전 독립 리뷰 PASS
 
 승인된 A 흐름과 최종 제품7/신규 독립55의 지문, FI9의 실제 assertion 탐지·매회 복구55PASS, 전체 unit682·mock browser425PASS/기존skip1 및 실제 로컬 HTTPS 명시복구6PASS를 읽기 대조했다. 최종 manifest17개와 unit134/HTTPS120 입력의 현재 지문 불일치0이며 새 P1/P2는 없다. 원8 빠른 전체이탈·native 자동focus 미검증, 고정 runtime 선행 준비와 Primary대역의 TwoStage/금융graph 우회 한계는 유지한다. 이 판정은 로컬 게시 준비에 한하며 후속 commit/push·정확 HEAD CI는 별도 게이트다. 리뷰 중 제품·테스트·실행·원격 변경0이다.
+
+## 2026-10-29 UTC — DeepSeek 참고 밝은 UI 실험
+
+별도 `feature/ui-deepseek-experiment`에서 밝은 hero·자연어 예시·세 개 설명 카드, 공통 12px 카드와 pill CTA, 짧은 등장/표면 반응을 구현했다. 기존 생성/방/로그인/리뷰 로직·API 계약은 유지하고, Node loopback 합성 프리뷰 15개 상태를 제품 번들과 분리했다. Figma 정적 근거와 별도 브라우저 관측, Meet me용 선택을 `docs/UI_EXPERIMENT_DEEPSEEK.md`에 구분했다. 로컬 실행은 `docs/UI_PREVIEW.md` 참조.
+
+api/type/lint/build 통과. 단위 783/784 첫 회 통과 후 timeout 파일 16/16 재실행 통과. 최초 E2E 481통과/26실패/1skip에서 CSS 문제를 수정했고 최종 관련130개는127통과/2실패/1skip이다. 남은 OAuth 새 탭2개는 변경 전 main 빌드에서도 동일 실패로 확인했다. 프리뷰10/10, 45개 화면 가로넘침·JS오류·외부요청0. 정확한 범위·초기 실패는 `docs/verification/ui-deepseek-light.md`에 기록했다. 사용자 피처 브랜치 검토와 후속 승인 전 develop/main 병합·배포 금지, 원격 push/PR 없음.
+
+### 2026-10-29 UTC — 로컬 UI 검토 피드백 반영
+
+hero를 “조건만 말하세요, 결정은 Meet me가 할게요”로 복원했다. 설명 카드의 500ms 동시 등장을 850ms와 같은 관측 묶음당 180ms 순차 등장으로 바꾸고, 모바일 단독 카드에는 지연을 누적하지 않는다. reduced-motion과 observer 미지원의 정적 가독성을 유지했다. 하단 안내는 22px의 차분한 번호 배지와 16px 동일 stroke의 링크/조건 입력/확정 체크 아이콘으로 정돈했다. 별도 feature에만 게시하며 PR·develop/main 병합·운영 배포는 하지 않는다. 실측과 회귀 결과는 `docs/verification/ui-deepseek-light.md` 참조.
+
+### 2026-10-29 UTC — 카드 상승을 더 느리고 크게 조정
+
+사용자 추가 요청으로 등장 이동을 24→56px, duration850→1150ms와 끝에서 부드럽게 감속하는 easing으로 조정했다. 180ms 순차 등장·모바일 개별 trigger·모션 감소의 정적 표시·기존 문구/아이콘은 유지한다. 실제 캡처에서 드러난 아래 패널과의 겹침은 모바일 행 간격56px·다음 패널 간격64px로 해소하고 이동 중 경계 검사를 보강했다. 별도 feature 게시만 진행하며 PR·develop/main 병합·운영 배포는 하지 않는다.
+
+## 2026-10-29 — UI experiment: compact task screens
+
+Implemented the user's screen-by-screen review on `feature/ui-deepseek-experiment`:
+concise OAuth entry, equal provider surfaces, five-row history with disclosed filters,
+compact account security paragraphs, centered input and state panels, disclosed HOST
+closing tools, result-first reading order and disclosed saved input, selectable recommendation
+cards with one continuation action, and timezone-aware compact range presentation.
+The explicit actual start/end selection and API authorization contracts remain intact.
+Desktop viewport checks include 1366×768 and 1440×900; mobile reflows without clipping.
+See `docs/verification/ui-deepseek-light.md` for test totals and the known pre-existing
+OAuth popup fixture limitation. No merge, PR or deployment is part of this change.
+
+## 2026-10-29 — Remove the visible login-card title
+
+Following local review, retained the login heading for assistive technology with
+`sr-only` styling and removed its header wrapper and top content margin. The global
+navigation and provider labels, equal 224×46px surfaces, assets and OAuth behavior
+remain unchanged. Verified the production build, lint and existing responsive
+login keyboard/navigation checks.
+
+## 2026-10-29 — Align room-stage card widths
+
+Aligned the shared production room layout to one container per stage: 720px for
+input/checking/submitted, analysis/status/error, actual-time selection and confirmed
+results; 1040px while the three recommendation cards are displayed. Headers, body
+cards and saved-input/unapplied disclosures inherit the same edges. Mobile uses
+the existing page gutters. Only width rules changed; API, state logic, text, motion,
+button sizing and the collapsed analysis disclosure remain intact.
+
+## 2026-10-29 — Center the login buttons after removing the title
+
+The previous title removal left an empty feedback paragraph reserving 3em plus
+24px of vertical margins. Scoped the fix to `.login-card`: an empty status region
+now occupies zero space while remaining mounted for accessibility; real pending
+or error feedback grows below the buttons with a 12px gap. Provider dimensions,
+assets, navigation logic and other screen widths are unchanged. Added numerical
+horizontal/vertical centering assertions to the responsive login E2E and verified
+pending/error visibility, stable button position and restored centering after BFCache.

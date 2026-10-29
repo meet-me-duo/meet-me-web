@@ -23,6 +23,10 @@ for (const width of [320, 390, 1440]) {
     await page.goto("/create");
     const google = page.getByRole("link", { name: "Google로 로그인" });
     const kakao = page.getByRole("link", { name: "Kakao로 로그인" });
+    const card = (await page.locator(".login-card").boundingBox())!;
+    const group = (await page.getByRole("group", { name: "로그인 방법" }).boundingBox())!;
+    expect(Math.abs((group.y - card.y) - (card.y + card.height - group.y - group.height))).toBeLessThan(1);
+    expect(Math.abs((group.x - card.x) - (card.x + card.width - group.x - group.width))).toBeLessThan(1);
     for (const link of [google, kakao]) {
       await expect(link).toBeVisible();
       expect(await link.locator("img").evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
@@ -35,7 +39,7 @@ for (const width of [320, 390, 1440]) {
     const googleSurface = google.locator(".gsi-material-button");
     await expect(googleSurface).toHaveCSS("background-color", "rgb(242, 242, 242)");
     await expect(googleSurface).toHaveCSS("border-style", "none");
-    await expect(googleSurface).toHaveCSS("height", "40px");
+    await expect(googleSurface).toHaveCSS("height", "46px");
     await expect(google.locator(".gsi-material-button-contents")).toHaveText("Google로 로그인");
     expect((await google.locator("img").boundingBox())!.width).toBe(20);
     expect((await google.locator("img").boundingBox())!.height).toBe(20);

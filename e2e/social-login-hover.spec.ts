@@ -20,8 +20,8 @@ for (const width of [320, 390, 1440]) {
       const bounds = (await link.boundingBox())!;
       const visible = (await surface.boundingBox())!;
       expect(bounds.height).toBe(46);
-      expect(visible.height).toBe(provider === "Google" ? 40 : 46);
-      expect(visible.y - bounds.y).toBe(provider === "Google" ? 3 : 0);
+      expect(visible.height).toBe(46);
+      expect(visible.y - bounds.y).toBe(0);
       const clip = { x: bounds.x - 10, y: bounds.y - 10, width: bounds.width + 20, height: bounds.height + 20 };
       await page.screenshot({ path: testInfo.outputPath(`${provider}-default.png`), clip });
       await link.hover();

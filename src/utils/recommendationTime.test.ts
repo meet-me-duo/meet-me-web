@@ -65,7 +65,7 @@ describe("#19 recommendation range display", () => {
     expect(label).toMatch(/10\D{0,3}0?9/);
     expect(label).toContain("23:00");
     expect(label).toContain("02:00");
-    expect(label).toMatch(/UTC\+0?9(?::00)?/);
+    expect(label).not.toContain("UTC");
   });
   it("distinguishes two identical fall DST wall times by their offsets", () => {
     const label = formatRecommendationRange("2026-11-01T05:30:00Z", "2026-11-01T06:30:00Z", "America/New_York");

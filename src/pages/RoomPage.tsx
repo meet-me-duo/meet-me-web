@@ -10,7 +10,7 @@ import ClarificationPanel from "../components/ClarificationPanel";
 import SubmissionCheckPanel from "../components/SubmissionCheckPanel";
 import { RoomCloseConfirmation } from "../components/RoomCloseConfirmation";
 import { RecommendationsPanel, RECOMMENDATION_PROTOCOL } from "../components/RecommendationsPanel";
-import { formatRecommendationRange } from "../utils/recommendationTime";
+import { formatRecommendationRange, recommendationTimeZoneLabel } from "../utils/recommendationTime";
 import { CandidateCard } from "../components/CandidateCard";
 import { formatDate, formatDateTime } from "../utils/time";
 import { submissionText, SUBMISSION_TEXT_LIMIT } from "../utils/submission";
@@ -161,11 +161,12 @@ export default function RoomPage() {
 
   if (!accountSession && room.viewer.role === "HOST") return <div className="room-page page-width"><RoomHeader room={room} /><LoginGate returnTo={`/rooms/${inviteCode}`} /><p className="privacy-note">주최자 기능은 로그인 계정으로 만든 모임에서 사용할 수 있어요.</p></div>;
 
+  const ownInput = room.submission_protocol === "PRE_SUBMIT_V1" && !correctionOpen(room) ? <div key={`check:${ownerKey}:auth:${authVersion}`} className={room.collection_status === "CLOSED" ? "room-input-secondary" : "room-input-primary"}><SubmissionCheckPanel room={room} onRoomChanged={setRoom} onAccessDenied={privateAccessDenied} /></div> : null;
   return (
     <div className="room-page page-width">
       <RoomHeader room={room} />
       {roomQuery.isError && <div className="alert warning room-refresh-warning" role="status"><span>모임 상태를 갱신하지 못했어요. 마지막으로 확인한 상태를 보여드려요.</span><button className="button secondary" disabled={roomQuery.isFetching} onClick={() => roomQuery.refetch()}>진행 상태 다시 확인</button></div>}
-      {room.submission_protocol === "PRE_SUBMIT_V1" && !correctionOpen(room) && <SubmissionCheckPanel key={`check:${ownerKey}:auth:${authVersion}`} room={room} onRoomChanged={setRoom} onAccessDenied={privateAccessDenied} />}
+      {room.collection_status !== "CLOSED" && ownInput}
       {showEditor && (room.submission_protocol !== "PRE_SUBMIT_V1" || correctionOpen(room)) && <SubmissionPanel key={`submission:${ownerKey}`} room={room} onRoomChanged={setRoom} onAccessDenied={privateAccessDenied} draft={currentDraft} onDraftChanged={updateDraft} clarificationPending={clarificationPendingOwner === ownerKey} />}
       {!showEditor && currentDraft !== null && <section className="glass-card side-card"><h2>서버 반영을 확인하지 않은 임시 입력</h2><p>저장하지 않은 내용은 분석에 포함되지 않아요. 이 화면에만 임시로 보관했어요. 저장 여부는 내 저장된 입력에서 확인해 주세요. 새로고침하거나 다른 모임으로 이동하면 사라져요.</p><label className="field"><span>내 임시 조건</span><textarea readOnly value={currentDraft} rows={4} /></label><button className="button secondary" onClick={() => setDraft(null)}>임시 수정 버리기</button></section>}
       {room.public_status === "COLLECTING" && correctionOpen(room) && !room.capabilities?.can_edit_own_submission && <StateCard icon={<LockKeyhole />} title="조건을 수정하는 중이에요" body="기존에 입력을 제출한 참여자가 자신의 입력을 수정할 수 있어요." />}
@@ -178,6 +179,7 @@ export default function RoomPage() {
       {room.public_status !== "COLLECTING" && <RecoveryActions key={`recovery:${ownerKey}`} room={room} onRoomChanged={setRoom} onAccessDenied={privateAccessDenied} />}
       {(room.submission_protocol !== "PRE_SUBMIT_V1" || correctionOpen(room)) && (room.public_status !== "COLLECTING" || (correctionOpen(room) && !room.capabilities?.can_edit_own_submission)) && <SavedSubmissionPanel key={`saved:${ownerKey}`} room={room} onAccessDenied={privateAccessDenied} />}
       {room.submission_protocol !== "PRE_SUBMIT_V1" && room.clarification_protocol === "owner-clarification-v1" && room.collection_status === "CLOSED" && room.public_status !== "CONFIRMED" && <ClarificationPanel key={`clarification:${ownerKey}`} room={room} onAccessDenied={privateAccessDenied} onPendingChange={pending => setClarificationPendingOwner(previous => pending ? ownerKey : previous === ownerKey ? null : previous)} onSaved={() => { void queryClient.invalidateQueries({ queryKey: ["submission", room.invite_code] }); void queryClient.invalidateQueries({ queryKey: ["room", room.invite_code] }); }} />}
+      {room.collection_status === "CLOSED" && ownInput}
       <RoomHistoryNotice />
     </div>
   );
@@ -394,10 +396,10 @@ function SubmissionPanel({ room, onRoomChanged, onAccessDenied, draft, onDraftCh
     <p className="submission-privacy">{correcting ? "저장은 분석 완료를 뜻하지 않아요. 주최자가 다시 분석하면 저장한 조건을 사용해요." : "저장은 분석 완료를 뜻하지 않아요. 입력 마감 후 조건을 분석해요."}</p>
     {refreshRoom.isError && <div className="alert warning refresh-warning" role="status"><span>조건은 저장됐지만 모임 진행 상태를 갱신하지 못했어요.</span><button className="button secondary" onClick={() => refreshRoom.mutate()}>진행 상태 다시 확인</button></div>}
     {save.isError && !saveConfirmedByRead && <div className="alert error"><p>{saveUncertain ? "조건 저장 결과를 확인하지 못했어요. 모임을 다시 만들 필요는 없어요. 저장 여부를 확인한 뒤 이 방에서 다시 시도해 주세요." : "조건 저장 요청이 거절됐어요. 아래 내용을 확인해 주세요."}</p>{errorMessage(save.error)}</div>}
-    {correcting ? <div className="host-tools-inline"><RecoveryActions room={room} onRoomChanged={onRoomChanged} onAccessDenied={onAccessDenied} blocked={dirty || save.isPending || clarificationPending} /></div> : host && <div className="host-tools-inline"><h3>주최자 도구</h3>
+    {correcting ? <div className="host-tools-inline"><RecoveryActions room={room} onRoomChanged={onRoomChanged} onAccessDenied={onAccessDenied} blocked={dirty || save.isPending || clarificationPending} /></div> : host && <details className="host-tools-inline"><summary>주최자 도구</summary>
       <RoomCloseConfirmation disabled={close.isPending || save.isPending || clarificationPending} pending={close.isPending} unsaved={dirty} error={close.isError ? errorMessage(close.error) : undefined}
         onConfirm={() => { if (closing.current || !mounted.current || latestRoom.current.viewer.role !== "HOST" || latestRoom.current.collection_status === "CLOSED") return; closing.current = true; close.mutate(true); }} />
-    </div>}
+    </details>}
   </section></div>;
 }
 
@@ -450,7 +452,7 @@ function ResultPanel({ room, onAccessDenied }: { room: Room; onAccessDenied: (er
   if (saved) {
     if (saved.protocol !== RECOMMENDATION_PROTOCOL) return <StateCard icon={<RefreshCw />} title="추천 화면 업데이트가 필요해요" body="새로고침해 최신 화면을 확인해 주세요." />;
     const candidate = result.data.candidate;
-    return <><section className="results-section"><div className="section-heading centered"><span className="eyebrow success"><CheckCircle2 size={15} /> 일정 확정 완료</span><h2>실제 모임 일정이 확정됐어요</h2></div><div className="candidate-list single"><article className="candidate-card recommendation-card" aria-label="확정된 모임 일정"><h3>확정된 모임 일정</h3><p>{formatRecommendationRange(saved.start_at, saved.end_at, room.time_zone_id)}</p><p>{candidate.attendance_count}/{candidate.total_participants}명 참석 가능 · {candidate.meeting_mode === "REMOTE" ? "온라인 · 접속 정보 별도 공지" : `대면 · ${candidate.place?.display_name ?? "장소 협의"}`}</p></article></div><CopyRoomLink room={room} result /></section>{room.review_prompt_supported === true ? <ReviewPrompt inviteCode={room.invite_code} viewerKey={viewerContext(room)} /> : null}</>;
+    return <><section className="results-section"><div className="section-heading centered"><span className="eyebrow success"><CheckCircle2 size={15} /> 일정 확정 완료</span><h2>실제 모임 일정이 확정됐어요</h2></div><div className="candidate-list single"><article className="candidate-card recommendation-card" aria-label="확정된 모임 일정"><h3>확정된 모임 일정</h3><p className="confirmed-time">{formatRecommendationRange(saved.start_at, saved.end_at, room.time_zone_id)}</p><p className="field-hint">{recommendationTimeZoneLabel(room.time_zone_id)}</p><p>{candidate.attendance_count}/{candidate.total_participants}명 참석 가능 · {candidate.meeting_mode === "REMOTE" ? "온라인 · 접속 정보 별도 공지" : `대면 · ${candidate.place?.display_name ?? "장소 협의"}`}</p></article></div><CopyRoomLink room={room} result /></section>{room.review_prompt_supported === true ? <ReviewPrompt inviteCode={room.invite_code} viewerKey={viewerContext(room)} /> : null}</>;
   }
   return <><section className="results-section"><div className="section-heading centered"><span className="eyebrow success"><CheckCircle2 size={15} /> 플랜 선택 완료</span><h2>주최자가 선택한 플랜이에요</h2><p>{formatDateTime(result.data.confirmed_at)}에 주최자가 Plan {result.data.candidate.plan_type}을 선택했어요.</p></div><div className="candidate-list single"><CandidateCard candidate={result.data.candidate} canConfirm={false} confirmed /></div><CopyRoomLink room={room} result /></section>{room.review_prompt_supported === true ? <ReviewPrompt inviteCode={room.invite_code} viewerKey={viewerContext(room)} /> : null}</>;
 }

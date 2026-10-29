@@ -18,7 +18,7 @@ async function keyboardToHero(page: import("@playwright/test").Page) {
 test("landing page starts the two-step room flow", async ({ page }) => {
   await installAccountRefresh(page, "민수");
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /조건만 말하세요/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "조건만 말하세요, 결정은 Meet me가 할게요", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "모임 만들기" }).click();
   await expect(page).toHaveURL(/\/create$/);
   await expect(page.getByText("Step 1 of 2")).toBeVisible();
@@ -60,7 +60,7 @@ test("mobile layout keeps primary action inside viewport", async ({ page }, test
 });
 
 for (const [width, height] of [[320, 568], [360, 640], [390, 844], [430, 932], [768, 1024], [1440, 900], [320, 480], [844, 390], [568, 320], [844, 320], [1280, 600]]) {
-  test(`landing focuses the first screen and reveals details at ${width}x${height}`, async ({ page }) => {
+  test(`landing remains readable without horizontal overflow at ${width}x${height}`, async ({ page }) => {
     await page.setViewportSize({ width, height });
     await page.goto("/");
     const hero = page.locator(".hero");
@@ -69,14 +69,13 @@ for (const [width, height] of [[320, 568], [360, 640], [390, 844], [430, 932], [
     await expect(hero.getByRole("heading", { level: 1 })).toBeVisible();
     const heading = hero.getByRole("heading", { level: 1 });
     const lineHeight = await heading.evaluate((element) => Number.parseFloat(getComputedStyle(element).lineHeight));
-    expect((await heading.boundingBox())!.height).toBeLessThanOrEqual(lineHeight * 2 + 1);
-    await expect.poll(async () => (await hero.boundingBox())!.y + (await hero.boundingBox())!.height).toBeGreaterThanOrEqual(height);
+    expect((await heading.boundingBox())!.height).toBeLessThanOrEqual(lineHeight * 4 + 1);
     const buttonBox = (await action.boundingBox())!;
-    expect(buttonBox.y).toBeGreaterThanOrEqual(68);
-    expect(buttonBox.y + buttonBox.height).toBeLessThanOrEqual(height);
+    expect(buttonBox.x).toBeGreaterThanOrEqual(0);
+    expect(buttonBox.x + buttonBox.width).toBeLessThanOrEqual(width);
     expect(buttonBox.height).toBeCloseTo(48, 2);
-    if (width <= 540) expect(buttonBox.width).toBeCloseTo(208, 2);
-    expect((await details.boundingBox())!.y).toBeGreaterThanOrEqual(height);
+    await expect(page.getByRole("complementary", { name: "자연어 조건 입력 예시" })).toBeVisible();
+    expect((await details.boundingBox())!.y).toBeGreaterThan(buttonBox.y + buttonBox.height);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
 
     await page.mouse.wheel(0, height);
@@ -131,7 +130,7 @@ test("hero action has strong contrast, keyboard focus and subtle pointer feedbac
   await expect(action).toHaveCSS("outline-width", "3px");
   await expect(action).toHaveCSS("outline-color", "rgb(15, 23, 42)");
   await action.hover();
-  await expect.poll(() => action.evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).m42)).toBe(-1);
+  await expect.poll(() => action.evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).m42)).toBe(0);
   await page.mouse.down();
   await expect.poll(() => action.evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).m42)).toBe(0);
   await page.mouse.move(0, 0);
@@ -171,79 +170,84 @@ test("landing details stay readable with reduced motion and no observer", async 
   await expect(page.getByRole("heading", { name: "비공개 조건 입력" })).toBeVisible();
 });
 
-test("sticky story holds a complete explanation and its layers move at different speeds", async ({ page }) => {
+test("feature cards remain readable after forward and reverse scrolling", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
-  const story = page.locator(".story");
-  await expect(story).toHaveAttribute("data-enhanced", "true");
-  const position = await story.evaluate((element) => {
-    const stage = element.querySelector<HTMLElement>(".story-stage")!;
-    return { start: element.getBoundingClientRect().top + scrollY - Number.parseFloat(getComputedStyle(stage).top), distance: element.clientHeight - stage.offsetHeight };
-  });
-  const snapshots = [];
-  for (const fraction of [.06, .28]) {
-    await page.evaluate(({ start, distance, fraction }) => scrollTo(0, start + distance * fraction), { ...position, fraction });
-    await expect(story.getByRole("heading", { name: "말하듯 조건 작성" })).toBeInViewport();
-    await expect(story.locator('[data-current="true"]')).toHaveCSS("opacity", "1");
-    snapshots.push(await story.evaluate((element) => ({
-      top: element.querySelector(".story-stage")!.getBoundingClientRect().top,
-      far: new DOMMatrix(getComputedStyle(element.querySelector(".story-backdrop i")!).transform).m42,
-      near: new DOMMatrix(getComputedStyle(element.querySelector('[data-current="true"] .story-art')!).transform).m42,
-    })));
+  const panels = page.locator(".story-panel");
+  await expect(panels).toHaveCount(3);
+  for (const panel of await panels.all()) {
+    await panel.scrollIntoViewIfNeeded();
+    await expect(panel.getByRole("heading")).toBeInViewport();
+    await expect(panel).toHaveCSS("opacity", "1");
+    await expect(panel).not.toHaveAttribute("inert", "");
   }
-  expect(snapshots[1].top).toBeCloseTo(snapshots[0].top, 1);
-  expect(Math.abs(snapshots[1].far - snapshots[0].far)).toBeGreaterThan(Math.abs(snapshots[1].near - snapshots[0].near) * 2);
-  expect(position.distance).toBeGreaterThan(page.viewportSize()!.height * 2);
+  await page.evaluate(() => scrollTo(0, 0));
+  await panels.first().scrollIntoViewIfNeeded();
+  await expect(panels.first()).toHaveCSS("opacity", "1");
+  await expect(panels.first()).toHaveCSS("position", "static");
 });
 
-test("normal wheel and a fast jump resolve the story from current position, including reverse scroll", async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: "no-preference" });
+test("keyboard guide link reaches details without a scroll lock", async ({ page }) => {
   await page.goto("/");
-  const story = page.locator(".story");
-  await expect(story).toHaveAttribute("data-enhanced", "true");
-  const position = await story.evaluate((element) => {
-    const stage = element.querySelector<HTMLElement>(".story-stage")!;
-    return { start: element.getBoundingClientRect().top + scrollY - Number.parseFloat(getComputedStyle(stage).top), distance: element.clientHeight - stage.offsetHeight };
-  });
-  await page.evaluate(({ start }) => scrollTo(0, start), position);
-  for (let i=0;i<3;i++) await page.mouse.wheel(0, 240);
-  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(position.start + 500);
-  const target = position.start + position.distance * .9;
-  const current = await page.evaluate(() => scrollY);
-  await page.mouse.wheel(0, target - current);
-  await expect(story.getByRole("heading", { name: "최대 3개 시간 선택지" })).toBeVisible();
-  await expect(story.getByText("우열 없는 시간 선택지에서 참석 인원과 방식을 비교하고, 실제 시작·종료 시간을 골라 확정해요.")).toBeVisible();
-  await expect(story.getByRole("button", { name: /최대 3개/ })).toHaveAttribute("aria-current", "step");
-  await page.mouse.wheel(0, -(position.distance * .4));
-  await expect(story.getByRole("heading", { name: "비공개 조건 입력" })).toBeVisible();
-  await expect(story.locator('[data-current="true"]')).toHaveCSS("opacity", "1");
-});
-
-test("story steps can be revisited with the keyboard without a scroll lock", async ({ page }) => {
-  await page.goto("/");
-  const story = page.locator(".story");
-  await expect(story).toHaveAttribute("data-enhanced", "true");
-  const button = story.getByRole("button", { name: /최대 3개/ });
-  await button.focus();
+  await page.getByRole("link", { name: "이용 방법 보기" }).focus();
   await page.keyboard.press("Enter");
-  await expect(button).toBeFocused();
-  await expect(story.getByRole("heading", { name: "최대 3개 시간 선택지" })).toBeInViewport();
+  await expect(page.locator("#how-it-works")).toBeFocused();
+  await expect(page.getByRole("heading", { name: "일정 조율을 단순하게." })).toBeInViewport();
   await page.keyboard.press("End");
   await expect(page.getByRole("heading", { name: "링크 하나로 시작하는 일정 조율" })).toBeInViewport();
 });
 
-test("story animation failure and short viewports leave all three static panels readable", async ({ page }) => {
-  await page.addInitScript(() => { Object.defineProperty(window, "requestAnimationFrame", { value: undefined }); });
+test("changing motion preference stops decorative entrances", async ({ page }) => {
   await page.goto("/");
-  const story = page.locator(".story");
-  for (const panel of await story.locator(".story-panel").all()) {
+  await page.locator(".story-panel").first().scrollIntoViewIfNeeded();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  for (const panel of await page.locator(".story-panel").all()) {
+    await expect(panel).toHaveCSS("animation-name", "none");
     await expect(panel).toHaveCSS("opacity", "1");
-    await expect(panel).not.toHaveAttribute("inert", "");
-    await expect(panel.getByRole("heading")).toBeVisible();
   }
-  await page.setViewportSize({ width: 844, height: 320 });
-  await page.reload();
-  await expect(story.locator(".story-stage")).toHaveCSS("position", "static");
-  await expect(story.getByRole("heading", { name: "비공개 조건 입력" })).toBeVisible();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(844);
+});
+
+test("cards entering together visibly progress in sequence", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  const cards = page.locator(".story-panel");
+  await cards.first().evaluate(element => scrollTo(0, element.getBoundingClientRect().top + scrollY - innerHeight * .45));
+  await expect.poll(() => cards.evaluateAll(elements => {
+    const progress = elements.map(element => element.getAnimations()[0]?.effect?.getComputedTiming().progress ?? 0);
+    return progress[0] > progress[1] && progress[1] > progress[2] && progress[0] < 1;
+  })).toBe(true);
+  const nextSectionTop = (await page.locator(".how-card").boundingBox())!.y;
+  for (const card of await cards.all()) {
+    const box = (await card.boundingBox())!;
+    expect(box.y + box.height).toBeLessThanOrEqual(nextSectionTop);
+  }
+  for (const card of await cards.all()) await expect(card).toHaveCSS("opacity", "1");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(1440);
+});
+
+test("a later mobile card starts without waiting for offscreen cards", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 640 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  const cards = page.locator(".story-panel");
+  await cards.first().evaluate(element => scrollTo(0, element.getBoundingClientRect().top + scrollY - 300));
+  await expect(cards.first()).toHaveClass(/story-entered/);
+  const firstBox = (await cards.first().boundingBox())!;
+  expect(firstBox.y + firstBox.height).toBeLessThanOrEqual((await cards.nth(1).boundingBox())!.y);
+  await expect(cards.first()).toHaveCSS("opacity", "1");
+  await expect(cards.last()).not.toHaveClass(/story-entered/);
+  await cards.nth(1).evaluate(element => scrollTo(0, element.getBoundingClientRect().top + scrollY - 300));
+  await expect(cards.nth(1)).toHaveClass(/story-entered/);
+  await expect(cards.nth(1)).toHaveCSS("opacity", "1");
+  await expect(cards.last()).not.toHaveClass(/story-entered/);
+  await cards.last().scrollIntoViewIfNeeded();
+  await expect(cards.last()).toHaveClass(/story-entered/);
+  await expect(cards.last()).toHaveCSS("animation-delay", "0s");
+  await expect(cards.last()).toHaveCSS("opacity", "1");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  for (const card of await cards.all()) {
+    await expect(card).toHaveCSS("animation-name", "none");
+    await expect(card).toHaveCSS("transform", "none");
+  }
 });

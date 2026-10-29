@@ -70,7 +70,7 @@ function mount(snapshot: Room = ready, primary: RecommendationList = list()) {
 }
 async function chooseOnline() {
   fireEvent.click(await screen.findByRole("radio", { name: /온라인/ }));
-  fireEvent.click(screen.getAllByRole("button", { name: "이 시간 선택" })[0]!);
+  fireEvent.click(screen.getAllByRole("button", { name: "이 시간 선택" })[0]!); fireEvent.click(screen.getByRole("button", { name: "선택한 시간 확정하기" }));
   fireEvent.change(screen.getByLabelText("시작 시간"), { target: { value: "2026-10-08T10:30" } });
   fireEvent.change(screen.getByLabelText("종료 시간"), { target: { value: "2026-10-08T11:15" } });
 }

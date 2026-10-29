@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, CalendarRange, Clock3, Link2, Sparkles, Users } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Clock3, Link2, LockKeyhole, MessageSquare, MessageSquareText, Users } from "lucide-react";
 import { api, ApiError, errorMessage } from "../api/client";
 import type { MeetingMode } from "../api/types";
 import { createRoomBody, createRoomSchema, defaultSearchDates, type CreateRoomValues } from "../utils/createRoom";
@@ -73,19 +73,36 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
 
   if (!creating) return (
     <div className="landing page-width">
-      <section className="hero">
-        <h1><span className="hero-line">조건만 말하세요,</span><span className="hero-line">결정은 <span className="hero-accent">Meet me</span>가 할게요</span></h1>
-        <Button className="hero-cta" onClick={() => navigate("/create")}>모임 만들기 <ArrowRight size={20} aria-hidden="true" /></Button>
+      <section className="hero" aria-labelledby="hero-title">
+        <div className="hero-copy">
+          <p className="hero-kicker">함께할 시간을 찾는 더 편한 방법</p>
+          <h1 id="hero-title"><span className="hero-line">조건만 말하세요,</span>{" "}<span className="hero-line">결정은 <span className="hero-accent">Meet me</span>가 할게요</span></h1>
+          <p className="hero-description">각자의 시간·장소 조건을 비공개로 모아<br className="hero-break" /> 함께할 수 있는 시간을 제안해요.</p>
+          <div className="hero-actions">
+            <Button className="hero-cta" onClick={() => navigate("/create")}>모임 만들기 <ArrowRight size={18} aria-hidden="true" /></Button>
+            <a className="button secondary hero-guide" href="#how-it-works">이용 방법 보기</a>
+          </div>
+          <p className="hero-note"><LockKeyhole size={14} aria-hidden="true" /> 초대받은 참여자는 로그인 없이 참여할 수 있어요.</p>
+        </div>
+        <aside className="hero-example" aria-label="자연어 조건 입력 예시">
+          <div className="example-heading"><span><MessageSquare size={16} aria-hidden="true" /> 내 조건 입력</span><span className="example-label">예시</span></div>
+          <blockquote>“화요일이나 목요일 저녁에 가능해요.<br />봉천역 근처면 좋겠어요.”</blockquote>
+          <div className="example-tags" aria-hidden="true"><span>시간 조건</span><span>장소 조건</span></div>
+          <div className="example-divider" />
+          <p><LockKeyhole size={16} aria-hidden="true" /><span>다른 참여자에게는 원문을 공개하지 않아요.</span></p>
+          <small>주최자는 분석에 반영되지 않은 조건을 확인할 수 있어요.</small>
+        </aside>
       </section>
-      <div className="landing-details">
+      <div className="landing-details" id="how-it-works" tabIndex={-1}>
         <div className="landing-intro">
-          <div className="eyebrow"><Sparkles size={16} /> 자연어 조건 입력 & 스마트 조율</div>
-          <p><span className="landing-sentence">일정 색칠하기와 눈치게임은 이제 그만.</span><span className="landing-sentence">각자의 조건을 비공개로 모아 함께할 시간을 찾아요.</span></p>
+          <p className="section-kicker">말하기부터 약속까지</p>
+          <h2>일정 조율을 단순하게.</h2>
+          <p>각자의 조건을 모으고, 가능한 시간을 함께 살펴보세요.</p>
         </div>
         <LandingStory />
         <section className="how-card">
           <h2>링크 하나로 시작하는 일정 조율</h2>
-          <div><How number="1" icon={<Link2 />} title="방 생성 & 공유" /><How number="2" icon={<CalendarRange />} title="각자 조건 제출" /><How number="3" icon={<Sparkles />} title="시간 선택 & 확정" /></div>
+          <ol className="how-steps"><How number="1" icon={<Link2 />} title="방 생성 & 공유" /><How number="2" icon={<MessageSquareText />} title="각자 조건 제출" /><How number="3" icon={<Check />} title="시간 선택 & 확정" /></ol>
         </section>
       </div>
     </div>
@@ -130,7 +147,7 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
   );
 }
 
-function How({ number, icon, title }: { number: string; icon: React.ReactNode; title: string }) { return <div className="how-step"><b>{number}</b><span>{icon}</span><strong>{title}</strong></div>; }
+function How({ number, icon, title }: { number: string; icon: React.ReactNode; title: string }) { return <li className="how-step"><b aria-hidden="true">{number}</b><span aria-hidden="true">{icon}</span><strong>{title}</strong></li>; }
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) { return <label className="field"><span>{label}</span>{children}<ErrorText text={error} /></label>; }
 function ErrorText({ text, id }: { text?: string; id?: string }) { return text ? <small id={id} className="field-error" role="alert">{text}</small> : null; }
 function Policy({ icon, checked, title, detail, onChange, children }: { icon: React.ReactNode; checked: boolean; title: string; detail: string; onChange: (value: boolean) => void; children?: React.ReactNode }) { return <div className={`policy-card ${checked ? "selected" : ""}`}><label><input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} /><span className="policy-icon">{icon}</span><span><strong>{title}</strong><small>{detail}</small></span></label>{children && <div className="policy-content">{children}</div>}</div>; }

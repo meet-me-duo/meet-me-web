@@ -7,6 +7,13 @@ test("landing explains equal time choices and the host disclosure boundary", asy
   await page.goto("/");
   await expect(page.locator(".hero")).toHaveCSS("opacity", "1");
   await page.screenshot({ path: testInfo.outputPath("landing.png") });
+  if (page.viewportSize()!.width <= 540) {
+    await expect(page.locator(".landing-details")).toBeHidden();
+    await expect(page.locator(".hero-description-mobile")).toHaveText("시간·장소 조건을 모아, 함께 만날 시간을 찾아요.");
+    await expect(page.getByRole("button", { name: "모임 만들기" })).toBeVisible();
+    // The mobile summary is intentionally compact; the desktop disclosure stays intact.
+    await page.setViewportSize({ width: 1440, height: 900 });
+  }
   const story = page.getByRole("region", { name: "Meet me 주요 기능" });
   await expect(story.getByRole("heading", { name: "최대 3개 시간 선택지" })).toBeVisible();
   await expect(story).toContainText("우열 없는 시간 선택지");

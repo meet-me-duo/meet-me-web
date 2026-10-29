@@ -636,13 +636,13 @@ fieldset.field legend { margin-bottom: 9px; }
   .hero-kicker { margin-bottom: 20px; }
 }
 @media (max-width: 540px) {
-  .landing .hero { padding-block: 40px 24px; gap: 36px; }
+  .landing .hero { min-height: calc(100svh - 69px); align-content: center; padding-block: 40px; gap: 0; }
   .landing .hero h1 { font-size: clamp(1.75rem, 7.6vw, 2.5rem); line-height: 1.4; }
   .hero-description { font-size: .9375rem; margin-top: 20px; }
   .hero-break { display: none; }
   .hero-actions { gap: 10px; margin-top: 24px; }
   .landing .hero-cta, .hero-guide { padding-inline: 17px; font-size: .875rem; }
-  .hero-example { padding: 24px 20px; }
+  .hero-example { display: none; }
   .landing .how-card { padding: 24px 20px; }
 }
 

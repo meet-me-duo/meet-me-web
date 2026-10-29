@@ -74,7 +74,13 @@ for (const [width, height] of [[320, 568], [360, 640], [390, 844], [430, 932], [
     expect(buttonBox.x).toBeGreaterThanOrEqual(0);
     expect(buttonBox.x + buttonBox.width).toBeLessThanOrEqual(width);
     expect(buttonBox.height).toBeCloseTo(48, 2);
-    await expect(page.getByRole("complementary", { name: "자연어 조건 입력 예시" })).toBeVisible();
+    const example = page.getByRole("complementary", { name: "자연어 조건 입력 예시", includeHidden: true });
+    if (width <= 540) {
+      await expect(example).toBeHidden();
+      expect((await details.boundingBox())!.y).toBeGreaterThanOrEqual(height);
+    } else {
+      await expect(example).toBeVisible();
+    }
     expect((await details.boundingBox())!.y).toBeGreaterThan(buttonBox.y + buttonBox.height);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
 

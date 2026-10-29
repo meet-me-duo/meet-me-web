@@ -10,7 +10,7 @@ import { endSession, getSession, restoreSession } from "./session";
 
 const account = { id: "11111111-2222-4333-8444-555555555555", displayName: "합성 회원" };
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
-const auth = (next = account) => json({ accessToken: "synthetic-access", expiresAt: new Date(Date.now() + 900_000).toISOString(), account: next });
+const auth = (next: unknown = account) => json({ accessToken: "synthetic-access", expiresAt: new Date(Date.now() + 900_000).toISOString(), account: next });
 function deferred<T>() { let resolve!: (value: T) => void; const promise = new Promise<T>(done => { resolve = done; }); return { promise, resolve }; }
 let fetchMock: ReturnType<typeof vi.fn>;
 const clients: QueryClient[] = [];
@@ -21,8 +21,8 @@ beforeEach(async () => {
   await endSession(); fetchMock.mockClear();
 });
 afterEach(async () => { cleanup(); clients.splice(0).forEach(client => client.clear()); fetchMock.mockResolvedValue(new Response(null, { status: 204 })); await endSession(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
-function mount() { return render(<MemoryRouter><AccountActionsProvider><AccountControls /><Routes><Route path="/account/security" element={<AccountSecurityPage />} /><Route path="*" element={null} /></Routes></AccountActionsProvider></MemoryRouter>); }
-async function signedIn() { fetchMock.mockResolvedValueOnce(auth()); await act(async () => { await restoreSession(); }); fetchMock.mockClear(); }
+function mount() { return render(<MemoryRouter><AccountActionsProvider><AccountControls /><Routes><Route path="/account/security" element={<AccountSecurityPage />} /><Route path="/operations" element={<h1>운영 페이지 진입 확인</h1>} /><Route path="*" element={null} /></Routes></AccountActionsProvider></MemoryRouter>); }
+async function signedIn(next: unknown = account) { fetchMock.mockResolvedValueOnce(auth(next)); await act(async () => { await restoreSession(); }); fetchMock.mockClear(); }
 function openSecurity() {
   fireEvent.click(screen.getByRole("button", { name: /계정 메뉴/ }));
   fireEvent.click(screen.getByRole("link", { name: "계정 보안" }));
@@ -33,6 +33,52 @@ function openSecurity() {
 }
 
 describe("account state and guarded account actions", () => {
+  it.each([undefined, null, {}, false, { canViewOperations: false }, { canViewOperations: "true" }, { canViewOperations: 1 }])("hides the admin entry without an explicit true server capability (%j)", async capabilities => {
+    await signedIn({ ...account, capabilities }); mount();
+    fireEvent.click(screen.getByRole("button", { name: /계정 메뉴/ }));
+    expect(screen.getByRole("link", { name: "계정 보안" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "어드민 페이지", hidden: true })).not.toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("places the server-authorized admin entry after account security and closes the menu on navigation", async () => {
+    await signedIn({ ...account, capabilities: { canViewOperations: true } }); mount();
+    fireEvent.click(screen.getByRole("button", { name: /계정 메뉴/ }));
+    const links = within(screen.getByRole("group", { name: "계정 동작" })).getAllByRole("link");
+    expect(links.map(link => link.textContent)).toEqual(["계정 보안", "어드민 페이지"]);
+    const entry = screen.getByRole("link", { name: "어드민 페이지" });
+    expect(entry).toHaveAttribute("href", "/operations");
+    fireEvent.click(entry);
+    expect(screen.getByRole("heading", { name: "운영 페이지 진입 확인" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /계정 메뉴/ })).toHaveAttribute("aria-expanded", "false");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("removes the entry when the same account loses its capability or a different account signs in", async () => {
+    await signedIn({ ...account, capabilities: { canViewOperations: true } }); mount();
+    fireEvent.click(screen.getByRole("button", { name: /계정 메뉴/ }));
+    expect(screen.getByRole("link", { name: "어드민 페이지" })).toBeInTheDocument();
+    await signedIn({ ...account, capabilities: { canViewOperations: false } });
+    expect(screen.queryByRole("link", { name: "어드민 페이지", hidden: true })).not.toBeInTheDocument();
+    await signedIn({ ...account, capabilities: { canViewOperations: true } });
+    expect(screen.getByRole("link", { name: "어드민 페이지" })).toBeInTheDocument();
+    await signedIn({ id: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee", displayName: "다른 합성 회원" });
+    expect(screen.getByRole("button", { name: "다른 합성 회원 계정 메뉴" })).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(screen.getByRole("button", { name: /계정 메뉴/ }));
+    expect(screen.queryByRole("link", { name: "어드민 페이지", hidden: true })).not.toBeInTheDocument();
+  });
+
+  it("removes the admin entry immediately when logout begins", async () => {
+    await signedIn({ ...account, capabilities: { canViewOperations: true } }); mount();
+    const pending = deferred<Response>(); fetchMock.mockReturnValueOnce(pending.promise);
+    fireEvent.click(screen.getByRole("button", { name: /계정 메뉴/ }));
+    expect(screen.getByRole("link", { name: "어드민 페이지" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "로그아웃" }));
+    expect(screen.queryByRole("link", { name: "어드민 페이지", hidden: true })).not.toBeInTheDocument();
+    await act(async () => pending.resolve(new Response(null, { status: 204 })));
+    expect(screen.getByRole("link", { name: "로그인" })).toBeInTheDocument();
+  });
+
   it("shows a login entry for anonymous state, and only an account trigger after authentication", async () => {
     mount(); expect(screen.getByRole("link", { name: "로그인" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /계정 메뉴/ })).not.toBeInTheDocument();

@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ChevronDown, LogOut, ShieldCheck, UserRound } from "lucide-react";
+import { ChevronDown, Gauge, LogOut, ShieldCheck, UserRound } from "lucide-react";
 import { getSessionVersion, subscribeSession, type Account } from "./session";
 import { getSessionRestoreStatus } from "./sessionRestoration";
 import { useAccountSession } from "./useAccount";
@@ -27,6 +27,7 @@ function AccountMenu({ account, busy, onLogout }: { account: Account; busy: bool
     <div hidden={!open} id={`${id}-panel`} className="account-menu-panel" role="group" aria-label="계정 동작">
       <button type="button" className="account-menu-item" disabled={busy} onClick={() => { setOpen(false); onLogout(); }}><LogOut size={17} aria-hidden="true" />로그아웃</button>
       <Link className="account-menu-item" to="/account/security" onClick={() => setOpen(false)}><ShieldCheck size={17} aria-hidden="true" />계정 보안</Link>
+      {account.capabilities?.canViewOperations === true && <Link className="account-menu-item" to="/operations" onClick={() => setOpen(false)}><Gauge size={17} aria-hidden="true" />어드민 페이지</Link>}
     </div>
   </div>;
 }

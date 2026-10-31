@@ -1,0 +1,33 @@
+{
+  "workItem": "issue-107-web-evidence-contract",
+  "sourceRevision": "22eb625b32056e0762efdc81b168cf31d4fa827a",
+  "testFiles": [
+    {
+      "path": "src/components/SubmissionCheckPanel.evidence.test.tsx",
+      "sha256": "f1e02978086e2214dab585c5655e353bd4de91c40ca55091fd63c47801544272"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/components/SubmissionCheckPanel.evidence.test.tsx",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1"
+  ],
+  "failedTests": [
+    "EX-RECEIPT shows received unresolved evidence without claiming interpretation confirmed",
+    "EX-ORIGINAL direct answer is an empty scoped editor and never rewrites the original input",
+    "EX-ORIGINAL A/B only previews and submits the supplement after explicit confirmation",
+    "EX-RECEIPT an unresolved new original after the question cap is not received"
+  ],
+  "expectedFailureCategory": "MISSING_BEHAVIOR",
+  "recordedAt": "2026-10-29T08:32:00.370213+00:00",
+  "provenance": "RED_RECONFIRMED_AFTER_FI_SPEC_EXPANSION",
+  "localLog": ".codex/tdd-evidence/issue-107-evidence-red-final.log",
+  "notes": "Synthetic public contract only; original source restored after RED confirmation. No server, OAuth or model calls."
+}

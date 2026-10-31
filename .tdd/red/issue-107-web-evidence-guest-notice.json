@@ -1,0 +1,30 @@
+{
+  "workItem": "issue-107-web-evidence-guest-notice",
+  "sourceRevision": "22eb625b32056e0762efdc81b168cf31d4fa827a",
+  "testFiles": [
+    {
+      "path": "src/components/GuestParticipation.evidence.test.tsx",
+      "sha256": "6c4a15dec63d967fb5a6ce81ccfa5082a69df49732cee2d3b772f6463eb386e0"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/components/GuestParticipation.evidence.test.tsx",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1"
+  ],
+  "failedTests": [
+    "EX-PRIVACY tells a blind V2 replacement writer about host disclosure before saving"
+  ],
+  "expectedFailureCategory": "MISSING_BEHAVIOR",
+  "recordedAt": "2026-10-29T08:32:00.371044+00:00",
+  "provenance": "CHRONOLOGICAL_RED",
+  "localLog": ".codex/tdd-evidence/issue-107-guest-notice-red.log",
+  "notes": "Synthetic public contract only; original source restored after RED confirmation. No server, OAuth or model calls."
+}

@@ -1,0 +1,29 @@
+{
+  "workItem": "issue-107-web-unverified-correction",
+  "sourceRevision": "22eb625b32056e0762efdc81b168cf31d4fa827a",
+  "testFiles": [
+    {
+      "path": "src/components/SubmissionCheckPanel.unverified-correction.test.tsx",
+      "sha256": "d4ada676d04feac277c0d3f5fc536d2e1fa52465217b4eacdc58647a394b3f8f"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/components/SubmissionCheckPanel.unverified-correction.test.tsx",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1"
+  ],
+  "failedTestCount": 1,
+  "initialPassCount": 0,
+  "expectedFailureCategory": "MISSING_BEHAVIOR",
+  "recordedAt": "2026-10-29T08:54:16.720693+00:00",
+  "provenance": "CHRONOLOGICAL_RED",
+  "localLog": ".codex/tdd-evidence/issue-107-unverified-correction-red.log",
+  "notes": "Public server UNVERIFIED_CORRECTION provenance contract, no historical question evidence reuse."
+}

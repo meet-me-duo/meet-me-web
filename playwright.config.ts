@@ -7,7 +7,7 @@ export default defineConfig({
   reporter: process.env.CI ? "github" : "list",
   use: { baseURL: "http://127.0.0.1:4173", trace: "on-first-retry" },
   webServer: {
-    command: "node node_modules/vite/bin/vite.js preview --configLoader runner --host 127.0.0.1 --port 4173",
+    command: "node node_modules/vite/bin/vite.js preview --config vite.e2e.config.ts --configLoader runner --host 127.0.0.1 --port 4173",
     url: "http://127.0.0.1:4173",
     reuseExistingServer: !process.env.CI,
   },

@@ -1,0 +1,29 @@
+{
+  "workItem": "issue-107-web-answer-quarantine",
+  "sourceRevision": "22eb625b32056e0762efdc81b168cf31d4fa827a",
+  "testFiles": [
+    {
+      "path": "src/auth/draftQuarantine.evidence.test.ts",
+      "sha256": "2487ab3474b8c97ff7f5ade7671cd9dcf326eb225cfeff9d25977d47aa964abe"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/auth/draftQuarantine.evidence.test.ts",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1"
+  ],
+  "failedTestCount": 2,
+  "initialPassCount": 4,
+  "expectedFailureCategory": "MISSING_BEHAVIOR",
+  "recordedAt": "2026-10-29T08:54:16.720112+00:00",
+  "provenance": "CHRONOLOGICAL_RED",
+  "localLog": ".codex/tdd-evidence/issue-107-answer-quarantine-red.log",
+  "notes": "Independent security test designer; only optional type skeleton added before RED."
+}

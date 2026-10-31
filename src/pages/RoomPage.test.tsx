@@ -249,6 +249,17 @@ describe("saved conditions and plan accuracy", () => {
     time_ranges: [{ start_at: "2026-10-06T10:00:00Z", end_at: "2026-10-06T12:00:00Z" }, { start_at: "2026-10-13T10:00:00Z", end_at: "2026-10-13T12:00:00Z" }],
   };
 
+  it("explains unsupported travel on a host no-match result without claiming the restriction was satisfied", async () => {
+    vi.spyOn(api, "getRoom").mockResolvedValue({ ...room, public_status: "NO_MATCH", viewer: { ...room.viewer, role: "HOST" } });
+    vi.spyOn(api, "getUnappliedInputs").mockResolvedValue([{ participant_display_name: "합성 참여자", raw_text: "합성역에서 도보 7분 이내", finalized_answer: "시간은 저녁 7시부터 가능", reason: "UNSUPPORTED_TRAVEL_CONSTRAINT", failure_scope: "PLACE" }]);
+    mount(0, "HOST");
+    await screen.findByText("이동 조건은 현재 계산할 수 없어 충족 여부를 확인하지 못했어요. 시간 조건은 별도로 계산했어요.");
+    expect(screen.getByText("합성역에서 도보 7분 이내")).toBeInTheDocument();
+    expect(screen.getByText("제출한 보완 답변: 시간은 저녁 7시부터 가능")).toBeInTheDocument();
+    expect(screen.getByText("장소 조건 미반영")).toBeInTheDocument();
+    expect(screen.queryByText("UNSUPPORTED_TRAVEL_CONSTRAINT")).not.toBeInTheDocument();
+  });
+
   it("shows partial coverage and a candidate limitation by the host selection action", async () => {
     vi.spyOn(api, "getRoom").mockResolvedValue({ ...room, public_status: "READY_WITH_WARNINGS", viewer: { ...room.viewer, role: "HOST" } });
     vi.spyOn(api, "getCandidates").mockResolvedValue({ quality: "PARTIAL", applied_submissions: 2, total_submissions: 3, unapplied_inputs: 1, candidates: [candidate] });

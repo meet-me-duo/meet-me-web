@@ -34,8 +34,14 @@ async function mockApi(page: Page, options: { rawText?: string | null; status?: 
       unappliedRequests.push(url);
       return route.fulfill({ json: [{ participant_display_name: "레거시 참여자", raw_text: null, reason: "LEGACY_MANUAL_ONLY_UNSUPPORTED" }, { participant_display_name: "다른 참여자", raw_text: "비공개 조건 원문", reason: options.unappliedReason ?? "PARSE_FAILED" }] });
     }
-    if (url.endsWith("/candidates")) return route.fulfill({ json: { quality: "PARTIAL", applied_submissions: 2, total_submissions: options.emptyCandidates ? 4 : 3, unapplied_inputs: 2, candidates: options.emptyCandidates ? [] : [candidate] } });
-    if (url.endsWith("/result")) return route.fulfill({ json: { candidate, confirmed_at: "2026-09-20T13:00:00Z" } });
+    if (new URL(url).pathname.endsWith("/candidates")) {
+      expect(new URL(url).searchParams.get("attendance_support")).toBe("conditional-v1");
+      return route.fulfill({ json: { quality: "PARTIAL", applied_submissions: 2, total_submissions: options.emptyCandidates ? 4 : 3, unapplied_inputs: 2, candidates: options.emptyCandidates ? [] : [candidate] } });
+    }
+    if (new URL(url).pathname.endsWith("/result")) {
+      expect(new URL(url).searchParams.get("attendance_support")).toBe("conditional-v1");
+      return route.fulfill({ json: { candidate, confirmed_at: "2026-09-20T13:00:00Z" } });
+    }
     return route.fulfill({ json: {
       invite_code: code, purpose: "자연어 조건 모임", meeting_mode: "EITHER", time_zone_id: "Asia/Seoul",
       search_start_date: "2026-09-21", search_end_date: "2026-09-28", search_range_source: "HOST_SPECIFIED",

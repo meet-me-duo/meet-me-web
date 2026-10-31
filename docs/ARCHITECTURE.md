@@ -103,3 +103,10 @@
 ## 격리 실험: 후보 문장 안의 장소 미검증 설명 (2026-10-31)
 
 서버 variant.summary를 기존 후보 설명에 연결하고 attendance_confirmed=false이면 인원 문구를 참석 가능이 아닌 시간 일치로 표시한다. 시간 선택과 확정 결과·legacy 카드에서도 같은 의미를 유지한다. 별도 경고 영역·배지·레이아웃을 추가하지 않는다. 원문은 기존 권한을 유지하고 자동 비대면 전환을 하지 않는다. 새 필드가 없는 이전 서버 응답은 기존 표시로 읽는다. 서버의 V22 및 미확인 상태 영속성은 운영 미반영이며 실제 도보·모델 정확성은 무료 UI 테스트가 증명하지 않는다.
+
+
+## 조건부 참석 표시 지원 선언 (2026-10-31 로컬 검증)
+
+서버와 동반한 호환 보강으로 `api`의 후보·추천 primary/alternatives·확정·결과 여섯 요청에 `attendance_support=conditional-v1` query를 보낸다. 새로운 인증이나 CORS header가 아니며 cookie/Bearer/Origin·요청 본문·AbortSignal·실제 시각·opaque cursor·cache:no-store는 기존 계약 그대로다. `attendance_confirmed=false`는 시간 일치/장소·이동 미확정으로 표시하고 주최자 시간 선택으로 true가 되지 않는다. 필드가 없는 과거 확인 결과는 기존 표시를 유지한다.
+
+이 선언을 모르는 기존 서버는 query를 무시한다. 지원 선언이 없는 구 웹에 조건부 결과를 제공하는 신 서버는409 CLIENT_UPDATE_REQUIRED와 새로고침 detail을 반환한다. 이미 존재하는 오류 영역을 사용하며 후보·결과 cache보다409/error를 먼저 표시하는 구 main bundle 동작을 별도 Chromium 검증으로 확인한다. UI/디자인/추가 경고 배지는 바꾸지 않는다. 연결이 끊긴 탭의 과거 DOM은 소급 삭제할 수 없으므로 다음 재조회 및 모든 확정의 서버 거부를 보장하고, 최초 조건부 서버 배포 전에 새 웹과 서버 guard를 함께 준비한다. V2 flag/유료 요청/운영 활성화는 별도다.

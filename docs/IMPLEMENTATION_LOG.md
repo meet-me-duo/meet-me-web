@@ -587,3 +587,12 @@ or error feedback grows below the buttons with a 12px gap. Provider dimensions,
 assets, navigation logic and other screen widths are unchanged. Added numerical
 horizontal/vertical centering assertions to the responsive login E2E and verified
 pending/error visibility, stable button position and restored centering after BFCache.
+
+
+## 2026-10-31 조건부 참석 표시의 구 웹 호환 보강 — 로컬 단계
+
+기준 develop2fa24d3a에서 별도 `feature/conditional-attendance-client-compat`를 준비했다. UI 컴포넌트·CSS는 유지하고 여섯 결과 요청의 의미 지원 query만 추가했다. 실제 로컬 서버가 생성한 OpenAPI에서 여섯 optional parameter·409 설명만 변경됐음을 JSON 비교하고 snapshot/types를 동기화했다. 기존 브라우저 대역은 query를 경로와 분리해 해석하며 지원 선언을 검증한다.
+
+API 계약15개 RED8FAIL/7PASS→GREEN15PASS, 전체 unit825PASS, 관련 desktop/mobile98PASS를 확인했다. 신 웹의 미확정 선택·refresh와 구 confirmed 응답, 실제 구 main5555 source bundle의 열린탭 확정 거부·cached result 재조회4case도 Chromium에서 개별PASS다. 브라우저 API는 합성 contract 대역이며 실제HTTP+PostgreSQL 경계 검증은 동반 서버20test와 분리한다. 하네스의 초기 단일 variant locator/문서 이동 계측/visibility event 전달 오류는 원본을 보존하고 실패 case만 수정·재확인했다. 나머지 표준 브라우저 회귀와 서버 전체 최종 검사 결과는 완료 시 별도 최종 검증 기록에 남긴다. 새Issue/PR/push·병합·운영·V2 활성화·실모델/지도 호출은 이 로컬 단계에서 실행하지 않았다.
+
+- 2026-10-31 구 웹 참석 호환 검증: unit825PASS, 기본 Chromium518개 discovery와98+420비중복 실행의 일치 확인(517PASS·기존 landing desktop mobile전용1SKIP·retry0), evidence6PASS, 로컬 native 하네스 사전검사 단위3PASS, build/lint/typecheck/api:check 통과. 구·신 동결 bundle4개별 브라우저 검증은 API contract 대역이며 실제 HTTP/PostgreSQL 가드와는 별도 증거다. 운영·실모델 전체 성공 또는 배포 완료로 확대하지 않는다.

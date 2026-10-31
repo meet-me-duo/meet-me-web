@@ -693,17 +693,13 @@ export interface components {
             null?: boolean;
             float?: boolean;
             container?: boolean;
-            string?: boolean;
-            object?: boolean;
-            /** @deprecated */
-            textual?: boolean;
             missingNode?: boolean;
-            boolean?: boolean;
             number?: boolean;
             /** @enum {string} */
             nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
             integralNumber?: boolean;
             valueNode?: boolean;
+            object?: boolean;
             pojo?: boolean;
             floatingPointNumber?: boolean;
             short?: boolean;
@@ -712,7 +708,11 @@ export interface components {
             double?: boolean;
             bigDecimal?: boolean;
             bigInteger?: boolean;
+            /** @deprecated */
+            textual?: boolean;
+            boolean?: boolean;
             binary?: boolean;
+            string?: boolean;
             embeddedValue?: boolean;
         };
         /** @description 현재 익명 참여자의 자연어 제출 또는 수정 요청 */
@@ -3250,7 +3250,10 @@ export interface operations {
     };
     confirm: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description 미확정 참석 의미 지원: conditional-v1만 지원 명시로 인정. 생략/기타 값은 해당 결과에 CLIENT_UPDATE_REQUIRED(409) */
+                attendance_support?: string;
+            };
             header?: never;
             path: {
                 inviteCode: string;
@@ -3311,7 +3314,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiProblemSchema"];
                 };
             };
-            /** @description 분석 준비 전·수정 라운드 OPEN·STALE_ANALYSIS·다른 선택 확정 충돌 */
+            /** @description 분석 준비 전·수정 라운드 OPEN·STALE_ANALYSIS·다른 선택 확정 충돌·CLIENT_UPDATE_REQUIRED */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -3675,7 +3678,10 @@ export interface operations {
     };
     confirm_1: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description 미확정 참석 의미 지원: conditional-v1만 지원 명시로 인정. 생략/기타 값은 해당 결과에 CLIENT_UPDATE_REQUIRED(409) */
+                attendance_support?: string;
+            };
             header?: never;
             path: {
                 inviteCode: string;
@@ -3723,7 +3729,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiProblemSchema"];
                 };
             };
-            /** @description 다른 후보가 이미 확정됨 */
+            /** @description 다른 후보가 이미 확정됨 또는 CLIENT_UPDATE_REQUIRED */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -4285,7 +4291,10 @@ export interface operations {
     };
     result: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description 미확정 참석 의미 지원: conditional-v1만 지원 명시로 인정. 생략/기타 값은 해당 결과에 CLIENT_UPDATE_REQUIRED(409) */
+                attendance_support?: string;
+            };
             header?: never;
             path: {
                 inviteCode: string;
@@ -4332,7 +4341,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiProblemSchema"];
                 };
             };
-            /** @description 분석 준비 전 또는 수정 라운드 OPEN */
+            /** @description 분석 준비 전·수정 라운드 OPEN·CLIENT_UPDATE_REQUIRED */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -4345,7 +4354,10 @@ export interface operations {
     };
     primary: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description 미확정 참석 의미 지원: conditional-v1만 지원 명시로 인정. 생략/기타 값은 해당 결과에 CLIENT_UPDATE_REQUIRED(409) */
+                attendance_support?: string;
+            };
             header?: never;
             path: {
                 inviteCode: string;
@@ -4401,7 +4413,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiProblemSchema"];
                 };
             };
-            /** @description 분석 준비 전·수정 라운드 OPEN·STALE_ANALYSIS·다른 선택 확정 충돌 */
+            /** @description 분석 준비 전·수정 라운드 OPEN·STALE_ANALYSIS·다른 선택 확정 충돌·CLIENT_UPDATE_REQUIRED */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -4419,6 +4431,8 @@ export interface operations {
                 cursor?: string;
                 /** @description 페이지 크기1~100 */
                 limit?: number;
+                /** @description 미확정 참석 의미 지원: conditional-v1만 지원 명시로 인정. 생략/기타 값은 해당 결과에 CLIENT_UPDATE_REQUIRED(409) */
+                attendance_support?: string;
             };
             header?: never;
             path: {
@@ -4475,7 +4489,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiProblemSchema"];
                 };
             };
-            /** @description 분석 준비 전·수정 라운드 OPEN·STALE_ANALYSIS·다른 선택 확정 충돌 */
+            /** @description 분석 준비 전·수정 라운드 OPEN·STALE_ANALYSIS·다른 선택 확정 충돌·CLIENT_UPDATE_REQUIRED */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -4573,7 +4587,10 @@ export interface operations {
     };
     candidates: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description 미확정 참석 의미 지원: conditional-v1만 지원 명시로 인정. 생략/기타 값은 해당 결과에 CLIENT_UPDATE_REQUIRED(409) */
+                attendance_support?: string;
+            };
             header?: never;
             path: {
                 inviteCode: string;
@@ -4620,7 +4637,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiProblemSchema"];
                 };
             };
-            /** @description 후보 준비 전 */
+            /** @description 후보 준비 전 또는 CLIENT_UPDATE_REQUIRED */
             409: {
                 headers: {
                     [name: string]: unknown;

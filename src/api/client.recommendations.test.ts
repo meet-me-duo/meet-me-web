@@ -29,13 +29,13 @@ describe("#19 native diverse-time-v1 HTTP contracts", () => {
     const fetch = respond(); const signal = new AbortController().signal;
     await api.getRecommendationAlternatives(code, { analysis_id: analysis, limit: 20 }, signal);
     expect(url(fetch).pathname).toBe(`/api/rooms/${code}/recommendations/alternatives`);
-    expect(Object.fromEntries(url(fetch).searchParams)).toEqual({ analysis_id: analysis, limit: "20" });
+    expect(Object.fromEntries(url(fetch).searchParams)).toEqual({ analysis_id: analysis, limit: "20", attendance_support: "conditional-v1" });
     expect(fetch.mock.calls[0]?.[1]).toMatchObject({ signal, credentials: "include" });
   });
   it("round-trips an opaque cursor without decoding, constructing, or losing reserved characters", async () => {
     const fetch = respond(); const cursor = "opaque+/=&?%23한글";
     await api.getRecommendationAlternatives(code, { analysis_id: analysis, limit: 20, cursor });
-    expect(Object.fromEntries(url(fetch).searchParams)).toEqual({ analysis_id: analysis, limit: "20", cursor });
+    expect(Object.fromEntries(url(fetch).searchParams)).toEqual({ analysis_id: analysis, limit: "20", cursor, attendance_support: "conditional-v1" });
     expect(fetch).toHaveBeenCalledTimes(1);
   });
   it("sends the four required selection fields to the separate recommendation confirmation URL", async () => {

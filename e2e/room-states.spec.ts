@@ -42,8 +42,14 @@ async function mockRoom(page: Page, status: string, options: { joined?: boolean;
     const url = route.request().url();
     if (url.endsWith("/guest-records") && route.request().method() === "GET") return route.fulfill({ json: { records: [] } });
     if (url.endsWith("/submission")) return route.fulfill({ status: 404, contentType: "application/problem+json", body: JSON.stringify({ code: "SUBMISSION_NOT_FOUND", detail: "제출 없음" }) });
-    if (url.endsWith("/candidates")) return route.fulfill({ json: { quality: "COMPLETE", applied_submissions: 4, total_submissions: 4, unapplied_inputs: 0, candidates: [candidate] } });
-    if (url.endsWith("/result")) return route.fulfill({ json: { candidate, confirmed_at: "2026-09-20T13:00:00Z" } });
+    if (new URL(url).pathname.endsWith("/candidates")) {
+      expect(new URL(url).searchParams.get("attendance_support")).toBe("conditional-v1");
+      return route.fulfill({ json: { quality: "COMPLETE", applied_submissions: 4, total_submissions: 4, unapplied_inputs: 0, candidates: [candidate] } });
+    }
+    if (new URL(url).pathname.endsWith("/result")) {
+      expect(new URL(url).searchParams.get("attendance_support")).toBe("conditional-v1");
+      return route.fulfill({ json: { candidate, confirmed_at: "2026-09-20T13:00:00Z" } });
+    }
     if (url.endsWith("/participants") && route.request().method() === "POST") return route.fulfill({ status: 201, json: room(status, true, "MEMBER") });
     return route.fulfill({ json: room(status, options.joined ?? true, options.role ?? "MEMBER") });
   });

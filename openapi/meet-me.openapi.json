@@ -1490,6 +1490,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "attendance_support",
+            "in": "query",
+            "description": "미확정 참석 의미 지원: conditional-v1만 지원 명시로 인정. 생략/기타 값은 해당 결과에 CLIENT_UPDATE_REQUIRED(409)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "conditional-v1"
+            }
           }
         ],
         "requestBody": {
@@ -1554,7 +1564,7 @@
             }
           },
           "409": {
-            "description": "분석 준비 전·수정 라운드 OPEN·STALE_ANALYSIS·다른 선택 확정 충돌",
+            "description": "분석 준비 전·수정 라운드 OPEN·STALE_ANALYSIS·다른 선택 확정 충돌·CLIENT_UPDATE_REQUIRED",
             "content": {
               "application/json": {
                 "schema": {
@@ -2054,6 +2064,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "attendance_support",
+            "in": "query",
+            "description": "미확정 참석 의미 지원: conditional-v1만 지원 명시로 인정. 생략/기타 값은 해당 결과에 CLIENT_UPDATE_REQUIRED(409)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "conditional-v1"
+            }
           }
         ],
         "responses": {
@@ -2098,7 +2118,7 @@
             }
           },
           "409": {
-            "description": "다른 후보가 이미 확정됨",
+            "description": "다른 후보가 이미 확정됨 또는 CLIENT_UPDATE_REQUIRED",
             "content": {
               "application/json": {
                 "schema": {
@@ -2797,6 +2817,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "attendance_support",
+            "in": "query",
+            "description": "미확정 참석 의미 지원: conditional-v1만 지원 명시로 인정. 생략/기타 값은 해당 결과에 CLIENT_UPDATE_REQUIRED(409)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "conditional-v1"
+            }
           }
         ],
         "responses": {
@@ -2841,7 +2871,7 @@
             }
           },
           "409": {
-            "description": "분석 준비 전 또는 수정 라운드 OPEN",
+            "description": "분석 준비 전·수정 라운드 OPEN·CLIENT_UPDATE_REQUIRED",
             "content": {
               "application/json": {
                 "schema": {
@@ -2875,6 +2905,16 @@
             "required": false,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "attendance_support",
+            "in": "query",
+            "description": "미확정 참석 의미 지원: conditional-v1만 지원 명시로 인정. 생략/기타 값은 해당 결과에 CLIENT_UPDATE_REQUIRED(409)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "conditional-v1"
             }
           }
         ],
@@ -2930,7 +2970,7 @@
             }
           },
           "409": {
-            "description": "분석 준비 전·수정 라운드 OPEN·STALE_ANALYSIS·다른 선택 확정 충돌",
+            "description": "분석 준비 전·수정 라운드 OPEN·STALE_ANALYSIS·다른 선택 확정 충돌·CLIENT_UPDATE_REQUIRED",
             "content": {
               "application/json": {
                 "schema": {
@@ -2995,6 +3035,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "attendance_support",
+            "in": "query",
+            "description": "미확정 참석 의미 지원: conditional-v1만 지원 명시로 인정. 생략/기타 값은 해당 결과에 CLIENT_UPDATE_REQUIRED(409)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "conditional-v1"
+            }
           }
         ],
         "responses": {
@@ -3049,7 +3099,7 @@
             }
           },
           "409": {
-            "description": "분석 준비 전·수정 라운드 OPEN·STALE_ANALYSIS·다른 선택 확정 충돌",
+            "description": "분석 준비 전·수정 라운드 OPEN·STALE_ANALYSIS·다른 선택 확정 충돌·CLIENT_UPDATE_REQUIRED",
             "content": {
               "application/json": {
                 "schema": {
@@ -3185,6 +3235,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "attendance_support",
+            "in": "query",
+            "description": "미확정 참석 의미 지원: conditional-v1만 지원 명시로 인정. 생략/기타 값은 해당 결과에 CLIENT_UPDATE_REQUIRED(409)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "conditional-v1"
+            }
           }
         ],
         "responses": {
@@ -3229,7 +3289,7 @@
             }
           },
           "409": {
-            "description": "후보 준비 전",
+            "description": "후보 준비 전 또는 CLIENT_UPDATE_REQUIRED",
             "content": {
               "application/json": {
                 "schema": {
@@ -3872,20 +3932,7 @@
           "container": {
             "type": "boolean"
           },
-          "string": {
-            "type": "boolean"
-          },
-          "object": {
-            "type": "boolean"
-          },
-          "textual": {
-            "type": "boolean",
-            "deprecated": true
-          },
           "missingNode": {
-            "type": "boolean"
-          },
-          "boolean": {
             "type": "boolean"
           },
           "number": {
@@ -3909,6 +3956,9 @@
             "type": "boolean"
           },
           "valueNode": {
+            "type": "boolean"
+          },
+          "object": {
             "type": "boolean"
           },
           "pojo": {
@@ -3935,7 +3985,17 @@
           "bigInteger": {
             "type": "boolean"
           },
+          "textual": {
+            "type": "boolean",
+            "deprecated": true
+          },
+          "boolean": {
+            "type": "boolean"
+          },
           "binary": {
+            "type": "boolean"
+          },
+          "string": {
             "type": "boolean"
           },
           "embeddedValue": {

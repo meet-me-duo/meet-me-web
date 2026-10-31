@@ -1,3 +1,14 @@
+## 2026-10-31 현재 — 구 웹 탭의 조건부 참석 표시 호환
+
+- [x] `[USER]` 로컬 구현·무료 검증·독립 검토 범위 승인, 새 게시/운영/V2/유료·지도·권한 변경 제외.
+- [x] `[AGENT]` develop2fa24d3a 기반 별도 로컬 feature/conditional-attendance-client-compat, 원본 작업 보존.
+- [x] `[AGENT]` 여섯 결과 요청의 attendance_support=conditional-v1 선언, 기존 쿠키·권한·body·시각·cursor·no-store 유지.
+- [x] `[AGENT]` 실제 생성 OpenAPI6 optional query/409만 동기화, API15·전체unit825·관련browser98·frozenold/newChromium4case 확인.
+- [ ] `[AGENT]` 남은 표준 브라우저 전체 범위·동반 서버 최종 검사·독립 최종 검토를 회수하고 결과를 정리한다.
+- [ ] `[SHARED]` 새 Issue/PR 게시와 develop 병합·정확SHA CI는 다음 구체 승인 범위로 제시한다. main/운영은 이후 rollout 단계다.
+
+현재는 6단계 전체 중 1단계 로컬 호환 보강이다. 아래는 당시 시점의 이전 기록이며 이번 단계의 게시 승인으로 해석하지 않는다.
+
 ## 2026-10-31 현재 작업 — Issue #60 게시 준비
 
 - [x] `[USER]` 서버·웹 새 Issue 각1개 → 격리 준비 수정·무료 재검증 → 피처 push → develop 대상 Draft PR 각1개 및 최종 SHA 일반 CI 확인 범위를 승인했다. 병합·배포·운영 DB·추가 유료 모델/지도 요청은 제외한다.
@@ -164,3 +175,21 @@
 - [ ] 해당 정확 HEAD의 원격CI 성공 확인
 
 근거: `docs/verification/issue-110-account-integration-independent.md`, `docs/verification/issue-110-native.json`. 운영 provider 로그인·실제운영자등록·병합·배포는 이번 성공 범위에 포함하지 않는다.
+
+### 2026-10-31 구 웹 참석 호환 — 1단계 무료 검증 완료
+
+- [x] 6 API 요청의 conditional-v1 지원 query와 실제 생성 OpenAPI/types·관련mock계약을 반영했다. UI TSX/CSS/경고영역·쿠키/Bearer/body/Origin/cursor/AbortSignal은 유지한다.
+- [x] unit825PASS, 기본browser518개정확실행(517PASS/기존1SKIP/retry0), evidence6PASS/하네스사전검사단위3PASS, build/lint/typecheck/api:check 통과. 구·신bundle4개별browser는API contract대역이며 실제serverHTTP+PG와별도다.
+- [x] 독립검토 열린P1/P2없음, 서버최종전체2680PASS/기존17SKIP/실패·오류0을 확인했다.
+- [ ] 별도 구체 승인 후 Issue/feature push/develop DraftPR·정확SHA CI·ready/develop병합·mergeCI를 진행한다. 현재commit/push/PR/merge/deploy/유료0,main·운영DB·V2는별도단계다.
+
+### 2026-10-31 2단계 게시·develop 통합 승인
+
+사용자가 Issue/검토 파일 commit·push/develop Draft PR/CI/ready·develop 병합/merge CI까지 승인했다. 실제 Issue #62를 생성했다. 1단계 검증 소스와 기존 결과는 유지하며 문서의 실행 상태만 갱신한다. main·운영 DB·배포·V2·유료 호출은 이 묶음에 포함하지 않는다.
+
+- [x] 로컬 호환 구현과 최종 무료 검사 완료
+- [x] Issue #62 생성 및 중복·원격 기준 확인
+- [ ] feature push와 develop Draft PR·정확 HEAD CI
+- [ ] ready/develop 병합과 정확 merge SHA CI 및 원격 포함 확인
+
+Commit/PR: 동일 커밋 예정.

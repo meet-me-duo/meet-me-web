@@ -18,7 +18,7 @@ export function CandidateCard({ candidate, canConfirm, pending, onConfirm, confi
       </div>
       <h3>{candidate.summary}</h3>
       <div className="candidate-meta">
-        <span><Users size={17} /> {candidate.attendance_count}/{candidate.total_participants}명 참석 가능</span>
+        <span><Users size={17} /> {candidate.attendance_count}/{candidate.total_participants}명 {candidate.attendance_confirmed === false ? "시간 일치" : "참석 가능"}</span>
         <span>{candidate.meeting_mode === "REMOTE" ? <Monitor size={17} /> : <MapPin size={17} />} {candidate.meeting_mode === "REMOTE" ? "비대면" : `후보 지역 · ${candidate.place?.display_name ?? "지역 협의"}`}</span>
       </div>
       <div className="time-options">

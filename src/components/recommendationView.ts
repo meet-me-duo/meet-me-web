@@ -8,6 +8,8 @@ export interface RecommendationVariantView {
   meetingMode: "IN_PERSON" | "REMOTE";
   place: string | null;
   excludedParticipantNames?: string[];
+  attendanceConfirmed?: boolean;
+  summary?: string;
 }
 
 export interface RecommendationOptionView {

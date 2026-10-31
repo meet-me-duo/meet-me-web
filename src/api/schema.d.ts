@@ -141,6 +141,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/rooms/{inviteCode}/review-prompt": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 확정 결과 본인 리뷰 요청을 한 번 선점
+         * @description 같은 화면의 request_id 재시도만 동일 pending 반환. 새 화면/기기는 같은 모임을 다시 요청하지 않음
+         */
+        post: operations["claimReviewPrompt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rooms/{inviteCode}/review-prompt/{promptId}/submission": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 본인 리뷰 제출
+         * @description 같은 답변 재시도는 멱등. 만족은 영구 중단, 다른 답변은 제출 후 7일 숨김. 답변 조회 API 없음
+         */
+        post: operations["submitReviewPrompt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rooms/{inviteCode}/review-prompt/{promptId}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 본인 리뷰 미제출 닫기
+         * @description 자유 입력을 보내지 않음. 체크한 경우만 서버 시각 기준 7일 숨김. 재시도는 기한을 연장하지 않음
+         */
+        post: operations["closeReviewPrompt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rooms/{inviteCode}/reopen": {
         parameters: {
             query?: never;
@@ -623,66 +683,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/rooms/{inviteCode}/review-prompt": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * 확정 결과 본인 리뷰 요청을 한 번 선점
-         * @description 같은 화면의 request_id 재시도만 동일 pending 반환. 새 화면/기기는 같은 모임을 다시 요청하지 않음
-         */
-        post: operations["claimReviewPrompt"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/rooms/{inviteCode}/review-prompt/{promptId}/submission": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * 본인 리뷰 제출
-         * @description 같은 답변 재시도는 멱등. 만족은 영구 중단, 다른 답변은 제출 후 7일 숨김. 답변 조회 API 없음
-         */
-        post: operations["submitReviewPrompt"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/rooms/{inviteCode}/review-prompt/{promptId}/close": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * 본인 리뷰 미제출 닫기
-         * @description 자유 입력을 보내지 않음. 체크한 경우만 서버 시각 기준 7일 숨김. 재시도는 기한을 연장하지 않음
-         */
-        post: operations["closeReviewPrompt"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -692,15 +692,14 @@ export interface components {
             empty?: boolean;
             null?: boolean;
             float?: boolean;
-            object?: boolean;
             container?: boolean;
-            string?: boolean;
             missingNode?: boolean;
             number?: boolean;
             /** @enum {string} */
             nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
             integralNumber?: boolean;
             valueNode?: boolean;
+            object?: boolean;
             pojo?: boolean;
             floatingPointNumber?: boolean;
             short?: boolean;
@@ -713,6 +712,7 @@ export interface components {
             textual?: boolean;
             boolean?: boolean;
             binary?: boolean;
+            string?: boolean;
             embeddedValue?: boolean;
         };
         /** @description 현재 익명 참여자의 자연어 제출 또는 수정 요청 */
@@ -1007,7 +1007,7 @@ export interface components {
              * @description 방 생성 시 고정된 제출 확인 흐름
              * @enum {string}
              */
-            submission_protocol?: "LEGACY" | "PRE_SUBMIT_V1";
+            submission_protocol?: "LEGACY" | "PRE_SUBMIT_V1" | "PRE_SUBMIT_V2";
             /** @description 리뷰 API 계약 지원 힌트. 참여·확정 여부와 claim이 최종 권한을 판정하며, 누락은 미지원 */
             review_prompt_supported?: boolean;
         };
@@ -1117,6 +1117,35 @@ export interface components {
             /** @description trim 후 1~500 Unicode 코드포인트 */
             raw_text: string;
         };
+        /** @description 원문 기준과 하나의 확정 보완 답변을 보존한 V2 근거 */
+        InputEvidenceResponse: {
+            supplement: components["schemas"]["InputSupplementResponse"] | null;
+            /** @enum {string} */
+            interpretation: "PENDING" | "CONFIRMED" | "UNRESOLVED";
+            protocol: string;
+            /** Format: int32 */
+            original_revision: number;
+            /** Format: date-time */
+            reference_at: string;
+            unresolved_reason: string | null;
+        };
+        /** @description 원문을 바꾸지 않는 하나의 질문 대상과 명시 답변 */
+        InputSupplementResponse: {
+            prompt: string;
+            /** Format: uuid */
+            question_id: string;
+            /** Format: int32 */
+            source_revision: number;
+            source_excerpt: string;
+            /** Format: int32 */
+            source_start_code_point: number;
+            answer_text: string;
+            choice_id: string | null;
+            /** Format: date-time */
+            answered_at: string;
+            /** Format: date-time */
+            reference_at: string;
+        };
         /** @description 마지막 수용본과 실제 수용 경로 */
         PrecheckAcceptedResponse: {
             /**
@@ -1124,6 +1153,8 @@ export interface components {
              * @description 수용된 제출 revision
              */
             revision: number;
+            /** @description V2 원문·최종 보완 근거. V1은 null */
+            evidence?: components["schemas"]["InputEvidenceResponse"] | null;
             /** @description 수용한 전체 원문 */
             raw_text: string;
             /**
@@ -1140,7 +1171,7 @@ export interface components {
              * @description 실제 version 연결로 판정한 수용 경로
              * @enum {string}
              */
-            confirmation_source: "PRECHECK" | "LEGACY_CORRECTION";
+            confirmation_source: "PRECHECK" | "PRECHECK_UNRESOLVED" | "UNVERIFIED_CORRECTION" | "LEGACY_CORRECTION";
         };
         /** @description 참여자가 확인 후 선택하는 전체 원문 제안 */
         PrecheckOptionResponse: {
@@ -1157,7 +1188,7 @@ export interface components {
              * @description 최초 명령 당시 검사 상태
              * @enum {string}
              */
-            status: "QUEUED" | "CHECKING" | "NEEDS_CHOICE" | "NEEDS_EDIT" | "CLEAR" | "FAILED" | "FAILED_QUEUE" | "TIMED_OUT" | "LIMIT_REACHED" | "CANCELLED" | "SUPERSEDED" | "CLOSED_BEFORE_COMPLETION";
+            status: "QUEUED" | "CHECKING" | "NEEDS_CHOICE" | "NEEDS_EDIT" | "CLEAR" | "RECEIVED" | "UNRESOLVED" | "FAILED" | "FAILED_QUEUE" | "TIMED_OUT" | "LIMIT_REACHED" | "CANCELLED" | "SUPERSEDED" | "CLOSED_BEFORE_COMPLETION";
             /**
              * Format: uuid
              * @description 멱등 UUID
@@ -1187,6 +1218,11 @@ export interface components {
             options: components["schemas"]["PrecheckOptionResponse"][];
             /** @description 원문에 실제 존재하는 모호 구절 */
             source_excerpt: string;
+            /**
+             * @description A/B+직접 답변 또는 직접 답변만
+             * @enum {string}
+             */
+            answer_mode?: "CHOICE_OR_TEXT" | "TEXT_ONLY";
         };
         /** @description 본인 원문과 완료본을 분리한 비공개 snapshot */
         PrecheckResponse: {
@@ -1198,7 +1234,7 @@ export interface components {
             check: components["schemas"]["PrecheckStateResponse"] | null;
             /** @description 현재 방 상태 */
             room: components["schemas"]["PrecheckRoomResponse"];
-            /** @description 현재 candidate가 CLEAR로 수용됨. 이전 완료본만 있으면 false */
+            /** @description 현재 candidate 접수 완료. V2 RECEIVED는 해석 미확정이며 CLEAR와 구분 */
             submission_complete: boolean;
             /** @description 마감된 활성 batch가 accepted를 포함함. 매칭 성공 보장은 아님 */
             applied_to_result: boolean;
@@ -1228,10 +1264,10 @@ export interface components {
              */
             id: string;
             /**
-             * @description 검사 상태. CLEAR만 현재 원문의 제출 완료
+             * @description CLEAR 해석 확정, RECEIVED 접수·해석 미확정, UNRESOLVED 새 버전 미접수
              * @enum {string}
              */
-            status: "QUEUED" | "CHECKING" | "NEEDS_CHOICE" | "NEEDS_EDIT" | "CLEAR" | "FAILED" | "FAILED_QUEUE" | "TIMED_OUT" | "LIMIT_REACHED" | "CANCELLED" | "SUPERSEDED" | "CLOSED_BEFORE_COMPLETION";
+            status: "QUEUED" | "CHECKING" | "NEEDS_CHOICE" | "NEEDS_EDIT" | "CLEAR" | "RECEIVED" | "UNRESOLVED" | "FAILED" | "FAILED_QUEUE" | "TIMED_OUT" | "LIMIT_REACHED" | "CANCELLED" | "SUPERSEDED" | "CLOSED_BEFORE_COMPLETION";
             /**
              * Format: int64
              * @description 명령 CAS에 필요한 단조 증가 검사 버전
@@ -1251,6 +1287,8 @@ export interface components {
              * @description candidate 또는 accepted의 독립 revision
              */
             revision: number;
+            /** @description V2 원문과 보완 답변을 별도로 보존한 근거 */
+            evidence?: components["schemas"]["InputEvidenceResponse"] | null;
             /** @description 보존된 전체 원문 */
             raw_text: string;
             /**
@@ -1288,8 +1326,36 @@ export interface components {
             question_id?: string | null;
             /** @description 명시 선택 ID */
             choice_id?: string | null;
-            /** @description 직접 수정한 전체 원문 */
+            /** @description V1 전체 수정 원문, V2 질문 대상에 대한 보완 답변 */
             direct_text?: string | null;
+        };
+        ClaimReviewRequest: {
+            /**
+             * Format: uuid
+             * @description 현재 화면의 재시도에만 재사용하는 UUID
+             */
+            request_id: string;
+        };
+        ReviewResponse: {
+            /**
+             * Format: uuid
+             * @description 현재 화면에서 표시할 요청. 표시할 수 없으면 null
+             */
+            prompt_id: string | null;
+            /**
+             * @description PENDING만 표시. 종료 응답에는 자유 입력이나 선택을 포함하지 않음
+             * @enum {string}
+             */
+            state: "PENDING" | "SUBMITTED" | "CLOSED" | "SUPPRESSED";
+        };
+        SubmitReviewRequest: {
+            choices: (1 | 2 | 3 | 4 | 5)[];
+            /** @description 5 기타 선택 시에만, 선택 입력. 최대 2000 Unicode 코드포인트 */
+            other_text?: string | null;
+        };
+        CloseReviewRequest: {
+            /** @description 체크 후 닫기만 사용자 전체 7일 숨김 */
+            hide_for_week: boolean;
         };
         /** @description 현재 미확정 결과의 조건 수정 라운드를 여는 명령 */
         ReopenInputRequest: {
@@ -1392,6 +1458,8 @@ export interface components {
             total_participants?: number;
             /** @description UTC 실제 시점 기준 후보 시간 구간 */
             time_ranges?: components["schemas"]["CandidateTimeRangeResponse"][];
+            /** @description false이면 시간만 일치하고 장소·이동 및 실제 대면 참석은 미확정; 확정 저장 뒤에도 유지 */
+            attendance_confirmed?: boolean;
         };
         /** @description 후보의 실제 UTC 시간 구간 */
         CandidateTimeRangeResponse: {
@@ -1524,12 +1592,19 @@ export interface components {
              */
             revision_round_id?: string;
         };
+        /** @description 현재 계정의 화면 접근 권한. 실제 API 인가를 대체하지 않는다 */
+        AccountCapabilitiesResponse: {
+            /** @description 운영 조회가 활성화되고 현재 계정이 명시적 운영자 허용 목록에 포함된 경우 true */
+            canViewOperations?: boolean;
+        };
         /** @description 로그인 계정. 이메일과 공급자 토큰은 포함하지 않는다 */
         AccountResponse: {
             /** @description 계정 UUID */
             id?: string;
             /** @description 계정 표시 이름 */
             displayName?: string;
+            /** @description 현재 계정에 대해 서버가 확인한 화면 접근 권한 */
+            capabilities?: components["schemas"]["AccountCapabilitiesResponse"];
         };
         /** @description 15분 Access Token. 브라우저 메모리에만 보관한다 */
         AuthResponse: {
@@ -1628,6 +1703,8 @@ export interface components {
         };
         /** @description 시간안의 방식·장소·참석 조합 */
         RecommendationVariantResponse: {
+            /** @description 확인된 시간과 미확인 장소·이동 조건을 함께 설명; 타인의 원문은 비공개 */
+            summary?: string;
             /**
              * Format: uuid
              * @description 선택에 필요한 variant UUID
@@ -1640,7 +1717,7 @@ export interface components {
             meeting_mode: "IN_PERSON" | "REMOTE";
             /**
              * Format: int32
-             * @description 참석 인원
+             * @description 시간 조건이 맞는 인원; attendance_confirmed=false이면 실제 대면 참석은 미확정
              */
             attendance_count: number;
             /**
@@ -1654,6 +1731,8 @@ export interface components {
             place: components["schemas"]["CandidatePlaceResponse"] | null;
             /** @description 고정 분석 배치에서 이 조합에 참석하지 않는 참여자의 공개 이름; 전원 참석은 빈 배열 */
             excluded_participant_names?: string[];
+            /** @description false이면 시간만 일치하고 장소·이동 충족 및 실제 참석은 미확정; 주최자 확정 후에도 유지 */
+            attendance_confirmed?: boolean;
         };
         /** @description 동명 기록을 구분하는 공개 선택 정보 */
         GuestRecordResponse: {
@@ -1707,12 +1786,19 @@ export interface components {
         };
         /** @description 주최자에게만 공개되는 미반영 입력 */
         UnappliedInputResponse: {
-            /** @description 언어 중립 미반영 사유 코드 */
+            /** @description 언어 중립 미반영 사유 코드. UNSUPPORTED_TRAVEL_CONSTRAINT는 이동 제약을 계산하지 못했으며 실제 충돌 판정이 아님 */
             reason?: string;
             /** @description 입력을 제출한 참여자의 표시 이름 */
             participant_display_name?: string;
             /** @description 후보에 반영되지 않은 원문. 구 슬롯 전용 입력은 null */
             raw_text?: string | null;
+            /** @description V2 최종 접수본에 포함된 보완 답변만 공개, 중간 질문은 제외 */
+            finalized_answer?: string | null;
+            /**
+             * @description 시간·장소·입력 해석 실패 범위
+             * @enum {string|null}
+             */
+            failure_scope?: "TIME" | "PLACE" | "INPUT" | null;
         };
         /** @description 고정 운영 조회 오류. 요청 경로와 임의 exception 값은 포함하지 않음 */
         OperatorProblemResponse: {
@@ -2096,34 +2182,6 @@ export interface components {
             has_more?: boolean;
             /** @description 다음 페이지 커서. has_more가 false면 null. 필터 변경 시 초기화 */
             next_cursor?: string | null;
-        };
-        ClaimReviewRequest: {
-            /**
-             * Format: uuid
-             * @description 현재 화면의 재시도에만 재사용하는 UUID
-             */
-            request_id: string;
-        };
-        CloseReviewRequest: {
-            /** @description 체크 후 닫기만 사용자 전체 7일 숨김 */
-            hide_for_week: boolean;
-        };
-        ReviewResponse: {
-            /**
-             * Format: uuid
-             * @description 현재 화면에서 표시할 요청. 표시할 수 없으면 null
-             */
-            prompt_id: string | null;
-            /**
-             * @description PENDING만 표시. 종료 응답에는 자유 입력이나 선택을 포함하지 않음
-             * @enum {string}
-             */
-            state: "PENDING" | "SUBMITTED" | "CLOSED" | "SUPPRESSED";
-        };
-        SubmitReviewRequest: {
-            choices: (1 | 2 | 3 | 4 | 5)[];
-            /** @description 5 기타 선택 시에만, 선택 입력. 최대 2000 Unicode 코드포인트 */
-            other_text?: string | null;
         };
     };
     responses: never;
@@ -2851,6 +2909,254 @@ export interface operations {
             };
         };
     };
+    claimReviewPrompt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                inviteCode: string;
+            };
+            cookie?: {
+                meet_me_guest?: string;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaimReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description 본인 요청 상태. 응답은 no-store */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ReviewResponse"];
+                };
+            };
+            /** @description 입력 형식/선택 조합 오류 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 본인 세션 없음/만료 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 본인 참여 증명 또는 Origin 부족 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 방 또는 본인 요청 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 미확정, 이미 종료 또는 다른 모임의 정책 갱신 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 리뷰 저장 일시 실패. 같은 요청으로 재시도 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
+    submitReviewPrompt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                inviteCode: string;
+                promptId: string;
+            };
+            cookie?: {
+                meet_me_guest?: string;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubmitReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description 본인 요청 상태. 응답은 no-store */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ReviewResponse"];
+                };
+            };
+            /** @description 입력 형식/선택 조합 오류 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 본인 세션 없음/만료 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 본인 참여 증명 또는 Origin 부족 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 방 또는 본인 요청 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 미확정, 이미 종료 또는 다른 모임의 정책 갱신 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 리뷰 저장 일시 실패. 같은 요청으로 재시도 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
+    closeReviewPrompt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                inviteCode: string;
+                promptId: string;
+            };
+            cookie?: {
+                meet_me_guest?: string;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CloseReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description 본인 요청 상태. 응답은 no-store */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ReviewResponse"];
+                };
+            };
+            /** @description 입력 형식/선택 조합 오류 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 본인 세션 없음/만료 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 본인 참여 증명 또는 Origin 부족 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 방 또는 본인 요청 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 미확정, 이미 종료 또는 다른 모임의 정책 갱신 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 리뷰 저장 일시 실패. 같은 요청으로 재시도 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
     reopen: {
         parameters: {
             query?: never;
@@ -2944,7 +3250,10 @@ export interface operations {
     };
     confirm: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description 미확정 참석 의미 지원: conditional-v1만 지원 명시로 인정. 생략/기타 값은 해당 결과에 CLIENT_UPDATE_REQUIRED(409) */
+                attendance_support?: string;
+            };
             header?: never;
             path: {
                 inviteCode: string;
@@ -3005,7 +3314,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiProblemSchema"];
                 };
             };
-            /** @description 분석 준비 전·수정 라운드 OPEN·STALE_ANALYSIS·다른 선택 확정 충돌 */
+            /** @description 분석 준비 전·수정 라운드 OPEN·STALE_ANALYSIS·다른 선택 확정 충돌·CLIENT_UPDATE_REQUIRED */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -3369,7 +3678,10 @@ export interface operations {
     };
     confirm_1: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description 미확정 참석 의미 지원: conditional-v1만 지원 명시로 인정. 생략/기타 값은 해당 결과에 CLIENT_UPDATE_REQUIRED(409) */
+                attendance_support?: string;
+            };
             header?: never;
             path: {
                 inviteCode: string;
@@ -3417,7 +3729,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiProblemSchema"];
                 };
             };
-            /** @description 다른 후보가 이미 확정됨 */
+            /** @description 다른 후보가 이미 확정됨 또는 CLIENT_UPDATE_REQUIRED */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -3979,7 +4291,10 @@ export interface operations {
     };
     result: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description 미확정 참석 의미 지원: conditional-v1만 지원 명시로 인정. 생략/기타 값은 해당 결과에 CLIENT_UPDATE_REQUIRED(409) */
+                attendance_support?: string;
+            };
             header?: never;
             path: {
                 inviteCode: string;
@@ -4026,7 +4341,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiProblemSchema"];
                 };
             };
-            /** @description 분석 준비 전 또는 수정 라운드 OPEN */
+            /** @description 분석 준비 전·수정 라운드 OPEN·CLIENT_UPDATE_REQUIRED */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -4039,7 +4354,10 @@ export interface operations {
     };
     primary: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description 미확정 참석 의미 지원: conditional-v1만 지원 명시로 인정. 생략/기타 값은 해당 결과에 CLIENT_UPDATE_REQUIRED(409) */
+                attendance_support?: string;
+            };
             header?: never;
             path: {
                 inviteCode: string;
@@ -4095,7 +4413,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiProblemSchema"];
                 };
             };
-            /** @description 분석 준비 전·수정 라운드 OPEN·STALE_ANALYSIS·다른 선택 확정 충돌 */
+            /** @description 분석 준비 전·수정 라운드 OPEN·STALE_ANALYSIS·다른 선택 확정 충돌·CLIENT_UPDATE_REQUIRED */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -4113,6 +4431,8 @@ export interface operations {
                 cursor?: string;
                 /** @description 페이지 크기1~100 */
                 limit?: number;
+                /** @description 미확정 참석 의미 지원: conditional-v1만 지원 명시로 인정. 생략/기타 값은 해당 결과에 CLIENT_UPDATE_REQUIRED(409) */
+                attendance_support?: string;
             };
             header?: never;
             path: {
@@ -4169,7 +4489,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiProblemSchema"];
                 };
             };
-            /** @description 분석 준비 전·수정 라운드 OPEN·STALE_ANALYSIS·다른 선택 확정 충돌 */
+            /** @description 분석 준비 전·수정 라운드 OPEN·STALE_ANALYSIS·다른 선택 확정 충돌·CLIENT_UPDATE_REQUIRED */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -4267,7 +4587,10 @@ export interface operations {
     };
     candidates: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description 미확정 참석 의미 지원: conditional-v1만 지원 명시로 인정. 생략/기타 값은 해당 결과에 CLIENT_UPDATE_REQUIRED(409) */
+                attendance_support?: string;
+            };
             header?: never;
             path: {
                 inviteCode: string;
@@ -4314,7 +4637,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiProblemSchema"];
                 };
             };
-            /** @description 후보 준비 전 */
+            /** @description 후보 준비 전 또는 CLIENT_UPDATE_REQUIRED */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -4756,254 +5079,6 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-        };
-    };
-    claimReviewPrompt: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                inviteCode: string;
-            };
-            cookie?: {
-                meet_me_guest?: string;
-            };
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ClaimReviewRequest"];
-            };
-        };
-        responses: {
-            /** @description 본인 요청 상태. 응답은 no-store */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ReviewResponse"];
-                };
-            };
-            /** @description 입력 형식/선택 조합 오류 */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-            /** @description 본인 세션 없음/만료 */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-            /** @description 본인 참여 증명 또는 Origin 부족 */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-            /** @description 방 또는 본인 요청 없음 */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-            /** @description 미확정, 이미 종료 또는 다른 모임의 정책 갱신 */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-            /** @description 리뷰 저장 일시 실패. 같은 요청으로 재시도 */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-        };
-    };
-    submitReviewPrompt: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                inviteCode: string;
-                promptId: string;
-            };
-            cookie?: {
-                meet_me_guest?: string;
-            };
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SubmitReviewRequest"];
-            };
-        };
-        responses: {
-            /** @description 본인 요청 상태. 응답은 no-store */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ReviewResponse"];
-                };
-            };
-            /** @description 입력 형식/선택 조합 오류 */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-            /** @description 본인 세션 없음/만료 */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-            /** @description 본인 참여 증명 또는 Origin 부족 */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-            /** @description 방 또는 본인 요청 없음 */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-            /** @description 미확정, 이미 종료 또는 다른 모임의 정책 갱신 */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-            /** @description 리뷰 저장 일시 실패. 같은 요청으로 재시도 */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-        };
-    };
-    closeReviewPrompt: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                inviteCode: string;
-                promptId: string;
-            };
-            cookie?: {
-                meet_me_guest?: string;
-            };
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CloseReviewRequest"];
-            };
-        };
-        responses: {
-            /** @description 본인 요청 상태. 응답은 no-store */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ReviewResponse"];
-                };
-            };
-            /** @description 입력 형식/선택 조합 오류 */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-            /** @description 본인 세션 없음/만료 */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-            /** @description 본인 참여 증명 또는 Origin 부족 */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-            /** @description 방 또는 본인 요청 없음 */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-            /** @description 미확정, 이미 종료 또는 다른 모임의 정책 갱신 */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-            /** @description 리뷰 저장 일시 실패. 같은 요청으로 재시도 */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ApiProblemSchema"];
                 };
             };
         };

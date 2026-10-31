@@ -76,6 +76,10 @@ export async function request<T>(path: string, init: RequestInit = {}): Promise<
 
 const encode = encodeURIComponent;
 
+// This declares display semantics, not permission. Old servers ignore the query;
+// compatible servers retain their existing authentication and selection checks.
+const withAttendanceSupport = (path: string) => `${path}${path.includes("?") ? "&" : "?"}attendance_support=conditional-v1`;
+
 export const api = {
   getSubmissionCheck: (inviteCode: string, signal?: AbortSignal) => request<SubmissionCheckSnapshot>(`/api/rooms/${encode(inviteCode)}/submission/checks/current`, { signal }),
   startSubmissionCheck: (inviteCode: string, body: StartSubmissionCheckBody) => request<SubmissionCheckSnapshot>(`/api/rooms/${encode(inviteCode)}/submission/checks`, { method: "POST", body: JSON.stringify(body) }),
@@ -101,18 +105,18 @@ export const api = {
   retryAnalysis: (inviteCode: string) => request<Room>(`/api/rooms/${encode(inviteCode)}/analysis/retry`, { method: "POST" }),
   reopenRoom: (inviteCode: string, body: ReopenBody) => request<ReopenResponse>(`/api/rooms/${encode(inviteCode)}/reopen`, { method: "POST", body: JSON.stringify(body) }),
   analyzeRevision: (inviteCode: string, body: ReanalyzeBody) => request<ReanalyzeResponse>(`/api/rooms/${encode(inviteCode)}/analysis`, { method: "POST", body: JSON.stringify(body) }),
-  getCandidates: (inviteCode: string) => request<CandidateList>(`/api/rooms/${encode(inviteCode)}/candidates`),
+  getCandidates: (inviteCode: string) => request<CandidateList>(withAttendanceSupport(`/api/rooms/${encode(inviteCode)}/candidates`)),
   getUnappliedInputs: (inviteCode: string) => request<UnappliedInput[]>(`/api/rooms/${encode(inviteCode)}/candidates/unapplied-inputs`),
   confirmCandidate: (inviteCode: string, candidateId: string) =>
-    request<ConfirmedResult>(`/api/rooms/${encode(inviteCode)}/candidates/${encode(candidateId)}/confirmation`, { method: "POST" }),
-  getResult: (inviteCode: string) => request<ConfirmedResult>(`/api/rooms/${encode(inviteCode)}/result`),
-  getRecommendations: (inviteCode: string, signal?: AbortSignal) => request<RecommendationList>(`/api/rooms/${encode(inviteCode)}/recommendations`, { signal }),
+    request<ConfirmedResult>(withAttendanceSupport(`/api/rooms/${encode(inviteCode)}/candidates/${encode(candidateId)}/confirmation`), { method: "POST" }),
+  getResult: (inviteCode: string) => request<ConfirmedResult>(withAttendanceSupport(`/api/rooms/${encode(inviteCode)}/result`)),
+  getRecommendations: (inviteCode: string, signal?: AbortSignal) => request<RecommendationList>(withAttendanceSupport(`/api/rooms/${encode(inviteCode)}/recommendations`), { signal }),
   getRecommendationAlternatives: (inviteCode: string, query: RecommendationAlternativeQuery, signal?: AbortSignal): Promise<RecommendationList> => {
     const params = new URLSearchParams({ analysis_id: query.analysis_id, limit: String(query.limit ?? 20) });
     if (query.cursor !== undefined) params.set("cursor", query.cursor);
-    return request<RecommendationList>(`/api/rooms/${encode(inviteCode)}/recommendations/alternatives?${params}`, { signal });
+    return request<RecommendationList>(withAttendanceSupport(`/api/rooms/${encode(inviteCode)}/recommendations/alternatives?${params}`), { signal });
   },
-  confirmRecommendation: (inviteCode: string, optionId: string, body: RecommendationConfirmationBody) => request<ConfirmedResult>(`/api/rooms/${encode(inviteCode)}/recommendations/${encode(optionId)}/confirmation`, { method: "POST", body: JSON.stringify(body) }),
+  confirmRecommendation: (inviteCode: string, optionId: string, body: RecommendationConfirmationBody) => request<ConfirmedResult>(withAttendanceSupport(`/api/rooms/${encode(inviteCode)}/recommendations/${encode(optionId)}/confirmation`), { method: "POST", body: JSON.stringify(body) }),
 };
 
 export function errorMessage(error: unknown): string {

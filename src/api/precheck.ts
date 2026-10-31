@@ -2,9 +2,9 @@ import type { components } from "./schema";
 import type { Complete } from "./types";
 
 export type SubmissionCheckStatus = components["schemas"]["PrecheckStateResponse"]["status"];
-export type SubmissionCheckVersion = Complete<components["schemas"]["PrecheckTextResponse"]>;
-export type AcceptedSubmissionCheckVersion = Complete<components["schemas"]["PrecheckAcceptedResponse"]>;
-export type SubmissionCheckQuestion = Omit<Complete<components["schemas"]["PrecheckQuestionResponse"]>, "options"> & {
+export type SubmissionCheckVersion = Omit<Complete<components["schemas"]["PrecheckTextResponse"]>, "evidence"> & Pick<components["schemas"]["PrecheckTextResponse"], "evidence">;
+export type AcceptedSubmissionCheckVersion = Omit<Complete<components["schemas"]["PrecheckAcceptedResponse"]>, "evidence"> & Pick<components["schemas"]["PrecheckAcceptedResponse"], "evidence">;
+export type SubmissionCheckQuestion = Omit<Complete<components["schemas"]["PrecheckQuestionResponse"]>, "options" | "answer_mode"> & Pick<components["schemas"]["PrecheckQuestionResponse"], "answer_mode"> & {
   options: Complete<components["schemas"]["PrecheckOptionResponse"]>[];
 };
 type CheckState = Omit<Complete<components["schemas"]["PrecheckStateResponse"]>, "question"> & {

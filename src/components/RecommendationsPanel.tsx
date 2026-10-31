@@ -15,6 +15,7 @@ function presentation(option: RecommendationOption, position: number) {
     attendanceCount: variant.attendance_count, totalParticipants: variant.total_participants,
     meetingMode: variant.meeting_mode, place: variant.place?.display_name ?? null,
     excludedParticipantNames: variant.excluded_participant_names ?? [],
+    attendanceConfirmed: variant.attendance_confirmed, summary: variant.summary,
   })) };
 }
 
@@ -85,7 +86,7 @@ export function RecommendationsPanel({ room, onAccessDenied }: { room: Room; onA
   const alternatives = (pages.data?.pages ?? []).flatMap(page => page.options).filter(option => { if (seen.has(option.option_id)) return false; seen.add(option.option_id); return true; });
   const lastPage = pages.data?.pages.at(-1);
   return <section className="results-section">
-    <div className="section-heading centered"><h2>{primary.data.options.length ? "함께할 수 있는 추천 시간이에요" : "선택할 수 있는 추천 시간이 없어요"}</h2></div>
+    <div className="section-heading centered"><h2>{primary.data.options.length ? (primary.data.options.some(option => option.variants.some(variant => variant.attendance_confirmed === false)) ? "추천 시간을 확인해 주세요" : "함께할 수 있는 추천 시간이에요") : "선택할 수 있는 추천 시간이 없어요"}</h2></div>
     {primary.isError && <div className="alert warning" role="status"><p>추천 시간을 갱신하지 못했어요. 마지막으로 확인한 추천과 입력을 유지했어요.</p><p>{errorMessage(primary.error)}</p><button className="button secondary" disabled={primary.isFetching} onClick={() => void primary.refetch()}>추천 시간 다시 확인</button></div>}
     {primary.data.quality === "PARTIAL" && <div className="alert warning" role="status">일부 입력이 반영되지 않아 반영 가능한 조건으로 만든 결과예요.</div>}
     <RecommendationChoices contextKey={JSON.stringify([...key, generation])} options={primary.data.options.map((option, index) => presentation(option, index + 1))} alternatives={alternatives.map((option, index) => presentation(option, index + 1))} timeZone={room.time_zone_id} canConfirm={room.viewer.role === "HOST" && !!room.capabilities?.can_confirm && !!room.analysis_id} pending={confirm.isPending} onConfirm={async selection => { await confirm.mutateAsync(selection); }} hasMore={lastPage ? lastPage.next_cursor !== null : primary.data.has_alternatives} loadingMore={pages.isFetching} onLoadMore={async () => { await pages.fetchNextPage(); }} />

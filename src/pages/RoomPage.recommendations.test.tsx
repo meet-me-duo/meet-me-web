@@ -81,6 +81,25 @@ async function refresh(view: ReturnType<typeof mount>, room: Room, primary: Reco
 afterEach(() => { cleanup(); for (const client of clients.splice(0)) client.clear(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe("#19 native protocol routing and recommendation presentation", () => {
+  it("preserves conditional attendance in server explanation after restoring a saved in-person selection", async () => {
+    const summary = "4명의 시간 조건이 맞지만 장소·이동 조건은 미확인이라 실제 대면 참석 여부는 미확정입니다.";
+    const view = mount({ ...ready, public_status: "CONFIRMED", capabilities: disabled });
+    view.results.mockResolvedValue({ ...result, candidate: { ...result.candidate, meeting_mode: "IN_PERSON", attendance_count: 4, attendance_confirmed: false, summary } });
+    await screen.findByText(summary);
+    expect(screen.getByText(/4\/4명 시간 일치/)).toBeInTheDocument();
+    expect(screen.queryByText(/명 참석 가능/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "일정 확정" })).not.toBeInTheDocument();
+  });
+  it("passes server conditional description into the existing choice text without new warning areas", async () => {
+    const summary = "4명의 시간 조건이 맞지만 장소·이동 조건은 미확인입니다.";
+    const pending = option();
+    pending.variants = [{ ...pending.variants[0]!, attendance_confirmed: false, summary }];
+    mount(ready, list([pending]));
+    await screen.findByText(summary);
+    expect(screen.getByText("4/4명 시간 일치")).toBeInTheDocument();
+    expect(screen.queryByText(/명 참석 가능/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
   it.each([1, 3])("shows exactly %s real primary choices through the new endpoint", async count => {
     const primary = [option(), option(o2, 2, "09", "잠실"), option(o3, 3, "10", "홍대")].slice(0, count);
     const view = mount(ready, list(primary));
@@ -132,6 +151,29 @@ describe("#19 native protocol routing and recommendation presentation", () => {
 });
 
 describe("#19 native confirmation and saved selection", () => {
+  it("keeps uncertainty throughout mocked candidate selection, confirmation API, and saved result", async () => {
+    const summary = "4명의 시간 조건이 맞지만 장소·이동 조건은 확인하지 못해 실제 대면 참석 여부는 미확정입니다.";
+    const pending = option();
+    pending.variants = [{ ...pending.variants[0]!, attendance_confirmed: false, summary }];
+    const view = mount(ready, list([pending]));
+    view.confirm.mockResolvedValue({ ...result, candidate: { ...result.candidate, meeting_mode: "IN_PERSON", attendance_count: 4, attendance_confirmed: false, summary }, selection: { ...result.selection!, variant_id: v1 } });
+    view.results.mockResolvedValue({ ...result, candidate: { ...result.candidate, meeting_mode: "IN_PERSON", attendance_count: 4, attendance_confirmed: false, summary }, selection: { ...result.selection!, variant_id: v1 } });
+    await screen.findByText(summary);
+    fireEvent.click(screen.getByRole("button", { name: "이 시간 선택" }));
+  fireEvent.click(screen.getByRole("button", { name: "선택한 시간 확정하기" }));
+    expect(screen.getByText(summary)).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("시작 시간"), { target: { value: "2026-10-08T10:30" } });
+    fireEvent.change(screen.getByLabelText("종료 시간"), { target: { value: "2026-10-08T11:15" } });
+    view.reads.mockResolvedValue({ ...ready, public_status: "CONFIRMED", state_version: 11, capabilities: disabled });
+    fireEvent.click(screen.getByRole("button", { name: "일정 확정" }));
+    await waitFor(() => expect(view.confirm).toHaveBeenCalledExactlyOnceWith(code, o1, { ...selectionBody, variant_id: v1 }));
+    await screen.findByRole("heading", { name: "실제 모임 일정이 확정됐어요" });
+    expect(screen.getByText(summary)).toBeInTheDocument();
+    expect(screen.getByText(/4\/4명 시간 일치/)).toBeInTheDocument();
+    expect(screen.queryByText(/명 참석 가능/)).not.toBeInTheDocument();
+    expect(view.legacyConfirm).not.toHaveBeenCalled();
+  });
+
   it("sends the exact analysis/variant/user-selected instants and renders the typed confirmed result", async () => {
     const view = mount(); await chooseOnline();
     expect(view.confirm).not.toHaveBeenCalled();

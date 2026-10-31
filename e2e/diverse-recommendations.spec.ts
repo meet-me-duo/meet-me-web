@@ -33,6 +33,7 @@ async function fixture(page: Page, baseURL: string, options: { count?: number; r
   page.on("pageerror", error => errors.push(error.message));
   await page.route("**/*", async route => {
     const request = route.request(); const url = new URL(request.url()); const method = request.method();
+    if ([root + "/recommendations", root + "/recommendations/alternatives", root + "/result", root + `/recommendations/${optionId}/confirmation`].includes(url.pathname)) expect(url.searchParams.get("attendance_support")).toBe("conditional-v1");
     if (url.origin !== origin) { unexpected.push(request.url()); return route.abort(); }
     if (await fulfillAccountRefresh(route, (options.role ?? "HOST") === "HOST" ? "합성 참여자" : null)) return;
     if (!url.pathname.startsWith("/api/")) return method === "GET" ? route.continue() : route.abort();

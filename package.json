@@ -20,7 +20,10 @@
     "api:snapshot": "node scripts/update-openapi.mjs",
     "api:check": "node scripts/check-openapi-generated.mjs",
     "preview:ui": "node scripts/preview-ui.mjs",
-    "test:ui-preview": "playwright test --config playwright.ui-preview.config.ts"
+    "test:ui-preview": "playwright test --config playwright.ui-preview.config.ts",
+    "test:evidence": "playwright test --config playwright.evidence.config.ts",
+    "test:evidence:native": "node scripts/check-native-evidence-harness.mjs && playwright test --config playwright.evidence-native.config.ts",
+    "test:evidence:preflight": "node --test scripts/check-native-evidence-harness.test.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

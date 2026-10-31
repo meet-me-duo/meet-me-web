@@ -21,12 +21,12 @@ export type RevisionRound = Complete<components["schemas"]["RevisionRoundRespons
 export type RoomCapabilities = Complete<components["schemas"]["RoomCapabilitiesResponse"]>;
 export type Room = Omit<Complete<RawRoom>, "viewer" | RecoveryKeys> & {
   viewer: Viewer;
-  submission_protocol?: "PRE_SUBMIT_V1" | "LEGACY";
+  submission_protocol?: "PRE_SUBMIT_V1" | "PRE_SUBMIT_V2" | "LEGACY";
   capabilities?: RoomCapabilities;
 } & Partial<Pick<Complete<RawRoom>, Exclude<RecoveryKeys, "capabilities">>>;
 export type Submission = Omit<Complete<RawSubmission>, "manual_available_times" | SubmissionKeys> & Partial<Pick<Complete<RawSubmission>, SubmissionKeys>>;
 export type SavedSubmission = Omit<Complete<RawSavedSubmission>, "manual_available_times" | SubmissionKeys> & Partial<Pick<Complete<RawSavedSubmission>, SubmissionKeys>>;
-export type Candidate = Omit<Complete<RawCandidate>, "time_ranges" | "place"> & {
+export type Candidate = Omit<Complete<RawCandidate>, "time_ranges" | "place" | "attendance_confirmed"> & Partial<Pick<RawCandidate, "attendance_confirmed">> & {
   time_ranges: Complete<components["schemas"]["CandidateTimeRangeResponse"]>[];
   place: Complete<components["schemas"]["CandidatePlaceResponse"]> | null;
 };
@@ -38,7 +38,7 @@ export type RecommendationOption = Omit<components["schemas"]["RecommendationOpt
 export type RecommendationList = Omit<components["schemas"]["RecommendationListResponse"], "options"> & { options: RecommendationOption[] };
 export type RecommendationConfirmationBody = components["schemas"]["RecommendationConfirmationRequest"];
 export type RecommendationAlternativeQuery = NonNullable<paths["/api/rooms/{inviteCode}/recommendations/alternatives"]["get"]["parameters"]["query"]>;
-export type UnappliedInput = Complete<components["schemas"]["UnappliedInputResponse"]>;
+export type UnappliedInput = Omit<Complete<components["schemas"]["UnappliedInputResponse"]>, "finalized_answer" | "failure_scope"> & Partial<Pick<Complete<components["schemas"]["UnappliedInputResponse"]>, "finalized_answer" | "failure_scope">>;
 export type ApiProblem = Complete<components["schemas"]["ApiProblemSchema"]>;
 
 export interface CreateRoomBody {

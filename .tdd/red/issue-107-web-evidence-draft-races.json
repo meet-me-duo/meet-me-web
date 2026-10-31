@@ -1,0 +1,29 @@
+{
+  "workItem": "issue-107-web-evidence-draft-races",
+  "sourceRevision": "22eb625b32056e0762efdc81b168cf31d4fa827a",
+  "testFiles": [
+    {
+      "path": "src/components/SubmissionCheckPanel.evidence-draft-races.test.tsx",
+      "sha256": "3aad96a15c281afe25b28537c0284dc3aa90169e105f98446e8d006fd54fbf57"
+    }
+  ],
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/components/SubmissionCheckPanel.evidence-draft-races.test.tsx",
+    "--configLoader",
+    "runner",
+    "--pool",
+    "threads",
+    "--maxWorkers",
+    "1"
+  ],
+  "failedTestCount": 4,
+  "initialPassCount": 1,
+  "expectedFailureCategory": "MISSING_BEHAVIOR",
+  "recordedAt": "2026-10-29T08:54:16.719406+00:00",
+  "provenance": "CHRONOLOGICAL_RED",
+  "localLog": ".codex/tdd-evidence/issue-107-evidence-races-red-final.log",
+  "notes": "Independent test designer; async snapshot wait corrected before fresh RED."
+}

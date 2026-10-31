@@ -1,3 +1,63 @@
+## 2026-10-31 현재 — 구 웹 탭의 조건부 참석 표시 호환
+
+- [x] `[USER]` 로컬 구현·무료 검증·독립 검토 범위 승인, 새 게시/운영/V2/유료·지도·권한 변경 제외.
+- [x] `[AGENT]` develop2fa24d3a 기반 별도 로컬 feature/conditional-attendance-client-compat, 원본 작업 보존.
+- [x] `[AGENT]` 여섯 결과 요청의 attendance_support=conditional-v1 선언, 기존 쿠키·권한·body·시각·cursor·no-store 유지.
+- [x] `[AGENT]` 실제 생성 OpenAPI6 optional query/409만 동기화, API15·전체unit825·관련browser98·frozenold/newChromium4case 확인.
+- [ ] `[AGENT]` 남은 표준 브라우저 전체 범위·동반 서버 최종 검사·독립 최종 검토를 회수하고 결과를 정리한다.
+- [ ] `[SHARED]` 새 Issue/PR 게시와 develop 병합·정확SHA CI는 다음 구체 승인 범위로 제시한다. main/운영은 이후 rollout 단계다.
+
+현재는 6단계 전체 중 1단계 로컬 호환 보강이다. 아래는 당시 시점의 이전 기록이며 이번 단계의 게시 승인으로 해석하지 않는다.
+
+## 2026-10-31 현재 작업 — Issue #60 게시 준비
+
+- [x] `[USER]` 서버·웹 새 Issue 각1개 → 격리 준비 수정·무료 재검증 → 피처 push → develop 대상 Draft PR 각1개 및 최종 SHA 일반 CI 확인 범위를 승인했다. 병합·배포·운영 DB·추가 유료 모델/지도 요청은 제외한다.
+- [x] `[AGENT]` 웹 [#60](https://github.com/meet-me-duo/meet-me-web/issues/60), 서버 [#176](https://github.com/meet-me-duo/meet-me-server/issues/176)을 생성하고 원본을 보존한 최신 develop 피처에서 이식 중이다. 기존 PR #51은 보류한다.
+- [x] `[AGENT]` 최신 디자인·모바일·운영자 진입을 보존하며 보완 답변/접수·초안 소유권·미확인 설명을 결합한다. 기본 E2E와 native 하네스 명령/config·의존성을 명시적으로 분리한다.
+- [x] `[AGENT]` 구 서버 필드 누락·생성 API·타입·린트·단위·빌드·기본/native 통합을 최종 소스로 검증하고 공개 자료를 정제한다. 과거 고유807개 결과를 새 합격으로 복사하지 않는다.
+- [ ] `[AGENT]` 검증 후 지정 피처 commit/push·Draft PR 및 최종 SHA CI 종료를 기록한다. 현재 Commit/PR: 동일 커밋 예정 / 새 PR 미생성.
+- [ ] `[USER]` 피처 화면 직접 확인과 후속 승인 전 develop 병합을 보류한다. 운영 배포·DB/reader 전환과 새 실모델 검증은 별도 승인 대상이다.
+
+현재 단계: 웹 로컬 검증 완료(Unit818 PASS, 기본 E2E517 PASS/기존SKIP1, mock6/native2/preflight3 PASS 및 API·타입·린트·빌드 PASS). 최종 SHA의 Draft PR CI는 아직 미실행이다. [공개 검증 요약](docs/verification/issue-60-publication-readiness.md)을 따른다. 아래는 각 날짜 당시의 역사 기록이다.
+
+## 장소 미검증 후보: 실제 브라우저 ↔ 로컬 서버 후속 (2026-10-31)
+
+- [x] `[AGENT]` 기존 소스·응답·패치와 서버2614PASS/17SKIP·웹807개를 보존하고 지원되는 Chromium/로컬 PG·Redis를 확인했다.
+- [x] `[AGENT]` 현재 빌드+새 웹 assets로 실제 Chromium4사례/6검증 묶음을 통과했다. 데스크톱/모바일 설명·선택·돌아가기·반복DOM활성화·확정·새로고침/실제GET/DB 일치, 알려진 시간/장소 충돌 제외를 확인했다.
+- [x] `[AGENT]` 제품·테스트 소스 변경0, 실제 모델·지도 요청0. 합성 auth refresh bootstrap만 대체했고 방·추천·확정·결과 API는 실제 서버다. 기존 공통 안내는 유지하고 새 장소 경고/배지는 없다.
+- [x] `[AGENT]` 스크린샷·명령·로그·DB 지문과 브라우저 배경 차단(proxy9/libc6)을 구분해 보고서에 보존했다. 독립 검토 P1/P2=0, 서버/브라우저 정상 종료, 불필요한 전체 재실행·Linear 수정·게시·병합·배포0.
+
+현재 단계: 승인된 로컬 브라우저 후속 검증 완료. [보고서](https://github.com/meet-me-duo/meet-me-server/blob/feature/issue-176-v2-evidence-qualified-time/docs/verification/experimental-conditional-place-candidates-result.md), 자료 `local-only-evidence/conditional-place-browser-20261031`. 실모델/실제 이동/실물기기/OAuth/운영 검증은 이번 범위에 없다.
+
+## 장소 미검증 시간 후보 설명 (2026-10-31)
+
+- [x] `[AGENT]` 기존 피처 브랜치·미커밋 UI/계약을 별도 baseline으로 보존했다.
+- [x] `[AGENT]` 후보·시간 선택·확정 및 legacy 카드에서 기존 문장 안에 장소 미검증을 보존하고 인원은 시간 일치로 표시한다. 새 경고 영역·자동 온라인 전환은 추가하지 않았다.
+- [x] `[AGENT]` native OpenAPI 동기화·type/lint/test/build 및 서버와 저장 응답 재생 결과를 대조한다.
+- [x] `[AGENT]` 로컬 결과와 한계를 보고한다. 사용자 피처 검토 전 develop/main 병합·게시·배포는 금지한다.
+
+# 장소 미지원 사유 표시 무료 검증 (2026-10-30 UTC)
+
+- [USER] `synthetic-authorization-e22ae1044c3a6abc` 범위의 로직 진단 표시만 기존 격리 계약 브랜치에서 검증한다. 디자인 변경·운영 접근·모델 호출·원격 게시·병합·배포는 없다.
+- [x] `UNSUPPORTED_TRAVEL_CONSTRAINT`를 실제 충돌이나 충족으로 표시하지 않는 설명과 원문·보완 답변·장소 범위 표시의 단위 RED→GREEN을 확인했다.
+- [x] 전체 unit76파일/802PASS·타입·lint·native OpenAPI 생성/일치·빌드 PASS. 응답 필드 변경 없이 사유 설명과 로컬 시험 server URL만 갱신했다. 서버의 이전1FAIL 기록은 보존하고, 후속 무료 상태 격리 수정 후 최종 전체2593PASS/0FAIL/기존17SKIP을 별도 후속 보고서에서 확인했다. 추가 API/게시/병합/배포0.
+- [ ] 사용자 피처 브랜치 직접 확인 및 이후 병합 승인. 기존 제한 유지.
+
+# V2 원문·보완 답변 및 접수 상태 계약 실험 (2026-10-29 UTC)
+
+- [USER] 로직 개선 구현·격리 테스트·결과 보고를 승인했다. web main `22eb625` 기준 별도 `feature/issue-107-evidence-contract` 작업 트리에서 진행한다. 시각 디자인은 다른 작업이다. 사용자 피처 브랜치 확인과 이후 승인 전 develop 병합 금지, main/운영 배포 금지를 유지한다.
+- [x] V2만 원문·보완 답변 분리, A/B 명시 제출 및 직접 답변 전용 질문, 미확정 `RECEIVED`와 미접수 `UNRESOLVED` 구분, 최초 입력 전 공개 범위 안내를 반영했다. V1/LEGACY 계약과 후보 계산·CSS는 유지한다.
+- [x] 신규 핵심3 RED→GREEN 및 추가 회귀1 PASS, 관련29 PASS. 독립 초안 경합·질문 격리 11개와 미확정 수정본 1개를 추가해 최종 전체 unit76파일801 PASS. 공개 범위 신규1 RED→GREEN과 초기 FI3 및 안전 보완 FI5 assertion 탐지·소스 원복을 확인했다. 실제 Chromium 합성 desktop/mobile6 PASS, retries0. type/lint/api 자체 일치/build PASS.
+- [x] 개발 서버 전용 합성 검토 화면과 실행 방법을 `docs/verification/issue-107-evidence-contract.md`에 정리했다. 실제 OAuth·서버·DB·모델 검증과 구분한다.
+- [x] 실제 서버 OpenAPI export와 의미 일치 및 타입 재생성, 독립 최종 소스 리뷰를 완료했다.
+- [x] 고정 서버 클래스와 실제 HTTP/PG/Redis/worker를 사용한 네이티브 desktop/mobile2 PASS, retries0. 질문1회·동결3버전·주최자 미반영 상세·실제 시각 선택 확정을 검증했다. 로그인 갱신/AI는 합성 fixture이며 외부 모델 평가는 별도다.
+- [x] source/tests/API diffcheck·실행 환경 비밀값 미포함 검사를 마치고 검증된 소스의 로컬 커밋을 준비했다. Commit/PR: 동일 로컬 커밋 예정 / PR 없음.
+- [ ] 사용자 피처 브랜치 직접 확인 및 이후 병합 승인. 검증된 소스의 로컬 commit만 추가 승인됐다. 원격 push/PR/merge/deploy는 실행하지 않는다.
+
+질문 미응답·검사 중·기술 실패·질문 한도 후 재입력의 마감 처리 정책은 실험의 보수적 가정이며 최종 확정과 구분한다. 자세한 실행·차단·검증 범위는 위 검증 문서에 기록한다.
+
+---
+
 # 계정 복구 안내·이 탭의 미저장 입력 보존 (2026-10-18 UTC)
 
 - [USER] 제출 전 확인 통합 과정에서 발견한 계정 복구 UX를 최소 범위로 보완한다. 기존 서버 인증 정책은 유지하고 이 탭의 입력 보존·같은 방 재로그인·복귀 확인만 추가한다.
@@ -115,3 +175,21 @@
 - [ ] 해당 정확 HEAD의 원격CI 성공 확인
 
 근거: `docs/verification/issue-110-account-integration-independent.md`, `docs/verification/issue-110-native.json`. 운영 provider 로그인·실제운영자등록·병합·배포는 이번 성공 범위에 포함하지 않는다.
+
+### 2026-10-31 구 웹 참석 호환 — 1단계 무료 검증 완료
+
+- [x] 6 API 요청의 conditional-v1 지원 query와 실제 생성 OpenAPI/types·관련mock계약을 반영했다. UI TSX/CSS/경고영역·쿠키/Bearer/body/Origin/cursor/AbortSignal은 유지한다.
+- [x] unit825PASS, 기본browser518개정확실행(517PASS/기존1SKIP/retry0), evidence6PASS/하네스사전검사단위3PASS, build/lint/typecheck/api:check 통과. 구·신bundle4개별browser는API contract대역이며 실제serverHTTP+PG와별도다.
+- [x] 독립검토 열린P1/P2없음, 서버최종전체2680PASS/기존17SKIP/실패·오류0을 확인했다.
+- [ ] 별도 구체 승인 후 Issue/feature push/develop DraftPR·정확SHA CI·ready/develop병합·mergeCI를 진행한다. 현재commit/push/PR/merge/deploy/유료0,main·운영DB·V2는별도단계다.
+
+### 2026-10-31 2단계 게시·develop 통합 승인
+
+사용자가 Issue/검토 파일 commit·push/develop Draft PR/CI/ready·develop 병합/merge CI까지 승인했다. 실제 Issue #62를 생성했다. 1단계 검증 소스와 기존 결과는 유지하며 문서의 실행 상태만 갱신한다. main·운영 DB·배포·V2·유료 호출은 이 묶음에 포함하지 않는다.
+
+- [x] 로컬 호환 구현과 최종 무료 검사 완료
+- [x] Issue #62 생성 및 중복·원격 기준 확인
+- [ ] feature push와 develop Draft PR·정확 HEAD CI
+- [ ] ready/develop 병합과 정확 merge SHA CI 및 원격 포함 확인
+
+Commit/PR: 동일 커밋 예정.

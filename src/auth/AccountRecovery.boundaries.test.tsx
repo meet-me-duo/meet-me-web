@@ -90,6 +90,12 @@ describe("issue132 exact pending drafts and irreversible fresh ownership denial"
     const result = kind === "PRECHECK" ? snapshot(1, submitted) : { raw_text: submitted, revision: 1, editable: true, locale: "ko-KR", created_at: "2026-10-18T10:00:00Z" };
     if (kind === "PRECHECK") privateA = () => json(result); else legacyA = () => json(result);
     await act(async () => { pending.resolve(json(result, kind === "PRECHECK" ? 202 : 200)); });
+    if (kind === "PRECHECK") {
+      await screen.findByText(/모호한 부분을 확인 중/);
+      expect(screen.queryByRole("textbox", { name: /시간·장소 조건/ })).not.toBeInTheDocument();
+      const failed = snapshot(1, submitted); failed.check!.status = "FAILED"; privateA = () => json(failed);
+      await act(async () => { await clients.at(-1)!.invalidateQueries(); });
+    }
     expect(await screen.findByRole("textbox", { name: /시간·장소 조건/ })).toHaveValue(newer);
     expect(quarantine.hasQuarantinedDraft()).toBe(true);
     expect(quarantine.recoverQuarantinedDraft(binding(kind, 0))?.rawText).toBe(newer);

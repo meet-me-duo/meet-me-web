@@ -51,9 +51,12 @@ for (const [protocol, motion] of [["PRE_SUBMIT_V1", "searching"], ["PRE_SUBMIT_V
     const canvas = page.locator(`[data-orb-state="${motion}"] canvas`);
     await expect(canvas).toBeVisible();
     await canvas.scrollIntoViewIfNeeded();
-    expect((await canvas.boundingBox())!.width).toBe(20);
-    await expect(page.locator('.section-heading [role="status"]')).toHaveAttribute("aria-live", "polite");
+    expect((await canvas.boundingBox())!.width).toBe(64);
+    await expect(page.locator('.analysis-loading [role="status"]')).toHaveAttribute("aria-live", "polite");
     await expect(page.locator(".thinking-orb")).toHaveAttribute("aria-hidden", "true");
+    await expect(page.getByRole("button", { name: "내 조건 수정", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "확인 취소", exact: true })).toHaveCount(0);
+    await expect(page.locator(".precheck-card, .submission-privacy")).toHaveCount(0);
     const frame = await canvas.evaluate(node => (node as HTMLCanvasElement).toDataURL());
     await expect.poll(() => canvas.evaluate(node => (node as HTMLCanvasElement).toDataURL())).not.toBe(frame);
     await page.screenshot({ path: info.outputPath(`${protocol}-orb.png`), fullPage: true });
@@ -64,21 +67,24 @@ for (const [protocol, motion] of [["PRE_SUBMIT_V1", "searching"], ["PRE_SUBMIT_V
     const staticFrame = await canvas.evaluate(node => (node as HTMLCanvasElement).toDataURL());
     await page.waitForTimeout(200);
     expect(await canvas.evaluate(node => (node as HTMLCanvasElement).toDataURL())).toBe(staticFrame);
-    expect(await canvas.evaluate(node => Array.from((node as HTMLCanvasElement).getContext("2d")!.getImageData(0, 0, 20, 20).data).some((value, i) => i % 4 === 3 && value > 0))).toBe(true);
+    expect(await canvas.evaluate(node => Array.from((node as HTMLCanvasElement).getContext("2d")!.getImageData(0, 0, (node as HTMLCanvasElement).width, (node as HTMLCanvasElement).height).data).some((value, i) => i % 4 === 3 && value > 0))).toBe(true);
     await page.screenshot({ path: info.outputPath(`${protocol}-reduced-motion.png`), fullPage: true });
 
     await page.emulateMedia({ reducedMotion: "no-preference" });
-    await page.locator(".precheck-card").evaluate(node => { node.style.marginTop = "2000px"; });
+    await page.locator(".analysis-loading").evaluate(node => { node.style.marginTop = "2000px"; });
     await page.evaluate(() => scrollTo(0, 0));
     await expect(canvas).not.toBeInViewport();
     await page.waitForTimeout(100);
     const offscreenFrame = await canvas.evaluate(node => (node as HTMLCanvasElement).toDataURL());
     await page.waitForTimeout(200);
     expect(await canvas.evaluate(node => (node as HTMLCanvasElement).toDataURL())).toBe(offscreenFrame);
-    await page.locator(".precheck-card").evaluate(node => { node.style.marginTop = ""; });
+    await page.locator(".analysis-loading").evaluate(node => { node.style.marginTop = ""; });
     await canvas.scrollIntoViewIfNeeded();
     await expect.poll(() => canvas.evaluate(node => (node as HTMLCanvasElement).toDataURL())).not.toBe(offscreenFrame);
 
+    mock.set(current("TIMED_OUT"));
+    await expect(page.getByText(/확인 시간이 초과됐어요/)).toBeVisible();
+    await expect(page.getByRole("button", { name: "다시 확인", exact: true })).toBeEnabled();
     await page.getByRole("button", { name: "확인 취소", exact: true }).dblclick();
     await expect(page.locator(".thinking-orb")).toHaveCount(0);
     await expect(page.getByText(/확인을 취소했어요/)).toBeVisible();
@@ -113,8 +119,9 @@ test.describe("#107 synthetic browser pre-submit", () => {
 
   test("reload restores a pending check by GET without creating a second write", async ({ page, baseURL }) => {
     const mock = await fixture(page, baseURL!, current("CHECKING")); await page.goto(`/rooms/${code}`);
-    await expect(page.getByText(raw, { exact: true })).toBeVisible(); await page.reload();
-    await expect(page.getByText(raw, { exact: true })).toBeVisible(); expect(mock.reads.length).toBeGreaterThanOrEqual(2); expect(mock.writes).toEqual([]);
+    await expect(page.locator(".analysis-loading")).toBeVisible(); await page.reload();
+    await expect(page.locator(".analysis-loading")).toBeVisible();
+    await expect(page.getByText(raw, { exact: true })).toHaveCount(0); expect(mock.reads.length).toBeGreaterThanOrEqual(2); expect(mock.writes).toEqual([]);
     await expect(page.getByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).toHaveCount(0); expect(mock.unexpected).toEqual([]);
   });
 
@@ -159,7 +166,7 @@ test.describe("#107 synthetic browser pre-submit", () => {
 
 for (const width of [320, 390, 1440]) {
   test(`saved precheck hierarchy and cancellable HOST confirmation at ${width}px`, async ({ page, baseURL }, info) => {
-    const mock = await fixture(page, baseURL!, current("CHECKING"), true, "HOST");
+    const mock = await fixture(page, baseURL!, current("FAILED"), true, "HOST");
     await page.setViewportSize({ width, height: 900 });
     await page.goto(`/rooms/${code}`);
     await expect(page.getByRole("heading", { name: "저장된 조건", exact: true })).toBeVisible();

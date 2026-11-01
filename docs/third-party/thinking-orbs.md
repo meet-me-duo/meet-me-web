@@ -17,8 +17,10 @@
   by the installed package. No Pro preset, Studio export, paid login or external
   script was used. Installation used pnpm's npm registry with scripts disabled.
 
-The existing PRE_SUBMIT_V1 QUEUED/CHECKING context uses `searching` (20px), V2
-uses `composing` (20px), and the room's ANALYZING context uses `solving` (64px).
+After the second local UI review, PRE_SUBMIT_V1 QUEUED/CHECKING uses `searching`,
+V2 uses `composing`, and the room's ANALYZING uses `solving`, all at 64px in the
+same centered loading layout. Normal checks hide raw text and controls while
+retaining component state; failures and failed reads expose recovery again.
 These are decorative context choices, not assertions about the provider being
 called or its internal stage. No frontend-visible Jev/LLM dispatch stage exists
 in the current contract. Do not manufacture progress or change protocols to
@@ -29,7 +31,7 @@ text remains a polite atomic live region. The published renderer uses 2D canvas
 with a device pixel ratio cap of 2, stops RAF when offscreen or the tab is hidden,
 cleans up on unmount, and responds to live reduced-motion changes with a static
 representative frame. There is no pointer capture/gravity behavior enabled. The
-small preset and speed 0.8 keep the visual subdued; speed changes animation time,
+64px preset and speed 0.8 keep the visual subdued; speed changes animation time,
 not frame rate. Real device energy usage remains unmeasured.
 
 Source/registry/license were checked on 2026-11-01. The lockfile pins the registry

@@ -637,7 +637,7 @@ fieldset.field legend { margin-bottom: 9px; }
   .hero-kicker { margin-bottom: 20px; }
 }
 @media (max-width: 540px) {
-  .landing .hero { min-height: calc(100svh - 69px); align-content: start; padding-block: max(24px, env(safe-area-inset-top)) 40px; gap: 0; }
+  .landing .hero { min-height: calc(100svh - 69px); align-content: center; padding-block: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-bottom)); gap: 0; }
   .landing .hero h1 { font-size: clamp(1.75rem, 7.6vw, 2.5rem); line-height: 1.4; }
   .hero-description { font-size: .9375rem; margin-top: 20px; }
   .hero-break { display: none; }
@@ -701,6 +701,8 @@ fieldset.field legend { margin-bottom: 9px; }
 .room-page .candidate-list, .room-page .actual-time-form, .room-page .unapplied { width: 100%; max-width: none; }
 .room-page .center-state .large-icon { width: 44px; height: 44px; margin-bottom: 12px; }
 .thinking-orb { display: inline-flex; flex: none; vertical-align: middle; }
+.analysis-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; min-height: 248px; padding: 32px 24px; text-align: center; }
+.analysis-loading h2 { margin: 0; color: #172033; font-size: clamp(1.15rem, 3vw, 1.5rem); line-height: 1.5; letter-spacing: -.035em; overflow-wrap: anywhere; }
 .room-page .center-state .large-icon:has(.thinking-orb) { width: 64px; height: 64px; background: transparent; }
 .room-page .center-state h1 { font-size: 1.5rem; }
 .room-page .center-state p { margin-bottom: 12px; }

@@ -1,5 +1,22 @@
 # Implementation log
 
+## 2026-11-01 — 사용자 리뷰 2: 모바일 중앙 배치와 단순한 분석 로딩 (로컬)
+
+`b176ef0`을 보존한 후 같은 격리 브랜치에서 후속 구현했다. 모바일 hero를
+헤더와 safe area를 고려한 중앙으로 되돌리고 아주 짧은 화면은 자연스럽게
+스크롤한다. 데스크톱 소개의 첫 viewport 밖 배치는 유지한다. V1 확인·V2 보완
+확인·전체 분석은 공통 `AnalysisLoading`의 64px 중앙 Orb와 짧은 문구를 쓴다.
+정상 검사 동안 원문 카드·내 조건 수정·확인 취소·안내/주최자 도구를 숨기며,
+비공개 안내 문단을 제거했다. 처리 컴포넌트/초안/polling과 오류·timeout 뒤
+복구·재시도·중복 요청 방어·API/conditional-v1은 보존한다.
+
+단위826, Chromium537PASS/기존skip1/retry0, evidence6, preview18, preflight3 및 lint/typecheck/API정합/build를
+확인했으며 전체 브라우저 결과와 실패한 초기 표시 기대값의 수정 근거는
+[후속 검증 기록](verification/home-thinking-orbs-review2.md)과 별도 새 산출물에
+남긴다. 이전 Library 항목은 유지하고 새 홈 PNG와 실제 UI MP4, source/bundle/
+patch/로그를 새 항목으로 제공한다. 사용자 확인 전 원격 게시/배포 금지,
+실제 모델·운영 API 호출0, 서버 변경0을 유지한다.
+
 ## 2026-11-01 — 홈 첫 화면 간격과 분석 Thinking Orbs (로컬)
 
 배포 기준 main `5976ccd6`을 원격과 대조한 뒤 별도 worktree/브랜치

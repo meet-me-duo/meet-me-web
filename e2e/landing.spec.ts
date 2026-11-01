@@ -123,7 +123,8 @@ for (const [width, height] of [[1440, 900], [1920, 1080], [1280, 600], [844, 390
     const action = page.getByRole("button", { name: "모임 만들기" });
     expect(kicker.y).toBeGreaterThanOrEqual(header.y + header.height + 24);
     if (width <= 540) {
-      expect(kicker.y - header.y - header.height).toBeLessThanOrEqual(32);
+      const copy = (await page.locator(".hero-copy").boundingBox())!;
+      expect(Math.abs(copy.y + copy.height / 2 - (header.y + header.height + (height - header.height) / 2))).toBeLessThanOrEqual(2);
       await expect(action).toBeInViewport({ ratio: 1 });
     } else {
       await expect(page.getByText("말하기부터 약속까지", { exact: true })).not.toBeInViewport();
@@ -139,6 +140,14 @@ for (const [width, height] of [[1440, 900], [1920, 1080], [1280, 600], [844, 390
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
   });
 }
+
+test("a very short mobile viewport keeps the centered hero naturally scrollable", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 360 }); await page.goto("/");
+  const action = page.getByRole("button", { name: "모임 만들기" });
+  await action.scrollIntoViewIfNeeded(); await expect(action).toBeInViewport({ ratio: 1 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+  await expect(page.locator(".hero")).not.toHaveCSS("overflow", "hidden");
+});
 
 test("hero action has strong contrast, keyboard focus and subtle pointer feedback", async ({ page }) => {
   await installAccountRefresh(page, "민수");

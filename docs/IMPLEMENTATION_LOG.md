@@ -1,5 +1,24 @@
 # Implementation log
 
+## 2026-11-01 — searching 통일·모임 상단 카드 축소·모바일 위치 미세 조정 (로컬)
+
+사용자가 첫 번째 searching 효과를 선택해 V1/V2 CHECKING과 전체 분석을 모두
+64px/light/speed0.8로 통일하고 phase 인자를 제거했다. 이전 V1/V2 캡처는 같은
+CHECKING fixture의 프로토콜 차이이며 원문→보완 답변 확인의 단계 구분이
+아니라는 설명을 바로잡았다. Jev/LLM 내부 단계를 추정하지 않는다.
+
+후속 피드백에 따라 모임 상단의 라벨·제목·설정·초대 링크는 보존하면서
+패딩·타이포·간격을 줄였다. 모바일 공유 아이콘은 기존 접근 가능한 이름과
+44px 터치 영역을 유지한다. 긴 제목의 줄바꿈과 복사 실패의 수동 입력도
+브라우저로 확인했다. 모바일 hero는 이전 중앙에서24px만 올리고 아주 짧은
+화면의 자연 스크롤과 데스크톱 소개의 첫 viewport 밖 배치를 유지한다.
+
+최종 unit826·Chromium545PASS/기존skip1/retry0·evidence6·preview18·preflight3 및
+lint/typecheck/API/build PASS다. 새 개별 Library 미리보기와 전체 source/bundle/patch 근거는
+[검증 기록](verification/home-searching-compact-header.md) 및 새 산출물에 남긴다.
+기존 커밋/미디어를 보존하며 사용자 확인 전 원격 push/PR/병합/배포 금지,
+서버 변경0, 실제 모델·운영 API 호출0을 유지한다.
+
 ## 2026-11-01 — 사용자 리뷰 2: 모바일 중앙 배치와 단순한 분석 로딩 (로컬)
 
 `b176ef0`을 보존한 후 같은 격리 브랜치에서 후속 구현했다. 모바일 hero를

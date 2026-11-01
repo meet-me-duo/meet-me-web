@@ -72,11 +72,38 @@ test("brand link returns to the landing page", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /조건만 말하세요/ })).toBeVisible();
 });
 
+for (const width of [1440, 390, 320]) {
+  test(`compact room header preserves settings and accessible share action at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 }); await mockRoom(page, "ANALYZING", { role: "HOST" });
+    await page.goto(`/rooms/${code}`);
+    const header = page.locator(".room-header"); await expect(header.getByRole("heading", { name: "졸업 프로젝트 회의" })).toBeVisible();
+    await expect(header).toContainText("내가 만든 모임"); await expect(header).toContainText("9월 21일"); await expect(header).toContainText("9월 28일");
+    await expect(header).toContainText("대면·비대면 모두");
+    expect((await header.boundingBox())!.height).toBeLessThanOrEqual(width > 780 ? 104 : 130);
+    const button = header.getByRole("button", { name: "초대 링크 복사" });
+    const box = (await button.boundingBox())!; expect(box.width).toBeGreaterThanOrEqual(44); expect(box.height).toBeGreaterThanOrEqual(44);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+  });
+}
+
+test("a long unbroken room title wraps at 320px and manual invitation copy remains usable", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 480 }); await mockRoom(page, "ANALYZING", { role: "HOST" });
+  const purpose = "아주긴모임제목과설정정보를생략하지않고좁은화면에서도확인하는합성모임".repeat(5);
+  await page.route(`**/api/rooms/${code}`, route => route.fulfill({ json: { ...room("ANALYZING", true, "HOST"), purpose } }));
+  await page.addInitScript(() => Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText: async () => { throw new Error("Synthetic clipboard failure"); } } }));
+  await page.goto(`/rooms/${code}`); const header = page.locator(".room-header");
+  await expect(header.getByRole("heading", { name: purpose })).toHaveText(purpose);
+  await header.getByRole("button", { name: "초대 링크 복사" }).click();
+  const input = header.getByRole("textbox", { name: "직접 복사할 링크" }); await expect(input).toHaveValue(new RegExp(`/rooms/${code}$`));
+  await input.click(); await expect(input).toBeFocused();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
+});
+
 test("full analysis has a live decorative orb and removes it on delayed polling", async ({ page }, info) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await mockRoom(page, "ANALYZING");
   await page.goto(`/rooms/${code}`);
-  const canvas = page.locator('[data-orb-state="solving"] canvas');
+  const canvas = page.locator('[data-orb-state="searching"] canvas');
   await expect(canvas).toBeVisible();
   await canvas.scrollIntoViewIfNeeded();
   expect((await canvas.boundingBox())!.width).toBe(64);

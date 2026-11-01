@@ -17,11 +17,13 @@
   by the installed package. No Pro preset, Studio export, paid login or external
   script was used. Installation used pnpm's npm registry with scripts disabled.
 
-After the second local UI review, PRE_SUBMIT_V1 QUEUED/CHECKING uses `searching`,
-V2 uses `composing`, and the room's ANALYZING uses `solving`, all at 64px in the
-same centered loading layout. Normal checks hide raw text and controls while
+After the user's motion selection, PRE_SUBMIT_V1/V2 QUEUED/CHECKING and room
+ANALYZING all use the same `searching` effect at 64px in the centered loading
+layout. The wrapper accepts no provider/protocol phase. V1/V2 in earlier videos
+were two protocol variants of the same CHECKING fixture, not sequential input
+and supplemental-answer processing stages. Normal checks hide raw text and controls while
 retaining component state; failures and failed reads expose recovery again.
-These are decorative context choices, not assertions about the provider being
+This is a decorative effect, not an assertion about the provider being
 called or its internal stage. No frontend-visible Jev/LLM dispatch stage exists
 in the current contract. Do not manufacture progress or change protocols to
 infer one. V2 is exercised only through synthetic browser fixtures here.

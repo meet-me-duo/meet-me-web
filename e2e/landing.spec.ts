@@ -124,7 +124,7 @@ for (const [width, height] of [[1440, 900], [1920, 1080], [1280, 600], [844, 390
     expect(kicker.y).toBeGreaterThanOrEqual(header.y + header.height + 24);
     if (width <= 540) {
       const copy = (await page.locator(".hero-copy").boundingBox())!;
-      expect(Math.abs(copy.y + copy.height / 2 - (header.y + header.height + (height - header.height) / 2))).toBeLessThanOrEqual(2);
+      expect(Math.abs(copy.y + copy.height / 2 - (header.y + header.height + (height - header.height) / 2 - 24))).toBeLessThanOrEqual(2);
       await expect(action).toBeInViewport({ ratio: 1 });
     } else {
       await expect(page.getByText("말하기부터 약속까지", { exact: true })).not.toBeInViewport();

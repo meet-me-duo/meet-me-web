@@ -43,12 +43,12 @@ async function fixture(page: Page, baseURL: string, initial = current(), joined 
 async function noPrivateStorage(page: Page, text: string) { expect(await page.evaluate(value => Object.values({ ...localStorage, ...sessionStorage }).some(item => String(item).includes(value)), text)).toBe(false); }
 
 // PRE_SUBMIT_V2 is a browser-only contract fixture; this does not enable a server.
-for (const [protocol, motion] of [["PRE_SUBMIT_V1", "searching"], ["PRE_SUBMIT_V2", "composing"]]) {
+for (const protocol of ["PRE_SUBMIT_V1", "PRE_SUBMIT_V2"]) {
   test(`${protocol} orb animates, reduces motion, pauses offscreen and stops after cancellation`, async ({ page, baseURL }, info) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
     const mock = await fixture(page, baseURL!, current("CHECKING"), true, "MEMBER", protocol);
     await page.goto(`/rooms/${code}`);
-    const canvas = page.locator(`[data-orb-state="${motion}"] canvas`);
+    const canvas = page.locator('[data-orb-state="searching"] canvas');
     await expect(canvas).toBeVisible();
     await canvas.scrollIntoViewIfNeeded();
     expect((await canvas.boundingBox())!.width).toBe(64);

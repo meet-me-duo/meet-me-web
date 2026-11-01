@@ -235,7 +235,7 @@ export default function SubmissionCheckPanel({ room, onRoomChanged, onAccessDeni
   // Presentation only: keep polling, ownership and in-memory drafts mounted.
   // A failed read/command must expose recovery instead of hiding it behind motion.
   if (!closed && running.has(check?.status ?? "") && !query.isError && failure == null && !uncertain && closeError == null) {
-    return <AnalysisLoading phase={v2 ? "clarification" : "checking"} title="모호한 부분을 확인 중이에요." />;
+    return <AnalysisLoading title="모호한 부분을 확인 중이에요." />;
   }
   return <details className={`submission-disclosure ${closed ? "is-closed" : "is-collecting"}`} open={closed ? undefined : true}><summary>내 저장 입력 확인</summary><div className="submission-layout submission-layout--single"><section className={`glass-card submission-card precheck-card ${complete ? "submission-complete" : ""}`} aria-label="제출 전 조건 확인">
     <div className="section-heading"><h2>{closed ? "마감된 내 입력 확인" : candidate ? showEditor ? "조건 수정" : "저장된 조건" : "가능한 조건을 알려주세요"}</h2>

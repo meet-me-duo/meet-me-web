@@ -72,6 +72,28 @@ test("brand link returns to the landing page", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /조건만 말하세요/ })).toBeVisible();
 });
 
+test("full analysis has a live decorative orb and removes it on delayed polling", async ({ page }, info) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await mockRoom(page, "ANALYZING");
+  await page.goto(`/rooms/${code}`);
+  const canvas = page.locator('[data-orb-state="solving"] canvas');
+  await expect(canvas).toBeVisible();
+  await canvas.scrollIntoViewIfNeeded();
+  expect((await canvas.boundingBox())!.width).toBe(64);
+  await expect(page.getByRole("status").filter({ hasText: "모두의 조건을 분석하고 있어요" })).toHaveAttribute("aria-live", "polite");
+  const frame = await canvas.evaluate(node => (node as HTMLCanvasElement).toDataURL());
+  await expect.poll(() => canvas.evaluate(node => (node as HTMLCanvasElement).toDataURL())).not.toBe(frame);
+  await page.screenshot({ path: info.outputPath("full-analysis-orb.png"), fullPage: true });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.waitForTimeout(100);
+  const reduced = await canvas.evaluate(node => (node as HTMLCanvasElement).toDataURL());
+  await page.waitForTimeout(200);
+  expect(await canvas.evaluate(node => (node as HTMLCanvasElement).toDataURL())).toBe(reduced);
+  await page.route(`**/api/rooms/${code}`, route => route.fulfill({ json: room("ANALYSIS_DELAYED") }));
+  await expect(page.getByRole("heading", { name: "분석이 잠시 지연되고 있어요" })).toBeVisible();
+  await expect(canvas).toHaveCount(0);
+});
+
 for (const [status, heading] of [
   ["ANALYZING", "모두의 조건을 분석하고 있어요"],
   ["INSUFFICIENT_PARTICIPANTS", "조율에 필요한 인원이 부족해요"],

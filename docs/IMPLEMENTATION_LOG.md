@@ -1,5 +1,22 @@
 # Implementation log
 
+## 2026-11-01 — 홈 첫 화면 간격과 분석 Thinking Orbs (로컬)
+
+배포 기준 main `5976ccd6`을 원격과 대조한 뒤 별도 worktree/브랜치
+`feat/home-thinking-orbs`에서 작업했다. 데스크톱 hero의 740px 상한을 제거해
+소개를 첫 viewport 아래로 옮겼고, 모바일 hero는 헤더 아래 24px부터 시작한다.
+공식 npm `thinking-orbs@0.3.2`(MIT)를 기존 제출 확인 V1/V2와 전체 분석에
+연결했다. 현재 API가 노출하지 않는 Jev/LLM 내부 단계를 추정하지 않고 기존
+상태·문구·취소·오류·timeout·중복 요청 방어와 conditional-v1 선언을 보존했다.
+
+단위825, 전체 Chromium535PASS/기존skip1/retry0, evidence6, preview18,
+하네스 사전검사3 및 lint/typecheck/API정합/build를 확인했다. 실제 픽셀·정지·
+취소·화면 이탈·짧은 viewport QA와 실패한 초기 하네스 기록은
+[검증 기록](verification/home-thinking-orbs-local.md)에 정리했다. 서버·운영·
+실모델·push/PR/병합/배포는 수행하지 않았다. 실제 모델 호출0이며 물리 기기
+배터리와 Safari는 미검증이다. 소스·bundle·patch·로그·스크린샷은 별도 검토
+산출물로 보존한다.
+
 ## 2026-10-28 — 승인된 UI 정돈과 공식 소셜 로그인 버튼
 
 - 원본 개인 PC 저장소를 보존하고 독립 clone의 `feature/ui-brand-refresh`에서 develop 656f757을 기준으로 작업했다. 조사 시 main 0c7a29b와 기능 트리가 같았다.

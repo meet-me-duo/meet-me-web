@@ -220,7 +220,7 @@ fieldset.field legend { margin-bottom: 9px; }
 
 .center-state { width: min(720px, calc(100% - 32px)); margin: 70px auto; padding: clamp(30px, 6vw, 52px); border-radius: var(--radius); text-align: center; }
 .center-state h1 { margin: 0 0 10px; font-size: clamp(1.4rem, 4vw, 1.9rem); letter-spacing: -.035em; }
-.center-state > p { max-width: 450px; margin: 0 auto 23px; color: #64748b; font-size: .85rem; line-height: 1.65; }
+.center-state > div > p { max-width: 450px; margin: 0 auto 23px; color: #64748b; font-size: .85rem; line-height: 1.65; }
 .center-state .button { margin-top: 5px; }
 .center-state .alert { margin: 15px 0; }
 .text-link { display: block; width: fit-content; margin: 22px auto 0; color: #64748b; font-size: .74rem; text-decoration: underline; text-underline-offset: 3px; }
@@ -590,7 +590,7 @@ fieldset.field legend { margin-bottom: 9px; }
 /* Bright platform experiment: light surfaces, quiet borders and a clear content axis. */
 .landing { position: relative; isolation: isolate; padding-bottom: var(--space-16); }
 .landing::before { content: ""; position: absolute; z-index: -1; inset: 0 calc((100% - 100vw) / 2) auto; height: 780px; pointer-events: none; background: radial-gradient(ellipse at 78% 10%, #e2edff 0, transparent 52%), linear-gradient(#f3f7ff, #f8fafc 85%); }
-.landing .hero { min-height: min(740px, calc(100svh - 68px)); max-width: none; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 64px; padding-block: 88px; text-align: left; animation: none; }
+.landing .hero { min-height: calc(100svh - 68px); max-width: none; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 64px; padding-block: 88px; text-align: left; animation: none; }
 .hero-copy { min-width: 0; }
 .hero-kicker, .section-kicker { margin: 0 0 24px; color: var(--sky-dark); font-size: .8125rem; font-weight: 600; letter-spacing: .02em; }
 .landing .hero h1 { font-size: clamp(2rem, 3.6vw, 3.25rem); font-weight: 600; line-height: 1.35; letter-spacing: -.055em; }
@@ -629,7 +629,7 @@ fieldset.field legend { margin-bottom: 9px; }
   .hero-example { padding: 24px; }
 }
 @media (max-width: 780px) {
-  .landing .hero { grid-template-columns: minmax(0, 1fr); min-height: 0; gap: 48px; padding-block: 64px 32px; }
+  .landing .hero { grid-template-columns: minmax(0, 1fr); gap: 48px; padding-block: 64px 32px; }
   .landing .hero h1 { font-size: clamp(2rem, 5.5vw, 3rem); }
   .hero-copy { max-width: 620px; }
   .hero-example { width: 100%; max-width: 540px; }
@@ -637,7 +637,7 @@ fieldset.field legend { margin-bottom: 9px; }
   .hero-kicker { margin-bottom: 20px; }
 }
 @media (max-width: 540px) {
-  .landing .hero { min-height: calc(100svh - 69px); align-content: center; padding-block: 40px; gap: 0; }
+  .landing .hero { min-height: calc(100svh - 69px); align-content: start; padding-block: max(24px, env(safe-area-inset-top)) 40px; gap: 0; }
   .landing .hero h1 { font-size: clamp(1.75rem, 7.6vw, 2.5rem); line-height: 1.4; }
   .hero-description { font-size: .9375rem; margin-top: 20px; }
   .hero-break { display: none; }
@@ -700,6 +700,8 @@ fieldset.field legend { margin-bottom: 9px; }
 .room-page .center-state { width: 100%; margin: 0 auto; padding: 28px; }
 .room-page .candidate-list, .room-page .actual-time-form, .room-page .unapplied { width: 100%; max-width: none; }
 .room-page .center-state .large-icon { width: 44px; height: 44px; margin-bottom: 12px; }
+.thinking-orb { display: inline-flex; flex: none; vertical-align: middle; }
+.room-page .center-state .large-icon:has(.thinking-orb) { width: 64px; height: 64px; background: transparent; }
 .room-page .center-state h1 { font-size: 1.5rem; }
 .room-page .center-state p { margin-bottom: 12px; }
 .room-page .results-section { padding: 8px 0; }

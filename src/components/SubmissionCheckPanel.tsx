@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, LoaderCircle } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
+import { AnalysisOrb } from "./AnalysisOrb";
 import { api, ApiError, errorMessage } from "../api/client";
 import type { Room } from "../api/types";
 import type { StartSubmissionCheckBody, SubmissionCheckCommand, SubmissionCheckSnapshot } from "../api/precheck";
@@ -234,7 +235,7 @@ export default function SubmissionCheckPanel({ room, onRoomChanged, onAccessDeni
   return <details className={`submission-disclosure ${closed ? "is-closed" : "is-collecting"}`} open={closed ? undefined : true}><summary>내 저장 입력 확인</summary><div className="submission-layout submission-layout--single"><section className={`glass-card submission-card precheck-card ${complete ? "submission-complete" : ""}`} aria-label="제출 전 조건 확인">
     <div className="section-heading"><h2>{closed ? "마감된 내 입력 확인" : candidate ? showEditor ? "조건 수정" : "저장된 조건" : "가능한 조건을 알려주세요"}</h2>
       {complete && !closed && <p role="status"><CheckCircle2 size={16} /> {unresolvedReceived ? messages.RECEIVED : "제출 완료 · 다른 참여자를 기다려 주세요."}</p>}
-      {!closed && !complete && check && !editing && !draftEdited.current && <p role="status">{running.has(check.status) && <LoaderCircle className="spin" size={16} />} {messages[check.status] ?? "현재 확인 상태를 다시 조회해 주세요."}</p>}
+      {!closed && !complete && check && !editing && !draftEdited.current && <p role="status" aria-live="polite" aria-atomic="true">{running.has(check.status) && <AnalysisOrb phase={v2 ? "clarification" : "checking"} />} {messages[check.status] ?? "현재 확인 상태를 다시 조회해 주세요."}</p>}
     </div>
     <p className="submission-privacy">{v2 ? "내 원문과 보완 답변은 다른 참여자에게 공개되지 않아요. 최종 분석에서 해석되지 않은 경우 원문과 제출한 답변, 미반영 사유를 주최자에게 보여줘요. 개인 확인 질문은 공개하지 않아요." : "내 원문과 확인 질문·답변은 다른 참여자에게 공개되지 않아요."}</p>
     {query.isPending && <p role="status">내 입력 확인 상태를 불러오는 중…</p>}

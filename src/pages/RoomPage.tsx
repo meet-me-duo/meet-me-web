@@ -8,6 +8,7 @@ import { correctionOpen, currentRoom, viewerContext, type RecoveryRoom as Room, 
 import AnalysisRecoveryPanel from "../components/AnalysisRecoveryPanel";
 import ClarificationPanel from "../components/ClarificationPanel";
 import SubmissionCheckPanel from "../components/SubmissionCheckPanel";
+import { AnalysisOrb } from "../components/AnalysisOrb";
 import { RoomCloseConfirmation } from "../components/RoomCloseConfirmation";
 import { RecommendationsPanel, RECOMMENDATION_PROTOCOL } from "../components/RecommendationsPanel";
 import { formatRecommendationRange, recommendationTimeZoneLabel } from "../utils/recommendationTime";
@@ -173,7 +174,7 @@ export default function RoomPage() {
       {showEditor && (!preSubmit || correctionOpen(room)) && <SubmissionPanel key={`submission:${ownerKey}`} room={room} onRoomChanged={setRoom} onAccessDenied={privateAccessDenied} draft={currentDraft} onDraftChanged={updateDraft} clarificationPending={clarificationPendingOwner === ownerKey} />}
       {!showEditor && currentDraft !== null && <section className="glass-card side-card"><h2>서버 반영을 확인하지 않은 임시 입력</h2><p>저장하지 않은 내용은 분석에 포함되지 않아요. 이 화면에만 임시로 보관했어요. 저장 여부는 내 저장된 입력에서 확인해 주세요. 새로고침하거나 다른 모임으로 이동하면 사라져요.</p><label className="field"><span>내 임시 조건</span><textarea readOnly value={currentDraft} rows={4} /></label><button className="button secondary" onClick={() => setDraft(null)}>임시 수정 버리기</button></section>}
       {room.public_status === "COLLECTING" && correctionOpen(room) && !room.capabilities?.can_edit_own_submission && <StateCard icon={<LockKeyhole />} title="조건을 수정하는 중이에요" body="기존에 입력을 제출한 참여자가 자신의 입력을 수정할 수 있어요." />}
-      {room.public_status === "ANALYZING" && <StateCard icon={<LoaderCircle className="spin" />} title="모두의 조건을 분석하고 있어요" body="접수된 조건으로 최적의 플랜을 만드는 중이에요. 잠시 시간이 걸릴 수 있어요." />}
+      {room.public_status === "ANALYZING" && <StateCard icon={<AnalysisOrb phase="analysis" size={64} />} live title="모두의 조건을 분석하고 있어요" body="접수된 조건으로 최적의 플랜을 만드는 중이에요. 잠시 시간이 걸릴 수 있어요." />}
       {room.public_status === "INSUFFICIENT_PARTICIPANTS" && <StateCard icon={<Users />} title="조율에 필요한 인원이 부족해요" body="최소 두 명의 제출이 필요해 후보를 만들지 않았어요." />}
       {room.public_status === "ANALYSIS_DELAYED" && <DelayedState key={`delayed:${ownerKey}`} room={room} onRetried={setRoom} onAccessDenied={privateAccessDenied} />}
       {room.public_status === "NO_MATCH" && <><StateCard icon={<AlertCircle />} title="모두에게 맞는 후보를 찾지 못했어요" body="반영 가능한 조건에서 함께할 일정을 찾지 못했어요. 일부 입력은 반영되지 않았을 수 있어요. 저장한 조건을 확인하고, 조건 수정을 열 수 있을 때 다시 조율해 보세요." />{room.viewer.role === "HOST" && <UnappliedInputs key={`unapplied:${ownerKey}`} room={room} onAccessDenied={privateAccessDenied} />}</>}
@@ -460,4 +461,4 @@ function ResultPanel({ room, onAccessDenied }: { room: Room; onAccessDenied: (er
   return <><section className="results-section"><div className="section-heading centered"><span className="eyebrow success"><CheckCircle2 size={15} /> 플랜 선택 완료</span><h2>주최자가 선택한 플랜이에요</h2><p>{formatDateTime(result.data.confirmed_at)}에 주최자가 Plan {result.data.candidate.plan_type}을 선택했어요.</p></div><div className="candidate-list single"><CandidateCard candidate={result.data.candidate} canConfirm={false} confirmed /></div><CopyRoomLink room={room} result /></section>{room.review_prompt_supported === true ? <ReviewPrompt inviteCode={room.invite_code} viewerKey={viewerContext(room)} /> : null}</>;
 }
 
-function StateCard({ icon, title, body, action, error }: { icon: React.ReactNode; title: string; body?: string; action?: React.ReactNode; error?: string }) { return <div className="center-state glass-card"><div className="large-icon">{icon}</div><h1>{title}</h1>{body && <p>{body}</p>}{error && <div className="alert error">{error}</div>}{action}<Link className="text-link" to="/">새 모임 만들기</Link></div>; }
+function StateCard({ icon, title, body, action, error, live = false }: { icon: React.ReactNode; title: string; body?: string; action?: React.ReactNode; error?: string; live?: boolean }) { return <div className="center-state glass-card"><div className="large-icon">{icon}</div><div role={live ? "status" : undefined} aria-live={live ? "polite" : undefined} aria-atomic={live ? true : undefined}><h1>{title}</h1>{body && <p>{body}</p>}</div>{error && <div className="alert error">{error}</div>}{action}<Link className="text-link" to="/">새 모임 만들기</Link></div>; }

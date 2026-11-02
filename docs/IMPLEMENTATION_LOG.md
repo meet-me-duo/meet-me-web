@@ -1,5 +1,58 @@
 # Implementation log
 
+## 2026-11-01 — searching 통일·모임 상단 카드 축소·모바일 위치 미세 조정 (로컬)
+
+사용자가 첫 번째 searching 효과를 선택해 V1/V2 CHECKING과 전체 분석을 모두
+64px/light/speed0.8로 통일하고 phase 인자를 제거했다. 이전 V1/V2 캡처는 같은
+CHECKING fixture의 프로토콜 차이이며 원문→보완 답변 확인의 단계 구분이
+아니라는 설명을 바로잡았다. Jev/LLM 내부 단계를 추정하지 않는다.
+
+후속 피드백에 따라 모임 상단의 라벨·제목·설정·초대 링크는 보존하면서
+패딩·타이포·간격을 줄였다. 모바일 공유 아이콘은 기존 접근 가능한 이름과
+44px 터치 영역을 유지한다. 긴 제목의 줄바꿈과 복사 실패의 수동 입력도
+브라우저로 확인했다. 모바일 hero는 이전 중앙에서24px만 올리고 아주 짧은
+화면의 자연 스크롤과 데스크톱 소개의 첫 viewport 밖 배치를 유지한다.
+
+최종 unit826·Chromium545PASS/기존skip1/retry0·evidence6·preview18·preflight3 및
+lint/typecheck/API/build PASS다. 새 개별 Library 미리보기와 전체 source/bundle/patch 근거는
+[검증 기록](verification/home-searching-compact-header.md) 및 새 산출물에 남긴다.
+기존 커밋/미디어를 보존하며 사용자 확인 전 원격 push/PR/병합/배포 금지,
+서버 변경0, 실제 모델·운영 API 호출0을 유지한다.
+
+## 2026-11-01 — 사용자 리뷰 2: 모바일 중앙 배치와 단순한 분석 로딩 (로컬)
+
+`b176ef0`을 보존한 후 같은 격리 브랜치에서 후속 구현했다. 모바일 hero를
+헤더와 safe area를 고려한 중앙으로 되돌리고 아주 짧은 화면은 자연스럽게
+스크롤한다. 데스크톱 소개의 첫 viewport 밖 배치는 유지한다. V1 확인·V2 보완
+확인·전체 분석은 공통 `AnalysisLoading`의 64px 중앙 Orb와 짧은 문구를 쓴다.
+정상 검사 동안 원문 카드·내 조건 수정·확인 취소·안내/주최자 도구를 숨기며,
+비공개 안내 문단을 제거했다. 처리 컴포넌트/초안/polling과 오류·timeout 뒤
+복구·재시도·중복 요청 방어·API/conditional-v1은 보존한다.
+
+단위826, Chromium537PASS/기존skip1/retry0, evidence6, preview18, preflight3 및 lint/typecheck/API정합/build를
+확인했으며 전체 브라우저 결과와 실패한 초기 표시 기대값의 수정 근거는
+[후속 검증 기록](verification/home-thinking-orbs-review2.md)과 별도 새 산출물에
+남긴다. 이전 Library 항목은 유지하고 새 홈 PNG와 실제 UI MP4, source/bundle/
+patch/로그를 새 항목으로 제공한다. 사용자 확인 전 원격 게시/배포 금지,
+실제 모델·운영 API 호출0, 서버 변경0을 유지한다.
+
+## 2026-11-01 — 홈 첫 화면 간격과 분석 Thinking Orbs (로컬)
+
+배포 기준 main `5976ccd6`을 원격과 대조한 뒤 별도 worktree/브랜치
+`feat/home-thinking-orbs`에서 작업했다. 데스크톱 hero의 740px 상한을 제거해
+소개를 첫 viewport 아래로 옮겼고, 모바일 hero는 헤더 아래 24px부터 시작한다.
+공식 npm `thinking-orbs@0.3.2`(MIT)를 기존 제출 확인 V1/V2와 전체 분석에
+연결했다. 현재 API가 노출하지 않는 Jev/LLM 내부 단계를 추정하지 않고 기존
+상태·문구·취소·오류·timeout·중복 요청 방어와 conditional-v1 선언을 보존했다.
+
+단위825, 전체 Chromium535PASS/기존skip1/retry0, evidence6, preview18,
+하네스 사전검사3 및 lint/typecheck/API정합/build를 확인했다. 실제 픽셀·정지·
+취소·화면 이탈·짧은 viewport QA와 실패한 초기 하네스 기록은
+[검증 기록](verification/home-thinking-orbs-local.md)에 정리했다. 서버·운영·
+실모델·push/PR/병합/배포는 수행하지 않았다. 실제 모델 호출0이며 물리 기기
+배터리와 Safari는 미검증이다. 소스·bundle·patch·로그·스크린샷은 별도 검토
+산출물로 보존한다.
+
 ## 2026-10-28 — 승인된 UI 정돈과 공식 소셜 로그인 버튼
 
 - 원본 개인 PC 저장소를 보존하고 독립 clone의 `feature/ui-brand-refresh`에서 develop 656f757을 기준으로 작업했다. 조사 시 main 0c7a29b와 기능 트리가 같았다.

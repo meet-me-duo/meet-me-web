@@ -47,7 +47,7 @@ it("keeps raw input on cancel and sends one explicitly confirmed close request",
 
 it("shows saved input and places HOST tools below cancellation, without a deadline sidebar", async () => {
   const candidate = { revision: 1, raw_text: "저장한 수요일 오후 조건", created_at: "2026-10-17T09:00:00Z", interpretation_reference_at: "2026-10-17T09:00:00Z" };
-  const check = { id: "22222222-2222-4222-8222-222222222222", status: "CHECKING" as const, version: 2, retry_allowed: false, failure_code: null, question: null };
+  const check = { id: "22222222-2222-4222-8222-222222222222", status: "FAILED" as const, version: 2, retry_allowed: false, failure_code: null, question: null };
   const cancel = vi.spyOn(api, "cancelSubmissionCheck").mockResolvedValue({ ...empty, candidate, check: { ...check, status: "CANCELLED", version: 3 } });
   const close = vi.spyOn(api, "closeRoom");
   mount({ ...empty, candidate, check });

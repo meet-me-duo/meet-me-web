@@ -21,7 +21,7 @@ const checkId = "22222222-2222-4222-8222-222222222222";
 const questionId = "33333333-3333-4333-8333-333333333333";
 const dirtyAnswer = "제 개인 답변은 퇴근 뒤입니다";
 const dirtyOriginal = "다음 주 금요일 19시부터 21시 온라인 가능";
-function snapshot(status: "NEEDS_CHOICE" | "CHECKING" | "RECEIVED", raw = original, revision = 1): SubmissionCheckSnapshot {
+function snapshot(status: "NEEDS_CHOICE" | "CHECKING" | "RECEIVED" | "FAILED", raw = original, revision = 1): SubmissionCheckSnapshot {
   const evidence = { protocol: "PRE_SUBMIT_V2" as const, original_revision: 1, reference_at: time, supplement: null, interpretation: "PENDING" as const, unresolved_reason: null };
   return {
     candidate: { revision, raw_text: raw, created_at: time, interpretation_reference_at: time, evidence }, accepted: null,
@@ -58,6 +58,10 @@ it("EX-DRAFT a dirty answer cannot become a new original after selecting A or B"
   await waitFor(() => expect(view.answer).toHaveBeenCalledTimes(1));
   await waitFor(() => expect(screen.queryByRole("heading", { name: "7시는 오전인가요, 오후인가요?" })).not.toBeInTheDocument());
 
+  await screen.findByText(/모호한 부분을 확인 중/);
+  view.read.mockResolvedValue(snapshot("RECEIVED", original, 2));
+  await act(async () => { await view.client.invalidateQueries(); });
+  await screen.findByRole("heading", { name: "저장된 원문 #2" });
   assertAnswerIsNotAnOriginalDraft();
   expect(view.start).not.toHaveBeenCalled();
 });
@@ -76,7 +80,7 @@ it("EX-DRAFT a remote question resolution cannot turn a dirty answer into a new 
 });
 
 it("EX-DRAFT a dirty original stays separate when a new question opens a direct answer editor", async () => {
-  const view = setup(snapshot("CHECKING"));
+  const view = setup(snapshot("FAILED"));
   fireEvent.click(await screen.findByRole("button", { name: "내 조건 수정" }));
   fireEvent.change(screen.getByRole("textbox", { name: /시간·장소 조건/ }), { target: { value: dirtyOriginal } });
   view.read.mockResolvedValue(snapshot("NEEDS_CHOICE"));

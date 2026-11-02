@@ -46,16 +46,20 @@ describe("#107 independent pre-submit lifecycle fences", () => {
     const view = setup(); await screen.findByRole("textbox", { name: /시간·장소 조건/ });
     const late = deferred<SubmissionCheckSnapshot>(); view.read.mockReturnValueOnce(late.promise);
     const refreshing = view.client.invalidateQueries(); await waitFor(() => expect(view.read).toHaveBeenCalledTimes(2));
-    await fillAndSubmit(); await screen.findByText("최신 입력");
+    await fillAndSubmit(); await screen.findByText(/모호한 부분을 확인 중/);
     const old = snapshot("낡은 입력", 1); old.check!.status = "NEEDS_CHOICE"; old.check!.question = { id: "33333333-3333-4333-8333-333333333333", text: "낡은 입력의 비공개 질문", source_excerpt: "옛 구절", options: [] };
     await act(async () => { late.resolve(old); await refreshing; });
-    expect(screen.queryByText("낡은 입력의 비공개 질문")).not.toBeInTheDocument(); expect(screen.getByText("최신 입력")).toBeInTheDocument();
+    expect(screen.queryByText("낡은 입력의 비공개 질문")).not.toBeInTheDocument(); expect(screen.getByText(/모호한 부분을 확인 중/)).toBeInTheDocument();
   });
 
   it("preserves unsaved local typing when another tab advances the candidate", async () => {
     const view = setup(); const input = await screen.findByRole("textbox", { name: /시간·장소 조건/ });
     fireEvent.change(input, { target: { value: "이 탭의 아직 저장하지 않은 초안" } });
     view.read.mockResolvedValue(snapshot("다른 탭에서 저장된 조건", 3)); await act(async () => { await view.client.invalidateQueries(); });
+    await screen.findByText(/모호한 부분을 확인 중/);
+    expect(screen.queryByRole("button", { name: "내 조건 수정" })).not.toBeInTheDocument();
+    const failed = snapshot("다른 탭에서 저장된 조건", 3); failed.check!.status = "FAILED";
+    view.read.mockResolvedValue(failed); await act(async () => { await view.client.invalidateQueries(); });
     await screen.findByText("다른 탭에서 저장된 조건");
     expect(document.body).toHaveTextContent(/다른 탭|최신.*입력|충돌/);
     if (!screen.queryByRole("textbox", { name: /시간·장소 조건/ })) fireEvent.click(screen.getByRole("button", { name: "내 조건 수정" }));

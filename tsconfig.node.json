@@ -17,6 +17,7 @@
   "include": [
     "vite.config.ts",
     "playwright.config.ts",
+    "playwright.local.config.ts",
     "eslint.config.js",
     "vite.e2e.config.ts",
     "vite.evidence-native.config.ts",

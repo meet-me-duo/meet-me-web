@@ -143,7 +143,7 @@ describe("issue132 original-tab private draft quarantine across authentication r
   });
 
   it("preserves a changed server revision and offers the quarantined raw separately until explicit use", async () => {
-    await dirty(); await restore(() => json({ code: "AUTH_REFRESH_INVALID" }, 401)); privateA = () => json(snapshot(2)); await restore(() => auth());
+    await dirty(); await restore(() => json({ code: "AUTH_REFRESH_INVALID" }, 401)); const failed = snapshot(2); failed.check!.status = "FAILED"; privateA = () => json(failed); await restore(() => auth());
     const conflict = await screen.findByRole("region", { name: "보관한 임시 입력" });
     expect(within(conflict).getByRole("textbox")).toHaveValue(raw); expect(within(conflict).getByRole("textbox")).toHaveAttribute("readonly");
     expect(document.body).toHaveTextContent(savedRaw); expect(mutationCalls).toEqual([]);
@@ -220,10 +220,18 @@ describe("issue132 original-tab private draft quarantine across authentication r
     expect(await screen.findByRole("textbox", { name: /시간·장소 조건/ })).toHaveValue(draftB); noPrivateRaw(); expect(mutationCalls).toEqual([]);
   });
   it.each([false, true])("recovers server-saved202 candidate/accepted=%s only from a fresh owner GET, with no automatic resubmission", async accepted => {
-    privateA = () => json(snapshot(1, savedRaw, accepted)); await restore(() => auth()); mount(); await screen.findByText(savedRaw);
+    privateA = () => json(snapshot(1, savedRaw, accepted)); await restore(() => auth()); mount();
+    if (accepted) await screen.findByText(savedRaw); else await screen.findByText(/모호한 부분을 확인 중/);
     await restore(() => json({ code: "AUTH_REFRESH_INVALID" }, 401)); expect(screen.queryByText(savedRaw)).not.toBeInTheDocument();
     const own = deferred<Response>(); privateA = () => own.promise; const before = privateCalls; await restore(() => auth()); await waitFor(() => expect(privateCalls).toBeGreaterThan(before));
-    expect(screen.queryByText(savedRaw)).not.toBeInTheDocument(); await act(async () => { own.resolve(json(snapshot(1, savedRaw, accepted))); }); await screen.findByText(savedRaw);
+    expect(screen.queryByText(savedRaw)).not.toBeInTheDocument(); await act(async () => { own.resolve(json(snapshot(1, savedRaw, accepted))); });
+    if (!accepted) {
+      await screen.findByText(/모호한 부분을 확인 중/);
+      expect(screen.queryByText(savedRaw)).not.toBeInTheDocument();
+      const failed = snapshot(1, savedRaw); failed.check!.status = "FAILED"; privateA = () => json(failed);
+      await act(async () => { await clients.at(-1)!.invalidateQueries(); });
+    }
+    await screen.findByText(savedRaw);
     if (accepted) expect(screen.getByText("제출 완료 · 다른 참여자를 기다려 주세요.")).toBeInTheDocument(); else noCompletion();
     expect(mutationCalls).toEqual([]); privateStorageAbsent();
   });

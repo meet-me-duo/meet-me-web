@@ -74,7 +74,15 @@ describe("#107 pre-submit card separates durable save and accepted completion", 
 
   it.each(["QUEUED", "CHECKING", "FAILED", "FAILED_QUEUE", "TIMED_OUT", "LIMIT_REACHED", "CANCELLED", "NEEDS_EDIT"] as const)("restores %s without POST or false completion", async status => {
     const view = setup(snapshot(status)); await waitFor(() => expect(view.read).toHaveBeenCalled());
-    expect(await screen.findByText(raw)).toBeInTheDocument(); noComplete();
+    if (["QUEUED", "CHECKING"].includes(status)) {
+      await screen.findByText(/모호한 부분을 확인 중/);
+      expect(screen.queryByText(raw)).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "내 조건 수정" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "확인 취소" })).not.toBeInTheDocument();
+      expect(document.querySelector(".analysis-loading canvas")).toHaveStyle({ width: "64px", height: "64px" });
+      expect(document.querySelector(".precheck-card, .submission-privacy")).not.toBeInTheDocument();
+    } else expect(await screen.findByText(raw)).toBeInTheDocument();
+    noComplete();
     expect(view.start).not.toHaveBeenCalled(); expect(view.answer).not.toHaveBeenCalled(); expect(view.legacySave).not.toHaveBeenCalled();
   });
 
@@ -92,7 +100,10 @@ describe("#107 pre-submit card separates durable save and accepted completion", 
 
   it("retains an earlier accepted version while a newer candidate is checking", async () => {
     const value = snapshot("CHECKING"); value.accepted = acceptedVersion(acceptedRaw, 8); value.submission_complete = false;
-    setup(value); await screen.findByText(acceptedRaw); await screen.findByText(raw);
+    const view = setup(value); await screen.findByText(/모호한 부분을 확인 중/);
+    expect(screen.queryByText(acceptedRaw)).not.toBeInTheDocument();
+    view.read.mockResolvedValue({ ...value, check: { ...value.check!, status: "FAILED" } });
+    await view.refresh(); await screen.findByText(acceptedRaw); await screen.findByText(raw);
     expect(document.body).toHaveTextContent(/이전.*확인|마지막.*확인/); expect(document.body).toHaveTextContent(/수정.*확인|확인 중/);
   });
 
@@ -103,6 +114,20 @@ describe("#107 pre-submit card separates durable save and accepted completion", 
 });
 
 describe("#107 explicit choice, direct edit and failure handling", () => {
+  it("exposes read recovery and timeout retry after a minimal loading view without duplicate requests", async () => {
+    const view = setup(snapshot("CHECKING")); await screen.findByText(/모호한 부분을 확인 중/);
+    view.read.mockRejectedValue(new ApiError(503, { code: "SYNTHETIC_READ_FAILURE" })); await view.refresh();
+    await screen.findByRole("alert");
+    expect(document.querySelector(".analysis-loading")).not.toBeInTheDocument();
+    view.read.mockResolvedValue(snapshot("TIMED_OUT"));
+    fireEvent.click(screen.getByRole("button", { name: "현재 상태 확인" }));
+    await screen.findByText(/확인 시간이 초과됐어요/);
+    const retry = screen.getByRole("button", { name: "다시 확인" });
+    act(() => { fireEvent.click(retry); fireEvent.click(retry); });
+    await screen.findByText(/모호한 부분을 확인 중/);
+    expect(view.retry).toHaveBeenCalledTimes(1); expect(view.start).not.toHaveBeenCalled();
+    expect(screen.queryByRole("button", { name: "확인 취소" })).not.toBeInTheDocument();
+  });
   it("keeps source text and full proposed text visible and requires explicit choice confirmation", async () => {
     const view = setup(choice()); await screen.findByText("오전과 오후 중 어느 시간인가요?"); await screen.findByText(raw);
     fireEvent.click(screen.getByRole("button", { name: /오전/ }));
@@ -149,7 +174,9 @@ describe("#107 explicit choice, direct edit and failure handling", () => {
   it("ignores obsolete operation_outcome when current snapshot is a newer pending candidate", async () => {
     const view = setup(); const current = snapshot("CHECKING"); current.candidate = version("다른 탭의 최신 조건", 3);
     current.operation_outcome = { request_id: "55555555-5555-4555-8555-555555555555", candidate_revision: 1, check_id: "66666666-6666-4666-8666-666666666666", status: "CLEAR" }; view.start.mockResolvedValue(current);
-    await submit(); await screen.findByText("다른 탭의 최신 조건"); noComplete();
+    await submit(); await screen.findByText(/모호한 부분을 확인 중/); noComplete();
+    view.read.mockResolvedValue({ ...current, check: { ...current.check!, status: "FAILED" } });
+    await view.refresh(); await screen.findByText("다른 탭의 최신 조건"); noComplete();
   });
 
   it("rejects 501 Unicode code points without truncation or transport", async () => {

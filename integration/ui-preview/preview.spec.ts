@@ -95,7 +95,7 @@ for (const [width, height] of [[1366, 768], [1440, 900]]) {
     for (const scene of ['collecting', 'checking', 'saved', 'analyzing', 'ready', 'confirmed', 'no_match']) {
       await page.goto(`/__preview?scene=${scene}`);
       if (['collecting', 'checking', 'saved'].includes(scene)) {
-        await visibleBeforeFold('.precheck-card');
+        await visibleBeforeFold(scene === 'checking' ? '.analysis-loading' : '.precheck-card');
         await expect(page.getByRole('button', { name: '입력 마감하기', exact: true })).not.toBeVisible();
       } else {
         await expect(page.locator('.submission-disclosure.is-closed')).not.toHaveAttribute('open');
@@ -111,7 +111,7 @@ for (const [width, height] of [[1366, 768], [1440, 900]]) {
           await expect(page.getByRole('button', { name: '이 시간 선택', pressed: true })).toHaveCount(1);
           await expect(next).toBeEnabled();
         } else if (scene === 'confirmed') await visibleBeforeFold('.confirmed-time, .result-copy');
-        else await visibleBeforeFold('.center-state');
+        else await visibleBeforeFold(scene === 'analyzing' ? '.analysis-loading' : '.center-state');
       }
       await page.screenshot({ path: info.outputPath(`${scene}.png`), fullPage: true });
     }

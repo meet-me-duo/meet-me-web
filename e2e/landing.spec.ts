@@ -86,7 +86,7 @@ for (const [width, height] of [[320, 568], [360, 640], [390, 844], [430, 932], [
     } else {
       await expect(example).toBeVisible();
       await expect(page.locator(".hero-description-mobile")).toBeHidden();
-      expect((await details.boundingBox())!.y).toBeGreaterThan(buttonBox.y + buttonBox.height);
+      expect((await details.boundingBox())!.y).toBeGreaterThanOrEqual(height);
       await page.mouse.wheel(0, height);
       await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
       await page.getByRole("heading", { name: "말하듯 조건 작성" }).scrollIntoViewIfNeeded();
@@ -112,6 +112,41 @@ test("landing supports keyboard navigation and viewport height changes", async (
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/create$/);
   await expect(page.getByLabel("모임 목적 / 이름")).toBeFocused();
+});
+
+for (const [width, height] of [[1440, 900], [1920, 1080], [1280, 600], [844, 390], [390, 844], [320, 480]]) {
+  test(`home fold and hero spacing at ${width}x${height}`, async ({ page }, info) => {
+    await page.setViewportSize({ width, height });
+    await page.goto("/");
+    const header = (await page.locator(".site-header").boundingBox())!;
+    const kicker = (await page.locator(".hero-kicker").boundingBox())!;
+    const action = page.getByRole("button", { name: "모임 만들기" });
+    expect(kicker.y).toBeGreaterThanOrEqual(header.y + header.height + 24);
+    if (width <= 540) {
+      const copy = (await page.locator(".hero-copy").boundingBox())!;
+      expect(Math.abs(copy.y + copy.height / 2 - (header.y + header.height + (height - header.height) / 2 - 24))).toBeLessThanOrEqual(2);
+      await expect(action).toBeInViewport({ ratio: 1 });
+    } else {
+      await expect(page.getByText("말하기부터 약속까지", { exact: true })).not.toBeInViewport();
+      await expect(page.getByRole("heading", { name: "일정 조율을 단순하게." })).not.toBeInViewport();
+    }
+    await page.screenshot({ path: info.outputPath(`home-${width}x${height}-initial.png`) });
+    if (width > 540) {
+      await page.locator("#how-it-works").scrollIntoViewIfNeeded();
+      await expect(page.getByRole("heading", { name: "일정 조율을 단순하게." })).toBeInViewport();
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.screenshot({ path: info.outputPath(`home-${width}x${height}-scrolled.png`), fullPage: true });
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+  });
+}
+
+test("a very short mobile viewport keeps the centered hero naturally scrollable", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 360 }); await page.goto("/");
+  const action = page.getByRole("button", { name: "모임 만들기" });
+  await action.scrollIntoViewIfNeeded(); await expect(action).toBeInViewport({ ratio: 1 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+  await expect(page.locator(".hero")).not.toHaveCSS("overflow", "hidden");
 });
 
 test("hero action has strong contrast, keyboard focus and subtle pointer feedback", async ({ page }) => {

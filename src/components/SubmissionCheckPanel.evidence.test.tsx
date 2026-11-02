@@ -48,7 +48,7 @@ it("EX-RECEIPT shows received unresolved evidence without claiming interpretatio
   setup(snapshot("RECEIVED", { candidate: { ...snapshot("RECEIVED").candidate, revision: 2, evidence: accepted.evidence }, accepted, submission_complete: true }));
   await screen.findByText(/접수 완료.*최종 분석에서 해석/);
   expect(screen.getByText("퇴근하면 가능해요", { exact: true })).toBeInTheDocument();
-  expect(screen.getByText(/해석되지 않은 경우.*주최자/)).toBeInTheDocument();
+  expect(document.querySelector(".submission-privacy")).not.toBeInTheDocument();
   expect(screen.queryByText("제출 완료 · 다른 참여자를 기다려 주세요.")).not.toBeInTheDocument();
   expect(screen.queryByText("수정 확인 중에는 이전 접수본을 유지해요.")).not.toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "확인 취소" })).not.toBeInTheDocument();
@@ -65,7 +65,8 @@ it("EX-ORIGINAL direct answer is an empty scoped editor and never rewrites the o
   fireEvent.click(screen.getByRole("button", { name: "답변 제출" }));
   await waitFor(() => expect(writes).toHaveLength(1));
   expect(writes[0]).toEqual({ path: `/api/rooms/${room.invite_code}/submission/checks/${checkId}/answer`, body: { request_id: expect.any(String), expected_revision: 1, expected_check_version: 2, question_id: questionId, direct_text: "오후 7~8시" } });
-  expect(screen.getByText(original, { exact: true })).toBeInTheDocument();
+  await screen.findByText(/모호한 부분을 확인 중/);
+  expect(screen.queryByText(original, { exact: true })).not.toBeInTheDocument();
 });
 
 it("EX-ORIGINAL A/B only previews and submits the supplement after explicit confirmation", async () => {

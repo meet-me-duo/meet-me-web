@@ -32,6 +32,9 @@ it("#107 keeps dirty local text when the user reopens editing after another tab 
   const view = setup(); const input = await screen.findByRole("textbox", { name: /시간·장소 조건/ });
   fireEvent.change(input, { target: { value: "이 탭의 소중한 미저장 초안" } });
   view.read.mockResolvedValue(snapshot("다른 탭에서 저장한 원문", 3)); await act(async () => { await view.client.invalidateQueries(); });
+  await screen.findByText(/모호한 부분을 확인 중/);
+  const failed = snapshot("다른 탭에서 저장한 원문", 3); failed.check!.status = "FAILED";
+  view.read.mockResolvedValue(failed); await act(async () => { await view.client.invalidateQueries(); });
   await screen.findByText("다른 탭에서 저장한 원문");
   const reopen = screen.queryByRole("button", { name: "내 조건 수정" }); if (reopen) fireEvent.click(reopen);
   expect(screen.getByRole("textbox", { name: /시간·장소 조건/ })).toHaveValue("이 탭의 소중한 미저장 초안");
@@ -49,7 +52,7 @@ it("#107 keeps a direct-edit draft when another tab produces a newer question", 
 });
 
 it("#107 asks to reconcile final inclusion when the room closed after an older private snapshot", async () => {
-  const view = setup(snapshot("마감 전 확인중이던 조건")); await screen.findByText("마감 전 확인중이던 조건");
+  const view = setup(snapshot("마감 전 확인중이던 조건")); await screen.findByText(/모호한 부분을 확인 중/);
   view.rerenderRoom({ ...baseRoom, collection_status: "CLOSED", public_status: "ANALYZING", state_version: 9, closure_reason: "MANUAL", closed_at: "2026-10-17T10:01:00Z" });
   expect(document.body).not.toHaveTextContent(/이번 결과에 반영되지 않았|이번 결과에 반영되지 않아요|이번 결과에 반영되지 않은 입력/);
   expect(screen.getByRole("button", { name: /반영 여부 확인|최종 상태 확인|현재 상태 확인/ })).toBeInTheDocument();

@@ -672,11 +672,31 @@ export interface paths {
         };
         /**
          * 현재 계정의 주최·참여 모임 목록
-         * @description 역할 생략은 전체. 생성일은 KST 양끝 포함 날짜이며 생성 시각 DESC, 방 ID ASC 커서 페이지를 사용한다. 기존 30일 보관 정책을 적용한다.
+         * @description 본인이 숨긴 모임은 제외한다. 역할 생략은 전체. 생성일은 KST 양끝 포함 날짜이며 생성 시각 DESC, 방 ID ASC 커서 페이지를 사용한다. 생성일부터 30일 보관한다.
          */
         get: operations["accountRooms"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/account/rooms/{inviteCode}/hide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 본인 내 모임 목록에서 숨김
+         * @description 로그인 계정의 HOST·MEMBER 관계만 숨긴다. 모임·참여·역할·제출·결과 접근과 타인 목록은 유지한다. body 없음. 반복 요청은 멱등이며 Web은 204 응답을 JSON으로 파싱하지 않는다.
+         */
+        post: operations["hideAccountRoom"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2152,7 +2172,7 @@ export interface components {
             /** @description RECORDED_ADMISSIONS. 실제 dispatch 집계 분모가 아님 */
             coverage_basis?: string;
         };
-        /** @description 기존 30일 보관 정책의 본인 주최 또는 참여 모임 */
+        /** @description 생성일부터 30일 보관 정책의 본인 주최 또는 참여 모임 */
         AccountRoomResponse: {
             /** @description 모임 이름(목적) */
             purpose?: string;
@@ -2170,13 +2190,13 @@ export interface components {
             created_at?: string;
             /**
              * Format: date-time
-             * @description 마감된 방은 마감 시각, 수집 중 방은 생성 시각에서 30일 후 정리 기준 시각. 정확한 경계는 포함
+             * @description 상태·숨김과 무관하게 생성 시각에서 30일 후 정리 기준 시각. 정확한 경계는 포함
              */
             expires_at?: string;
         };
         /** @description 계정 본인의 주최·참여 모임 목록. 생성 시각 DESC, 방 ID ASC 커서 정렬 */
         AccountRoomsResponse: {
-            /** @description 계정 소유권과 기존 30일 보관 범위를 만족하는 모임 */
+            /** @description 계정 소유권과 생성일부터 30일 보관 범위를 만족하고 본인이 숨기지 않은 모임 */
             rooms?: components["schemas"]["AccountRoomResponse"][];
             /** @description 다음 페이지 존재 여부 */
             has_more?: boolean;
@@ -5065,6 +5085,63 @@ export interface operations {
             };
             /** @description 로그인 필요 */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 인증 검증 키 사용 불가 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
+    hideAccountRoom: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description 본인이 참여한 모임의 초대 코드 */
+                inviteCode: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 본인 모임 숨김 완료 또는 이미 숨김. 응답 body 없음 */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 로그인 계정 누락(ACCOUNT_REQUIRED) 또는 무효·만료 인증. guest cookie로 대체 불가 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description Origin 누락(ORIGIN_NOT_ALLOWED) 또는 불허 Origin. 기존 CORS 거부는 Problem JSON을 보장하지 않음 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 타인 모임·없는/잘못된 코드·생성일부터 30일 초과를 동일하게 ROOM_NOT_FOUND 처리 */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

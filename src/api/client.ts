@@ -32,7 +32,7 @@ export class ApiError extends Error {
   }
 }
 
-export async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+export async function request<T>(path: string, init: RequestInit = {}, responseKind: "json" | "empty" = "json"): Promise<T> {
   const startedEpoch = getSessionVersion();
   let token: string | null;
   try { token = getAccessToken(true); } catch (error) {
@@ -69,6 +69,10 @@ export async function request<T>(path: string, init: RequestInit = {}): Promise<
       problem.retry_after_seconds ?? (Number.isFinite(headerDelay) ? headerDelay : undefined),
     );
   }
+  if (responseKind === "empty") {
+    if (response.status !== 204) throw new ApiError(502, { detail: "목록 숨김 응답을 확인하지 못했어요. 목록을 다시 조회해 주세요." });
+    return undefined as T;
+  }
   const body = (await response.json()) as T;
   ensureCurrentAccount();
   return body;
@@ -86,6 +90,7 @@ export const api = {
   answerSubmissionCheck: (inviteCode: string, checkId: string, body: SubmissionCheckCommand) => request<SubmissionCheckSnapshot>(`/api/rooms/${encode(inviteCode)}/submission/checks/${encode(checkId)}/answer`, { method: "POST", body: JSON.stringify(body) }),
   retrySubmissionCheck: (inviteCode: string, checkId: string, body: SubmissionCheckCommand) => request<SubmissionCheckSnapshot>(`/api/rooms/${encode(inviteCode)}/submission/checks/${encode(checkId)}/retry`, { method: "POST", body: JSON.stringify(body) }),
   cancelSubmissionCheck: (inviteCode: string, checkId: string, body: SubmissionCheckCommand) => request<SubmissionCheckSnapshot>(`/api/rooms/${encode(inviteCode)}/submission/checks/${encode(checkId)}/cancel`, { method: "POST", body: JSON.stringify(body) }),
+  hideAccountRoom: (inviteCode: string) => request<void>(`/api/account/rooms/${encode(inviteCode)}/hide`, { method: "POST" }, "empty"),
   getAccountRooms: (filters?: AccountRoomFilters, cursor?: string, signal?: AbortSignal) => request<AccountRoomsResponse>(accountRoomsPath(filters, cursor), { signal }),
   claimGuestRoom: (code: string) => request<Room>(`/api/rooms/${encode(code)}/claim`, { method: "POST" }),
   getClarifications: (inviteCode: string, signal?: AbortSignal) => request<ClarificationList>(`/api/rooms/${encode(inviteCode)}/submission/clarifications`, { signal }),

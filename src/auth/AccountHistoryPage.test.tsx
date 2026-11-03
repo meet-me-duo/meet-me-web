@@ -2,6 +2,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import * as session from "./session";
 import { AccountArchive } from "./AccountHistoryPage";
 import { api, ApiError } from "../api/client";
 import type { AccountRoomRecord, AccountRoomsResponse } from "../api/accountRooms";
@@ -106,3 +107,57 @@ describe("account-based room history", () => {
     expect(screen.getByRole("link", { name: "구 서버 주최 기록" })).toBeInTheDocument();
   });
 });
+
+describe("account-only hiding", () => {
+  it("blocks duplicate clicks, refetches from first page and preserves other direct links", async () => {
+    const pending = deferred<void>();
+    const get = vi.spyOn(api, "getAccountRooms").mockResolvedValueOnce(body([row("a", "숨길 모임"), row("b", "다른 모임", "MEMBER")])).mockResolvedValue(body([row("b", "다른 모임", "MEMBER")]));
+    const hide = vi.spyOn(api, "hideAccountRoom").mockReturnValue(pending.promise);
+    mount(); const button = await screen.findByRole("button", { name: "숨길 모임 목록에서 숨기기" });
+    act(() => { fireEvent.click(button); fireEvent.click(button); });
+    expect(hide).toHaveBeenCalledTimes(1); expect(hide).toHaveBeenCalledWith("a".repeat(22));
+    expect(screen.getByRole("button", { name: "다른 모임 목록에서 숨기기" })).toBeDisabled();
+    await act(async () => pending.resolve());
+    await waitFor(() => expect(screen.queryByRole("link", { name: /숨길 모임/ })).not.toBeInTheDocument());
+    expect(await screen.findByRole("link", { name: /다른 모임/ })).toHaveAttribute("href", `/rooms/${"b".repeat(22)}`);
+    expect(get).toHaveBeenLastCalledWith({}, undefined, expect.any(AbortSignal));
+  });
+  it("keeps failed row and permits retry", async () => {
+    vi.spyOn(api, "getAccountRooms").mockResolvedValue(body([row("a", "합성 모임")]));
+    const hide = vi.spyOn(api, "hideAccountRoom").mockRejectedValue(new ApiError(503, { detail: "합성 일시 오류" }));
+    mount(); fireEvent.click(await screen.findByRole("button", { name: /목록에서 숨기기/ }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("합성 일시 오류");
+    expect(screen.getByRole("link", { name: /합성 모임/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /목록에서 숨기기/ }));
+    await waitFor(() => expect(hide).toHaveBeenCalledTimes(2));
+  });
+  it("does not reset another mounted view after navigation", async () => {
+    const pending = deferred<void>();
+    const get = vi.spyOn(api, "getAccountRooms").mockResolvedValue(body([row("a", "합성 모임")]));
+    vi.spyOn(api, "hideAccountRoom").mockReturnValue(pending.promise);
+    const view = mount(); fireEvent.click(await screen.findByRole("button", { name: /목록에서 숨기기/ }));
+    view.unmount(); await act(async () => pending.resolve()); expect(get).toHaveBeenCalledTimes(1);
+  });
+});
+
+  it("ignores a late hide completion after account epoch changes", async () => {
+    let epoch = 1; vi.spyOn(session, "getSessionVersion").mockImplementation(() => epoch);
+    const pending = deferred<void>();
+    const get = vi.spyOn(api, "getAccountRooms").mockResolvedValue(body([row("a", "계정 경계 모임")]));
+    vi.spyOn(api, "hideAccountRoom").mockReturnValue(pending.promise);
+    mount(); fireEvent.click(await screen.findByRole("button", { name: /목록에서 숨기기/ }));
+    epoch++; await act(async () => pending.resolve());
+    expect(get).toHaveBeenCalledTimes(1);
+  });
+  it("resets cached filters and opaque pages after a successful hide", async () => {
+    const get = vi.spyOn(api, "getAccountRooms").mockResolvedValueOnce(body([row("a", "첫 페이지")], "opaque-cursor")).mockResolvedValueOnce(body([row("b", "둘째 페이지")])).mockResolvedValue(body([row("b", "둘째 페이지")]));
+    vi.spyOn(api, "hideAccountRoom").mockResolvedValue(undefined);
+    mount(); await screen.findByRole("link", { name: /첫 페이지/ });
+    const client = clients.at(-1)!;
+    client.setQueryData(["account-rooms", { role: "HOST" }], { pages: [body([row("a", "숨길 캐시")])], pageParams: [undefined] });
+    fireEvent.click(screen.getByRole("button", { name: "더 보기" })); await screen.findByRole("link", { name: /둘째 페이지/ });
+    fireEvent.click(screen.getByRole("button", { name: "첫 페이지 목록에서 숨기기" }));
+    await waitFor(() => expect(get).toHaveBeenCalledTimes(3));
+    expect(get).toHaveBeenLastCalledWith({}, undefined, expect.any(AbortSignal));
+    expect(client.getQueryData(["account-rooms", { role: "HOST" }])).toBeUndefined();
+  });

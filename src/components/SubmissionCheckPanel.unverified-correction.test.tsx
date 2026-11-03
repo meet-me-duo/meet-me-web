@@ -24,6 +24,6 @@ it("EX-ORIGINAL a post-close unverified correction shows its frozen input withou
   expect(screen.queryByText("오래된 보완 답변", { exact: true })).not.toBeInTheDocument();
   expect(document.body).toHaveTextContent(/해석 미확정.*수정/);
   expect(document.body).not.toHaveTextContent(/이번 수정은.*반영되지 않았/);
-  expect(screen.queryByText("제출 완료 · 다른 참여자를 기다려 주세요.")).not.toBeInTheDocument();
+  expect(screen.queryByText("제출 완료")).not.toBeInTheDocument();
   expect(start).not.toHaveBeenCalled(); expect(answer).not.toHaveBeenCalled();
 });

@@ -49,7 +49,6 @@ test("V2 native original -> one scoped answer -> frozen final input -> host sele
   await expect(page.getByRole("button", { name: "확인 취소", exact: true })).toHaveCount(0);
   await page.reload();
   await expect(page.getByText(/접수 완료.*최종 분석에서 해석/)).toBeVisible();
-  await page.locator("details.host-tools-inline > summary").click();
   await page.getByRole("button", { name: "입력 마감하기", exact: true }).click();
   await page.getByRole("dialog").getByRole("button", { name: "지금 입력 마감", exact: true }).click();
   await expect(page.getByRole("heading", { name: "함께할 수 있는 추천 시간이에요" })).toBeVisible();

@@ -57,7 +57,7 @@ function setup(initial = snapshot(), initialRoom = room) {
   return { ...view, client, read, start, answer, retry, cancel, legacySave, legacyRead, roomRead, epoch, refresh, rerenderPage: () => view.rerender(tree()) };
 }
 afterEach(() => { cleanup(); for (const client of clients.splice(0)) client.clear(); vi.restoreAllMocks(); localStorage.clear(); sessionStorage.clear(); });
-const noComplete = () => expect(screen.queryByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).not.toBeInTheDocument();
+const noComplete = () => expect(screen.queryByText(/조건 제출을 완료했어요|다른 참여자를 기다려|^\s*제출 완료\s*$/)).not.toBeInTheDocument();
 async function submit(text = raw) { fireEvent.change(await screen.findByRole("textbox", { name: /시간·장소 조건/ }), { target: { value: text } }); fireEvent.click(screen.getByRole("button", { name: /조건 제출하기/ })); }
 
 describe("#107 pre-submit card separates durable save and accepted completion", () => {
@@ -93,7 +93,7 @@ describe("#107 pre-submit card separates durable save and accepted completion", 
 
   it.each(["주말 아무 때나 가능", "내일 오후 7시부터 8시까지 온라인 가능", "토요일이나 일요일 중 언제든 괜찮아요"])("accepts synthetic CLEAR for intended broad/context-clear input without a question: %s", async text => {
     const value = snapshot("CLEAR"); value.candidate = version(text); value.accepted = acceptedVersion(text, 4); value.submission_complete = true;
-    setup(value); await screen.findByText("제출 완료 · 다른 참여자를 기다려 주세요.");
+    setup(value); await screen.findByText("제출 완료");
     expect(screen.queryByText(/오전과 오후 중/)).not.toBeInTheDocument(); expect(screen.queryByRole("button", { name: /직접 수정/ })).not.toBeInTheDocument();
     expect(document.body).toHaveTextContent(text);
   });
@@ -144,10 +144,12 @@ describe("#107 explicit choice, direct edit and failure handling", () => {
     expect(view.answer).not.toHaveBeenCalled(); expect(view.start).not.toHaveBeenCalled();
   });
 
-  it("distinguishes successful server cancel from merely aborting a browser request", async () => {
-    const view = setup(choice()); fireEvent.click(await screen.findByRole("button", { name: /확인 취소/ }));
-    await waitFor(() => expect(view.cancel).toHaveBeenCalledTimes(1)); await screen.findByText(/취소/); noComplete();
-    expect(view.cancel.mock.calls[0]?.[2]).toMatchObject({ expected_revision: 1, expected_check_version: 1 });
+  it("preserves an externally cancelled check without exposing or automatically sending cancel", async () => {
+    const view = setup(choice()); await screen.findByText("오전과 오후 중 어느 시간인가요?");
+    expect(screen.queryByRole("button", { name: "확인 취소" })).not.toBeInTheDocument();
+    view.read.mockResolvedValue(snapshot("CANCELLED")); await view.refresh();
+    await screen.findByText(/확인을 취소했어요/); noComplete();
+    expect(screen.getByText(raw)).toBeInTheDocument(); expect(view.cancel).not.toHaveBeenCalled();
   });
 
   it("keeps private read failure visible instead of treating it as no question/completion", async () => {

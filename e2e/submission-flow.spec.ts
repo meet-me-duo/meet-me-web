@@ -82,8 +82,8 @@ for (const width of [1440, 320, 390]) {
         await expect(page.getByText(role === "HOST" ? "초대 링크를 공유해 주세요" : "입력 마감을 기다려 주세요")).toBeVisible();
         await expect(page.locator(".room-header h1")).toHaveText("제출 후 다음 행동 확인");
         await expect(page.locator(".submission-layout > aside")).toHaveCount(0);
-        if (role === "HOST") await page.locator(".host-tools-inline > summary").click();
-        await expect(page.getByRole("button", { name: "입력 마감하기" })).toHaveCount(role === "HOST" ? 1 : 0);
+        await expect(page.locator(".host-tools-inline > summary")).toHaveCount(0);
+        await expect(page.getByRole("button", { name: "입력 마감하기" })).toHaveCount(0);
         await checkLayout(page);
         await page.screenshot({ path: info.outputPath(`${role}-completed.png`), fullPage: true });
         for (const text of ["목요일 저녁", "금요일 비대면"]) {
@@ -208,9 +208,8 @@ for (const width of [1440, 320, 390]) {
     });
 
     test("close errors and early close use actual response counts, member cannot close", async ({ page }) => {
-      const state = await fixture(page, "HOST", "COLLECTING", true);
+      const state = await fixture(page, "HOST", "COLLECTING", true, "manual");
       await page.goto(`/rooms/${code}`);
-      await page.locator(".host-tools-inline > summary").click();
       const trigger = page.getByRole("button", { name: "입력 마감하기" });
       await trigger.click();
       const dialog = page.getByRole("dialog", { name: "지금 입력을 마감할까요?" });

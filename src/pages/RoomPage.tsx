@@ -370,6 +370,8 @@ function SubmissionPanel({ room, onRoomChanged, onAccessDenied, draft, onDraftCh
   const host = room.viewer.role === "HOST";
   const saveUncertain = !(save.error instanceof ApiError) || save.error.status >= 500 || save.error.status === 408;
   const saveConfirmedByRead = save.variables !== undefined && submissionQuery.data?.raw_text === save.variables;
+  const closeControl = host && !correcting && room.manual_only ? <RoomCloseConfirmation disabled={close.isPending || save.isPending || clarificationPending} pending={close.isPending} unsaved={dirty} error={close.isError ? errorMessage(close.error) : undefined}
+    onConfirm={() => { if (closing.current || !mounted.current || latestRoom.current.viewer.role !== "HOST" || latestRoom.current.collection_status === "CLOSED") return; closing.current = true; close.mutate(true); }} /> : null;
 
   return <div className="submission-layout submission-layout--single"><section className={"glass-card submission-card " + (completed ? "submission-complete" : "")}>
     {host && !correcting && save.isIdle && submissionQuery.isSuccess && submissionQuery.data === null && loadedRevision === null && <div className="submission-next">
@@ -382,7 +384,7 @@ function SubmissionPanel({ room, onRoomChanged, onAccessDenied, draft, onDraftCh
     {completed ? <>
       <div className="section-heading"><span className="eyebrow success"><CheckCircle2 size={15} /> 제출 완료</span><h2>조건 제출을 완료했어요</h2><p>조건이 안전하게 저장됐어요.</p></div>
       {!correcting && <div className="submission-next"><h3>{host ? "초대 링크를 공유해 주세요" : "입력 마감을 기다려 주세요"}</h3><p>{host ? "참여자에게 링크를 보내 조건을 모아 주세요. 입력이 마감되면 분석을 시작해요." : "입력이 마감되면 분석을 시작해요. 진행 상태는 자동으로 갱신돼요."}</p>{host && <CopyRoomLink room={room} primary />}</div>}
-      <div className="submitted-condition"><span className="saved-revision"><CheckCircle2 size={16} /> 저장된 입력 #{loadedRevision}</span><p className="submitted-text">{submissionQuery.data?.raw_text}</p><button className="button secondary" disabled={submissionQuery.data?.editable === false || (correcting && !room.capabilities?.can_edit_own_submission) || save.isPending} onClick={() => { save.reset(); setEditing(true); }}>내 조건 수정</button></div>
+      <div className="submitted-condition"><span className="saved-revision"><CheckCircle2 size={16} /> 저장된 입력 #{loadedRevision}</span><p className="submitted-text">{submissionQuery.data?.raw_text}</p><div className="condition-actions" role="group" aria-label="내 입력 관리"><button className="button secondary" disabled={submissionQuery.data?.editable === false || (correcting && !room.capabilities?.can_edit_own_submission) || save.isPending} onClick={() => { save.reset(); setEditing(true); }}>내 조건 수정</button>{closeControl}</div></div>
     </> : <>
       <div className="section-heading"><span className="eyebrow subtle"><LockKeyhole size={14} /> 비공개로 모으는 조건</span><h2>{loadedRevision ? "내 조건을 수정해 주세요" : "가능한 조건을 알려주세요"}</h2><p>가능한 시간과 장소 조건을 자연어로 입력해 주세요.</p></div>
       <p id="submission-privacy" className="submission-privacy">반영된 조건은 다른 참여자에게 공개되지 않아요. 분석에 반영하지 못한 원문은 주최자에게 공개될 수 있어요.</p>
@@ -400,10 +402,8 @@ function SubmissionPanel({ room, onRoomChanged, onAccessDenied, draft, onDraftCh
     <p className="submission-privacy">{correcting ? "저장은 분석 완료를 뜻하지 않아요. 주최자가 다시 분석하면 저장한 조건을 사용해요." : "저장은 분석 완료를 뜻하지 않아요. 입력 마감 후 조건을 분석해요."}</p>
     {refreshRoom.isError && <div className="alert warning refresh-warning" role="status"><span>조건은 저장됐지만 모임 진행 상태를 갱신하지 못했어요.</span><button className="button secondary" onClick={() => refreshRoom.mutate()}>진행 상태 다시 확인</button></div>}
     {save.isError && !saveConfirmedByRead && <div className="alert error"><p>{saveUncertain ? "조건 저장 결과를 확인하지 못했어요. 모임을 다시 만들 필요는 없어요. 저장 여부를 확인한 뒤 이 방에서 다시 시도해 주세요." : "조건 저장 요청이 거절됐어요. 아래 내용을 확인해 주세요."}</p>{errorMessage(save.error)}</div>}
-    {correcting ? <div className="host-tools-inline"><RecoveryActions room={room} onRoomChanged={onRoomChanged} onAccessDenied={onAccessDenied} blocked={dirty || save.isPending || clarificationPending} /></div> : host && <details className="host-tools-inline"><summary>주최자 도구</summary>
-      <RoomCloseConfirmation disabled={close.isPending || save.isPending || clarificationPending} pending={close.isPending} unsaved={dirty} error={close.isError ? errorMessage(close.error) : undefined}
-        onConfirm={() => { if (closing.current || !mounted.current || latestRoom.current.viewer.role !== "HOST" || latestRoom.current.collection_status === "CLOSED") return; closing.current = true; close.mutate(true); }} />
-    </details>}
+    {closeControl && !completed && <div className="condition-actions" role="group" aria-label="내 입력 관리">{closeControl}</div>}
+    {correcting && <div className="host-tools-inline"><RecoveryActions room={room} onRoomChanged={onRoomChanged} onAccessDenied={onAccessDenied} blocked={dirty || save.isPending || clarificationPending} /></div>}
   </section></div>;
 }
 

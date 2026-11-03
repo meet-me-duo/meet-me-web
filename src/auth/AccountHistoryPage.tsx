@@ -96,7 +96,7 @@ export function AccountArchive() {
       </form></CardContent></details>}
       {query.isPending ? <p role="status">모임을 불러오는 중이에요.</p> : query.isError && !query.isFetchNextPageError ? <div className="alert error" role="alert"><p>{errorMessage(query.error)}</p><Button variant="secondary" onClick={() => void query.refetch()}>목록 다시 불러오기</Button></div> : <>
         <p className="account-history-summary" role="status">{roles[applied.role]} · 불러온 모임 {rows.length}개{applied.query ? ` · 이름 “${applied.query}”` : ""}</p>
-        {rows.length === 0 ? <Card className="account-history-empty"><h2>조건에 맞는 모임이 없어요</h2><p>조회 조건을 바꾸거나 새 모임을 만들어 보세요.</p></Card> : <ul className="account-history-list">{rows.map(row => <li key={row.invite_code}><Card>
+        {rows.length === 0 ? <Card className="account-history-empty"><h2>조건에 맞는 모임이 없어요</h2><p>조회 조건을 바꾸거나 새 모임을 만들어 보세요.</p></Card> : <ul className="account-history-list">{rows.map(row => <li key={row.invite_code}><Card className="account-history-item">
           <Link className="account-history-room" to={`/rooms/${encodeURIComponent(row.invite_code)}`}><strong>{row.purpose}</strong><span className="account-history-role">{roles[row.role]}</span></Link>
           <dl><div><dt>생성</dt><dd><time dateTime={row.created_at}>{formatDateTime(row.created_at)}</time></dd></div><div><dt>정리 예정</dt><dd><time dateTime={row.expires_at}>{formatDateTime(row.expires_at)}</time></dd></div></dl>
           <Button variant="secondary" disabled={hiding !== null} aria-label={`${row.purpose} 목록에서 숨기기`} onClick={() => void hide(row.invite_code)}>{hiding === row.invite_code ? "숨기는 중…" : "목록에서 숨기기"}</Button>

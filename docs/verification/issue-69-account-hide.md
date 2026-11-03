@@ -6,6 +6,8 @@ POST /api/account/rooms/{inviteCode}/hide는 body 없이 전송하고 최초/반
 
 서버 제공 expires_at를 그대로 표시한다. 클라이언트 시계로30일 경계를 재판정하지 않는다. 서버 계약은 created_at+30일 경계 포함, 이후 제외이며 401 ACCOUNT_REQUIRED /404 ROOM_NOT_FOUND /Origin 누락403 ORIGIN_NOT_ALLOWED다.
 
-합성 검증: 전체 unit845PASS, browser581PASS+기존skip1/retry0. 추가 계정 epoch·필터 캐시·페이지 초기화 검사13PASS. body없는POST/반복204/noJSON/오류/늦은계정응답/예상밖200, UI 실패보존·중복요청·refresh·다른계정·직접링크 계약 대역을 확인했다. 이 결과는 실제 backend 동작을 검증했다는 뜻이 아니다. 실제 운영API/모델 호출0. 서버 변경0.
+합성 검증: 최종 unit847PASS, browser581PASS+기존skip1/retry0. 추가 계정 epoch·필터 캐시·페이지 초기화 검사13PASS. body없는POST/반복204/noJSON/오류/늦은계정응답/예상밖200, UI 실패보존·중복요청·refresh·다른계정·직접링크 계약 대역을 확인했다. 이 결과는 실제 backend 동작을 검증했다는 뜻이 아니다. 실제 운영API/모델 호출0. 서버 변경0.
 
-서버 배포 확인 전 publish/merge/deploy 진행을 보류한다. 입력 UI PR70과 별도 릴리스이며 PR51은 제외한다.
+버튼 추가 후 데스크톱5개 목록 fold 회귀4건을 확인하고 버튼을 카드 오른쪽에 배치해 preview18PASS로 복구했다. 최종 빌드 브라우저 전체검사는 별도 로그로 기록한다.
+
+Draft PR과 CI는 별도로 준비하며 서버 배포 확인 전 main 승격·운영 배포를 보류한다. 입력 UI PR70과 별도 릴리스이며 PR51은 제외한다.

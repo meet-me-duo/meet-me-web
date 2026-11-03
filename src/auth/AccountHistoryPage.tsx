@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { CalendarDays, Search } from "lucide-react";
 import { api, ApiError, errorMessage } from "../api/client";
 import { decodeAccountRooms, type AccountRoomFilters, type AccountRoomRole } from "../api/accountRooms";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
+import { getSessionVersion } from "./session";
 import { formatDateTime } from "../utils/time";
 
 type Draft = { role: "ALL" | AccountRoomRole; from: string; to: string; query: string };
@@ -19,6 +20,28 @@ function validDate(value: string) {
 }
 
 export function AccountArchive() {
+  const queryClient = useQueryClient();
+  const mounted = useRef(false);
+  const busy = useRef(false);
+  const [hiding, setHiding] = useState<string | null>(null);
+  const [hideError, setHideError] = useState<string | null>(null);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  const hide = async (code: string) => {
+    if (busy.current) return;
+    busy.current = true;
+    const epoch = getSessionVersion();
+    setHiding(code); setHideError(null);
+    try {
+      await api.hideAccountRoom(code);
+      if (!mounted.current || epoch !== getSessionVersion()) return;
+      await queryClient.resetQueries({ queryKey: ["account-rooms"] });
+    } catch (error) {
+      if (mounted.current && epoch === getSessionVersion()) setHideError(errorMessage(error));
+    } finally {
+      busy.current = false;
+      if (mounted.current && epoch === getSessionVersion()) setHiding(null);
+    }
+  };
   const [draft, setDraft] = useState(initial);
   const [applied, setApplied] = useState(initial);
   const [formError, setFormError] = useState<string | null>(null);
@@ -76,11 +99,13 @@ export function AccountArchive() {
         {rows.length === 0 ? <Card className="account-history-empty"><h2>조건에 맞는 모임이 없어요</h2><p>조회 조건을 바꾸거나 새 모임을 만들어 보세요.</p></Card> : <ul className="account-history-list">{rows.map(row => <li key={row.invite_code}><Card>
           <Link className="account-history-room" to={`/rooms/${encodeURIComponent(row.invite_code)}`}><strong>{row.purpose}</strong><span className="account-history-role">{roles[row.role]}</span></Link>
           <dl><div><dt>생성</dt><dd><time dateTime={row.created_at}>{formatDateTime(row.created_at)}</time></dd></div><div><dt>정리 예정</dt><dd><time dateTime={row.expires_at}>{formatDateTime(row.expires_at)}</time></dd></div></dl>
+          <Button variant="secondary" disabled={hiding !== null} aria-label={`${row.purpose} 목록에서 숨기기`} onClick={() => void hide(row.invite_code)}>{hiding === row.invite_code ? "숨기는 중…" : "목록에서 숨기기"}</Button>
         </Card></li>)}</ul>}
         {query.isFetchNextPageError && <div className="alert error" role="alert">{errorMessage(query.error)}</div>}
         {query.hasNextPage && <Button className="account-history-more" variant="secondary" disabled={query.isFetchingNextPage} onClick={() => void query.fetchNextPage({ cancelRefetch: false })}>{query.isFetchingNextPage ? "추가 모임을 불러오는 중…" : query.isFetchNextPageError ? "다음 모임 다시 불러오기" : "더 보기"}</Button>}
       </>}
     </>}
-    <p className="field-hint">모임은 생성 또는 마감 후 30일이 지나면 삭제돼요.</p>
+    {hideError && <p role="alert" className="alert error">{hideError}</p>}
+    <p className="field-hint">모임은 생성일로부터 30일 동안 목록에 표시돼요. 숨기기는 내 목록에만 적용되며, 다른 참여자나 모임 링크에는 영향을 주지 않아요.</p>
   </section>;
 }

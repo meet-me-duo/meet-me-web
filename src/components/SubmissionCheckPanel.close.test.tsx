@@ -22,10 +22,10 @@ it("keeps raw input on cancel and sends one explicitly confirmed close request",
   let finishClose!: (value: Room) => void;
   const pending = new Promise<Room>(resolve => { finishClose = resolve; });
   const close = vi.spyOn(api, "closeRoom").mockReturnValue(pending);
-  mount();
+  mount(empty, { ...room, manual_only: true });
   const input = await screen.findByRole("textbox", { name: /시간·장소 조건/ });
   fireEvent.change(input, { target: { value: "아직 저장하지 않은 수요일 오후 조건" } });
-  fireEvent.click(screen.getByText("주최자 도구", { selector: "summary" }));
+  expect(screen.queryByText("주최자 도구", { selector: "summary" })).not.toBeInTheDocument();
   const trigger = screen.getByRole("button", { name: "입력 마감하기" }); fireEvent.click(trigger);
   let dialog = screen.getByRole("dialog", { name: "지금 입력을 마감할까요?" });
   expect(close).not.toHaveBeenCalled(); expect(dialog).toHaveTextContent("자동 마감 조건 전이라도");
@@ -45,7 +45,7 @@ it("keeps raw input on cancel and sends one explicitly confirmed close request",
   await act(async () => finishClose({ ...room, collection_status: "CLOSED", public_status: "ANALYZING", state_version: 2, closure_reason: "MANUAL", closed_at: "2026-10-17T10:00:00Z" }));
 });
 
-it("shows saved input and places HOST tools below cancellation, without a deadline sidebar", async () => {
+it("preserves saved input after an externally cancelled check without exposing cancel or auto-HOST tools", async () => {
   const candidate = { revision: 1, raw_text: "저장한 수요일 오후 조건", created_at: "2026-10-17T09:00:00Z", interpretation_reference_at: "2026-10-17T09:00:00Z" };
   const check = { id: "22222222-2222-4222-8222-222222222222", status: "FAILED" as const, version: 2, retry_allowed: false, failure_code: null, question: null };
   const cancel = vi.spyOn(api, "cancelSubmissionCheck").mockResolvedValue({ ...empty, candidate, check: { ...check, status: "CANCELLED", version: 3 } });
@@ -54,14 +54,12 @@ it("shows saved input and places HOST tools below cancellation, without a deadli
   await screen.findByRole("heading", { name: "저장된 조건" });
   expect(screen.queryByRole("heading", { name: "가능한 조건을 알려주세요" })).not.toBeInTheDocument();
   expect(screen.queryByRole("heading", { name: "마감 조건" })).not.toBeInTheDocument();
-  const stop = screen.getByRole("button", { name: "확인 취소" });
-  const tools = screen.getByText("주최자 도구", { selector: "summary" });
-  expect(stop.compareDocumentPosition(tools) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-  fireEvent.click(stop);
-  await waitFor(() => expect(cancel).toHaveBeenCalledTimes(1));
-  expect(cancel).toHaveBeenCalledWith(room.invite_code, check.id, expect.objectContaining({ request_id: expect.any(String), expected_revision: 1, expected_check_version: 2 }));
+  expect(screen.queryByRole("button", { name: "확인 취소" })).not.toBeInTheDocument();
+  expect(screen.queryByText("주최자 도구", { selector: "summary" })).not.toBeInTheDocument();
+  vi.mocked(api.getSubmissionCheck).mockResolvedValue({ ...empty, candidate, check: { ...check, status: "CANCELLED", version: 3 } });
+  await act(async () => { await client!.invalidateQueries(); });
   await screen.findByText(/확인을 취소했어요/);
-  expect(screen.getByText(candidate.raw_text)).toBeInTheDocument(); expect(close).not.toHaveBeenCalled();
+  expect(screen.getByText(candidate.raw_text)).toBeInTheDocument(); expect(close).not.toHaveBeenCalled(); expect(cancel).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole("button", { name: "내 조건 수정" }));
   expect(screen.getByRole("textbox", { name: /시간·장소 조건/ })).toHaveValue(candidate.raw_text);
 });
@@ -71,4 +69,46 @@ it("never exposes a close action to a MEMBER", async () => {
   await screen.findByRole("textbox", { name: /시간·장소 조건/ });
   expect(screen.queryByRole("button", { name: "입력 마감하기" })).not.toBeInTheDocument();
   expect(screen.queryByText("주최자 도구", { selector: "summary" })).not.toBeInTheDocument(); expect(close).not.toHaveBeenCalled();
+});
+
+const saved = { revision: 1, raw_text: "합성 수요일 오후 조건", created_at: "2026-10-17T09:00:00Z", interpretation_reference_at: "2026-10-17T09:00:00Z" };
+const needsEdit = { ...empty, candidate: saved, check: { id: "22222222-2222-4222-8222-222222222222", status: "NEEDS_EDIT" as const, version: 1, retry_allowed: false, failure_code: null, question: null } };
+
+it.each(["PRE_SUBMIT_V1", "PRE_SUBMIT_V2"] as const)("groups the existing manual HOST actions without disclosure for %s", async protocol => {
+  mount(needsEdit, { ...room, manual_only: true, submission_protocol: protocol });
+  await screen.findByRole("button", { name: "내 조건 수정" });
+  const actions = await screen.findByRole("group", { name: "내 입력 관리" });
+  expect(within(actions).getAllByRole("button").map(button => button.textContent)).toEqual(["내 조건 수정", "입력 마감하기"]);
+  expect(within(actions).getByRole("button", { name: "입력 마감하기" })).toHaveClass("danger-outline");
+  expect(screen.queryByText("주최자 도구", { selector: "summary" })).not.toBeInTheDocument();
+});
+
+it("keeps MEMBER actions limited to editing their own input", async () => {
+  mount(needsEdit, { ...room, manual_only: true, viewer: { ...room.viewer, role: "MEMBER" } });
+  const actions = await screen.findByRole("group", { name: "내 입력 관리" });
+  expect(within(actions).getAllByRole("button").map(button => button.textContent)).toEqual(["내 조건 수정"]);
+  expect(screen.queryByRole("button", { name: "입력 마감하기" })).not.toBeInTheDocument();
+  expect(screen.queryByText("주최자 도구", { selector: "summary" })).not.toBeInTheDocument();
+});
+
+it.each(["CLEAR", "RECEIVED", "CANCELLED"] as const)("does not invent cancellation in %s", async status => {
+  mount({ ...needsEdit, check: { ...needsEdit.check, status } }, { ...room, manual_only: true, submission_protocol: "PRE_SUBMIT_V2" });
+  await screen.findByRole("button", { name: "내 조건 수정" });
+  expect(screen.queryByRole("button", { name: "확인 취소" })).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "입력 마감하기" })).toBeInTheDocument();
+});
+
+it.each(["QUEUED", "CHECKING"] as const)("keeps normal %s free of all manual HOST actions", async status => {
+  mount({ ...needsEdit, check: { ...needsEdit.check, status } }, { ...room, manual_only: true });
+  await screen.findByText("모호한 부분을 확인 중이에요.");
+  expect(screen.queryByRole("group", { name: "내 입력 관리" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: /내 조건 수정|확인 취소|입력 마감하기/ })).not.toBeInTheDocument();
+});
+
+it("hides both close and HOST disclosure for auto-closing rooms", async () => {
+  mount(needsEdit);
+  const actions = await screen.findByRole("group", { name: "내 입력 관리" });
+  expect(within(actions).queryByRole("button", { name: "입력 마감하기" })).not.toBeInTheDocument();
+  expect(screen.queryByText("주최자 도구", { selector: "summary" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "입력 마감하기" })).not.toBeInTheDocument();
 });

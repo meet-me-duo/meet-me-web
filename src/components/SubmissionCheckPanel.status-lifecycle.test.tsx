@@ -5,6 +5,7 @@ import type { SubmissionCheckSnapshot, SubmissionCheckStatus } from "../api/prec
 import type { Room } from "../api/types";
 import * as session from "../auth/session";
 import SubmissionCheckPanel from "./SubmissionCheckPanel";
+import { api } from "../api/client";
 
 // Independent public-state/HTTP regression for web #32 / server #128.
 // A stored historical question is not authority to answer after leaving NEEDS_CHOICE.
@@ -82,10 +83,12 @@ async function openEditor() {
 }
 
 describe("#32 historical questions never reopen a terminated check", () => {
-  it("cancels a visible question, preserves the raw input and starts a fresh request without an old answer", async () => {
+  it("keeps the cancel API contract for an existing client and restores its cancelled snapshot without an old answer", async () => {
     const view = setup(snapshot("NEEDS_CHOICE", true));
     await screen.findByRole("heading", { name: questionText });
-    fireEvent.click(screen.getByRole("button", { name: "확인 취소" }));
+    expect(screen.queryByRole("button", { name: "확인 취소" })).not.toBeInTheDocument();
+    await act(async () => { await api.cancelSubmissionCheck(code, checkId, { request_id: crypto.randomUUID(), expected_revision: 4, expected_check_version: 9 }); });
+    await view.refresh();
     await screen.findByText(/확인을 취소했어요/);
     expect(view.writes).toHaveLength(1);
     expect(view.writes[0]).toEqual({ path: `${path}/${checkId}/cancel`, body: { request_id: expect.stringMatching(/^[0-9a-f-]{36}$/i), expected_revision: 4, expected_check_version: 9 } });

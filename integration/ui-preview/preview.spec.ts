@@ -70,7 +70,6 @@ test("synthetic creation, condition submission and closing use the existing cont
   await page.getByRole("textbox").fill("화요일 저녁 7시부터 9시까지 온라인으로 가능해요.");
   await page.getByRole("button", { name: /조건 제출하기/ }).click();
   await expect(page.getByRole("status").filter({ hasText: "제출 완료 · 다른 참여자를 기다려 주세요." })).toBeVisible();
-  await page.locator(".host-tools-inline > summary").click();
   await page.getByRole("button", { name: "입력 마감하기", exact: true }).click();
   await page.getByRole("button", { name: "지금 입력 마감", exact: true }).click();
   await expect(page.getByRole("button", { name: "이 시간 선택" })).toHaveCount(3);
@@ -140,13 +139,14 @@ test('closed input remains available on request and login surfaces match without
 });
 
 test('history fixtures open each room with its listed HOST or MEMBER role', async ({ page }) => {
-  for (const [index, host] of [[1, false], [0, true]] as const) {
+  for (const index of [1, 0]) {
     await page.goto('/__preview?scene=history');
     const link = page.locator('.account-history-room').nth(index);
     const title = await link.locator('strong').innerText();
     await link.click();
     await expect(page.locator('.room-header h1')).toHaveText(title);
-    if (host) await expect(page.locator('.host-tools-inline > summary')).toHaveText('주최자 도구');
-    else await expect(page.locator('.host-tools-inline')).toHaveCount(0);
+    await expect(page.locator('.host-tools-inline')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: '입력 마감하기' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: '확인 취소' })).toHaveCount(0);
   }
 });

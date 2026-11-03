@@ -124,7 +124,8 @@ describe("issue132 neutral recovery and honest restoration failure UI", () => {
     const pending = deferred<Response>(); refreshQueue.push(() => pending.promise);
     fireEvent(window, new Event("focus")); fireEvent.click(within(note).getByRole("button", { name: "로그인 상태 다시 확인" })); fireEvent(window, new Event("focus"));
     await waitFor(() => expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith("/api/auth/refresh"))).toHaveLength(initial + 1));
-    await act(async () => { pending.resolve(auth()); }); await screen.findByRole("button", { name: "입력 마감하기" });
+    await act(async () => { pending.resolve(auth()); }); await waitFor(() => expect(screen.queryByRole("region", { name: "계정 복구" })).not.toBeInTheDocument());
+    expect(screen.queryByRole("button", { name: "입력 마감하기" })).not.toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "계정 복구" })).not.toBeInTheDocument(); expect(mutationCalls).toEqual([]);
   });
 });

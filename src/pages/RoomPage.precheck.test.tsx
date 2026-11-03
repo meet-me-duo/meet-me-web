@@ -144,10 +144,12 @@ describe("#107 explicit choice, direct edit and failure handling", () => {
     expect(view.answer).not.toHaveBeenCalled(); expect(view.start).not.toHaveBeenCalled();
   });
 
-  it("distinguishes successful server cancel from merely aborting a browser request", async () => {
-    const view = setup(choice()); fireEvent.click(await screen.findByRole("button", { name: /확인 취소/ }));
-    await waitFor(() => expect(view.cancel).toHaveBeenCalledTimes(1)); await screen.findByText(/취소/); noComplete();
-    expect(view.cancel.mock.calls[0]?.[2]).toMatchObject({ expected_revision: 1, expected_check_version: 1 });
+  it("preserves an externally cancelled check without exposing or automatically sending cancel", async () => {
+    const view = setup(choice()); await screen.findByText("오전과 오후 중 어느 시간인가요?");
+    expect(screen.queryByRole("button", { name: "확인 취소" })).not.toBeInTheDocument();
+    view.read.mockResolvedValue(snapshot("CANCELLED")); await view.refresh();
+    await screen.findByText(/확인을 취소했어요/); noComplete();
+    expect(screen.getByText(raw)).toBeInTheDocument(); expect(view.cancel).not.toHaveBeenCalled();
   });
 
   it("keeps private read failure visible instead of treating it as no question/completion", async () => {

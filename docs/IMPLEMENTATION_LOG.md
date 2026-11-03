@@ -1,5 +1,27 @@
 # Implementation log
 
+## 2026-11-03 — 본인 입력 관리와 수동 마감 버튼 간소화 (cloud 로컬)
+
+최신 develop11d2c51(main9bdea4f와 동일 tree)에서 독립
+`feature/manual-close-actions` worktree를 만들었다. 사용자의 최종 요청으로
+이전 세 버튼 중간안을 대체해 하단 확인 취소와 주최자 도구 토글을 제거했다.
+참가자는 기존 허용 상태의 본인 수정만, 수집 중 수동 마감 전용 HOST는
+같은 액션 그룹의 수정·붉은 마감을 사용한다. 정상 접수 완료의 추가 안내
+토글도 숨기되 질문·실패·timeout·재시도·수정 초안/오류 복구를 유지한다.
+상단 모임 카드, NEEDS_EDIT/질문 매핑, V1/V2/conditional-v1 및 cancel API와
+기존 CANCELLED 응답 처리는 바꾸지 않았다. 확인창·단일 요청·focus를 보존했다.
+
+최종 단위836/79파일·브라우저575PASS/기존skip1/retry0/flaky0·evidence6·
+preview18·preflight3·API/lint/typecheck/build PASS다. 기존4173 포트를 건드리지
+않고4197의 동일 합성 suite를 실행했다. 참조 이미지 materialize는 지원
+절차와 소비 환경 경로1회 재준비 후에도 차단돼 픽셀을 보지 못했다. 이를
+검수 완료로 표시하지 않으며 합성 미리보기만 제공한다. 개인 원문/이미지를
+산출물에 포함하지 않는다. 초기/중간 검사와 최종 결과는 별도로 보존했다.
+
+자세한 근거는 [검증 기록](verification/input-actions-local.md)과 새 검토 묶음에
+남긴다. 로컬 구현/검증/미리보기까지만 승인됐으며 push/PR/merge/deploy0,
+운영 API/모델 호출0, 서버 변경0이다. 기존 작업공간·커밋·산출물을 보존했다.
+
 ## 2026-11-01 — searching 통일·모임 상단 카드 축소·모바일 위치 미세 조정 (로컬)
 
 사용자가 첫 번째 searching 효과를 선택해 V1/V2 CHECKING과 전체 분석을 모두

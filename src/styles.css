@@ -760,3 +760,9 @@ fieldset.field legend { margin-bottom: 9px; }
 .recommendation-variants:has(input) { position: relative; z-index: 1; }
 /* The time editor has its own focused heading; avoid repeating the results heading. */
 .results-section:has(.actual-time-form) > .section-heading { display: none; }
+
+@media (min-width: 768px) {
+  .account-history-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 16px; }
+  .account-history-item > .account-history-room, .account-history-item > dl { grid-column: 1; }
+  .account-history-item > button { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+}

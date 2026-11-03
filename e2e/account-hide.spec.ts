@@ -43,9 +43,9 @@ for (const width of [320, 390, 1440]) test(`personal deletion confirmation, focu
   const cancel = dialog.getByRole("button", { name: "취소", exact: true }), confirm = dialog.getByRole("button", { name: "내 목록에서 삭제", exact: true });
   await expect(cancel).toBeFocused(); await page.keyboard.press("Shift+Tab"); await expect(confirm).toBeFocused(); await page.keyboard.press("Tab"); await expect(cancel).toBeFocused();
   await page.screenshot({ path: info.outputPath("confirm.png"), fullPage: true });
-  await page.mouse.click(2,2); await expect(dialog).toBeVisible(); expect(state.calls).toBe(0);
+  if (info.project.name === "mobile") await page.touchscreen.tap(2,2); else await page.mouse.click(2,2); await expect(dialog).toBeVisible(); expect(state.calls).toBe(0);
   await page.keyboard.press("Escape"); await expect(dialog).toHaveCount(0); await expect(trigger).toBeFocused();expect(state.calls).toBe(0);
-  await trigger.click();await dialog.getByRole("button", {name:"취소",exact:true}).click();await expect(trigger).toBeFocused();expect(state.calls).toBe(0);
+  if (info.project.name === "mobile") await trigger.tap(); else await trigger.click();await dialog.getByRole("button", {name:"취소",exact:true}).click();await expect(trigger).toBeFocused();expect(state.calls).toBe(0);
   await trigger.click();await dialog.getByRole("button", {name:"내 목록에서 삭제",exact:true}).click();await expect(dialog.getByRole("alert")).toContainText("잠시 후");expect(state.calls).toBe(1);
   state.fail=false;let release!:()=>void;state.wait=new Promise<void>(done=>{release=done;});
   await dialog.getByRole("button", {name:"내 목록에서 삭제",exact:true}).evaluate(node=>{(node as HTMLButtonElement).click();(node as HTMLButtonElement).click();});

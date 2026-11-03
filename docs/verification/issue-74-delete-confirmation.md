@@ -1,5 +1,31 @@
 # Issue #74 — 내 목록 삭제 확인과 카드 작업 정리
 
+## 최종 계약 연결 — 2026-11-03
+
+서버 [ec0865cc00745b8780560565d04dd4c9774222f5의 실제 생성 OpenAPI](https://github.com/meet-me-duo/meet-me-server/blob/ec0865cc00745b8780560565d04dd4c9774222f5/docs/openapi/account-room-history.openapi.json)를 읽었다. 원문 SHA256 `03043ac4658ba676bad0eed6015937ebb5f4801bf9e303666ba9cb4a0de04a4e`를 재계산해 전달값과 일치했다. 웹 snapshot은 기존 서식과 키 순서를 보존하며 전체 JSON의 의미 일치를 별도로 assert했다. 웹 파일 SHA256은 `37ad773fad50d023de2df81a003737c4e9ad1ea74b8a45c87a3d6106d2aec00f`다. [계약 대조 근거](issue-74-room-retention-contract.json)에 해시와 참조 경로를 기록한다.
+
+기존 명세와의 의미 차이는 `RoomResponse.expires_at` 속성과 required 선언 두 곳이다. 실제 생성 명세는 string/date-time/required/non-null이며, 저장된 생성 시각+30×24시간의 UTC 보관 만료 기준이다. 생성·조회·참여·마감·claim·retry와 수정 라운드 중첩 응답이 공통 RoomResponse를 참조한다. `api:generate`로 schema를 재생성해 `expires_at: string`을 확인했고, 임시 수동 타입은 제거했다. 웹 Room 읽기 alias만 기존 구 서버 호환 패턴에 따라 optional로 완화한다. 새 서버 계약을 optional로 바꾼 것이 아니다.
+
+현재 구현은 상세 응답의 expires_at만 사용한다. 계정 목록을 조회·구독하거나 생성일/closed_at·일정으로 추정하지 않는다. 목록 진입·직접 링크·새로고침·비로그인/미참여·로그아웃 계정 경계에서 표시하며, 누락/null/잘못된 날짜에서는 숨긴다. 한국 날짜 기준 `자동 정리 D-N`, 보관 만료 시각부터는 `자동 정리 예정`으로 표시한다. 정확한 물리 삭제 실행 시각이나 삭제 완료를 약속하지 않는다. 기존 생성일 보조 표시·목록 정리일 제거, 카드 우상단44px 삭제 동작, 확인/실패/계정 경계와 내 입력·수직 수정/조건부 마감·searching Orb를 보존한다.
+
+서버 PR202는 아직 운영 반영 완료 신호를 받지 않았다. Web은 기존 Draft PR75의 검증·commit/push·정확 head CI까지 진행하며, 서버 운영 준비 확인 전 병합·배포를 보류한다. 원문 대조는 서버 변경이나 운영 API 요청을 포함하지 않는다. 아래 예비/최초 기록은 각 당시 이력이다.
+
+최종 로컬 unit873/82files·browser599PASS/기존skip1/retry0/flaky0/errors0·preview18·evidence6·preflight3·API/lint/typecheck/build PASS. desktop1440/mobile390/mobile320의 새 캡처24장과 캡처 흐름3PASS를 확인했다. 독립 검토가 실제 계약·소스150/dist12 지문 일치·캡처24장 전체를 확인했으며 새 P1/P2는 없다. 실제 운영 OAuth/서버/모델/실기기 검증은 이번 범위가 아니다. 정확 push head CI는 후속 PR 기록에서 확인하며 서버 운영 완료 신호 전 Web 병합·배포를 보류한다.
+
+---
+
+## 2026-11-03 후속 — 서버 예정 계약 기반 예비 구현 (미게시)
+
+부모가 서버 담당의 예정 계약을 전달했다. 공통 RoomResponse의 `expires_at`은 required/non-null UTC date-time으로, 저장된 생성 시각 + 30×24시간의 보관 만료 기준이다. 물리 삭제 실행 시각은 보장하지 않는다. 실제 서버 commit SHA와 생성 OpenAPI 원문은 아직 대기 중이다. 아래의 목록 cache 타협과 최초 검증 기록은 당시 이력이며 최종 구현 방식이 아니다.
+
+예비 Web은 상세 응답의 `expires_at`만 사용한다. 계정 목록 cache 구독·탐색 경로 의존을 제거하고 비참여 게스트 화면에도 연결했다. 정상 응답이면 목록 진입·직접 링크·새로고침·비로그인·계정 경계 전환에서 표시한다. 구 서버/잘못된 응답의 누락·null·형식/달력 오류는 날짜를 추정하지 않고 표시하지 않는다. 예비 `Room.expires_at?: string`은 실제 생성 snapshot 수신 전 임시 읽기 타입이며, 서버 새 계약 자체가 optional이라는 뜻이 아니다. 저장 OpenAPI·생성 schema는 아직 변경하지 않았다.
+
+문구는 `자동 정리 D-N`, 만료 기준 시각부터는 `자동 정리 예정`이다. 한국 시간 달력 날짜 차이를 사용하고, 만료가 지났다는 이유로 실제 삭제 완료를 표시하지 않는다. 보조 설명은 실제 정리 시점이 다를 수 있음을 밝힌다. 분 경계(한국 자정 포함)와 실제 만료 시각에 로컬 타이머로 갱신하고, visibility 복귀 때 재계산한다. 새 API·Web Storage 사용은 없다. 구 서버 목록 안내도 생성일 기준 30일로 정정했다.
+
+새 예비 검증: 관련 unit41 PASS, lint/typecheck/API 정합/build PASS. 최초 browser34 중 모바일 경계1은 설치한 시계가 페이지 준비 동안 계속 흘러 자정을 넘은 하네스 문제였다. 기대값을 유지한 첫 `pauseAt` 수정은 초기 로딩 타이머까지 멈춰 경계2건이 실패했다. 공식 Playwright 지침에 따라 화면 로딩 후 시계를 고정하고 reload 전 재개하도록 정정한 경계2건은 PASS다. 실패 원본 로그·JSON과 최종 경계 로그는 별도로 보존한다. 최종 예비 전체 unit873·일반 browser32 및 재실행 경계2 PASS다. 독립 정적 리뷰 새 P1/P2 없음 및 독립 관련37 PASS를 확인했다. 실제 서버 생성 snapshot 반영 후 최종 aggregate·독립 최종 리뷰·캡처와 정확 head CI를 다시 확인해야 한다. 원격 push·병합·배포·운영 요청·모델 호출·서버 변경은 없다. Linear 갱신 거부 뒤 재시도하지 않는다.
+
+---
+
 기준 main `5fff175`에서 독립 브랜치 `feature/74-account-room-delete-confirm`을 준비했다. 문구는 ‘삭제’지만 실제 API는 기존 body 없는 `POST /api/account/rooms/{inviteCode}/hide`와 204 빈 응답이다. 서버·API·보관 정책·조건부 참석 지원 선언은 변경하지 않는다.
 
 카드 오른쪽 위에 쓰레기통과 ‘삭제’를 함께 표시하고 44px 이상의 터치 영역을 유지한다. 역할은 왼쪽의 일반 정보로 분리했다. 생성일은 작은 한국 시간 날짜로 유지하고 정리일은 목록에서 제거했다. 모달은 본인 목록에서만 삭제되며 되돌릴 수 없고, 모임 자체·다른 참여자 목록·기존 참여·직접 링크에는 영향이 없음을 설명한다.

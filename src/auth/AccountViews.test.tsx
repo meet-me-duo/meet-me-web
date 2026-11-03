@@ -28,7 +28,7 @@ describe("account entry and archive without guest claim UI", () => {
     expect(await screen.findByRole("link", { name: /내 방/ })).toHaveAttribute("href", "/rooms/abcdefghijklmnopqrstuv");
     expect(screen.queryByText(/정리 예정/)).not.toBeInTheDocument();
     expect(screen.getByText(/^생성 /)).toBeInTheDocument();
-    expect(screen.getByText(/30일/)).toBeInTheDocument();
+    expect(screen.getByText("모임은 생성일로부터 30일 후 자동 정리 대상이 돼요.")).toBeInTheDocument();
   });
   it("does not show cached archive after authorization denial", async () => {
     vi.spyOn(api, "getAccountRooms").mockRejectedValue(new ApiError(401, { code: "AUTH_REQUIRED" }));

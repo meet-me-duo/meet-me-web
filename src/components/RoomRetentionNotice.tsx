@@ -1,33 +1,25 @@
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import type { AccountRoomPage } from "../api/accountRooms";
+import { useEffect, useReducer } from "react";
 import { roomRetentionLabel } from "../utils/roomRetention";
 
-/** RoomResponse has no retention timestamps. Reuse matching account-list evidence without another API request. */
-export function RoomRetentionNotice({ inviteCode }: { inviteCode: string }) {
-  const client = useQueryClient();
-  const subscribe = useCallback((notify: () => void) => client.getQueryCache().subscribe(notify), [client]);
-  const snapshot = useCallback(() => {
-    const matches = new Set<string>();
-    for (const [, data] of client.getQueriesData<{ pages: AccountRoomPage[] }>({ queryKey: ["account-rooms"] })) {
-      for (const page of Array.isArray(data?.pages) ? data.pages : []) for (const row of Array.isArray(page?.rooms) ? page.rooms : []) {
-        if (row?.invite_code === inviteCode && typeof row.created_at === "string" && typeof row.expires_at === "string" && roomRetentionLabel(row.created_at, row.expires_at) !== null) matches.add(JSON.stringify([row.created_at, row.expires_at]));
-      }
-    }
-    return matches.size === 1 ? [...matches][0] : "";
-  }, [client, inviteCode]);
-  const evidence = useSyncExternalStore(subscribe, snapshot, () => "");
-  const [now, setNow] = useState(Date.now);
+/** The room response owns the retention deadline, independently of account history. */
+export function RoomRetentionNotice({ expiresAt }: { expiresAt: unknown }) {
+  const [, refreshClock] = useReducer((value: number) => value + 1, 0);
+  const label = roomRetentionLabel(expiresAt);
   useEffect(() => {
-    if (!evidence) return;
-    const update = () => setNow(Date.now());
-    const timer = window.setInterval(update, 60_000);
+    if (typeof expiresAt !== "string" || roomRetentionLabel(expiresAt) === null) return;
+    let timer: number;
+    const schedule = () => {
+      const now = Date.now();
+      const nextMinute = (Math.floor(now / 60_000) + 1) * 60_000;
+      const expires = Date.parse(expiresAt);
+      const next = Math.min(nextMinute, expires > now ? expires : Infinity);
+      timer = window.setTimeout(() => { refreshClock(); schedule(); }, Math.max(1, next - now));
+    };
+    const update = () => { refreshClock(); window.clearTimeout(timer); schedule(); };
+    schedule();
     document.addEventListener("visibilitychange", update);
-    return () => { window.clearInterval(timer); document.removeEventListener("visibilitychange", update); };
-  }, [evidence]);
-  if (!evidence) return null;
-  const [createdAt, expiresAt] = JSON.parse(evidence) as [string, string];
-  const label = roomRetentionLabel(createdAt, expiresAt, now);
-  if (!label) return null;
-  return <p className="room-retention-hint" title="생성일 기준 30일 후 자동 정리 · 한국 시간 날짜 기준"><time dateTime={expiresAt}>{label}</time></p>;
+    return () => { window.clearTimeout(timer); document.removeEventListener("visibilitychange", update); };
+  }, [expiresAt]);
+  if (!label || typeof expiresAt !== "string") return null;
+  return <p className="room-retention-hint" title="생성일 기준 30일 보관 · 한국 시간 날짜 기준 · 실제 정리 시점은 다를 수 있어요."><time dateTime={expiresAt}>{label}</time></p>;
 }

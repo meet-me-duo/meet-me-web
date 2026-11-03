@@ -769,5 +769,5 @@ fieldset.field legend { margin-bottom: 9px; }
 .account-history-item > .account-room-delete-trigger { grid-column: 2; grid-row: 1; align-self: start; min-width: 44px; min-height: 44px; padding: 8px; border: 0; border-radius: 8px; background: transparent; gap: 4px; font-size: .75rem; color: #b91c1c; box-shadow: none; }
 .account-history-item > .account-room-delete-trigger:hover:not(:disabled) { background: #fef2f2; }
 .account-room-delete-purpose { margin-bottom: 16px; }
-.room-header .room-retention-hint { color: #64748b; font-size: .75rem; }
+.room-retention-hint { color: #64748b; font-size: .75rem; }
 .account-history-item .account-history-room strong { max-width: 100%; overflow-wrap: anywhere; word-break: keep-all; }

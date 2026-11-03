@@ -1,0 +1,25 @@
+{
+  "server_commit": "ec0865cc00745b8780560565d04dd4c9774222f5",
+  "source_path": "docs/openapi/account-room-history.openapi.json",
+  "source_sha256": "03043ac4658ba676bad0eed6015937ebb5f4801bf9e303666ba9cb4a0de04a4e",
+  "web_snapshot_sha256": "37ad773fad50d023de2df81a003737c4e9ad1ea74b8a45c87a3d6106d2aec00f",
+  "semantic_equal": true,
+  "note": "Web preserves its existing JSON formatting and key order; raw verified producer bytes are retained separately.",
+  "changed_json_paths": [
+    "/components/schemas/RoomResponse/properties/expires_at",
+    "/components/schemas/RoomResponse/required"
+  ],
+  "room_response_references": [
+    "/paths//api/rooms/post/responses/201/content/*/*/schema",
+    "/paths//api/rooms/{inviteCode}/participants/post/responses/201/content/*/*/schema",
+    "/paths//api/rooms/{inviteCode}/participants/post/responses/200/content/*/*/schema",
+    "/paths//api/rooms/{inviteCode}/close/post/responses/200/content/*/*/schema",
+    "/paths//api/rooms/{inviteCode}/claim/post/responses/200/content/*/*/schema",
+    "/paths//api/rooms/{inviteCode}/analysis/retry/post/responses/202/content/*/*/schema",
+    "/paths//api/rooms/{inviteCode}/get/responses/200/content/*/*/schema",
+    "/components/schemas/ReopenedInputResponse/properties/room",
+    "/components/schemas/RevisionAnalysisResponse/properties/room"
+  ],
+  "generated_expires_at_type": "required non-null string",
+  "app_read_alias": "Generated field relaxed only for backward read compatibility; invalid/missing data renders no date."
+}

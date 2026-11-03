@@ -84,7 +84,7 @@ export function AccountArchive() {
     if (JSON.stringify(next) === JSON.stringify(applied)) void query.refetch({ cancelRefetch: false }); else setApplied(next);
   };
 
-  if (first?.kind === "legacy" && !denied) return <section className="page-width narrow account-card"><h1>내가 만든 모임</h1><p>현재 서버는 본인이 주최한 모임 목록만 지원해요. 참여 모임과 필터는 서버 업데이트 후 사용할 수 있어요.</p><p>방은 생성 또는 마감 후 30일이 지나면 정리돼요.</p>
+  if (first?.kind === "legacy" && !denied) return <section className="page-width narrow account-card"><h1>내가 만든 모임</h1><p>현재 서버는 본인이 주최한 모임 목록만 지원해요. 참여 모임과 필터는 서버 업데이트 후 사용할 수 있어요.</p><p>모임은 생성일로부터 30일 후 자동 정리 대상이 돼요.</p>
     {rows.length === 0 ? <p>아직 만든 모임이 없어요.</p> : <ul className="archive-list">{rows.map(row => <li key={row.invite_code}><Link to={`/rooms/${encodeURIComponent(row.invite_code)}`}>{row.purpose}</Link><small>생성 {creationDate.format(new Date(row.created_at))}</small></li>)}</ul>}
     {query.isError && <p className="alert error" role="alert">{errorMessage(query.error)}</p>}<Link className="button primary" to="/create">모임 만들기</Link></section>;
 

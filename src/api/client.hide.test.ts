@@ -30,3 +30,13 @@ it("does not turn an unexpected 200 into success", async () => {
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("{}", { status: 200 })));
   await expect(api.hideAccountRoom("synthetic")).rejects.toMatchObject({ status: 502 });
 });
+
+it("handles a non-JSON CORS403 without parsing it as success", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("Forbidden", { status: 403, statusText: "Forbidden", headers: { "Content-Type": "text/plain" } })));
+  await expect(api.hideAccountRoom("synthetic")).rejects.toMatchObject({ status: 403, problem: { detail: "Forbidden" } });
+});
+
+it("preserves authentication key unavailability503 without inventing an error code", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ detail: "인증 검증 키 사용 불가" }), { status: 503 })));
+  await expect(api.hideAccountRoom("synthetic")).rejects.toMatchObject({ status: 503, problem: { detail: "인증 검증 키 사용 불가" } });
+});

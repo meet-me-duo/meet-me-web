@@ -11,3 +11,9 @@ POST /api/account/rooms/{inviteCode}/hide는 body 없이 전송하고 최초/반
 버튼 추가 후 데스크톱5개 목록 fold 회귀4건을 확인하고 버튼을 카드 오른쪽에 배치해 preview18PASS로 복구했다. 최종 빌드 브라우저 전체검사는 별도 로그로 기록한다.
 
 Draft PR과 CI는 별도로 준비하며 서버 배포 확인 전 main 승격·운영 배포를 보류한다. 입력 UI PR70과 별도 릴리스이며 PR51은 제외한다.
+
+## 서버 생성 명세 대조 (2026-11-03)
+
+서버 commit `c4419f4c2f3f8b1e517a4454b66d42e60d90dd52`의 `docs/openapi/account-room-history.openapi.json` 원문을 GitHub로 읽었다. Web snapshot과 JSON 구조를 비교하여 `/api/account/rooms` 설명, 새 `/api/account/rooms/{inviteCode}/hide`, AccountRoomResponse/AccountRoomsResponse 설명만 다름을 확인했다. 나머지 경로·스키마·상위 메타데이터는 동일하다. Producer 문서를 snapshot으로 반영하고 생성 타입을 갱신했다.
+
+operationId=hideAccountRoom, requestBody 없음, 204 content 없음, 401/403/404/503을 확인했다. 기존 클라이언트의 명시적 empty 응답 경로와 body 없는POST는 일치한다. JSON을 보장하지 않는CORS403과 인증키 불가503 회귀를 추가했다. 서버 PR198은 아직 배포 전이므로 운영 활성화 게이트는 유지한다. 이 대조는 실제 운영 endpoint 호출이 아니다.

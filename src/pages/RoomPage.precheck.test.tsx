@@ -57,7 +57,7 @@ function setup(initial = snapshot(), initialRoom = room) {
   return { ...view, client, read, start, answer, retry, cancel, legacySave, legacyRead, roomRead, epoch, refresh, rerenderPage: () => view.rerender(tree()) };
 }
 afterEach(() => { cleanup(); for (const client of clients.splice(0)) client.clear(); vi.restoreAllMocks(); localStorage.clear(); sessionStorage.clear(); });
-const noComplete = () => expect(screen.queryByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).not.toBeInTheDocument();
+const noComplete = () => expect(screen.queryByText(/조건 제출을 완료했어요|다른 참여자를 기다려|^\s*제출 완료\s*$/)).not.toBeInTheDocument();
 async function submit(text = raw) { fireEvent.change(await screen.findByRole("textbox", { name: /시간·장소 조건/ }), { target: { value: text } }); fireEvent.click(screen.getByRole("button", { name: /조건 제출하기/ })); }
 
 describe("#107 pre-submit card separates durable save and accepted completion", () => {
@@ -93,7 +93,7 @@ describe("#107 pre-submit card separates durable save and accepted completion", 
 
   it.each(["주말 아무 때나 가능", "내일 오후 7시부터 8시까지 온라인 가능", "토요일이나 일요일 중 언제든 괜찮아요"])("accepts synthetic CLEAR for intended broad/context-clear input without a question: %s", async text => {
     const value = snapshot("CLEAR"); value.candidate = version(text); value.accepted = acceptedVersion(text, 4); value.submission_complete = true;
-    setup(value); await screen.findByText("제출 완료 · 다른 참여자를 기다려 주세요.");
+    setup(value); await screen.findByText("제출 완료");
     expect(screen.queryByText(/오전과 오후 중/)).not.toBeInTheDocument(); expect(screen.queryByRole("button", { name: /직접 수정/ })).not.toBeInTheDocument();
     expect(document.body).toHaveTextContent(text);
   });

@@ -69,7 +69,7 @@ test("synthetic creation, condition submission and closing use the existing cont
   await expect(page.getByRole("heading", { name: "로컬 UI 확인용 모임" })).toBeVisible();
   await page.getByRole("textbox").fill("화요일 저녁 7시부터 9시까지 온라인으로 가능해요.");
   await page.getByRole("button", { name: /조건 제출하기/ }).click();
-  await expect(page.getByRole("status").filter({ hasText: "제출 완료 · 다른 참여자를 기다려 주세요." })).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: "제출 완료" })).toBeVisible();
   await page.getByRole("button", { name: "입력 마감하기", exact: true }).click();
   await page.getByRole("button", { name: "지금 입력 마감", exact: true }).click();
   await expect(page.getByRole("button", { name: "이 시간 선택" })).toHaveCount(3);
@@ -98,7 +98,7 @@ for (const [width, height] of [[1366, 768], [1440, 900]]) {
         await expect(page.getByRole('button', { name: '입력 마감하기', exact: true })).not.toBeVisible();
       } else {
         await expect(page.locator('.submission-disclosure.is-closed')).not.toHaveAttribute('open');
-        await expect(page.getByRole('heading', { name: '마감된 내 입력 확인' })).not.toBeVisible();
+        await expect(page.getByRole('heading', { name: '내 입력' })).not.toBeVisible();
         if (scene === 'ready') {
           await expect(page.getByRole('button', { name: '이 시간 선택' })).toHaveCount(3);
           await visibleBeforeFold('.recommendation-card, .recommendation-continue');
@@ -128,7 +128,7 @@ test('closed input remains available on request and login surfaces match without
   await page.goto('/__preview?scene=confirmed');
   const summary = page.locator('.submission-disclosure > summary');
   await summary.focus(); await page.keyboard.press('Enter');
-  await expect(page.getByRole('heading', { name: /저장된 원문/ })).toBeVisible();
+  await expect(page.locator('.submission-disclosure .submitted-text').first()).toBeVisible();
   await expect(page.getByRole('heading', { name: '마지막 확인 완료본' })).toBeVisible();
   await page.goto('/__preview?scene=login');
   const google = await page.locator('.gsi-material-button').boundingBox();

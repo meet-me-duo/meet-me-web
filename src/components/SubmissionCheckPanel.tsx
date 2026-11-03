@@ -241,13 +241,13 @@ export default function SubmissionCheckPanel({ room, onRoomChanged, onAccessDeni
   const showRetry = !closed && !!check?.retry_allowed;
   const closeControl = !closed && room.viewer.role === "HOST" && room.manual_only ? <RoomCloseConfirmation disabled={pending} pending={pending} unsaved={draftEdited.current} error={closeError != null ? errorMessage(closeError) : undefined} onConfirm={() => { void closeRoom(); }} /> : null;
   return <details className={`submission-disclosure ${closed ? "is-closed" : "is-collecting"}`} open={closed ? undefined : true}><summary>내 저장 입력 확인</summary><div className="submission-layout submission-layout--single"><section className={`glass-card submission-card precheck-card ${complete ? "submission-complete" : ""}`} aria-label="제출 전 조건 확인">
-    <div className="section-heading"><h2>{closed ? "마감된 내 입력 확인" : candidate ? showEditor ? "조건 수정" : "저장된 조건" : "가능한 조건을 알려주세요"}</h2>
-      {complete && !closed && <p role="status"><CheckCircle2 size={16} /> {unresolvedReceived ? messages.RECEIVED : "제출 완료 · 다른 참여자를 기다려 주세요."}</p>}
+    <div className="section-heading"><h2>내 입력</h2>
+      {complete && !closed && <p role="status"><CheckCircle2 size={16} /> {unresolvedReceived ? messages.RECEIVED : "제출 완료"}</p>}
       {!closed && !complete && check && !editing && !draftEdited.current && <p role="status" aria-live="polite" aria-atomic="true">{messages[check.status] ?? "현재 확인 상태를 다시 조회해 주세요."}</p>}
     </div>
     {query.isPending && <p role="status">내 입력 확인 상태를 불러오는 중…</p>}
     {query.isError && <div className="alert error" role="alert">확인 상태를 불러오지 못했어요. {errorMessage(query.error)}<button className="button secondary" onClick={() => query.refetch()}>현재 상태 확인</button></div>}
-    {candidate && !(closed && correctionAccepted) && !(acceptedComplete && (editing || draftEdited.current)) && <div className="submitted-condition"><h3>저장된 원문 #{candidate.revision}</h3><p className="submitted-text">{candidate.raw_text}</p></div>}
+    {candidate && !(closed && correctionAccepted) && !(acceptedComplete && (editing || draftEdited.current)) && <div className="submitted-condition"><p className="submitted-text">{candidate.raw_text}</p></div>}
     {supplement && <div className="submitted-condition"><h3>제출한 보완 답변</h3><p>확인한 부분: {supplement.source_excerpt}</p><p className="submitted-text">{supplement.answer_text}</p></div>}
     {current?.accepted && (!complete || closed) && (!closed || closureVerified) && <div className="submitted-condition"><h3>{legacyCorrectionAccepted ? "조건 수정에서 저장한 입력" : unverifiedCorrectionAccepted ? "해석 미확정 수정 접수본" : v2 ? "마지막 접수본" : "마지막 확인 완료본"}</h3><p className="submitted-text">{current.accepted.raw_text}</p><p>{closed ? current.applied_to_result ? legacyCorrectionAccepted ? "수정 라운드에서 저장한 입력을 이번 결과에 사용해요." : v2 ? "마지막 접수본을 최종 분석에 전달했어요. 실제 해석·반영 여부는 결과를 확인해 주세요." : "마지막 확인 완료본을 이번 결과에 사용해요." : "이 저장본은 이번 결과에 사용되지 않았어요." : v2 ? "수정 확인 중에는 이전 접수본을 유지해요." : "수정 확인 중에는 이전 확인 완료본을 유지해요."}</p></div>}
     {closed && closureVerified && !complete && !correctionAccepted && <p className="alert warning" role="status">{current?.accepted ? "이번 수정은 확인을 완료하지 못해 이번 결과에 반영되지 않았어요." : "확인을 완료하지 못한 이 입력은 이번 결과에 반영되지 않았어요."}</p>}

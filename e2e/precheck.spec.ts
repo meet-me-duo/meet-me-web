@@ -111,7 +111,7 @@ test.describe("#107 synthetic browser pre-submit", () => {
     await page.locator(".submission-help > summary").click();
     await page.getByRole("button", { name: /조건 제출하기/ }).dblclick();
     await expect(page.getByText(/확인 중|확인하고/)).toBeVisible();
-    await expect(page.getByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).toHaveCount(0);
+    await expect(page.getByText(/조건 제출을 완료했어요|다른 참여자를 기다려|^\s*제출 완료\s*$/)).toHaveCount(0);
     await expect(page.locator('[data-orb-state="searching"] canvas')).toBeVisible();
     expect(mock.writes).toHaveLength(1); expect(mock.writes[0]?.body).toMatchObject({ expected_revision: 0, raw_text: "토요일  오후\n온라인만" });
     await noPrivateStorage(page, "토요일  오후"); expect(mock.unexpected).toEqual([]); expect(mock.errors).toEqual([]);
@@ -122,12 +122,12 @@ test.describe("#107 synthetic browser pre-submit", () => {
     await expect(page.locator(".analysis-loading")).toBeVisible(); await page.reload();
     await expect(page.locator(".analysis-loading")).toBeVisible();
     await expect(page.getByText(raw, { exact: true })).toHaveCount(0); expect(mock.reads.length).toBeGreaterThanOrEqual(2); expect(mock.writes).toEqual([]);
-    await expect(page.getByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).toHaveCount(0); expect(mock.unexpected).toEqual([]);
+    await expect(page.getByText(/조건 제출을 완료했어요|다른 참여자를 기다려|^\s*제출 완료\s*$/)).toHaveCount(0); expect(mock.unexpected).toEqual([]);
   });
 
   for (const status of ["FAILED", "TIMED_OUT", "FAILED_QUEUE", "CANCELLED", "LIMIT_REACHED"]) test(`${status} keeps saved text and never declares completion`, async ({ page, baseURL }) => {
     const mock = await fixture(page, baseURL!, current(status)); await page.goto(`/rooms/${code}`);
-    await expect(page.getByText(raw, { exact: true })).toBeVisible(); await expect(page.getByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).toHaveCount(0);
+    await expect(page.getByText(raw, { exact: true })).toBeVisible(); await expect(page.getByText(/조건 제출을 완료했어요|다른 참여자를 기다려|^\s*제출 완료\s*$/)).toHaveCount(0);
     await expect(page.locator(".thinking-orb")).toHaveCount(0);
     expect(mock.writes).toEqual([]); expect(mock.unexpected).toEqual([]); expect(mock.errors).toEqual([]);
   });
@@ -135,7 +135,7 @@ test.describe("#107 synthetic browser pre-submit", () => {
   test("synthetic CLEAR preserves broad intent, asks no unnecessary question and displays accepted text", async ({ page, baseURL }) => {
     const value = current("CLEAR"); value.candidate = textVersion("주말 아무 때나 가능"); value.accepted = { ...textVersion("주말 아무 때나 가능", 8), confirmation_source: "PRECHECK" }; value.submission_complete = true;
     const mock = await fixture(page, baseURL!, value); await page.goto(`/rooms/${code}`);
-    await expect(page.getByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).toBeVisible(); await expect(page.getByText("주말 아무 때나 가능", { exact: true })).toBeVisible();
+    await expect(page.getByText(/조건 제출을 완료했어요|다른 참여자를 기다려|^\s*제출 완료\s*$/)).toBeVisible(); await expect(page.getByText("주말 아무 때나 가능", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: /오전|오후|직접 수정/ })).toHaveCount(0); expect(mock.writes).toEqual([]); expect(mock.unexpected).toEqual([]);
   });
 
@@ -169,7 +169,7 @@ for (const width of [320, 390, 1440]) {
     const mock = await fixture(page, baseURL!, current("FAILED"), true, "HOST", "PRE_SUBMIT_V1", true);
     await page.setViewportSize({ width, height: 900 });
     await page.goto(`/rooms/${code}`);
-    await expect(page.getByRole("heading", { name: "저장된 조건", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "내 입력", exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: "가능한 조건을 알려주세요" })).toHaveCount(0);
     await expect(page.locator(".room-header h1")).toHaveText(ownRoom.purpose);
     await expect(page.locator(".room-header").getByRole("button", { name: "초대 링크 복사" })).toBeVisible();

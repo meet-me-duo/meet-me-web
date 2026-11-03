@@ -61,7 +61,7 @@ it("EX-DRAFT a dirty answer cannot become a new original after selecting A or B"
   await screen.findByText(/모호한 부분을 확인 중/);
   view.read.mockResolvedValue(snapshot("RECEIVED", original, 2));
   await act(async () => { await view.client.invalidateQueries(); });
-  await screen.findByRole("heading", { name: "저장된 원문 #2" });
+  await screen.findByRole("heading", { name: "내 입력" });
   assertAnswerIsNotAnOriginalDraft();
   expect(view.start).not.toHaveBeenCalled();
 });
@@ -72,7 +72,7 @@ it("EX-DRAFT a remote question resolution cannot turn a dirty answer into a new 
   fireEvent.change(screen.getByRole("textbox", { name: /보완 답변/ }), { target: { value: dirtyAnswer } });
   view.read.mockResolvedValue(snapshot("RECEIVED", original, 2));
   await act(async () => { await view.client.invalidateQueries(); });
-  await screen.findByRole("heading", { name: "저장된 원문 #2" });
+  await screen.findByRole("heading", { name: "내 입력" });
 
   assertAnswerIsNotAnOriginalDraft();
   expect(view.start).not.toHaveBeenCalled();

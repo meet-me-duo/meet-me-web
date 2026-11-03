@@ -51,7 +51,7 @@ it("preserves saved input after an externally cancelled check without exposing c
   const cancel = vi.spyOn(api, "cancelSubmissionCheck").mockResolvedValue({ ...empty, candidate, check: { ...check, status: "CANCELLED", version: 3 } });
   const close = vi.spyOn(api, "closeRoom");
   mount({ ...empty, candidate, check });
-  await screen.findByRole("heading", { name: "저장된 조건" });
+  await screen.findByRole("heading", { name: "내 입력" });
   expect(screen.queryByRole("heading", { name: "가능한 조건을 알려주세요" })).not.toBeInTheDocument();
   expect(screen.queryByRole("heading", { name: "마감 조건" })).not.toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "확인 취소" })).not.toBeInTheDocument();

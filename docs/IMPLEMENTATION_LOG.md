@@ -671,3 +671,7 @@ pending/error visibility, stable button position and restored centering after BF
 API 계약15개 RED8FAIL/7PASS→GREEN15PASS, 전체 unit825PASS, 관련 desktop/mobile98PASS를 확인했다. 신 웹의 미확정 선택·refresh와 구 confirmed 응답, 실제 구 main5555 source bundle의 열린탭 확정 거부·cached result 재조회4case도 Chromium에서 개별PASS다. 브라우저 API는 합성 contract 대역이며 실제HTTP+PostgreSQL 경계 검증은 동반 서버20test와 분리한다. 하네스의 초기 단일 variant locator/문서 이동 계측/visibility event 전달 오류는 원본을 보존하고 실패 case만 수정·재확인했다. 나머지 표준 브라우저 회귀와 서버 전체 최종 검사 결과는 완료 시 별도 최종 검증 기록에 남긴다. 새Issue/PR/push·병합·운영·V2 활성화·실모델/지도 호출은 이 로컬 단계에서 실행하지 않았다.
 
 - 2026-10-31 구 웹 참석 호환 검증: unit825PASS, 기본 Chromium518개 discovery와98+420비중복 실행의 일치 확인(517PASS·기존 landing desktop mobile전용1SKIP·retry0), evidence6PASS, 로컬 native 하네스 사전검사 단위3PASS, build/lint/typecheck/api:check 통과. 구·신 동결 bundle4개별 브라우저 검증은 API contract 대역이며 실제 HTTP/PostgreSQL 가드와는 별도 증거다. 운영·실모델 전체 성공 또는 배포 완료로 확대하지 않는다.
+
+## 2026-11-03 내 입력·세로 액션 독립 릴리스 (#68)
+
+하단 제목/원문 라벨 중복을 정리하고 수정·조건부 붉은 마감을 세로 배치했다. 사용자 게시·병합·Web 배포 승인으로 별도 feature에서 준비하며 숨김 #69와 보류 #51은 제외한다. 최종 로컬 전체 단위836, 브라우저575+skip1, evidence6, preview18, preflight3 및 API/lint/typecheck/build PASS. 상세: `docs/verification/issue-68-input-actions.md`.

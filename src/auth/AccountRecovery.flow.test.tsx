@@ -75,7 +75,7 @@ async function restore(factory: ReplyFactory) { refreshQueue.push(factory); awai
 async function verified(initial = snapshot()) { privateA = () => json(initial); await restore(() => auth()); mount(); return screen.findByRole("textbox", { name: /시간·장소 조건/ }); }
 async function dirty() { const input = await verified(); fireEvent.change(input, { target: { value: raw } }); return input; }
 const noPrivateRaw = () => { expect(screen.queryByDisplayValue(raw)).not.toBeInTheDocument(); expect(document.body.textContent).not.toContain(raw); };
-const noCompletion = () => expect(screen.queryByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).not.toBeInTheDocument();
+const noCompletion = () => expect(screen.queryByText(/조건 제출을 완료했어요|다른 참여자를 기다려|^\s*제출 완료\s*$/)).not.toBeInTheDocument();
 const beforeUnload = () => { const event = new Event("beforeunload", { cancelable: true }); window.dispatchEvent(event); return event.defaultPrevented; };
 function preventNativeNavigation() { document.addEventListener("click", event => event.preventDefault(), { once: true }); }
 function privateStorageAbsent() { const dump = JSON.stringify({ ...localStorage, ...sessionStorage }); for (const value of [raw, savedRaw, A.id, contextA, "synthetic-access-A"]) expect(dump).not.toContain(value); }
@@ -233,7 +233,7 @@ describe("issue132 original-tab private draft quarantine across authentication r
       await act(async () => { await clients.at(-1)!.invalidateQueries(); });
     }
     await screen.findByText(savedRaw);
-    if (accepted) expect(screen.getByText("제출 완료 · 다른 참여자를 기다려 주세요.")).toBeInTheDocument(); else noCompletion();
+    if (accepted) expect(screen.getByText("제출 완료")).toBeInTheDocument(); else noCompletion();
     expect(mutationCalls).toEqual([]); privateStorageAbsent();
   });
 });

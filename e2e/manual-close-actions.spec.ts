@@ -44,6 +44,13 @@ for (const [width, height] of [[1440, 900], [390, 844], [320, 480]]) test(`compl
   await page.goto("/account/rooms"); await page.locator(".account-history-room").click();
   const group = page.getByRole("group", { name: "내 입력 관리" });
   await expect(group.getByRole("button")).toHaveText(["내 조건 수정", "입력 마감하기"]);
+  await expect(page.getByRole("heading", { name: "내 입력", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /저장된 조건|저장된 원문/ })).toHaveCount(0);
+  const [edit, close] = await group.getByRole("button").all();
+  const editBox = (await edit.boundingBox())!, closeBox = (await close.boundingBox())!;
+  expect(closeBox.y).toBeGreaterThanOrEqual(editBox.y + editBox.height + 7.9);
+  expect(Math.abs(closeBox.x - editBox.x)).toBeLessThan(1);
+  expect(Math.abs(closeBox.width - editBox.width)).toBeLessThan(1);
   await expect(page.locator(".submission-help")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "확인 취소" })).toHaveCount(0);
   await expect(page.locator(".host-tools-inline > summary")).toHaveCount(0);

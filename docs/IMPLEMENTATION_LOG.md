@@ -675,3 +675,7 @@ API 계약15개 RED8FAIL/7PASS→GREEN15PASS, 전체 unit825PASS, 관련 desktop
 ## 2026-11-03 내 입력·세로 액션 독립 릴리스 (#68)
 
 하단 제목/원문 라벨 중복을 정리하고 수정·조건부 붉은 마감을 세로 배치했다. 사용자 게시·병합·Web 배포 승인으로 별도 feature에서 준비하며 숨김 #69와 보류 #51은 제외한다. 최종 로컬 전체 단위836, 브라우저575+skip1, evidence6, preview18, preflight3 및 API/lint/typecheck/build PASS. 상세: `docs/verification/issue-68-input-actions.md`.
+
+## 2026-11-03 내 모임 카드 삭제 확인 (#74)
+
+목록 삭제를 작은우상단쓰레기통+삭제로정리하고역할/생성일정보와분리했다. 본인목록만삭제·되돌릴수없음을확인모달에명시하며취소/키보드/focus복원·중복/계정경계를보호한다. 정리일은목록에서제거하고생성일은작은KST날짜로유지한다. 상세D-day는실제목록날짜cache가있는경우만표시하며RoomResponse날짜필드부재에따른직접진입/새로고침/비로그인제한을배포전에보고했다. API/서버정책변경없음. 검증/별도리뷰/지원범위: `docs/verification/issue-74-delete-confirmation.md`.

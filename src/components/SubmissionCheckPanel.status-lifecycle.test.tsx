@@ -5,6 +5,7 @@ import type { SubmissionCheckSnapshot, SubmissionCheckStatus } from "../api/prec
 import type { Room } from "../api/types";
 import * as session from "../auth/session";
 import SubmissionCheckPanel from "./SubmissionCheckPanel";
+import { api } from "../api/client";
 
 // Independent public-state/HTTP regression for web #32 / server #128.
 // A stored historical question is not authority to answer after leaving NEEDS_CHOICE.
@@ -71,7 +72,7 @@ afterEach(() => {
   cleanup(); for (const client of clients.splice(0)) client.clear();
   vi.restoreAllMocks(); vi.unstubAllGlobals(); localStorage.clear(); sessionStorage.clear();
 });
-const noComplete = () => expect(screen.queryByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).not.toBeInTheDocument();
+const noComplete = () => expect(screen.queryByText(/조건 제출을 완료했어요|다른 참여자를 기다려|^\s*제출 완료\s*$/)).not.toBeInTheDocument();
 function noActiveQuestion() {
   expect(screen.queryByRole("heading", { name: questionText })).not.toBeInTheDocument();
   expect(screen.queryByRole("button", { name: /^(오전|오후|직접 수정|선택한 내용으로 확인)$/ })).not.toBeInTheDocument();
@@ -82,10 +83,12 @@ async function openEditor() {
 }
 
 describe("#32 historical questions never reopen a terminated check", () => {
-  it("cancels a visible question, preserves the raw input and starts a fresh request without an old answer", async () => {
+  it("keeps the cancel API contract for an existing client and restores its cancelled snapshot without an old answer", async () => {
     const view = setup(snapshot("NEEDS_CHOICE", true));
     await screen.findByRole("heading", { name: questionText });
-    fireEvent.click(screen.getByRole("button", { name: "확인 취소" }));
+    expect(screen.queryByRole("button", { name: "확인 취소" })).not.toBeInTheDocument();
+    await act(async () => { await api.cancelSubmissionCheck(code, checkId, { request_id: crypto.randomUUID(), expected_revision: 4, expected_check_version: 9 }); });
+    await view.refresh();
     await screen.findByText(/확인을 취소했어요/);
     expect(view.writes).toHaveLength(1);
     expect(view.writes[0]).toEqual({ path: `${path}/${checkId}/cancel`, body: { request_id: expect.stringMatching(/^[0-9a-f-]{36}$/i), expected_revision: 4, expected_check_version: 9 } });
@@ -112,7 +115,7 @@ describe("#32 historical questions never reopen a terminated check", () => {
 
   it("keeps a completed CLEAR snapshot free of historical answer controls", async () => {
     const view = setup(snapshot("CLEAR", true));
-    await screen.findByText("제출 완료 · 다른 참여자를 기다려 주세요.");
+    await screen.findByText("제출 완료");
     noActiveQuestion(); expect(screen.getByText(raw, { exact: true })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "내 조건 수정" })).toBeEnabled();
     expect(view.writes).toEqual([]);
@@ -142,8 +145,8 @@ describe("#32 complete retry and direct-edit flows through the public API client
     const unaccepted = snapshot("CLEAR", false, raw, 4, 11); unaccepted.accepted = null; unaccepted.submission_complete = false;
     view.set(unaccepted); await view.refresh(); noComplete();
     view.set(snapshot("CLEAR", false, raw, 4, 12)); await view.refresh();
-    await screen.findByText("제출 완료 · 다른 참여자를 기다려 주세요.");
-    expect(document.body).toHaveTextContent(/다른 참여자를 기다려/);
+    await screen.findByText("제출 완료");
+    expect(screen.getByRole("status")).toHaveTextContent("제출 완료");
     expect(screen.getByText(raw, { exact: true })).toBeInTheDocument();
     expect(view.writes).toHaveLength(1); expect(view.reads.length).toBeGreaterThanOrEqual(3);
   });
@@ -160,7 +163,7 @@ describe("#32 complete retry and direct-edit flows through the public API client
     expect(view.writes[0]).toEqual({ path: `${path}/${checkId}/answer`, body: { request_id: expect.stringMatching(/^[0-9a-f-]{36}$/i), expected_revision: 4, expected_check_version: 9, question_id: questionId, direct_text: edited } });
     await screen.findByText(/모호한 부분을 확인 중/); noComplete();
     view.set(snapshot("CLEAR", false, edited, 5, 11)); await view.refresh();
-    await screen.findByText("제출 완료 · 다른 참여자를 기다려 주세요.");
+    await screen.findByText("제출 완료");
     expect(screen.getByText(edited, { exact: true, normalizer: value => value })).toBeInTheDocument();
     noActiveQuestion(); expect(view.writes).toHaveLength(1);
   });

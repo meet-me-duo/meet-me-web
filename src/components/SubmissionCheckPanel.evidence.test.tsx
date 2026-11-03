@@ -49,7 +49,7 @@ it("EX-RECEIPT shows received unresolved evidence without claiming interpretatio
   await screen.findByText(/접수 완료.*최종 분석에서 해석/);
   expect(screen.getByText("퇴근하면 가능해요", { exact: true })).toBeInTheDocument();
   expect(document.querySelector(".submission-privacy")).not.toBeInTheDocument();
-  expect(screen.queryByText("제출 완료 · 다른 참여자를 기다려 주세요.")).not.toBeInTheDocument();
+  expect(screen.queryByText("제출 완료")).not.toBeInTheDocument();
   expect(screen.queryByText("수정 확인 중에는 이전 접수본을 유지해요.")).not.toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "확인 취소" })).not.toBeInTheDocument();
   expect(screen.queryByRole("heading", { name: question.text })).not.toBeInTheDocument();
@@ -86,7 +86,7 @@ it("EX-RECEIPT an unresolved new original after the question cap is not received
   const writes = setup(snapshot("UNRESOLVED", { check: { ...snapshot("UNRESOLVED").check, failure_code: "QUESTION_LIMIT_REACHED" } }));
   await screen.findByText(/이미 보완 질문을 한 번 제공해 추가 질문은 없어요/);
   expect(screen.queryByText(/접수 완료/)).not.toBeInTheDocument();
-  expect(screen.queryByText("제출 완료 · 다른 참여자를 기다려 주세요.")).not.toBeInTheDocument();
+  expect(screen.queryByText("제출 완료")).not.toBeInTheDocument();
   expect(screen.queryByRole("heading", { name: question.text })).not.toBeInTheDocument();
   expect(writes).toHaveLength(0);
 });

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { api, ApiError } from "../api/client";
@@ -30,8 +30,23 @@ function mount(gcTime = 0, role: "HOST" | "MEMBER" = "MEMBER") {
 }
 
 describe("natural-language conditions screen", () => {
+  it("keeps the legacy manual HOST close action next to saved-input editing and visible while editing", async () => {
+    vi.spyOn(api, "getRoom").mockResolvedValue({ ...room, manual_only: true, viewer: { ...room.viewer, role: "HOST" } });
+    vi.spyOn(api, "getSubmission").mockResolvedValue(submission("화요일 저녁"));
+    const close = vi.spyOn(api, "closeRoom");
+    mount(0, "HOST");
+    await screen.findByRole("button", { name: "내 조건 수정" });
+    const actions = await screen.findByRole("group", { name: "내 입력 관리" });
+    expect(within(actions).getAllByRole("button").map(button => button.textContent)).toEqual(["내 조건 수정", "입력 마감하기"]);
+    expect(screen.queryByText("주최자 도구", { selector: "summary" })).not.toBeInTheDocument();
+    fireEvent.click(within(actions).getByRole("button", { name: "내 조건 수정" }));
+    await screen.findByRole("textbox");
+    expect(screen.getByRole("button", { name: "입력 마감하기" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "확인 취소" })).not.toBeInTheDocument();
+    expect(close).not.toHaveBeenCalled();
+  });
   it.each([401, 403, 404])("hides cached host actions when a subsequent room read returns %s", async status => {
-    const getRoom = vi.spyOn(api, "getRoom").mockResolvedValue({ ...room, viewer: { ...room.viewer, role: "HOST" } });
+    const getRoom = vi.spyOn(api, "getRoom").mockResolvedValue({ ...room, manual_only: true, viewer: { ...room.viewer, role: "HOST" } });
     vi.spyOn(api, "getSubmission").mockResolvedValue(submission("화요일 저녁"));
     const client = mount(0, "HOST");
     await screen.findByRole("button", { name: "입력 마감하기" });
@@ -80,7 +95,7 @@ describe("natural-language conditions screen", () => {
     complete(submission("목요일 저녁", existing ? 2 : 1));
     await screen.findByText(`저장된 입력 #${existing ? 2 : 1}`);
     expect(input).toHaveValue("금요일 저녁");
-    expect(screen.queryByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/조건 제출을 완료했어요|다른 참여자를 기다려|^\s*제출 완료\s*$/)).not.toBeInTheDocument();
     fireEvent.change(input, { target: { value: "목요일 저녁" } });
     expect(screen.getByRole("textbox")).toBe(input);
     fireEvent.click(screen.getByRole("button", { name: "수정 취소" }));
@@ -224,7 +239,7 @@ describe("saved conditions and plan accuracy", () => {
     expect(screen.getByRole("button", { name: "수정 취소" })).toBeEnabled();
     fireEvent.change(input, { target: { value: "목요일 저녁" } });
     expect(screen.getByRole("textbox")).toBe(input);
-    expect(screen.queryByText(/조건 제출을 완료했어요|다른 참여자를 기다려/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/조건 제출을 완료했어요|다른 참여자를 기다려|^\s*제출 완료\s*$/)).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "수정 취소" }));
     await screen.findByRole("heading", { name: "조건 제출을 완료했어요" });
   });

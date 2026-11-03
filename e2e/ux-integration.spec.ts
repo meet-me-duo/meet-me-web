@@ -19,7 +19,7 @@ for (const width of [1440, 320, 390]) test(`create, save, share, partial selecti
   const room = (role: string) => ({
     invite_code: code, purpose: "통합 흐름 검증", meeting_mode: "EITHER", time_zone_id: "Asia/Seoul",
     search_start_date: "2099-01-01", search_end_date: "2099-01-15", search_range_source: "DEFAULTED",
-    expected_participants: 4, submission_deadline: "2099-12-31T09:30:00.000Z", manual_only: false,
+    expected_participants: null, submission_deadline: null, manual_only: true,
     collection_status: state.status === "COLLECTING" ? "COLLECTING" : "CLOSED", public_status: state.status,
     closure_reason: state.status === "COLLECTING" ? null : "HOST_MANUAL", closed_at: state.status === "COLLECTING" ? null : "2099-01-01T09:00:00Z",
     viewer: { joined: true, role, display_name: role === "HOST" ? "주최자" : "참여자" }, input_disclosure_policy: "HOST_ON_PARTIAL_RESULT",
@@ -62,11 +62,10 @@ for (const width of [1440, 320, 390]) test(`create, save, share, partial selecti
   await expect(page.getByLabel("주최자 이름")).toHaveCount(0);
   await page.getByLabel("모임 목적 / 이름").fill("통합 흐름 검증");
   await page.getByRole("button", { name: /다음 단계/ }).click();
-  await page.getByRole("checkbox", { name: /정해진 시간이 되면/ }).check();
-  await page.getByLabel("제출 마감 (한국 시간)").fill("2099-12-31T18:30");
+  await page.getByRole("radio", { name: "직접 마감", exact: true }).check();
   await page.getByRole("button", { name: "방 만들기", exact: true }).click();
   await expect(page).toHaveURL(`/rooms/${code}`);
-  expect(state.created[0]).toMatchObject({ expected_participants: 4, submission_deadline: "2099-12-31T09:30:00.000Z", manual_only: false, search_start_date: null, search_end_date: null });
+  expect(state.created[0]).toMatchObject({ expected_participants: null, submission_deadline: null, manual_only: true, search_start_date: null, search_end_date: null });
   await expect(page.locator(".room-header h1")).toHaveText("통합 흐름 검증");
   await expect(page.locator(".submission-layout > aside")).toHaveCount(0);
   await expect(page.getByText(/반영하지 못한 원문은 주최자에게 공개/)).toBeVisible();
@@ -87,7 +86,6 @@ for (const width of [1440, 320, 390]) test(`create, save, share, partial selecti
   await expect(page.getByText("수정한 내용이 아직 저장되지 않았어요.")).toBeVisible();
   await page.getByRole("button", { name: "수정 취소" }).click();
   await expect(page.locator(".submitted-text")).toHaveText("목요일 저녁");
-  await page.locator(".host-tools-inline > summary").click();
   await page.getByRole("button", { name: "입력 마감하기" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "지금 입력 마감", exact: true }).click();
   await expect(page.getByRole("heading", { name: "일부 조건으로 만든 후보 플랜이에요" })).toBeVisible();

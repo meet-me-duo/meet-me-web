@@ -17,7 +17,7 @@ test("V2 scoped choice preserves original and receives unresolved evidence", asy
   await expect(page.getByRole("heading", { name: "제출한 보완 답변" })).toBeVisible();
   await expect(page.getByRole("button", { name: "확인 취소", exact: true })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "7~8시는 오전인가요, 오후인가요?" })).toHaveCount(0);
-  await expect(page.getByText("제출 완료 · 다른 참여자를 기다려 주세요.")).toHaveCount(0);
+  await expect(page.getByText("제출 완료")).toHaveCount(0);
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: info.outputPath("v2-unresolved-received.png"), fullPage: true });
   expect(errors).toEqual([]);

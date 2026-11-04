@@ -1036,6 +1036,12 @@ export interface components {
              * @example 2026-11-30T12:00:00Z
              */
             expires_at: string;
+            /**
+             * Format: int32
+             * @description 현재 최신 제출 버전이 존재하는 고유 참여자 수. 제출한 주최자·회원·게스트를 포함하며 수정·재참여·계정 연결·개인 목록 숨김으로 중복 집계하거나 제외하지 않음. 초안·제출 전 확인만 존재하면 제외하며 현재 수정 라운드의 재제출 수나 고정 분석 배치 인원이 아님
+             * @example 0
+             */
+            submitted_participant_count: number;
         };
         /** @description 현재 브라우저 세션의 방 참여 상태 */
         ViewerParticipationResponse: {

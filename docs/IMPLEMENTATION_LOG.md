@@ -1,5 +1,25 @@
 # Implementation log
 
+## 2026-11-04 — #77 분수 caption 후속 수정
+
+사용자 결정 “분수일 때만 빼”에 따라 정상 목표 분수에서 작은 ‘제출’을 생략한다. 목표 없는 수치 아래 ‘제출’과 접근성 의미·stale/누락 안내는 유지한다. PR78의 develop 병합 뒤 main 승격 PR79는 Draft로 보존하고 별도 피처에서 최소 표시 조건·회귀 검사를 준비했다. 최종 후속 검사·독립 리뷰·정확 HEAD CI는 관련 PR에 별도로 기록한다. 이전 전체 검사 결과를 새 결과로 합산하지 않는다.
+
+## 2026-11-04 — #77 실제 집계 명세 연결·게시 준비
+
+서버 PR207의 `18fd232fa7b94d8076ed7bfc71bb56f87703d8a4`에서 실제 생성 OpenAPI를 읽고 원문111847바이트의 Git blob·SHA256을 검증했다. 웹 snapshot은 전체 JSON 의미가 같고 변경은 RoomResponse 집계 property/required 두 곳뿐이다. 생성 DTO의 필수 number를 유지하며 구 서버 누락만 생성 타입 기반 읽기 alias에서 허용한다. 자세한 해시는 [검증 기록](verification/issue-77-submission-progress.md)에 보존한다.
+
+최종 단위911개(84파일), 전체 browser635 PASS/기존1 SKIP, 관련36, build/API/lint/typecheck/preflight3/evidence6/preview18이 통과했다. 실패·flaky·재시도·browser reporter 오류는0이다. 독립 리뷰에서 발견한20/20 비율과 stale 과원 겹침은 같은14px 두 줄과 카드의 별도 안내 행으로 해결했으며 최신 P1/P2는0이다. 최종 제품/테스트11파일 해시가 검증 중 변하지 않았고 실제 PNG9개를 보존했다. Library 공식 업로드 실패는 재시도하거나 우회하지 않았다.
+
+Commit/PR은 동일 커밋 예정이며 게시 후 정확 HEAD CI를 조회한다. 사용자가 서버 후 Web 배포를 승인했으므로 서버 담당의 운영 집계 계약 완료 신호 뒤에 정상 병합·배포를 이어간다. 그 전에는 운영 게이트를 유지한다.
+
+## 2026-11-04 — #77 예비 로컬 구현·집계 명세 대기 당시 기록
+
+사용자가 Web 일시 보류를 철회하고 최신 크기 요구로 재개했다. 기존 Issue77·feature/issue-77-room-submission-progress에서 상단 카드만 확장했다. 도넛은64px/8px/중앙14px이며 모바일 공유 버튼도64px, 동일 축·12px 간격이다. 웹은 공유 왼쪽이며 날짜 다음 줄에 대면/비대면을 표시한다. 목표 없는 원에는 완료 의미를 부여하지 않고 목표 초과 때도 실제 숫자는 보존한다. 기존 내 입력·마감 확인·삭제·D-day·searching·권한/복구 흐름을 유지한다.
+
+단위906/84파일, 전체 browser627PASS/기존1SKIP·unexpected/flaky/retry0·reporter errors0, 최종 실제 원 지름 관련28, evidence6, preview18, preflight3 및 lint/typecheck/build/기존 snapshot 정합이 통과했다. 초회 새 테스트의 fixture 타입·lint·비동기 DOM 대기 오류는 정정 이력으로 구분했다. 서버 담당이 집계 의미와 목표 초과 수치 보존을 확정했지만 실제 생성 OpenAPI/source SHA는 아직 미수신이다. 예정 필드의 로컬 예비 연결만 하며 snapshot·생성 타입·commit/push/Draft PR/CI는 대기한다.
+
+제공 시안3개는 공식 materialization 실패로 픽셀을 확인하지 않았다. 실제 합성 Chromium 캡처6개는 로컬 검증·보존했으나 Library 업로드 helper가 `hosted apps tools/list request failed: network`로 실패해 Library ID가 없다. 우회/재시도하지 않았다. 독립 리뷰도 최종 계약과 별도 검토 단계로 남는다. 서버 수정·운영/모델 호출·PR51 변경·병합·배포는0이다. [검증 기록](verification/issue-77-submission-progress.md)에 완료 범위와 한계를 기록했다.
+
 ## 2026-11-03 — PR75 상세 보관 만료의 실제 생성 계약 연결
 
 서버 ec0865cc00745b8780560565d04dd4c9774222f5의 실제 생성 OpenAPI 원문 SHA25603043ac4658ba676bad0eed6015937ebb5f4801bf9e303666ba9cb4a0de04a4e를 검증했다. 기존 웹 서식/키순서를 보존한 snapshot은 서버 원문과 전체 JSON 의미가 같고, 의미 변경은 RoomResponse.expires_at/required 두 곳뿐이다. generated schema의 required/non-null string에 연결했으며 임시 수동 타입은 제거했다. 구 서버 읽기 alias만 안전하게 optional 처리한다. 자세한 근거는 [계약 대조](verification/issue-74-room-retention-contract.json)와 [검증 기록](verification/issue-74-delete-confirmation.md)에 남긴다.

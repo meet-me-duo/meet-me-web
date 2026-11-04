@@ -89,6 +89,30 @@ CloudFront의 **Minimum TTL > 0은 origin의 no-store도 무시할 수 있다**.
 기존 메시지 자동 갱신은 보장하지 않는다. 이 계획은 무료 구독의 origin/behavior 허용 및
 정책 적용 가능성까지 운영에서 검증했다는 의미가 아니다. 적용 전 현재 구독 제약을 확인한다.
 
+## 승인된 모임 미리보기 경로 적용
+
+2026-11-04 사용자가 Web #81·Server #211의 정상 develop→main 승격·운영 배포와
+`/rooms/*` 경로 변경을 승인했다. 실제 배포판 `E25O88UJV05I9`의 alias는
+`app.meet-me.co.kr`이며 전환 전 S3 origin은 `web-s3`다. ETag와 전체 설정은 비공개
+작업 문맥에 보존하고 실제 적용 직전에 다시 조회한다. FREE/ACTIVE 구독도 읽기 전용으로 확인했다.
+
+Terraform은 API HTTPS/443·TLSv1.2 origin `room-preview-api`와 빈 origin path,
+우선 `/rooms/*` behavior를 선언한다. GET/HEAD, Managed-CachingDisabled의 모든 TTL 0과
+기존 보안 응답 헤더 정책을 사용하며 viewer Host·cookie·query·Authorization을 전달하는 정책을 붙이지 않는다.
+500·502·503·504의 오류 캐시 TTL은 0이고 응답 코드나 오류 문서를 치환하지 않는다.
+기존 S3 기본 behavior와 403/404→200 `/index.html` 처리는 유지한다.
+
+기존 Web 배포 역할에는 CreateInvalidation만 있고 인프라 apply workflow는 없다.
+IAM·OIDC·환경 보호를 확대하지 않는다. 승인된 연결 AWS 도구에서 설정 차이를 검토하고
+최신 ETag의 IfMatch로 해당 배포판만 적용한다. Terraform 소스와 같은 필드만 바꾸며
+기존 remote state를 임의 편집하지 않는다. 다음 정상 Terraform plan은 refresh된 실제 상태와 이 선언을 대조해야 한다.
+
+순서는 해시 자산 보존 Web 배포 → Server 배포 및 고정 `/index.html` outbound 확인 → 경로 적용이다.
+Deployed 후 `/rooms/*`를 invalidate한다. 복귀는 보존한 S3 origin·behavior·오류 설정으로 되돌리고
+Deployed 후 같은 경로를 무효화한다. 기존 자산은 보존하며 DB 변경은 없다.
+검증에는 허용된 기존 테스트 방만 사용하고 생성·참여·제출·유료 호출은 하지 않는다.
+실제 적용·검증 완료 상태는 PR과 배포 workflow의 정확 SHA·최종 결과로 확인한다.
+
 ## 현재 상태
 
 2026-09-20에 Terraform을 적용했고 `https://app.meet-me.co.kr`을 공개했다. CloudFront 배포판, WAF와 Route 53 zone은 PricingPlanManager의 `FREE / ACTIVE` 구독에 연결됐다. 계정은 `PAID / ACTIVE`이고 이 구독은 유료 승인이 없는 월 $0 플랜이다.

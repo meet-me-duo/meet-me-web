@@ -1,3 +1,17 @@
+## 2026-11-04 현재 — #77 모임 상단 제출 집계 표시
+
+- [x] 사용자 Web 재개 요청을 확인하고 기존 Issue #77·feature/issue-77-room-submission-progress를 이어간다. main66913ac/develop881925a 및 보류 PR51을 확인했다.
+- [x] 상단 카드에 동일 64px 원·8px 두께·14px 중앙 숫자를 사용한다. 모바일 공유 버튼도 64px이며 우상단에서 원과 같은 축·12px 간격을 유지한다. 날짜 다음 모임 방식을 분리하고 카드 여백을 늘렸다.
+- [x] 목표 없는 제출 수와 목표 대비 진행을 구분하고, 실제 숫자·0·미확인·과원·분모0·갱신 실패·접근 거부를 구별한다. 개인 명단이나 입력 상태로 집계하지 않는다.
+- [x] 예비 관련 단위33 및 실제 Chromium 관련54 PASS. 접근성·개인정보·로딩/오류·마감·게스트 경계와 320/390/1440px·긴 제목·직접 복사를 확인했다.
+- [x] 전체 단위906/84파일·기본 browser627PASS/기존1SKIP·retry/flaky0·evidence6·집계 명시 preview18·preflight3·lint/typecheck/build 및 기존 snapshot 생성 정합을 확인했다. 새 실제 서버 명세 대조와 구분한다.
+- [x] 실제 서버18fd232fa7b94d8076ed7bfc71bb56f87703d8a4의 생성 OpenAPI111847바이트/Git blob2ed12b97·SHA2569e1149f0를 검증했다. 전체 JSON 의미 일치와 집계 property/required 두 항목만 변경됨을 확인하고 생성 타입·구 서버 누락 호환을 대조했다.
+- [x] 독립 리뷰의20/20 및 stale 과원 겹침을 같은14px 두 줄·별도 안내 행으로 해결했다. 최종 단위911/84파일·browser635 PASS/기존1 SKIP·retry/flaky0·관련36·evidence6/preview18/preflight3·API/lint/typecheck/build PASS, 독립 P1/P2=0 및 소스11파일 지문 불변을 확인했다. 캡처9개를 보존했고 Library 공식 경로 네트워크 차단은 유지한다.
+- [ ] feature commit/push·develop Draft PR·정확 HEAD CI를 확인한다. Commit/PR: 동일 커밋 예정.
+- [ ] 사용자가 서버 배포 후 Web 배포를 승인했다. 서버 담당의 실제 운영 배포·count 검증 완료 신호 후에만 이번 변경의 정상 develop/main 병합·기존 production 배포를 이어간다. 보호 우회·무관 PR·운영 방 수정·모델 호출은 하지 않는다.
+
+사용자가 더 나은 UI 검토를 위해 일시 보류했다가 최신 시안과 동일 크기 요구로 재개했다. 실제 서버 snapshot/source SHA 대기는 해소됐으며 최종 aggregate·독립 리뷰 완료 후 게시 단계다. 캡처 PNG9개를 보존했으나 공식 Library 업로드는 tools/list network 오류로 실패해 생성 ID가 없다. 입력 시안의 Library 전송 실패도 보존하며 픽셀을 확인했다고 주장하지 않는다. 검수는 로컬 합성 API의 실제 렌더 캡처를 사용한다. Linear 공동 상태 반영은 부모가 담당한다.
+
 ## 2026-10-31 현재 — 구 웹 탭의 조건부 참석 표시 호환
 
 - [x] `[USER]` 로컬 구현·무료 검증·독립 검토 범위 승인, 새 게시/운영/V2/유료·지도·권한 변경 제외.

@@ -1,0 +1,163 @@
+{
+  "issue": 77,
+  "server_contract": {
+    "repository": "meet-me-duo/meet-me-server",
+    "source_sha": "18fd232fa7b94d8076ed7bfc71bb56f87703d8a4",
+    "path": "docs/openapi/account-room-history.openapi.json",
+    "raw_bytes": 111847,
+    "git_blob": "2ed12b97d86df57a5bf512b71120564e0fe55b4a",
+    "raw_sha256": "9e1149f01c35e3b27762c4e3586ac7ed03ed9f26d98be6472ad438ce3103c8a7",
+    "web_snapshot_sha256": "056f863b4005ee65cce36852a21290d73d13cab867fb689c68f7de0d4434c6e0",
+    "generated_schema_sha256": "3b561ebfe1f4471a79b92a6f421ebe4873ce7f216dbdd4f8094e617eb5d30e4d",
+    "full_json_semantics_equal": true,
+    "changed_paths": [
+      "/components/schemas/RoomResponse/properties/submitted_participant_count",
+      "/components/schemas/RoomResponse/required"
+    ],
+    "aggregate_required_nonnull_integer_int32_min0": true,
+    "expected_participants_nullable_unchanged": true
+  },
+  "checks": {
+    "unit": {
+      "passed": 911,
+      "files": 84,
+      "start_utc": "2026-11-04T04:53:03Z",
+      "duration_seconds": 168.33
+    },
+    "browser": {
+      "startTime": "2026-11-04T04:53:04.931Z",
+      "duration": 428697.04099999997,
+      "expected": 635,
+      "skipped": 1,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "browser_report_errors": 0,
+    "focused_browser": 36,
+    "evidence": 6,
+    "preview": 18,
+    "preflight": 3,
+    "api_check": "PASS",
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "build": "PASS",
+    "diff_check": "PASS",
+    "retry_count": 0
+  },
+  "independent_review": {
+    "p1": 0,
+    "p2": 0,
+    "resolved": [
+      "20/20 ratio overlapped the ring; same14px numeric label now uses two lines",
+      "stacked stale caption displaced large numerator; notice now occupies a separate row in the existing card"
+    ],
+    "extra_render_checks": [
+      "320px and1440px with long title, stale1000/50, clipboard failure concurrently"
+    ],
+    "implementation_unchanged_during_final_aggregate": true
+  },
+  "layout": {
+    "diameter_css_px": 64,
+    "stroke_css_px": 8,
+    "central_font_css_px": 14,
+    "mobile_share_css_px": [
+      64,
+      64
+    ],
+    "mobile_vertical_gap_css_px": 12,
+    "same_mobile_center_axis": true,
+    "actual_painted_diameter_checked": true,
+    "two_line_inner_chord_checked": true
+  },
+  "product_test_sha256": {
+    "src/components/RoomSubmissionProgress.tsx": "12b3cabd9595dd91320ac3af72d4602a3315c695c3a79f53b187bdd0860f789e",
+    "src/components/RoomSubmissionProgress.test.tsx": "9b3f35a6092d2b64c4eb5753efb1f0ff798d1e54911b8303bd532e2bcfc54012",
+    "src/pages/RoomPage.tsx": "fd14243821a9f5249bab2b4599578e1b6c710e7a42bae244835d057930b5c92d",
+    "src/pages/RoomPage.submission-progress.test.tsx": "b86955ec13acc97739aa92a609aa29ce0b40c5295865a6923464575e85f757b9",
+    "src/styles.css": "4f8ecf94a3527442b75fb0dd95c98ceedcbba0a98eb66627f2d94ef5eb902a8c",
+    "e2e/submission-progress.spec.ts": "bcd3e8d68991ed9493a9bc603a41b523d56f3bce9f39a918c104d4a2b75e8b23",
+    "e2e/room-states.spec.ts": "ae9fef29f91528a5b3c1a61af810ea4697f27f88b6fd94fec8254ba80a2dde4a",
+    "scripts/ui-preview/fixtures.mjs": "54dc1f081e3112c7339ca68f8caee69a10f607c2e471e27d4af3615a2be0f8c6",
+    "openapi/meet-me.openapi.json": "056f863b4005ee65cce36852a21290d73d13cab867fb689c68f7de0d4434c6e0",
+    "src/api/schema.d.ts": "3b561ebfe1f4471a79b92a6f421ebe4873ce7f216dbdd4f8094e617eb5d30e4d",
+    "src/api/types.ts": "7c27d3109e6f8f01c14332282512467a7cb3a52ffdd35f6b1315d533f03682ac"
+  },
+  "captures": [
+    {
+      "file_name": "meet-me-web-submission-1440-20-target.png",
+      "sha256": "2957e338081ba122707e69545dff03a3dbc5a57d742f296971c83b4cd2ec135b",
+      "png_width": 1440,
+      "png_height": 900
+    },
+    {
+      "file_name": "meet-me-web-submission-1440-count.png",
+      "sha256": "b62efed2d9cbb9f0ffd48d7fb34b6ad15f37cd4749293b46caa88b335c8c6cf7",
+      "png_width": 1440,
+      "png_height": 900
+    },
+    {
+      "file_name": "meet-me-web-submission-1440-target.png",
+      "sha256": "57b9863639ca3a0f6327d617af595eae6320e4badbc95152b6942cda9eb74f10",
+      "png_width": 1440,
+      "png_height": 900
+    },
+    {
+      "file_name": "meet-me-web-submission-320-20-target.png",
+      "sha256": "464da288b176dd52d6e2a55f24ec2a7fe6694d4ad37331f9ea5e5053ad2ef1fc",
+      "png_width": 840,
+      "png_height": 2363
+    },
+    {
+      "file_name": "meet-me-web-submission-320-count.png",
+      "sha256": "1445009965fe51002311ac5ecb1f18c70820a67ec570b2f3810f2552a7e10c96",
+      "png_width": 840,
+      "png_height": 2363
+    },
+    {
+      "file_name": "meet-me-web-submission-320-target.png",
+      "sha256": "10d9f7aa35c50a7103907d6aa020902bc7eff023e52b8ef9bfd65dafe464c066",
+      "png_width": 840,
+      "png_height": 2363
+    },
+    {
+      "file_name": "meet-me-web-submission-390-20-target.png",
+      "sha256": "44f80126884f66a499e41bf2e6e62fed399389ec6e4370719e6b4a47bfea2de6",
+      "png_width": 1024,
+      "png_height": 2363
+    },
+    {
+      "file_name": "meet-me-web-submission-390-count.png",
+      "sha256": "5bce4260c92f79bba580ce65508724cee0e1cca2c0c052a15edc545f12f401d7",
+      "png_width": 1024,
+      "png_height": 2363
+    },
+    {
+      "file_name": "meet-me-web-submission-390-target.png",
+      "sha256": "d68fd5bbeff86643514e92e2081998adff1d4a2f5eda506da67eb4d9353f2282",
+      "png_width": 1024,
+      "png_height": 2363
+    }
+  ],
+  "library": {
+    "reference_images_pixels_viewed": false,
+    "reference_materialization": "official helper download failed",
+    "capture_upload": "BLOCKED",
+    "capture_upload_error": "hosted apps tools/list request failed: network",
+    "capture_library_ids": [],
+    "failed_upload_retried_or_bypassed": false
+  },
+  "publication": {
+    "commit_pr": "same commit planned",
+    "draft_target": "develop",
+    "operational_gate": "user authorized server-first then Web deployment; server operational count verification confirmation still pending"
+  },
+  "scope": {
+    "production_api_requests": 0,
+    "production_writes": 0,
+    "model_calls": 0,
+    "server_changes": 0,
+    "pr51_changes": 0,
+    "protection_bypass": 0,
+    "github_review_approve_calls": 0
+  }
+}

@@ -73,13 +73,14 @@ test("brand link returns to the landing page", async ({ page }) => {
 });
 
 for (const width of [1440, 390, 320]) {
-  test(`compact room header preserves settings and accessible share action at ${width}px`, async ({ page }) => {
+  test(`room header preserves settings and accessible share action at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 }); await mockRoom(page, "ANALYZING", { role: "HOST" });
     await page.goto(`/rooms/${code}`);
     const header = page.locator(".room-header"); await expect(header.getByRole("heading", { name: "졸업 프로젝트 회의" })).toBeVisible();
     await expect(header).toContainText("내가 만든 모임"); await expect(header).toContainText("9월 21일"); await expect(header).toContainText("9월 28일");
     await expect(header).toContainText("대면·비대면 모두");
-    expect((await header.boundingBox())!.height).toBeLessThanOrEqual(width > 780 ? 104 : 130);
+    // The submission circle and separate meeting-mode line intentionally add height.
+    expect((await header.boundingBox())!.height).toBeLessThanOrEqual(width > 780 ? 160 : 220);
     const button = header.getByRole("button", { name: "초대 링크 복사" });
     const box = (await button.boundingBox())!; expect(box.width).toBeGreaterThanOrEqual(44); expect(box.height).toBeGreaterThanOrEqual(44);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);

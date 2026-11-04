@@ -25,6 +25,8 @@ export function fixture(scene) {
   let deadline = null;
   const titles = [purpose, '팀 프로젝트 회의', '친구들과 저녁 약속', '함께하는 독서 모임', '주말 산책'];
   let submitted = scene === 'saved' || status !== 'COLLECTING';
+  // Explicit synthetic aggregate, independent of draft/precheck state.
+  let submittedParticipantCount = scene === 'saved' ? 2 : status !== 'COLLECTING' ? 4 : 0;
   let candidateText = raw;
   let checkState = scene === 'checking' ? 'CHECKING' : submitted ? 'CLEAR' : null;
   let reviewDone = false;
@@ -36,7 +38,7 @@ export function fixture(scene) {
   }));
   let result = { confirmed_at: now(), selection: { protocol: 'diverse-time-v1', analysis_id: id, option_id: options[0].option_id, variant_id: variantId, start_at: time(1, '10'), end_at: time(1, '11') },
     candidate: { candidate_id: null, plan_type: 'A', rank: 1, meeting_mode: 'REMOTE', attendance_count: 4, total_participants: 4, place: null, summary: '모두 함께할 수 있는 온라인 모임', time_ranges: [{ start_at: time(1, '10'), end_at: time(1, '11') }] } };
-  const room = () => ({ invite_code: activeCode, purpose, meeting_mode: 'EITHER', time_zone_id: 'Asia/Seoul', search_start_date: date(0), search_end_date: date(7), search_range_source: 'HOST_SPECIFIED', expected_participants: expectedParticipants, submission_deadline: deadline, manual_only: manualOnly,
+  const room = () => ({ invite_code: activeCode, purpose, meeting_mode: 'EITHER', time_zone_id: 'Asia/Seoul', search_start_date: date(0), search_end_date: date(7), search_range_source: 'HOST_SPECIFIED', expected_participants: expectedParticipants, submitted_participant_count: submittedParticipantCount, submission_deadline: deadline, manual_only: manualOnly,
     collection_status: status === 'COLLECTING' ? 'COLLECTING' : 'CLOSED', closure_reason: status === 'COLLECTING' ? null : 'MANUAL', closed_at: status === 'COLLECTING' ? null : now(), public_status: status,
     viewer: { joined: true, role: activeRole, display_name: activeRole === 'HOST' ? '합성 주최자' : '합성 참여자', context_id: variantId }, input_disclosure_policy: 'HOST_ON_PARTIAL_RESULT', state_version: 1, revision_generation: 0, revision_round: null,
     analysis_id: id, remaining_correction_analyses: 3, recommendation_protocol: 'diverse-time-v1', submission_protocol: 'PRE_SUBMIT_V1', review_prompt_supported: scene === 'review',
@@ -57,12 +59,12 @@ export function fixture(scene) {
       const q = url.searchParams;
       return [200, { rooms: rows.filter(row => (!q.get('query') || row.purpose.includes(q.get('query'))) && (!q.get('role') || q.get('role') === row.role) && (!q.get('created_from') || date(0) >= q.get('created_from')) && (!q.get('created_to') || date(0) <= q.get('created_to'))), has_more: false, next_cursor: null }];
     }
-    if (path === '/api/rooms' && method === 'POST') { purpose = typeof body.purpose === 'string' ? body.purpose : purpose; manualOnly = body.manual_only === true; expectedParticipants = typeof body.expected_participants === 'number' ? body.expected_participants : null; deadline = typeof body.submission_deadline === 'string' ? body.submission_deadline : null; status = 'COLLECTING'; submitted = false; checkState = null; return [201, room()]; }
+    if (path === '/api/rooms' && method === 'POST') { purpose = typeof body.purpose === 'string' ? body.purpose : purpose; manualOnly = body.manual_only === true; expectedParticipants = typeof body.expected_participants === 'number' ? body.expected_participants : null; deadline = typeof body.submission_deadline === 'string' ? body.submission_deadline : null; status = 'COLLECTING'; submitted = false; submittedParticipantCount = 0; checkState = null; return [201, room()]; }
     if (path === root && method === 'GET') return scene === 'error' ? [503, { detail: '미리보기용 조회 실패예요. 화면 목록에서 다른 상태를 선택해 주세요.' }] : [200, room()];
     if (path === root + '/guest-records' && method === 'GET') return [200, { records: [] }];
     if (path === root + '/submission/checks/current' && method === 'GET') return [200, snapshot()];
     if (path === root + '/submission/checks' && method === 'POST') {
-      candidateText = String(body.raw_text ?? '').slice(0, 2000); checkState = 'CLEAR'; submitted = true;
+      candidateText = String(body.raw_text ?? '').slice(0, 2000); checkState = 'CLEAR'; if (!submitted) submittedParticipantCount++; submitted = true;
       // Deliberately deterministic UI fixture: no interpretation/model call.
       return [200, snapshot()];
     }

@@ -8,6 +8,87 @@
 - ACM 인증서는 CloudFront 요구에 따라 `us-east-1`에 생성한다.
 - GitHub Actions는 `production` Environment에서만 OIDC role을 사용한다.
 
+## 모임별 링크 제목 전환 계획 (2026-11-04, 미적용)
+
+`/rooms/<22자 invite_code>`의 최초 HTML을 기존 서버가 생성하고 공개 `purpose`만
+`Meet me - 모임 이름`으로 넣는다. `/`의 `Meet me — 스마트 일정 조율`은 그대로다.
+이미지나 참여자·입력 원문은 추가하지 않는다. 기존 주소/방을 그대로 사용하며 migration은 없다.
+웹에서 이동한 경우에는 공개 방 조회를 바탕으로 탭 제목도 갱신한다.
+
+서버는 **고정 주소** `https://app.meet-me.co.kr/index.html`만 읽는다. 요청의 Host,
+forwarded 헤더, 쿠키, Authorization, query는 이 요청과 canonical 생성에 사용하지 않는다.
+해당 주소는 반드시 기존 S3 behavior에 남겨 순환 호출을 막는다. 제목 HTML과 shell을
+서버 메모리에 캐시하지 않는다. 전체 shell 요청은 3초/256KiB로 제한하고 redirect·비 HTML·
+잘못된 shell·shell 장애는 정보 없는 503/no-store로 끝낸다. 모임이 없거나 삭제됐거나 이름 조회가 실패하면 기본 제목의
+정상 SPA를 200으로 제공하므로 기존 오류 화면은 JS가 처리한다. `/rooms/*`는 중첩 경로도
+일치하므로 `/rooms/<code>/nested` 등은 이름 조회 없이 기본 SPA를 제공한다.
+
+선택 이유: JS 실행 전 제목을 읽는 공유 크롤러와 브라우저 모두 같은 HTML을 받으며
+SSR 프레임워크, Lambda, 새 컴퓨팅 인프라나 이미지 저장소가 필요 없다.
+비용/제약: 모임 HTML마다 기존 서버 DB 조회와 공개 shell GET이 추가되고 초기 응답이
+Web origin에 의존한다. WAF의 IP별 제한에는 서버 outbound IP의 shell GET이 모인다.
+대규모 트래픽 최적화는 별도 검토하며 이 변경에서 WAF/권한을 완화하지 않는다.
+
+### 로컬 검증과 남은 게이트
+
+- Server의 `ktlintCheck assemble test`는 종료 코드 0, 23분 40초다. 355 suites / 2,753 tests 중
+  2,736 PASS, 17 SKIP, 실패·오류 0이며 신규 회귀 14개도 통과했다.
+- Web의 최종 단위 925개, api:check·lint·typecheck·build, evidence preflight 3개가 통과했다.
+  시스템 Chromium 151에서 브라우저 회귀 635 PASS / 1 SKIP와 evidence 6 PASS다.
+  지정 Chromium 153 다운로드는 네트워크 정책 403으로 차단됐다. 차단 확인 후 추가 다운로드 시도나 정책 변경은 하지 않았다.
+- 깨끗한 Server develop `9db8c067305e19d37f668de5c9648e179955adbc`에서 최초 Python 실패 대상
+  34개 메서드는 모두 통과했다. Java 17·Alpine 준비 후 관련 Node 7개도 통과했고,
+  AR15·AR16·AR24와 credential-refresh 전체 스크립트는 기준·feature 양쪽에서 순차 통과했다.
+  같은 기준 소스의 제한된 동시 부하에서는 원래 15초 installer timeout과 AR15 실패가 재현됐다.
+  운영 코드·assertion·timeout은 수정하지 않았다.
+- Compose secret-fidelity는 기준·feature 모두 종료 코드 0이다. 이전 실패 표시는 연결 명령 묶음의
+  종료 코드 1을 Compose에 잘못 귀속한 보고 오류였으며, 뒤의 credential-refresh fixture timeout과 구분한다.
+- **수정하지 않은 Nginx runtime 검사는 환경 제약으로 미통과다.** 기준에서도 config 모드 0600으로
+  읽기 거부가 발생했다. 임시 0644 보정 후 localhost health 요청은 환경 HTTP 프록시에서 403을 받았고,
+  같은 임시 컨테이너의 로컬 직접 요청은 200이었다. 임시 권한은 원복하고 프록시·네트워크 정책은 유지했다.
+  이후 임시 로컬 사본에서 비밀정보 없는 config만 0644로 두고 고정 localhost wget에만 `-Y off`를
+  적용한 검사는 종료 코드 0(2.3초)으로 통과했다. assertion·timeout·capability는 유지했고 사본은 삭제했다.
+  이 결과는 로컬 환경 보정의 검증이며 추적 fixture 변경이나 운영 Nginx 검증을 뜻하지 않는다.
+- 최초 feature 배포 계약 결과는 Node 415개 중 10 FAIL, Python 424개 중 1 FAIL / 37 ERROR로 보존한다.
+  **현재 feature의 전체 Python·Node 배포 계약은 이후 재실행하지 않았다.** 집중·기준 비교 결과만으로
+  전체 배포 계약이나 CI 통과를 주장하지 않는다. ARM64 Built Image·정확 HEAD 원격 CI,
+  운영 서버 outbound/TLS/DNS·CloudFront 전환·실제 Kakao 미리보기 검증은 미실행이다.
+
+아래 단계는 **준비된 운영 계획**이며 이번 로컬 작업에서 실행하지 않는다.
+
+1. `[AGENT/SHARED]` Web 배포의 자산 업로드에서 `s3 sync --delete` 제거를 먼저 배포한다.
+   기존 해시 자산을 보존하고 새 자산 업로드 후 index.html을 교체한다. 이전 shell·열린 탭의
+   해시 파일이 배포 중 사라지지 않도록 즉시 정리/lifecycle 삭제를 추가하지 않는다.
+   보존 자산의 저장 비용과 향후 정리 정책은 별도 검토한다.
+2. `[SHARED]` 필수 CI·리뷰와 별도 승인을 거쳐 서버를 배포한다. 기존 Nginx의 HTTPS
+   `location /`가 이미 `/rooms/**`를 앱으로 전달하므로 프록시 설정을 추가하지 않는다.
+   서버의 `/rooms/<가상 code>`와 `/rooms/<가상 code>/nested`를 쿠키 없이 확인한다.
+   현 단계는 로컬 mock 검증이며 운영 서버 outbound TLS/DNS/접근·실제 API 기능은 미검증이다.
+3. `[USER/SHARED]` Web Terraform의 CloudFront distribution에 기존 API HTTPS origin
+   (`api.meet-me.co.kr`, HTTPS only/443, TLSv1.2)를 추가하고 S3 기본 behavior보다 우선하는
+   **ordered behavior `/rooms/*`**를 준비·plan·검토한 뒤 승인받아 적용한다.
+   GET/HEAD만 허용하고 `Managed-CachingDisabled`를 지정한다. Min/Default/Max TTL은
+   모두 0이어야 한다. 기존 보안 응답 헤더 정책과 HTTPS 강제는 유지한다.
+   origin path는 비우고 query/cookie/Authorization/Origin/viewer Host는 전달하지 않는다.
+   User-Agent별 분기나 새 viewer rewrite를 추가하지 않는다. 기존 403/404 SPA error
+   mapping은 유지하되 모임 누락은 서버가 200으로 처리하고 shell 장애는 503으로 구분한다.
+   `/index.html`, `/assets/*`, 홈페이지와 다른 SPA 경로는 기존 S3 origin에 둔다.
+4. `[SHARED]` behavior 배포 완료 후 `/rooms/*` 캐시를 invalidate한다. 두 모임의 최초 HTML
+   title/og:title/canonical과 각각 다른 이름, 없는/삭제된 방, 중첩 경로, GET/HEAD,
+   일반 브라우저·Kakao UA의 동일 응답, no-store 및 JS/CSS 200을 확인한다.
+   `/`는 원래 제목인지 확인한다. 실제 방 이름을 운영 검증에 사용하려면 별도 허용된 방을
+   사용하며 생성·참여·제출·모델 호출은 이 smoke에 포함하지 않는다.
+5. `[SHARED]` 문제가 생기면 `/rooms/*` ordered behavior를 제거/비활성화해 기존 S3 SPA로
+   돌리고 해당 경로를 invalidate한다. DB 변경이 없으므로 데이터 rollback은 필요 없다.
+
+CloudFront의 **Minimum TTL > 0은 origin의 no-store도 무시할 수 있다**.
+따라서 Cache-Control만으로 전환하지 않는다.
+[캐시 정책 설명](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cache-key-understand-cache-policy.html),
+[behavior 순서·경로 패턴](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/DownloadDistValuesCacheBehavior.html).
+카카오가 이미 수집한 링크 미리보기는 별도 캐시 갱신 후 새 메시지로 다시 확인해야 하며,
+기존 메시지 자동 갱신은 보장하지 않는다. 이 계획은 무료 구독의 origin/behavior 허용 및
+정책 적용 가능성까지 운영에서 검증했다는 의미가 아니다. 적용 전 현재 구독 제약을 확인한다.
+
 ## 현재 상태
 
 2026-09-20에 Terraform을 적용했고 `https://app.meet-me.co.kr`을 공개했다. CloudFront 배포판, WAF와 Route 53 zone은 PricingPlanManager의 `FREE / ACTIVE` 구독에 연결됐다. 계정은 `PAID / ACTIVE`이고 이 구독은 유료 승인이 없는 월 $0 플랜이다.

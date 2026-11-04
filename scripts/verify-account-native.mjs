@@ -70,8 +70,8 @@ try {
   completed('google-oidc-cookie-refresh-bearer-profile-create');
   await host.getByRole('link', { name: '내가 만든 모임', exact: true }).click();
   await expect(host.getByRole('link', { name: roomName, exact: true })).toBeVisible();
-  await expect(host.getByRole('listitem').filter({ has: host.getByRole('link', { name: roomName, exact: true }) }).getByText(/정리 예정/)).toBeVisible();
-  completed('own-host-archive-expiry');
+  await expect(host.getByRole('listitem').filter({ has: host.getByRole('link', { name: roomName, exact: true }) }).getByText(/^생성 /)).toBeVisible();
+  completed('own-host-archive-created-date');
   const deviceContext = await context(); const device = await deviceContext.newPage();
   await login(device, 'Google', '/account/rooms');
   await expect(device.getByRole('link', { name: roomName, exact: true })).toBeVisible();

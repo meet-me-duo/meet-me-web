@@ -30,7 +30,7 @@ export function RoomSubmissionProgress({ submittedCount, expectedParticipants, c
     </svg>
     <span className="submission-progress-center" aria-hidden="true">
       <strong className={`submission-progress-number${stacked ? " is-stacked" : ""}`}>{stacked ? <><span>{numerator}/</span><span>{target}명</span></> : value}</strong>
-      {!stacked && <span className="submission-progress-caption">{stale ? "마지막 확인" : knownCount ? "제출" : "집계 미확인"}</span>}
+      {!stacked && (stale || !knownCount || target === null) && <span className="submission-progress-caption">{stale ? "마지막 확인" : knownCount ? "제출" : "집계 미확인"}</span>}
     </span>
   </div>{stacked && stale && <p className="room-submission-stale-note">마지막으로 확인한 제출 인원이에요.</p>}</>;
 }

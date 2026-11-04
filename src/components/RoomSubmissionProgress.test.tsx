@@ -10,6 +10,12 @@ describe("submission aggregate presentation", () => {
     expect(screen.getByRole("img", { name: "입력 수집 중 · 목표 4명 중 2명 제출" })).toHaveTextContent("2/4명");
     expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
   });
+  it.each([[0, 4], [2, 4], [6, 4], [20, 20]])("shows only the fraction for a known target (%s/%s), retaining its accessible meaning", (submittedCount, expectedParticipants) => {
+    const { container } = render(<RoomSubmissionProgress submittedCount={submittedCount} expectedParticipants={expectedParticipants} closed={false} />);
+    const progress = screen.getByRole("img", { name: `입력 수집 중 · 목표 ${expectedParticipants}명 중 ${submittedCount}명 제출` });
+    expect(progress.textContent).toBe(`${submittedCount}/${expectedParticipants}명`);
+    expect(container.querySelector(".submission-progress-caption")).toBeNull();
+  });
   it("retains the real numerator above capacity while bounding the visual arc", () => {
     const { container } = render(<RoomSubmissionProgress submittedCount={6} expectedParticipants={4} closed />);
     expect(screen.getByRole("img", { name: "입력 마감 · 목표 4명 중 6명 제출" })).toHaveTextContent("6/4명");
@@ -39,6 +45,10 @@ describe("submission aggregate presentation", () => {
   it("labels retained data as the last confirmed aggregate after a failed refresh", () => {
     render(<RoomSubmissionProgress submittedCount={2} expectedParticipants={4} closed stale />);
     expect(screen.getByRole("img", { name: "입력 마감 · 마지막 확인한 집계 · 목표 4명 중 2명 제출" })).toHaveTextContent("마지막 확인");
+  });
+  it("retains a truthful stale notice for a count without a target", () => {
+    render(<RoomSubmissionProgress submittedCount={2} expectedParticipants={null} closed stale />);
+    expect(screen.getByRole("img", { name: "입력 마감 · 마지막 확인한 집계 · 2명 제출, 목표 인원 없음" })).toHaveTextContent("2명마지막 확인");
   });
   it.each([[20, 20], [50, 50], [100, 50], [1000, 50]])("preserves the full %s/%s value using two central lines with the same number typography", (submittedCount, expectedParticipants) => {
     const { container } = render(<RoomSubmissionProgress submittedCount={submittedCount} expectedParticipants={expectedParticipants} closed />);

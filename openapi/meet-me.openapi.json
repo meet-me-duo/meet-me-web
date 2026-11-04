@@ -4605,10 +4605,18 @@
             "format": "date-time",
             "description": "실제 저장된 방 생성 시각부터 30×24시간 후인 UTC 정리 기준 시각. 상태·개인 숨김과 무관하며 정확한 물리 삭제 실행 시각을 보장하지 않음",
             "example": "2026-11-30T12:00:00Z"
+          },
+          "submitted_participant_count": {
+            "type": "integer",
+            "format": "int32",
+            "description": "현재 최신 제출 버전이 존재하는 고유 참여자 수. 제출한 주최자·회원·게스트를 포함하며 수정·재참여·계정 연결·개인 목록 숨김으로 중복 집계하거나 제외하지 않음. 초안·제출 전 확인만 존재하면 제외하며 현재 수정 라운드의 재제출 수나 고정 분석 배치 인원이 아님",
+            "example": 0,
+            "minimum": 0
           }
         },
         "required": [
-          "expires_at"
+          "expires_at",
+          "submitted_participant_count"
         ]
       },
       "ViewerParticipationResponse": {

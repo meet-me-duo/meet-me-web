@@ -678,15 +678,27 @@ fieldset.field legend { margin-bottom: 9px; }
 .room-page { display: flex; flex-direction: column; gap: 16px; max-width: 720px; padding-block: 24px; }
 .room-page:has(.recommendation-choices) { max-width: 1040px; }
 .room-page > * { min-width: 0; }
-.room-header { margin: 0; padding: 12px 16px; gap: 16px; }
+.room-header { --room-progress-size: 64px; display: grid; grid-template-columns: minmax(0, 1fr) var(--room-progress-size) auto; align-items: center; margin: 0; padding: 24px 20px; gap: 16px; }
 .room-header > div:first-child { min-width: 0; flex: 1; }
+.room-header-details { grid-column: 1; grid-row: 1; }
 .room-header .room-kicker { display: block; color: var(--sky-dark); font-size: .625rem; font-weight: 600; letter-spacing: 0; line-height: 1.3; overflow-wrap: anywhere; }
 .room-header h1 { margin: 3px 0; font-size: 1.125rem; line-height: 1.4; overflow-wrap: anywhere; word-break: keep-all; }
 .room-header p { font-size: .75rem; line-height: 1.5; overflow-wrap: anywhere; }
-.room-header .room-copy { flex: 0 0 auto; width: auto; max-width: 100%; }
-.room-header .room-copy .button { min-height: 44px; font-size: .75rem; padding-inline: 12px; }
-.room-header:has(.copy-feedback) { flex-wrap: wrap; }
-.room-header:has(.copy-feedback) .room-copy { flex-basis: 100%; width: 100%; }
+.room-header .room-copy { display: contents; }
+.room-header .room-copy .button { grid-column: 3; grid-row: 1; min-height: 44px; font-size: .75rem; padding-inline: 12px; }
+.room-header .room-header-mode { margin-top: 4px; }
+.room-header-actions { display: contents; }
+.room-header .copy-feedback { grid-column: 1 / -1; grid-row: 2; }
+.room-header .manual-copy-link { grid-column: 1 / -1; grid-row: 3; width: 100%; min-width: 0; }
+.room-submission-progress { grid-column: 2; grid-row: 1; position: relative; width: var(--room-progress-size); height: var(--room-progress-size); }
+.room-submission-progress svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.submission-progress-track { stroke: #dbeafe; }
+.submission-progress-value { stroke: #0284c7; }
+.submission-progress-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #334155; }
+.submission-progress-number { font-size: .875rem; font-weight: 700; line-height: 1.1; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.submission-progress-number.is-stacked { display: flex; flex-direction: column; align-items: center; line-height: 1; }
+.room-header .room-submission-stale-note { grid-column: 1 / -1; }
+.submission-progress-caption { font-size: .5625rem; line-height: 1.1; white-space: nowrap; color: #475569; }
 .room-input-primary, .room-input-secondary { width: 100%; margin-inline: auto; }
 .room-input-secondary { order: 2; }
 .room-page > .room-history-note { order: 3; margin-block: 0; text-align: center; }
@@ -741,10 +753,14 @@ fieldset.field legend { margin-bottom: 9px; }
 .confirmed-time { font-size: 1.3rem; line-height: 1.6; font-weight: 700; }
 @media (max-width: 780px) {
   .room-page { padding-block: 16px; }
-  .room-header { flex-direction: row; align-items: flex-start; gap: 12px; padding: 12px; }
+  .room-header { grid-template-columns: minmax(0, 1fr) var(--room-progress-size); grid-template-rows: var(--room-progress-size) auto; align-items: start; column-gap: 16px; row-gap: 12px; padding: 20px 16px; }
+  .room-header-details { grid-row: 1 / 3; }
   .room-header h1 { font-size: 1rem; }
-  .room-header .room-copy .button { min-width: 44px; padding-inline: 10px; }
+  .room-header .room-copy .button { grid-column: 2; grid-row: 1; width: var(--room-progress-size); height: var(--room-progress-size); min-width: var(--room-progress-size); padding: 0; }
+  .room-submission-progress { grid-row: 2; }
   .room-header .room-copy-label { display: none; }
+  .room-header .copy-feedback { grid-row: 3; }
+  .room-header .manual-copy-link { grid-row: 4; }
   .precheck-card { padding: 20px; }
   .recommendation-choices .candidate-list { grid-template-columns: minmax(0, 1fr); }
   .recommendation-continue { width: 100%; }

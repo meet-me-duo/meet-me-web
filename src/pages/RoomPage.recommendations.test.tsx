@@ -81,6 +81,29 @@ async function refresh(view: ReturnType<typeof mount>, room: Room, primary: Reco
 afterEach(() => { cleanup(); for (const client of clients.splice(0)) client.clear(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe("#19 native protocol routing and recommendation presentation", () => {
+  it("maps API names independently for primary variants and paginated alternatives into selection", async () => {
+    const first = option();
+    first.variants[0]!.available_participant_names = ["합성 하나", "합성 둘", "동명", "동명"];
+    first.variants[1]!.available_participant_names = ["합성 셋", "합성 넷", "합성 다섯"];
+    first.variants[1]!.excluded_participant_names = ["동명"];
+    const view = mount(ready, list([first], { has_alternatives: true }));
+    await screen.findByText("참석 가능 · 합성 하나 님, 합성 둘 님, 동명 님, 동명 님");
+    await chooseOnline();
+    expect(screen.getByRole("heading", { name: /실제 일정 선택/ }).parentElement).toHaveTextContent("참석 가능 · 합성 셋 님, 합성 넷 님, 합성 다섯 님");
+    expect(screen.getByRole("heading", { name: /실제 일정 선택/ }).parentElement).not.toHaveTextContent("합성 하나");
+    fireEvent.click(screen.getByRole("button", { name: "추천안으로 돌아가기" }));
+    const other = option(o4, null, "11");
+    other.variants = [{ ...other.variants[0]!, available_participant_names: ["합성 대안 가", "합성 대안 나"], attendance_count: 2, attendance_confirmed: false }];
+    view.alternatives.mockResolvedValue(list([other]));
+    fireEvent.click(screen.getByRole("button", { name: "다른 가능한 시간 보기" }));
+    await screen.findByText(/시간 조건 일치 · 합성 대안 가 님, 합성 대안 나 님/);
+    fireEvent.click(screen.getAllByRole("button", { name: "이 시간 선택" })[1]!);
+    fireEvent.click(screen.getByRole("button", { name: "선택한 시간 확정하기" }));
+    const selected = screen.getByRole("heading", { name: /실제 일정 선택/ }).parentElement!;
+    expect(selected).toHaveTextContent("시간 조건 일치 · 합성 대안 가 님, 합성 대안 나 님");
+    expect(selected).toHaveTextContent("장소·이동 조건을 확인하지 못해 실제 참석 여부는 미확정");
+    expect(selected).not.toHaveTextContent("합성 셋");
+  });
   it("preserves conditional attendance in server explanation after restoring a saved in-person selection", async () => {
     const summary = "4명의 시간 조건이 맞지만 장소·이동 조건은 미확인이라 실제 대면 참석 여부는 미확정입니다.";
     const view = mount({ ...ready, public_status: "CONFIRMED", capabilities: disabled });

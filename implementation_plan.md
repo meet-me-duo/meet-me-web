@@ -1,3 +1,15 @@
+## 2026-11-04 별도 작업 — Issue #82 추천 variant의 가능한 이름 표시
+
+- [x] 새 클라우드 환경에서 최신 develop `07ecea198e619d602de39ac920d8c69b3298b4fc`를 ff-only 확인하고 `feature/recommendation-participant-names`로 분리했다. 초기 체크아웃과 원격 main은 `cfe3159df264fe517dd1c1f23c2bda754faa65ae`다.
+- [x] API 이름을 추천 카드·대안·실제 일정 선택에 연결했다. 시간 조건 일치와 장소·이동 미확정을 유지하며 제외 명단을 불참 확정으로 표현하지 않는다. 누락 필드는 빈 명단으로 처리한다.
+- [x] 새 UI 회귀 RED6→GREEN10 및 Panel 통합35, 전체 단위84파일/920개와 lint를 확인했다.
+- [x] 로컬 native OpenAPI의 새 이름 필드·제외 설명만 동기화하고 공식 타입 생성·api:check·typecheck·lint·정식 build를 통과했다.
+- [x] 고정 빌드 전체 Chromium636개는633 PASS/2 FAIL/기존1 SKIP이며 추천42개는 모두 PASS다. 첫 전체631 PASS/4 FAIL/기존1 SKIP와 빌드 갱신 시점의 재로딩 오류도 보존했다.
+- [x] 고정 빌드 실패는 저장 입력 조회의 로그인 초기화 timeout과 랜딩 opacity timeout이다. 두 사례 단독2 PASS, 동일 사례 baseline20 PASS/feature20 PASS, 관련 소스·fixture11개 byte-identical을 확인했다. 원인 재현과 환경/baseline 귀속은 미확정이며 전체 검사를 clean pass로 보고하지 않는다. 원본 JSON·DOM·로그·빌드 지문·재검증 trace를 인계한다.
+- [x] `[USER/AGENT]` 사용자의 후속 승인으로 commit·feature push·develop Draft PR·정확한 최종 head의 원격 CI 확인까지 범위를 확장했다. 기존 Issue를 검색한 뒤 이번 목적의 [Issue #82](https://github.com/meet-me-duo/meet-me-web/issues/82)를 연결했다.
+- [ ] `[AGENT]` 커밋 이후 원격 head와 Draft PR·CI 완료 여부를 확인하고 PR 본문에 결과를 기록한다. 커밋 시점 Commit/PR: 동일 커밋 예정.
+- `[USER/SHARED]` merge·auto-merge·main 릴리스·운영 배포는 승인 범위 밖이다. 운영 데이터·비밀 값·실제 유료 AI/지도는 사용하지 않는다.
+
 ## 2026-11-04 현재 — #77 모임 상단 제출 집계 표시
 
 - [x] 사용자 Web 재개 요청을 확인하고 기존 Issue #77·feature/issue-77-room-submission-progress를 이어간다. main66913ac/develop881925a 및 보류 PR51을 확인했다.

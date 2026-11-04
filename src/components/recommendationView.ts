@@ -7,6 +7,7 @@ export interface RecommendationVariantView {
   totalParticipants: number;
   meetingMode: "IN_PERSON" | "REMOTE";
   place: string | null;
+  availableParticipantNames?: string[];
   excludedParticipantNames?: string[];
   attendanceConfirmed?: boolean;
   summary?: string;

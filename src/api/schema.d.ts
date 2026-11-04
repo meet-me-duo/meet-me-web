@@ -1761,10 +1761,12 @@ export interface components {
             partial_attendance: boolean;
             /** @description 대면 대표 지역; 온라인은 null */
             place: components["schemas"]["CandidatePlaceResponse"] | null;
-            /** @description 고정 분석 배치에서 이 조합에 참석하지 않는 참여자의 공개 이름; 전원 참석은 빈 배열 */
+            /** @description 고정 분석 배치에서 이 조합에 포함되지 않은 참여자의 공개 이름; 불참 확정이나 제외 사유를 뜻하지 않음; 전원 참석은 빈 배열 */
             excluded_participant_names?: string[];
             /** @description false이면 시간만 일치하고 장소·이동 충족 및 실제 참석은 미확정; 주최자 확정 후에도 유지 */
             attendance_confirmed?: boolean;
+            /** @description 고정 분석 배치에서 이 조합에 포함된 참여자의 공개 이름; 동명이인은 각각 유지; attendance_confirmed=false이면 시간만 일치하고 실제 참석은 미확정 */
+            available_participant_names?: string[];
         };
         /** @description 동명 기록을 구분하는 공개 선택 정보 */
         GuestRecordResponse: {

@@ -78,6 +78,26 @@ resource "aws_cloudfront_distribution" "web" {
     origin_id                = "web-s3"
     origin_access_control_id = aws_cloudfront_origin_access_control.web.id
   }
+  origin {
+    domain_name = "api.${var.domain_name}"
+    origin_id   = "room-preview-api"
+    origin_path = ""
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "https-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
+    }
+  }
+  ordered_cache_behavior {
+    path_pattern               = "/rooms/*"
+    target_origin_id           = "room-preview-api"
+    viewer_protocol_policy     = "redirect-to-https"
+    allowed_methods            = ["GET", "HEAD"]
+    cached_methods             = ["GET", "HEAD"]
+    cache_policy_id            = data.aws_cloudfront_cache_policy.caching_disabled.id
+    response_headers_policy_id = data.aws_cloudfront_response_headers_policy.security.id
+  }
   default_cache_behavior {
     target_origin_id           = "web-s3"
     viewer_protocol_policy     = "redirect-to-https"
@@ -98,6 +118,13 @@ resource "aws_cloudfront_distribution" "web" {
     response_code         = 200
     response_page_path    = "/index.html"
     error_caching_min_ttl = 0
+  }
+  dynamic "custom_error_response" {
+    for_each = toset(["500", "502", "503", "504"])
+    content {
+      error_code            = tonumber(custom_error_response.value)
+      error_caching_min_ttl = 0
+    }
   }
   restrictions {
     geo_restriction {

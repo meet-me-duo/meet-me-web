@@ -1,4 +1,17 @@
-## 2026-11-04 현재 작업 — 모임별 공유 링크 제목 (Draft PR 게시 준비)
+## 2026-11-04 현재 — 승인된 미리보기 운영 반영
+
+- [x] 사용자가 Web #81·Server #211 병합, 정상 develop→main 승격·운영 배포와 CloudFront `/rooms/*` 전환을 승인했다. 별도 실험 호출 예산은 사용하지 않는다.
+- [x] Web #81은 사용자의 병합으로 develop `29eed5edac2fc78d8018181ef636b7ae48e4e56b`에 통합됐다. main 승격 PR #84와 통합 CI를 확인 중이다. 참여자 이름 PR #83·Server #214는 포함하지 않는다.
+- [x] 실제 배포판 alias·ETag·S3 origin·API DNS/TLS·FREE/ACTIVE 구독을 읽기 전용으로 확인했다. 기존 설정과 복귀 경로를 비공개 작업 문맥에 보존했다.
+- [x] 고정 API HTTPS origin, 빈 origin path, GET/HEAD 우선 경로, CachingDisabled와 5xx 오류 TTL 0을 Terraform에 선언했다. IAM·OIDC·보호·WAF는 변경하지 않는다.
+- [x] Terraform 1.14.8의 fmt -check·backend 없는 init·validate와 git diff --check를 통과했다. 실운영 plan/apply는 실행하지 않았다. Linux hash 한 줄 자동 추가는 원복해 기존 lockfile을 보존했다.
+- [ ] 좁은 인프라 PR을 통합하고 최종 HEAD 검사를 확인한다. Commit/PR: 동일 커밋 예정.
+- [ ] 자산 보존 Web 배포 → Server 배포·outbound 확인 → 최신 ETag 조건의 CloudFront 적용·Deployed 확인·`/rooms/*` 무효화 → 읽기 전용 검증을 완료한다.
+- [ ] 실제 SHAs·digest·검증 한계와 복귀 상태를 확인한 뒤 참여자 이름 작업자에게 배포 순서를 넘긴다.
+
+최종 갱신: 2026-11-04 UTC. 아래는 구현·게시 준비 당시의 기록이며 현재 승인·운영 상태는 이 절과 실제 PR/workflow 결과를 따른다.
+
+## 2026-11-04 구현 기록 — 모임별 공유 링크 제목 (Draft PR 게시 준비)
 
 - [x] `[AGENT]` 실제 origin remote 확인, 깨끗한 develop ff-only 갱신 후 `07ecea1`에서 `feature/room-preview-title` 생성. 기존 work 브랜치와 사용자 작업 보존, Server Draft PR #208 사용·변경 없음.
 - [x] `[AGENT]` 기존 `/rooms/{inviteCode}`와 공개 `purpose`를 사용해 제목/OG/canonical을 제공하는 서버 HTML adapter와 Web 탭 제목 구현. 홈페이지 제목 유지, 이미지·추가 개인 데이터·migration·새 URL 없음.

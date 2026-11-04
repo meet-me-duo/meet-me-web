@@ -18,8 +18,8 @@ const ownText = "합성 본인 입력\n이번 주 저녁 가능";
 
 function option(id = optionId, rank: number | null = 1, day = "08"): RecommendationOption {
   return { option_id: id, rank, summary: "합성 가능한 시간", time_range: { start_at: `2026-10-${day}T01:00:00Z`, end_at: `2026-10-${day}T05:00:00Z` }, variants: [
-    { variant_id: local, meeting_mode: "IN_PERSON", attendance_count: 4, total_participants: 4, partial_attendance: false, place: { display_name: "강남", latitude: null, longitude: null } },
-    { variant_id: online, meeting_mode: "REMOTE", attendance_count: 3, total_participants: 4, partial_attendance: true, place: null },
+    { variant_id: local, meeting_mode: "IN_PERSON", attendance_count: 4, total_participants: 4, partial_attendance: false, available_participant_names: ["합성 하나", "합성 둘", "동명", "동명"], excluded_participant_names: [], place: { display_name: "강남", latitude: null, longitude: null } },
+    { variant_id: online, meeting_mode: "REMOTE", attendance_count: 3, total_participants: 4, partial_attendance: true, available_participant_names: ["합성 셋", "합성 넷", "합성 다섯"], excluded_participant_names: ["동명"], place: null },
   ] };
 }
 async function fixture(page: Page, baseURL: string, options: { count?: number; role?: "HOST" | "MEMBER"; protocol?: string; failure?: 409 | 503; precise?: boolean } = {}) {
@@ -113,8 +113,13 @@ for (const width of [1440, 390, 320]) test.describe(`native recommendation ${wid
   });
   test("keyboard return restores focus and keeps native boundaries accessible without horizontal overflow", async ({ page, baseURL }) => {
     const mock = await fixture(page, baseURL!); await page.goto(`/rooms/${code}`);
+    await expect(page.getByRole("article")).toContainText("참석 가능 · 합성 하나 님, 합성 둘 님, 동명 님, 동명 님");
+    await expect(page.getByRole("article")).toContainText("참석 가능 · 합성 셋 님, 합성 넷 님, 합성 다섯 님");
+    await page.getByRole("radio", { name: /온라인/ }).check();
     const choice = page.getByRole("button", { name: "이 시간 선택" }); await choice.focus(); await page.keyboard.press("Enter"); await page.getByRole("button", { name: "선택한 시간 확정하기" }).click();
     await expect(page.getByRole("heading", { name: /실제 일정 선택/ })).toBeFocused();
+    await expect(page.locator(".actual-time-form")).toContainText("참석 가능 · 합성 셋 님, 합성 넷 님, 합성 다섯 님");
+    await expect(page.locator(".actual-time-form")).not.toContainText("합성 하나");
     const back = page.getByRole("button", { name: "추천안으로 돌아가기" }); await back.focus(); await page.keyboard.press("Enter"); await expect(choice).toBeFocused();
     expect((await choice.boundingBox())?.height).toBeGreaterThanOrEqual(44);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

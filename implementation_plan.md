@@ -1,3 +1,18 @@
+## 2026-11-04 현재 작업 — 모임별 공유 링크 제목 (Draft PR 게시 준비)
+
+- [x] `[AGENT]` 실제 origin remote 확인, 깨끗한 develop ff-only 갱신 후 `07ecea1`에서 `feature/room-preview-title` 생성. 기존 work 브랜치와 사용자 작업 보존, Server Draft PR #208 사용·변경 없음.
+- [x] `[AGENT]` 기존 `/rooms/{inviteCode}`와 공개 `purpose`를 사용해 제목/OG/canonical을 제공하는 서버 HTML adapter와 Web 탭 제목 구현. 홈페이지 제목 유지, 이미지·추가 개인 데이터·migration·새 URL 없음.
+- [x] `[AGENT]` 고정 HTTPS `/index.html`, 요청 헤더 미전파, redirect 금지, 256KiB streaming 제한과 전체 3초 deadline, no-store 및 중첩 SPA/누락·삭제·이름 조회 장애 fallback 테스트 준비. shell 장애는503으로 구분.
+- [x] `[AGENT]` Web 자산 보존 변경과 CloudFront CachingDisabled/모든 TTL0 ordered behavior·전환/복귀 계획 문서화. Nginx는 기존 HTTPS 전체 proxy 사용.
+- [x] `[AGENT]` 최종 Web 단위 925/925, 집중 9/9, api:check·lint·typecheck·build·evidence preflight 3개 통과. 시스템 Chromium 151에서 desktop/mobile E2E 635 PASS / 1 SKIP 및 evidence 6 PASS다. 다운로드 대상 Chromium 153은 네트워크 정책 403으로 설치하지 못했다. 이전 전체 실행의 운영 화면 1개 실패는 단독 6/6 및 최종 전체 925/925 재실행에서 통과했다.
+- [x] `[AGENT]` 독립 코드·테스트 리뷰 P1/P2 0. 임시 브라우저 config 삭제, git diff --check 통과. CloudFront/실제 Kakao 및 운영 통합 검증은 미실행이며 서버 전체 검사 결과는 서버 진행 문서에서 별도 기록한다.
+- [x] `[AGENT]` 서버의 ktlintCheck·assemble·test는 2,736 PASS / 17 SKIP / 실패·오류 0으로 완료됐다. 깨끗한 서버 develop 기준에서 최초 Python 실패 대상 34개 메서드 모두 PASS, AR15·AR16·AR24와 credential-refresh는 기준·feature 양쪽에서 순차 PASS다. Compose 실패 표시는 연결 명령 종료 코드의 귀속 오류였으며 기준·feature 모두 종료 코드 0으로 정정했다. 최초 timeout은 같은 기준 소스의 제한된 동시 부하에서도 재현했다.
+- [ ] `[SHARED]` 수정하지 않은 Nginx runtime 검사는 기준에서도 config 권한·localhost 프록시 403으로 미통과다. 현재 feature의 전체 Python 424개·Node 전체 415개는 후속 재실행하지 않았다. ARM64·원격 CI·운영 outbound/CloudFront·실제 Kakao 검증도 미실행이며 전체 CI·배포 준비 완료로 표시하지 않는다. 상세 결과와 제약은 [배포 문서](docs/DEPLOYMENT.md)의 모임별 링크 제목 절을 따른다.
+- [x] `[USER/AGENT]` 사용자가 두 feature 브랜치 push·develop 대상 Draft PR 생성·정확 HEAD 원격 CI 확인을 명시 승인했다. 새 Issue를 필수로 요구하거나 번호를 만들지 않는다. 병합·auto-merge·운영 배포·CloudFront 적용은 승인 범위 밖이다.
+- [ ] `[AGENT]` 검토된 변경을 로컬 commit/push하고 각 Draft PR의 정확 HEAD CI를 확인한다. Commit/PR: 동일 커밋 예정 / 게시 후 확인.
+
+최종 갱신: 2026-11-04 UTC. Commit/PR: 동일 커밋 예정. 원격 게시 및 CI 결과는 실제 Git/PR 기록에서 확인한다. 일회성 추적 `.tdd` JSON/임시 스크립트는 만들지 않는다.
+
 ## 2026-11-04 현재 — #77 모임 상단 제출 집계 표시
 
 - [x] 사용자 Web 재개 요청을 확인하고 기존 Issue #77·feature/issue-77-room-submission-progress를 이어간다. main66913ac/develop881925a 및 보류 PR51을 확인했다.

@@ -26,6 +26,7 @@ import { getSession, getSessionVersion } from "../auth/session";
 import GuestAccessPanel from "../components/GuestAccessPanel";
 import { ReviewPrompt } from "../features/review/ReviewPrompt";
 import { roomLink } from "../utils/roomLink";
+import { useRoomTitle } from "../utils/useRoomTitle";
 
 const UNAPPLIED_REASON_MESSAGES: Record<string, string> = {
   UNSUPPORTED_TRAVEL_CONSTRAINT: "이동 조건은 현재 계산할 수 없어 충족 여부를 확인하지 못했어요. 시간 조건은 별도로 계산했어요.",
@@ -83,6 +84,9 @@ export default function RoomPage() {
       return false;
     },
   });
+  const titleRoom = roomQuery.data;
+  const titleUnavailable = roomQuery.error instanceof ApiError && [401, 403, 404].includes(roomQuery.error.status);
+  useRoomTitle(titleRoom?.invite_code === inviteCode && !titleUnavailable && accessFailure?.inviteCode !== inviteCode ? titleRoom.purpose : undefined);
   const epoch = accessEpoch.current;
   const setRoom = (room: Room) => {
     if (deniedRoom.current === inviteCode || epoch !== accessEpoch.current) return;

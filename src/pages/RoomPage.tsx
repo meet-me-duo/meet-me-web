@@ -9,6 +9,7 @@ import AnalysisRecoveryPanel from "../components/AnalysisRecoveryPanel";
 import ClarificationPanel from "../components/ClarificationPanel";
 import SubmissionCheckPanel from "../components/SubmissionCheckPanel";
 import { AnalysisLoading } from "../components/AnalysisLoading";
+import { RoomRetentionNotice } from "../components/RoomRetentionNotice";
 import { RoomCloseConfirmation } from "../components/RoomCloseConfirmation";
 import { RecommendationsPanel, RECOMMENDATION_PROTOCOL } from "../components/RecommendationsPanel";
 import { formatRecommendationRange, recommendationTimeZoneLabel } from "../utils/recommendationTime";
@@ -161,7 +162,7 @@ export default function RoomPage() {
   const preSubmit = room.submission_protocol === "PRE_SUBMIT_V1" || room.submission_protocol === "PRE_SUBMIT_V2";
   const showEditor = room.public_status === "COLLECTING" && (!correctionOpen(room) || room.capabilities?.can_edit_own_submission);
 
-  if (!room.viewer.joined) return <div className="form-page page-width narrow">{room.collection_status === "CLOSED" ? <><h1>입력이 마감된 모임이에요</h1><p>{room.purpose}</p></> : <h1>{room.purpose}</h1>}<GuestAccessPanel room={room} roomKey={`${inviteCode}:auth:${authVersion}:access:${epoch}`} onJoined={joined => { if (!mounted.current || deniedRoom.current === inviteCode || epoch !== accessEpoch.current || currentAccess.current.inviteCode !== inviteCode || currentAccess.current.authVersion !== authVersion || getSessionVersion() !== authVersion) return; setRoom(joined); }} onVerified={restoreVerifiedGuest} /></div>;
+  if (!room.viewer.joined) return <div className="form-page page-width narrow">{room.collection_status === "CLOSED" ? <><h1>입력이 마감된 모임이에요</h1><p>{room.purpose}</p></> : <h1>{room.purpose}</h1>}<RoomRetentionNotice expiresAt={room.expires_at} /><GuestAccessPanel room={room} roomKey={`${inviteCode}:auth:${authVersion}:access:${epoch}`} onJoined={joined => { if (!mounted.current || deniedRoom.current === inviteCode || epoch !== accessEpoch.current || currentAccess.current.inviteCode !== inviteCode || currentAccess.current.authVersion !== authVersion || getSessionVersion() !== authVersion) return; setRoom(joined); }} onVerified={restoreVerifiedGuest} /></div>;
 
   if (!accountSession && room.viewer.role === "HOST") return <div className="room-page page-width"><RoomHeader room={room} /><LoginGate returnTo={`/rooms/${inviteCode}`} /><p className="privacy-note">주최자 기능은 로그인 계정으로 만든 모임에서 사용할 수 있어요.</p></div>;
 
@@ -220,7 +221,7 @@ function SavedSubmissionPanel({ room, onAccessDenied }: { room: Room; onAccessDe
 
 function RoomHeader({ room }: { room: Room }) {
   const participantId = "participant_id" in room.viewer && typeof room.viewer.participant_id === "string" ? room.viewer.participant_id : null;
-  return <section className="room-header glass-card"><div><span className="room-kicker">{room.viewer.role === "HOST" ? "내가 만든 모임" : `${room.viewer.display_name}님이 참여한 모임`}</span><h1>{room.purpose}</h1><p>{formatDate(room.search_start_date)}부터 {formatDate(room.search_end_date)} 전까지 · {room.meeting_mode === "REMOTE" ? "비대면" : room.meeting_mode === "IN_PERSON" ? "대면" : "대면·비대면 모두"}</p>{participantId && <p className="field-hint guest-record-notice">내 참여 기록 번호: <strong>{participantId}</strong><br />다른 기기에서 같은 이름의 기록을 구분할 때 사용해요. 번호만으로 기존 원문을 읽을 수는 없어요.</p>}</div><CopyRoomLink room={room} /></section>;
+  return <section className="room-header glass-card"><div><span className="room-kicker">{room.viewer.role === "HOST" ? "내가 만든 모임" : `${room.viewer.display_name}님이 참여한 모임`}</span><h1>{room.purpose}</h1><p>{formatDate(room.search_start_date)}부터 {formatDate(room.search_end_date)} 전까지 · {room.meeting_mode === "REMOTE" ? "비대면" : room.meeting_mode === "IN_PERSON" ? "대면" : "대면·비대면 모두"}</p><RoomRetentionNotice expiresAt={room.expires_at} />{participantId && <p className="field-hint guest-record-notice">내 참여 기록 번호: <strong>{participantId}</strong><br />다른 기기에서 같은 이름의 기록을 구분할 때 사용해요. 번호만으로 기존 원문을 읽을 수는 없어요.</p>}</div><CopyRoomLink room={room} /></section>;
 }
 
 function RecoveryActions({ room, onRoomChanged, onAccessDenied, blocked = false }: { room: Room; onRoomChanged: (room: Room) => void; onAccessDenied: (error: ApiError) => void; blocked?: boolean }) {

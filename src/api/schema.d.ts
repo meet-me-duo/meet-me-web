@@ -1030,6 +1030,12 @@ export interface components {
             submission_protocol?: "LEGACY" | "PRE_SUBMIT_V1" | "PRE_SUBMIT_V2";
             /** @description 리뷰 API 계약 지원 힌트. 참여·확정 여부와 claim이 최종 권한을 판정하며, 누락은 미지원 */
             review_prompt_supported?: boolean;
+            /**
+             * Format: date-time
+             * @description 실제 저장된 방 생성 시각부터 30×24시간 후인 UTC 정리 기준 시각. 상태·개인 숨김과 무관하며 정확한 물리 삭제 실행 시각을 보장하지 않음
+             * @example 2026-11-30T12:00:00Z
+             */
+            expires_at: string;
         };
         /** @description 현재 브라우저 세션의 방 참여 상태 */
         ViewerParticipationResponse: {

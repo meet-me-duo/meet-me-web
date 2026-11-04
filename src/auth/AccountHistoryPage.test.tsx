@@ -23,7 +23,9 @@ describe("account-based room history", () => {
     expect(get).toHaveBeenCalledWith({}, undefined, expect.any(AbortSignal));
     expect(screen.getByRole("status")).toHaveTextContent("전체 · 불러온 모임 2개");
     expect(screen.getByText(/모임 생성일 기준 · 한국 시간/)).toBeInTheDocument();
-    expect(screen.getAllByText("정리 예정")).toHaveLength(2);
+    expect(screen.queryByText("정리 예정")).not.toBeInTheDocument();
+    expect(document.querySelector(".account-history-created")).toHaveTextContent("생성 2026. 10. 28.");
+    expect(screen.getAllByText(/생성/).length).toBeGreaterThan(0);
     expect(screen.getByRole("link", { name: /내 주최 모임/ })).toHaveAttribute("href", `/rooms/${"a".repeat(22)}`);
     expect(screen.queryByRole("button", { name: "더 보기" })).not.toBeInTheDocument();
   });
@@ -113,10 +115,11 @@ describe("account-only hiding", () => {
     const pending = deferred<void>();
     const get = vi.spyOn(api, "getAccountRooms").mockResolvedValueOnce(body([row("a", "숨길 모임"), row("b", "다른 모임", "MEMBER")])).mockResolvedValue(body([row("b", "다른 모임", "MEMBER")]));
     const hide = vi.spyOn(api, "hideAccountRoom").mockReturnValue(pending.promise);
-    mount(); const button = await screen.findByRole("button", { name: "숨길 모임 목록에서 숨기기" });
-    act(() => { fireEvent.click(button); fireEvent.click(button); });
+    mount(); const button = await screen.findByRole("button", { name: "숨길 모임 내 목록에서 삭제" });
+    fireEvent.click(button);
+    act(() => { fireEvent.click(screen.getByRole("button", { name: "내 목록에서 삭제" })); fireEvent.click(screen.getByRole("button", { name: "내 목록에서 삭제" })); });
     expect(hide).toHaveBeenCalledTimes(1); expect(hide).toHaveBeenCalledWith("a".repeat(22));
-    expect(screen.getByRole("button", { name: "다른 모임 목록에서 숨기기" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "삭제 중…" })).toBeDisabled();
     await act(async () => pending.resolve());
     await waitFor(() => expect(screen.queryByRole("link", { name: /숨길 모임/ })).not.toBeInTheDocument());
     expect(await screen.findByRole("link", { name: /다른 모임/ })).toHaveAttribute("href", `/rooms/${"b".repeat(22)}`);
@@ -125,17 +128,19 @@ describe("account-only hiding", () => {
   it("keeps failed row and permits retry", async () => {
     vi.spyOn(api, "getAccountRooms").mockResolvedValue(body([row("a", "합성 모임")]));
     const hide = vi.spyOn(api, "hideAccountRoom").mockRejectedValue(new ApiError(503, { detail: "합성 일시 오류" }));
-    mount(); fireEvent.click(await screen.findByRole("button", { name: /목록에서 숨기기/ }));
+    mount(); fireEvent.click(await screen.findByRole("button", { name: /내 목록에서 삭제/ }));
+    fireEvent.click(screen.getByRole("button", { name: "내 목록에서 삭제" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("합성 일시 오류");
     expect(screen.getByRole("link", { name: /합성 모임/ })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /목록에서 숨기기/ }));
+    fireEvent.click(screen.getByRole("button", { name: "내 목록에서 삭제" }));
     await waitFor(() => expect(hide).toHaveBeenCalledTimes(2));
   });
   it("does not reset another mounted view after navigation", async () => {
     const pending = deferred<void>();
     const get = vi.spyOn(api, "getAccountRooms").mockResolvedValue(body([row("a", "합성 모임")]));
     vi.spyOn(api, "hideAccountRoom").mockReturnValue(pending.promise);
-    const view = mount(); fireEvent.click(await screen.findByRole("button", { name: /목록에서 숨기기/ }));
+    const view = mount(); fireEvent.click(await screen.findByRole("button", { name: /내 목록에서 삭제/ }));
+    fireEvent.click(screen.getByRole("button", { name: "내 목록에서 삭제" }));
     view.unmount(); await act(async () => pending.resolve()); expect(get).toHaveBeenCalledTimes(1);
   });
 });
@@ -145,7 +150,8 @@ describe("account-only hiding", () => {
     const pending = deferred<void>();
     const get = vi.spyOn(api, "getAccountRooms").mockResolvedValue(body([row("a", "계정 경계 모임")]));
     vi.spyOn(api, "hideAccountRoom").mockReturnValue(pending.promise);
-    mount(); fireEvent.click(await screen.findByRole("button", { name: /목록에서 숨기기/ }));
+    mount(); fireEvent.click(await screen.findByRole("button", { name: /내 목록에서 삭제/ }));
+    fireEvent.click(screen.getByRole("button", { name: "내 목록에서 삭제" }));
     epoch++; await act(async () => pending.resolve());
     expect(get).toHaveBeenCalledTimes(1);
   });
@@ -156,8 +162,25 @@ describe("account-only hiding", () => {
     const client = clients.at(-1)!;
     client.setQueryData(["account-rooms", { role: "HOST" }], { pages: [body([row("a", "숨길 캐시")])], pageParams: [undefined] });
     fireEvent.click(screen.getByRole("button", { name: "더 보기" })); await screen.findByRole("link", { name: /둘째 페이지/ });
-    fireEvent.click(screen.getByRole("button", { name: "첫 페이지 목록에서 숨기기" }));
+    fireEvent.click(screen.getByRole("button", { name: "첫 페이지 내 목록에서 삭제" }));
+    fireEvent.click(screen.getByRole("button", { name: "내 목록에서 삭제" }));
     await waitFor(() => expect(get).toHaveBeenCalledTimes(3));
     expect(get).toHaveBeenLastCalledWith({}, undefined, expect.any(AbortSignal));
     expect(client.getQueryData(["account-rooms", { role: "HOST" }])).toBeUndefined();
+  });
+
+  it("requires confirmation and restores focus after cancellation", async () => {
+    vi.spyOn(api, "getAccountRooms").mockResolvedValue(body([row("a", "주말 독서 모임")]));
+    const hide = vi.spyOn(api, "hideAccountRoom").mockResolvedValue(undefined);
+    mount(); const trigger = await screen.findByRole("button", {name:"주말 독서 모임 내 목록에서 삭제"});
+    fireEvent.click(trigger);expect(hide).not.toHaveBeenCalled();
+    const cancel = screen.getByRole("button", {name:"취소"});expect(cancel).toHaveFocus();
+    fireEvent.click(cancel);expect(screen.queryByRole("dialog")).not.toBeInTheDocument();expect(trigger).toHaveFocus();expect(hide).not.toHaveBeenCalled();
+  });
+
+  it("does not confirm an old account's selected row", async () => {
+    let epoch=1;vi.spyOn(session,"getSessionVersion").mockImplementation(()=>epoch);
+    vi.spyOn(api,"getAccountRooms").mockResolvedValue(body([row("a","주말 독서 모임")]));const hide=vi.spyOn(api,"hideAccountRoom").mockResolvedValue(undefined);
+    mount();fireEvent.click(await screen.findByRole("button",{name:"주말 독서 모임 내 목록에서 삭제"}));epoch++;
+    fireEvent.click(screen.getByRole("button",{name:"내 목록에서 삭제"}));expect(hide).not.toHaveBeenCalled();expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });

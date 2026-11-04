@@ -761,8 +761,13 @@ fieldset.field legend { margin-bottom: 9px; }
 /* The time editor has its own focused heading; avoid repeating the results heading. */
 .results-section:has(.actual-time-form) > .section-heading { display: none; }
 
-@media (min-width: 768px) {
-  .account-history-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 16px; }
-  .account-history-item > .account-history-room, .account-history-item > dl { grid-column: 1; }
-  .account-history-item > button { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
-}
+/* Keep the role with the title and the personal-list action in its own corner. */
+.account-history-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; align-items: start; }
+.account-history-item > .account-history-room { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 0; }
+.account-history-item .account-history-role { border: 0; padding: 0; border-radius: 0; font-size: .75rem; color: #64748b; }
+.account-history-item > .account-history-created { grid-column: 1 / -1; margin: 2px 0 0; font-size: .75rem; color: #64748b; line-height: 1.6; }
+.account-history-item > .account-room-delete-trigger { grid-column: 2; grid-row: 1; align-self: start; min-width: 44px; min-height: 44px; padding: 8px; border: 0; border-radius: 8px; background: transparent; gap: 4px; font-size: .75rem; color: #b91c1c; box-shadow: none; }
+.account-history-item > .account-room-delete-trigger:hover:not(:disabled) { background: #fef2f2; }
+.account-room-delete-purpose { margin-bottom: 16px; }
+.room-retention-hint { color: #64748b; font-size: .75rem; }
+.account-history-item .account-history-room strong { max-width: 100%; overflow-wrap: anywhere; word-break: keep-all; }

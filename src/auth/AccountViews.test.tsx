@@ -21,13 +21,14 @@ describe("account entry and archive without guest claim UI", () => {
     expect(screen.queryByRole("button", { name: /참여.*연결/ })).not.toBeInTheDocument();
     expect(screen.queryByText(/이 브라우저.*참여.*연결/)).not.toBeInTheDocument();
   });
-  it("renders account archive separately with expiry and links only returned records", async () => {
+  it("renders account archive with creation date and links only returned records", async () => {
     vi.spyOn(api, "getAccountRooms").mockResolvedValue({ rooms: [{ invite_code: "abcdefghijklmnopqrstuv", purpose: "내 방", created_at: "2026-10-17T00:00:00Z", expires_at: "2026-11-16T00:00:00Z" }] });
     mount(<AccountArchive />);
     expect(await screen.findByRole("heading", { name: "내가 만든 모임" })).toBeInTheDocument();
     expect(await screen.findByRole("link", { name: /내 방/ })).toHaveAttribute("href", "/rooms/abcdefghijklmnopqrstuv");
-    expect(screen.getByText(/정리 예정/)).toBeInTheDocument();
-    expect(screen.getByText(/30일/)).toBeInTheDocument();
+    expect(screen.queryByText(/정리 예정/)).not.toBeInTheDocument();
+    expect(screen.getByText(/^생성 /)).toBeInTheDocument();
+    expect(screen.getByText("모임은 생성일로부터 30일 후 자동 정리 대상이 돼요.")).toBeInTheDocument();
   });
   it("does not show cached archive after authorization denial", async () => {
     vi.spyOn(api, "getAccountRooms").mockRejectedValue(new ApiError(401, { code: "AUTH_REQUIRED" }));

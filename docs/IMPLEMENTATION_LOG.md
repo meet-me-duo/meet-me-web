@@ -1,5 +1,25 @@
 # Implementation log
 
+## 2026-11-03 — PR75 상세 보관 만료의 실제 생성 계약 연결
+
+서버 ec0865cc00745b8780560565d04dd4c9774222f5의 실제 생성 OpenAPI 원문 SHA25603043ac4658ba676bad0eed6015937ebb5f4801bf9e303666ba9cb4a0de04a4e를 검증했다. 기존 웹 서식/키순서를 보존한 snapshot은 서버 원문과 전체 JSON 의미가 같고, 의미 변경은 RoomResponse.expires_at/required 두 곳뿐이다. generated schema의 required/non-null string에 연결했으며 임시 수동 타입은 제거했다. 구 서버 읽기 alias만 안전하게 optional 처리한다. 자세한 근거는 [계약 대조](verification/issue-74-room-retention-contract.json)와 [검증 기록](verification/issue-74-delete-confirmation.md)에 남긴다.
+
+목록 cache와 무관한 상세 D-day·미참여 게스트·직접 링크/새로고침·계정 경계·잘못된 날짜 미표시를 최종 검증했다. 보관 만료 기준과 물리 삭제 실행 시점을 구분한다. 서버 운영 완료 신호 전 Web 병합/배포는 보류하고 기존 Draft PR75의 commit/push·정확 head CI까지만 진행한다. 서버 코드·운영 API/모델 호출·Linear 재시도는 없다. 아래 예비 계약 대기 설명은 당시 이력이다.
+
+최종 로컬 unit873/82files·browser599PASS/기존skip1/retry0/flaky0/errors0·preview18·evidence6·preflight3·API/lint/typecheck/build PASS. desktop1440/mobile390/mobile320의 새 캡처24장과 캡처 흐름3PASS를 확인했다. 독립 검토가 실제 계약·소스150/dist12 지문 일치·캡처24장 전체를 확인했으며 새 P1/P2는 없다. 실제 운영 OAuth/서버/모델/실기기 검증은 이번 범위가 아니다. 정확 push head CI는 후속 PR 기록에서 확인하며 서버 운영 완료 신호 전 Web 병합·배포를 보류한다.
+
+---
+
+## 2026-11-03 — PR75 독립 cloud 복구와 상세 보관 만료 계약 예비 연결
+
+원격 PR75 Draft/open·feature/74-account-room-delete-confirm·head13d3d192와 CI41631317269 성공을 재조회하고 새 독립 환경에서 복구했다. 보존 코드 baseline unit861/API/lint/typecheck/build/preflight3·관련 browser24·preview18·evidence6을 새로 검증하고 320/390/1440px 삭제 모달·오류·pending·성공 캡처를 새로 생성했다.
+
+이후 서버 담당의 예정 계약인 공통 RoomResponse.expires_at(required/non-null UTC, 저장된 생성 시각+30×24시간의 보관 만료 기준)을 부모가 전달했다. 실제 생성 OpenAPI와 서버 SHA는 아직 대기 중이다. Web은 상세 응답의 expires_at만 사용하고 계정 목록 cache 의존을 제거했다. 비참여 게스트·직접 링크·새로고침·계정 경계도 표시하며 날짜 누락·오류는 추정하지 않는다. 자동 정리 D-N/자동 정리 예정은 물리 삭제 실행 시각을 약속하지 않는다. legacy 목록 문구도 생성일 기준으로 정정했다. API snapshot/생성 schema는 아직 바꾸지 않았고 임시 읽기 타입임을 코드와 검증 문서에 명시했다.
+
+예비 전체 unit873/API/lint/typecheck/build PASS, 일반 browser32·최종 시계 경계2 PASS 및 독립 관련37 PASS다. 시계 설치 직후 자정 도달/초기 로딩 pause 하네스 실패와 정정은 별도로 보존한다. 아직 최종 aggregate·최종 snapshot 대조·최종 독립 리뷰·정확 head CI가 아니다. 원격 push·서버 변경·병합·배포·운영/모델 호출은 없다. Linear 갱신 거부 뒤 재시도하지 않았다. 상세는 [검증 기록](verification/issue-74-delete-confirmation.md)을 따른다.
+
+---
+
 ## 2026-11-03 — 본인 입력 관리와 수동 마감 버튼 간소화 (cloud 로컬)
 
 최신 develop11d2c51(main9bdea4f와 동일 tree)에서 독립
@@ -675,3 +695,7 @@ API 계약15개 RED8FAIL/7PASS→GREEN15PASS, 전체 unit825PASS, 관련 desktop
 ## 2026-11-03 내 입력·세로 액션 독립 릴리스 (#68)
 
 하단 제목/원문 라벨 중복을 정리하고 수정·조건부 붉은 마감을 세로 배치했다. 사용자 게시·병합·Web 배포 승인으로 별도 feature에서 준비하며 숨김 #69와 보류 #51은 제외한다. 최종 로컬 전체 단위836, 브라우저575+skip1, evidence6, preview18, preflight3 및 API/lint/typecheck/build PASS. 상세: `docs/verification/issue-68-input-actions.md`.
+
+## 2026-11-03 내 모임 카드 삭제 확인 (#74)
+
+목록 삭제를 작은우상단쓰레기통+삭제로정리하고역할/생성일정보와분리했다. 본인목록만삭제·되돌릴수없음을확인모달에명시하며취소/키보드/focus복원·중복/계정경계를보호한다. 정리일은목록에서제거하고생성일은작은KST날짜로유지한다. 상세D-day는실제목록날짜cache가있는경우만표시하며RoomResponse날짜필드부재에따른직접진입/새로고침/비로그인제한을배포전에보고했다. API/서버정책변경없음. 검증/별도리뷰/지원범위: `docs/verification/issue-74-delete-confirmation.md`.

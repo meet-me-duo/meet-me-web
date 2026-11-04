@@ -1,16 +1,17 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { CalendarDays, Search } from "lucide-react";
+import { CalendarDays, Search, Trash2 } from "lucide-react";
 import { api, ApiError, errorMessage } from "../api/client";
 import { decodeAccountRooms, type AccountRoomFilters, type AccountRoomRole } from "../api/accountRooms";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { getSessionVersion } from "./session";
-import { formatDateTime } from "../utils/time";
+import { AccountRoomDeleteDialog } from "../components/AccountRoomDeleteDialog";
 
 type Draft = { role: "ALL" | AccountRoomRole; from: string; to: string; query: string };
 const initial: Draft = { role: "ALL", from: "", to: "", query: "" };
+const creationDate = new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeZone: "Asia/Seoul" });
 const roles = { ALL: "전체", HOST: "주최", MEMBER: "참여" };
 function validDate(value: string) {
   if (!value) return true;
@@ -24,10 +25,14 @@ export function AccountArchive() {
   const mounted = useRef(false);
   const busy = useRef(false);
   const [hiding, setHiding] = useState<string | null>(null);
+  const heading = useRef<HTMLHeadingElement>(null);
+  const [selected, setSelected] = useState<{ code: string; purpose: string; epoch: number; trigger: HTMLButtonElement } | null>(null);
   const [hideError, setHideError] = useState<string | null>(null);
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
-  const hide = async (code: string) => {
-    if (busy.current) return;
+  const hide = async () => {
+    if (busy.current || !selected) return;
+    if (selected.epoch !== getSessionVersion()) { setSelected(null); return; }
+    const code = selected.code;
     busy.current = true;
     const epoch = getSessionVersion();
     setHiding(code); setHideError(null);
@@ -35,6 +40,7 @@ export function AccountArchive() {
       await api.hideAccountRoom(code);
       if (!mounted.current || epoch !== getSessionVersion()) return;
       await queryClient.resetQueries({ queryKey: ["account-rooms"] });
+      if (mounted.current && epoch === getSessionVersion()) setSelected(null);
     } catch (error) {
       if (mounted.current && epoch === getSessionVersion()) setHideError(errorMessage(error));
     } finally {
@@ -78,12 +84,12 @@ export function AccountArchive() {
     if (JSON.stringify(next) === JSON.stringify(applied)) void query.refetch({ cancelRefetch: false }); else setApplied(next);
   };
 
-  if (first?.kind === "legacy" && !denied) return <section className="page-width narrow account-card"><h1>내가 만든 모임</h1><p>현재 서버는 본인이 주최한 모임 목록만 지원해요. 참여 모임과 필터는 서버 업데이트 후 사용할 수 있어요.</p><p>방은 생성 또는 마감 후 30일이 지나면 정리돼요.</p>
-    {rows.length === 0 ? <p>아직 만든 모임이 없어요.</p> : <ul className="archive-list">{rows.map(row => <li key={row.invite_code}><Link to={`/rooms/${encodeURIComponent(row.invite_code)}`}>{row.purpose}</Link><small>정리 예정 {formatDateTime(row.expires_at)}</small></li>)}</ul>}
+  if (first?.kind === "legacy" && !denied) return <section className="page-width narrow account-card"><h1>내가 만든 모임</h1><p>현재 서버는 본인이 주최한 모임 목록만 지원해요. 참여 모임과 필터는 서버 업데이트 후 사용할 수 있어요.</p><p>모임은 생성일로부터 30일 후 자동 정리 대상이 돼요.</p>
+    {rows.length === 0 ? <p>아직 만든 모임이 없어요.</p> : <ul className="archive-list">{rows.map(row => <li key={row.invite_code}><Link to={`/rooms/${encodeURIComponent(row.invite_code)}`}>{row.purpose}</Link><small>생성 {creationDate.format(new Date(row.created_at))}</small></li>)}</ul>}
     {query.isError && <p className="alert error" role="alert">{errorMessage(query.error)}</p>}<Link className="button primary" to="/create">모임 만들기</Link></section>;
 
   return <section className="page-width account-card account-history" aria-labelledby="account-history-title">
-    <div className="account-history-heading"><div><h1 id="account-history-title">내 모임</h1></div><Link className="button primary" to="/create">모임 만들기</Link></div>
+    <div className="account-history-heading"><div><h1 id="account-history-title" ref={heading} tabIndex={-1}>내 모임</h1></div><Link className="button primary" to="/create">모임 만들기</Link></div>
     {denied ? <div className="alert error" role="alert">{errorMessage(query.error)}</div> : <>
       {(supportsHistory || first?.kind === "history") && <details className="account-history-filters ui-card"><summary>모임 찾기 · 검색 및 필터</summary><CardContent><form onSubmit={submit}>
         <fieldset className="account-history-roles"><legend>모임 구분</legend>{(Object.keys(roles) as (keyof typeof roles)[]).map(role => <label key={role}><input type="radio" name="history-role" value={role} checked={draft.role === role} onChange={() => setDraft(current => ({ ...current, role }))} />{roles[role]}</label>)}</fieldset>
@@ -97,15 +103,15 @@ export function AccountArchive() {
       {query.isPending ? <p role="status">모임을 불러오는 중이에요.</p> : query.isError && !query.isFetchNextPageError ? <div className="alert error" role="alert"><p>{errorMessage(query.error)}</p><Button variant="secondary" onClick={() => void query.refetch()}>목록 다시 불러오기</Button></div> : <>
         <p className="account-history-summary" role="status">{roles[applied.role]} · 불러온 모임 {rows.length}개{applied.query ? ` · 이름 “${applied.query}”` : ""}</p>
         {rows.length === 0 ? <Card className="account-history-empty"><h2>조건에 맞는 모임이 없어요</h2><p>조회 조건을 바꾸거나 새 모임을 만들어 보세요.</p></Card> : <ul className="account-history-list">{rows.map(row => <li key={row.invite_code}><Card className="account-history-item">
-          <Link className="account-history-room" to={`/rooms/${encodeURIComponent(row.invite_code)}`}><strong>{row.purpose}</strong><span className="account-history-role">{roles[row.role]}</span></Link>
-          <dl><div><dt>생성</dt><dd><time dateTime={row.created_at}>{formatDateTime(row.created_at)}</time></dd></div><div><dt>정리 예정</dt><dd><time dateTime={row.expires_at}>{formatDateTime(row.expires_at)}</time></dd></div></dl>
-          <Button variant="secondary" disabled={hiding !== null} aria-label={`${row.purpose} 목록에서 숨기기`} onClick={() => void hide(row.invite_code)}>{hiding === row.invite_code ? "숨기는 중…" : "목록에서 숨기기"}</Button>
+          <Link className="account-history-room" to={`/rooms/${encodeURIComponent(row.invite_code)}`}><span className="account-history-role">{roles[row.role]}</span><strong>{row.purpose}</strong></Link>
+          <p className="account-history-created">생성 <time dateTime={row.created_at}>{creationDate.format(new Date(row.created_at))}</time></p>
+          <Button variant="danger-outline" className="account-room-delete-trigger" disabled={hiding !== null} aria-label={`${row.purpose} 내 목록에서 삭제`} title="내 목록에서 삭제" onClick={event => { setHideError(null); setSelected({ code: row.invite_code, purpose: row.purpose, epoch: getSessionVersion(), trigger: event.currentTarget }); }}><Trash2 size={16} aria-hidden="true" /><span>삭제</span></Button>
         </Card></li>)}</ul>}
         {query.isFetchNextPageError && <div className="alert error" role="alert">{errorMessage(query.error)}</div>}
         {query.hasNextPage && <Button className="account-history-more" variant="secondary" disabled={query.isFetchingNextPage} onClick={() => void query.fetchNextPage({ cancelRefetch: false })}>{query.isFetchingNextPage ? "추가 모임을 불러오는 중…" : query.isFetchNextPageError ? "다음 모임 다시 불러오기" : "더 보기"}</Button>}
       </>}
     </>}
-    {hideError && <p role="alert" className="alert error">{hideError}</p>}
-    <p className="field-hint">모임은 생성일로부터 30일 동안 목록에 표시돼요. 숨기기는 내 목록에만 적용되며, 다른 참여자나 모임 링크에는 영향을 주지 않아요.</p>
+    {selected && !denied && <AccountRoomDeleteDialog purpose={selected.purpose} pending={hiding !== null} error={hideError} returnFocusTo={selected.trigger} fallbackFocus={heading} onCancel={() => { if (!busy.current) { setSelected(null); setHideError(null); } }} onConfirm={() => void hide()} />}
+    <p className="field-hint">모임은 생성일로부터 30일 동안 목록에 표시돼요.</p>
   </section>;
 }

@@ -41,6 +41,9 @@ for (const width of [320, 390, 1440]) {
         const donut = header.getByRole("img", { name: target === null ? "입력 마감 · 2명 제출, 목표 인원 없음" : "입력 마감 · 목표 4명 중 2명 제출" });
         const button = header.getByRole("button", { name: "초대 링크 복사" });
         await expect(donut).toBeVisible();
+        await expect(donut.locator("strong")).toHaveText(target === null ? "2명" : "2/4명");
+        if (target === null) await expect(donut.locator(".submission-progress-caption")).toHaveText("제출");
+        else await expect(donut.locator(".submission-progress-caption")).toHaveCount(0);
         await expect(header.locator("h1")).toHaveText(purpose);
         await expect(header.locator(".room-retention-hint")).toBeVisible();
         await expect(page.locator(".thinking-orb")).toHaveAttribute("data-orb-state", "searching");

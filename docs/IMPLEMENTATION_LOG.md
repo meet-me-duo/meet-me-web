@@ -1,5 +1,9 @@
 # Implementation log
 
+## 2026-11-04 — #77 분수 caption 후속 수정
+
+사용자 결정 “분수일 때만 빼”에 따라 정상 목표 분수에서 작은 ‘제출’을 생략한다. 목표 없는 수치 아래 ‘제출’과 접근성 의미·stale/누락 안내는 유지한다. PR78의 develop 병합 뒤 main 승격 PR79는 Draft로 보존하고 별도 피처에서 최소 표시 조건·회귀 검사를 준비했다. 최종 후속 검사·독립 리뷰·정확 HEAD CI는 관련 PR에 별도로 기록한다. 이전 전체 검사 결과를 새 결과로 합산하지 않는다.
+
 ## 2026-11-04 — #77 실제 집계 명세 연결·게시 준비
 
 서버 PR207의 `18fd232fa7b94d8076ed7bfc71bb56f87703d8a4`에서 실제 생성 OpenAPI를 읽고 원문111847바이트의 Git blob·SHA256을 검증했다. 웹 snapshot은 전체 JSON 의미가 같고 변경은 RoomResponse 집계 property/required 두 곳뿐이다. 생성 DTO의 필수 number를 유지하며 구 서버 누락만 생성 타입 기반 읽기 alias에서 허용한다. 자세한 해시는 [검증 기록](verification/issue-77-submission-progress.md)에 보존한다.

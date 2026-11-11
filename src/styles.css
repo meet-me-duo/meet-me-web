@@ -733,14 +733,14 @@ fieldset.field legend { margin-bottom: 9px; }
 .recommendation-choices { max-width: none; }
 .recommendation-zone { margin-bottom: 14px; text-align: center; }
 .recommendation-choices .candidate-list { max-width: none; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-.recommendation-card { padding: 18px; box-shadow: none; }
+.recommendation-card { display: flex; flex-direction: column; padding: 18px; box-shadow: none; }
 .recommendation-card::before { display: none; }
 .recommendation-card h3 { margin: 0 0 12px; }
 .recommendation-card.is-selected { border-color: #0369a1; box-shadow: 0 0 0 1px #0369a1; background: #f0f9ff; }
 .recommendation-variants legend { font-size: .8rem; margin-bottom: 4px; }
 .recommendation-variant { padding: 10px 0; margin-block: 0 10px; border: 0; }
 .recommendation-variant:has(input:checked) { background: transparent; }
-.recommendation-card .candidate-meta { gap: 6px; font-size: .85rem; }
+.recommendation-card .candidate-meta { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; font-size: .85rem; }
 .recommendation-range { margin-block: 10px 0; font-size: .94rem; }
 .recommendation-select[aria-pressed="true"] { color: #075985; border-color: #0369a1; background: #e0f2fe; }
 .recommendation-continue { display: flex; margin: 18px auto 0; min-width: 224px; }
@@ -770,10 +770,25 @@ fieldset.field legend { margin-bottom: 9px; }
 }
 /* The card's native selection button also targets the surrounding card surface. */
 .recommendation-select { position: static; }
+.recommendation-card > .recommendation-select { margin-top: auto; }
 .recommendation-select::before { display: none; }
 .recommendation-select::after { position: absolute; inset: 0; content: ""; }
 .recommendation-card:has(.recommendation-select:focus-visible) { outline: 3px solid #0f172a; outline-offset: 3px; }
 .recommendation-variants:has(input) { position: relative; z-index: 1; }
+.recommendation-participants { margin-block: 4px 16px; padding-top: 12px; border-top: 1px solid #e2e8f0; }
+.recommendation-participants-heading { display: flex; flex-wrap: wrap; gap: 4px 8px; margin: 0 0 10px; color: #334155; font-size: .85rem; font-weight: 700; }
+.recommendation-participants-heading > span { color: #475569; font-size: .75rem; font-weight: 400; }
+.recommendation-participant-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; margin: 0; padding: 0; list-style: none; }
+.recommendation-participant-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.participant-status { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 100%; padding: 7px 10px; border: 1px solid transparent; border-radius: 10px; color: #1e293b; font-size: .85rem; line-height: 1.5; }
+.participant-status-label { display: inline-flex; flex: none; align-items: center; justify-content: flex-end; gap: 4px; min-width: 5rem; white-space: nowrap; font-size: .8rem; font-weight: 600; }
+.participant-status svg { flex: none; }
+.participant-status-available { background: #ecfdf5; border-color: #a7f3d0; }
+.participant-status-unavailable { background: #fff1f2; border-color: #fda4af; }
+.participant-status-unknown { background: #fffbeb; border-color: #fcd34d; }
+.recommendation-participants-hint { margin: 10px 0 0; color: #475569; font-size: .8rem; line-height: 1.6; }
+.recommendation-participants-toggle { z-index: 1; min-height: 44px; margin-top: 8px; gap: 6px; font-size: .8rem; }
+.recommendation-variant-group + .recommendation-variant-group { padding-top: 8px; border-top: 1px solid #e2e8f0; }
 /* The time editor has its own focused heading; avoid repeating the results heading. */
 .results-section:has(.actual-time-form) > .section-heading { display: none; }
 

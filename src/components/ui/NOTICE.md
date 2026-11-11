@@ -1,4 +1,4 @@
-Card and Button are adapted from shadcn/ui's React components:
+Card and Button, and the participant status badge structure, are adapted from shadcn/ui's React components:
 https://github.com/shadcn-ui/ui/tree/main/apps/v4/registry/new-york-v4/ui
 
 This project retains its existing global CSS. Tailwind utility classes have been

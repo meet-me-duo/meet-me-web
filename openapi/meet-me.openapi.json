@@ -232,6 +232,16 @@
           "required": true
         },
         "responses": {
+          "200": {
+            "description": "성공 여부만 반환; 기존 원문과 제출 버전은 반환하지 않음",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestReplacementResponse"
+                }
+              }
+            }
+          },
           "400": {
             "description": "잘못된 입력",
             "content": {
@@ -301,16 +311,6 @@
                 }
               }
             }
-          },
-          "200": {
-            "description": "성공 여부만 반환; 기존 원문과 제출 버전은 반환하지 않음",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/GuestReplacementResponse"
-                }
-              }
-            }
           }
         }
       }
@@ -353,11 +353,8 @@
               }
             }
           },
-          "500": {
-            "description": "방 생성에 필요한 내부 설정 사용 불가"
-          },
-          "401": {
-            "description": "로그인 필요",
+          "400": {
+            "description": "입력 검증 실패",
             "content": {
               "*/*": {
                 "schema": {
@@ -366,8 +363,8 @@
               }
             }
           },
-          "400": {
-            "description": "입력 검증 실패",
+          "401": {
+            "description": "로그인 필요",
             "content": {
               "*/*": {
                 "schema": {
@@ -385,6 +382,9 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "방 생성에 필요한 내부 설정 사용 불가"
           },
           "503": {
             "description": "요청 제한 저장소 사용 불가",
@@ -444,6 +444,16 @@
           "required": true
         },
         "responses": {
+          "200": {
+            "description": "새 revision, 취소 또는 동일 작업 재생",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClarificationAnswerResponse"
+                }
+              }
+            }
+          },
           "400": {
             "description": "입력 형식·선택·직접 원문 검증 실패",
             "content": {
@@ -513,16 +523,6 @@
                 }
               }
             }
-          },
-          "200": {
-            "description": "새 revision, 취소 또는 동일 작업 재생",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClarificationAnswerResponse"
-                }
-              }
-            }
           }
         }
       }
@@ -563,6 +563,16 @@
           "required": true
         },
         "responses": {
+          "202": {
+            "description": "저장 결과와 현재 snapshot. 확인 대기는 제출 완료 아님",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrecheckResponse"
+                }
+              }
+            }
+          },
           "400": {
             "description": "입력 계약 위반",
             "content": {
@@ -603,16 +613,6 @@
               }
             }
           },
-          "429": {
-            "description": "기존 제출 요청 제한 초과",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiProblemSchema"
-                }
-              }
-            }
-          },
           "409": {
             "description": "revision·멱등 키·protocol·마감 충돌",
             "content": {
@@ -623,12 +623,12 @@
               }
             }
           },
-          "202": {
-            "description": "저장 결과와 현재 snapshot. 확인 대기는 제출 완료 아님",
+          "429": {
+            "description": "기존 제출 요청 제한 초과",
             "content": {
-              "*/*": {
+              "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PrecheckResponse"
+                  "$ref": "#/components/schemas/ApiProblemSchema"
                 }
               }
             }
@@ -681,6 +681,16 @@
           "required": true
         },
         "responses": {
+          "202": {
+            "description": "새 execution 접수, 최초 outcome과 최신 snapshot 분리",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrecheckResponse"
+                }
+              }
+            }
+          },
           "400": {
             "description": "입력 계약 위반",
             "content": {
@@ -721,16 +731,6 @@
               }
             }
           },
-          "429": {
-            "description": "기존 제출 요청 제한 초과",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiProblemSchema"
-                }
-              }
-            }
-          },
           "409": {
             "description": "revision·멱등 키·protocol·마감 충돌",
             "content": {
@@ -741,12 +741,12 @@
               }
             }
           },
-          "202": {
-            "description": "새 execution 접수, 최초 outcome과 최신 snapshot 분리",
+          "429": {
+            "description": "기존 제출 요청 제한 초과",
             "content": {
-              "*/*": {
+              "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PrecheckResponse"
+                  "$ref": "#/components/schemas/ApiProblemSchema"
                 }
               }
             }
@@ -799,6 +799,16 @@
           "required": true
         },
         "responses": {
+          "200": {
+            "description": "취소 결과와 현재 snapshot",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrecheckResponse"
+                }
+              }
+            }
+          },
           "400": {
             "description": "입력 계약 위반",
             "content": {
@@ -839,16 +849,6 @@
               }
             }
           },
-          "429": {
-            "description": "기존 제출 요청 제한 초과",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiProblemSchema"
-                }
-              }
-            }
-          },
           "409": {
             "description": "revision·멱등 키·protocol·마감 충돌",
             "content": {
@@ -859,12 +859,12 @@
               }
             }
           },
-          "200": {
-            "description": "취소 결과와 현재 snapshot",
+          "429": {
+            "description": "기존 제출 요청 제한 초과",
             "content": {
-              "*/*": {
+              "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PrecheckResponse"
+                  "$ref": "#/components/schemas/ApiProblemSchema"
                 }
               }
             }
@@ -917,6 +917,16 @@
           "required": true
         },
         "responses": {
+          "202": {
+            "description": "파생 원문 저장과 재검사 접수",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrecheckResponse"
+                }
+              }
+            }
+          },
           "400": {
             "description": "입력 계약 위반",
             "content": {
@@ -957,16 +967,6 @@
               }
             }
           },
-          "429": {
-            "description": "기존 제출 요청 제한 초과",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiProblemSchema"
-                }
-              }
-            }
-          },
           "409": {
             "description": "revision·멱등 키·protocol·마감 충돌",
             "content": {
@@ -977,12 +977,12 @@
               }
             }
           },
-          "202": {
-            "description": "파생 원문 저장과 재검사 접수",
+          "429": {
+            "description": "기존 제출 요청 제한 초과",
             "content": {
-              "*/*": {
+              "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PrecheckResponse"
+                  "$ref": "#/components/schemas/ApiProblemSchema"
                 }
               }
             }
@@ -1632,12 +1632,32 @@
           "required": true
         },
         "responses": {
+          "200": {
+            "description": "기존 참여 반환",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomResponse"
+                }
+              }
+            }
+          },
           "201": {
             "description": "새 참여 생성",
             "content": {
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/RoomResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "입력 검증 실패",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblemSchema"
                 }
               }
             }
@@ -1652,28 +1672,8 @@
               }
             }
           },
-          "200": {
-            "description": "기존 참여 반환",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/RoomResponse"
-                }
-              }
-            }
-          },
           "403": {
             "description": "Origin 또는 게스트 참여 조회 증명 범위 부족",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiProblemSchema"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "입력 검증 실패",
             "content": {
               "*/*": {
                 "schema": {
@@ -1751,6 +1751,16 @@
           "required": true
         },
         "responses": {
+          "200": {
+            "description": "VERIFIED_GUEST는 본인 읽기, REPLACE_ONLY는 빈 입력으로 대체만 가능",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestReaccessResponse"
+                }
+              }
+            }
+          },
           "400": {
             "description": "잘못된 입력",
             "content": {
@@ -1817,16 +1827,6 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiProblemSchema"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "VERIFIED_GUEST는 본인 읽기, REPLACE_ONLY는 빈 입력으로 대체만 가능",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/GuestReaccessResponse"
                 }
               }
             }
@@ -2517,6 +2517,72 @@
         }
       }
     },
+    "/api/account/rooms/{inviteCode}/hide": {
+      "post": {
+        "tags": [
+          "room-ownership-controller"
+        ],
+        "summary": "본인 내 모임 목록에서 숨김",
+        "description": "로그인 계정의 HOST·MEMBER 관계만 숨긴다. 모임·참여·역할·제출·결과 접근과 타인 목록은 유지한다. body 없음. 반복 요청은 멱등이며 Web은 204 응답을 JSON으로 파싱하지 않는다.",
+        "operationId": "hideAccountRoom",
+        "parameters": [
+          {
+            "name": "inviteCode",
+            "in": "path",
+            "description": "본인이 참여한 모임의 초대 코드",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "본인 모임 숨김 완료 또는 이미 숨김. 응답 body 없음"
+          },
+          "401": {
+            "description": "로그인 계정 누락(ACCOUNT_REQUIRED) 또는 무효·만료 인증. guest cookie로 대체 불가",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblemSchema"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin 누락(ORIGIN_NOT_ALLOWED) 또는 불허 Origin. 기존 CORS 거부는 Problem JSON을 보장하지 않음",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblemSchema"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "타인 모임·없는/잘못된 코드·생성일부터 30일 초과를 동일하게 ROOM_NOT_FOUND 처리",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblemSchema"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "인증 검증 키 사용 불가",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiProblemSchema"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/rooms/{inviteCode}": {
       "get": {
         "tags": [
@@ -2612,6 +2678,16 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "본인에게만 공개하는 현재 미응답 질문",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClarificationListResponse"
+                }
+              }
+            }
+          },
           "400": {
             "description": "입력 형식·선택·직접 원문 검증 실패",
             "content": {
@@ -2681,16 +2757,6 @@
                 }
               }
             }
-          },
-          "200": {
-            "description": "본인에게만 공개하는 현재 미응답 질문",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClarificationListResponse"
-                }
-              }
-            }
           }
         }
       }
@@ -2721,6 +2787,16 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "private 현재 snapshot, 최초 저장 전 candidate null",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrecheckResponse"
+                }
+              }
+            }
+          },
           "400": {
             "description": "입력 계약 위반",
             "content": {
@@ -2761,16 +2837,6 @@
               }
             }
           },
-          "429": {
-            "description": "기존 제출 요청 제한 초과",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiProblemSchema"
-                }
-              }
-            }
-          },
           "409": {
             "description": "revision·멱등 키·protocol·마감 충돌",
             "content": {
@@ -2781,12 +2847,12 @@
               }
             }
           },
-          "200": {
-            "description": "private 현재 snapshot, 최초 저장 전 candidate null",
+          "429": {
+            "description": "기존 제출 요청 제한 초과",
             "content": {
-              "*/*": {
+              "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PrecheckResponse"
+                  "$ref": "#/components/schemas/ApiProblemSchema"
                 }
               }
             }
@@ -3129,6 +3195,16 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "공개 이름과 기록 번호만 반환",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestRecordsResponse"
+                }
+              }
+            }
+          },
           "400": {
             "description": "잘못된 입력",
             "content": {
@@ -3195,16 +3271,6 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiProblemSchema"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "공개 이름과 기록 번호만 반환",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/GuestRecordsResponse"
                 }
               }
             }
@@ -3409,6 +3475,16 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "원문 없는 현재 방 요약",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperatorRoomPageResponse"
+                }
+              }
+            }
+          },
           "400": {
             "description": "고정 형식의 잘못된 조회 조건",
             "content": {
@@ -3445,16 +3521,6 @@
               "application/problem+json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperatorProblemResponse"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "원문 없는 현재 방 요약",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/OperatorRoomPageResponse"
                 }
               }
             }
@@ -3506,16 +3572,6 @@
               }
             }
           },
-          "404": {
-            "description": "운영자 인가 후에도 조회 대상 없음",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OperatorProblemResponse"
-                }
-              }
-            }
-          },
           "400": {
             "description": "고정 형식의 잘못된 조회 조건",
             "content": {
@@ -3538,6 +3594,16 @@
           },
           "403": {
             "description": "기본 접근 거부 또는 명시적 운영자 allowlist 미포함",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperatorProblemResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "운영자 인가 후에도 조회 대상 없음",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3587,16 +3653,6 @@
               }
             }
           },
-          "404": {
-            "description": "운영자 인가 후에도 조회 대상 없음",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OperatorProblemResponse"
-                }
-              }
-            }
-          },
           "400": {
             "description": "고정 형식의 잘못된 조회 조건",
             "content": {
@@ -3619,6 +3675,16 @@
           },
           "403": {
             "description": "기본 접근 거부 또는 명시적 운영자 allowlist 미포함",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperatorProblemResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "운영자 인가 후에도 조회 대상 없음",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3910,72 +3976,6 @@
           }
         }
       }
-    },
-    "/api/account/rooms/{inviteCode}/hide": {
-      "post": {
-        "tags": [
-          "room-ownership-controller"
-        ],
-        "summary": "본인 내 모임 목록에서 숨김",
-        "description": "로그인 계정의 HOST·MEMBER 관계만 숨긴다. 모임·참여·역할·제출·결과 접근과 타인 목록은 유지한다. body 없음. 반복 요청은 멱등이며 Web은 204 응답을 JSON으로 파싱하지 않는다.",
-        "operationId": "hideAccountRoom",
-        "parameters": [
-          {
-            "name": "inviteCode",
-            "in": "path",
-            "description": "본인이 참여한 모임의 초대 코드",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "본인 모임 숨김 완료 또는 이미 숨김. 응답 body 없음"
-          },
-          "401": {
-            "description": "로그인 계정 누락(ACCOUNT_REQUIRED) 또는 무효·만료 인증. guest cookie로 대체 불가",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiProblemSchema"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Origin 누락(ORIGIN_NOT_ALLOWED) 또는 불허 Origin. 기존 CORS 거부는 Problem JSON을 보장하지 않음",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiProblemSchema"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "타인 모임·없는/잘못된 코드·생성일부터 30일 초과를 동일하게 ROOM_NOT_FOUND 처리",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiProblemSchema"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "인증 검증 키 사용 불가",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiProblemSchema"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -3995,10 +3995,26 @@
           "float": {
             "type": "boolean"
           },
+          "object": {
+            "type": "boolean"
+          },
           "container": {
             "type": "boolean"
           },
           "missingNode": {
+            "type": "boolean"
+          },
+          "string": {
+            "type": "boolean"
+          },
+          "integralNumber": {
+            "type": "boolean"
+          },
+          "textual": {
+            "type": "boolean",
+            "deprecated": true
+          },
+          "boolean": {
             "type": "boolean"
           },
           "number": {
@@ -4018,13 +4034,7 @@
               "STRING"
             ]
           },
-          "integralNumber": {
-            "type": "boolean"
-          },
           "valueNode": {
-            "type": "boolean"
-          },
-          "object": {
             "type": "boolean"
           },
           "pojo": {
@@ -4051,17 +4061,7 @@
           "bigInteger": {
             "type": "boolean"
           },
-          "textual": {
-            "type": "boolean",
-            "deprecated": true
-          },
-          "boolean": {
-            "type": "boolean"
-          },
           "binary": {
-            "type": "boolean"
-          },
-          "string": {
             "type": "boolean"
           },
           "embeddedValue": {
@@ -4434,6 +4434,12 @@
             "minLength": 22,
             "pattern": "^[A-Za-z0-9_-]{22}$"
           },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "실제 저장된 방 생성 시각부터 30×24시간 후인 UTC 정리 기준 시각. 상태·개인 숨김과 무관하며 정확한 물리 삭제 실행 시각을 보장하지 않음",
+            "example": "2026-11-30T12:00:00Z"
+          },
           "meeting_mode": {
             "type": "string",
             "description": "선호 모임 방식",
@@ -4473,6 +4479,13 @@
             ],
             "format": "int32",
             "description": "자동 마감 참여자 목표"
+          },
+          "submitted_participant_count": {
+            "type": "integer",
+            "format": "int32",
+            "description": "현재 최신 제출 버전이 존재하는 고유 참여자 수. 제출한 주최자·회원·게스트를 포함하며 수정·재참여·계정 연결·개인 목록 숨김으로 중복 집계하거나 제외하지 않음. 초안·제출 전 확인만 존재하면 제외하며 현재 수정 라운드의 재제출 수나 고정 분석 배치 인원이 아님",
+            "example": 0,
+            "minimum": 0
           },
           "submission_deadline": {
             "type": [
@@ -4599,19 +4612,6 @@
           "review_prompt_supported": {
             "type": "boolean",
             "description": "리뷰 API 계약 지원 힌트. 참여·확정 여부와 claim이 최종 권한을 판정하며, 누락은 미지원"
-          },
-          "expires_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "실제 저장된 방 생성 시각부터 30×24시간 후인 UTC 정리 기준 시각. 상태·개인 숨김과 무관하며 정확한 물리 삭제 실행 시각을 보장하지 않음",
-            "example": "2026-11-30T12:00:00Z"
-          },
-          "submitted_participant_count": {
-            "type": "integer",
-            "format": "int32",
-            "description": "현재 최신 제출 버전이 존재하는 고유 참여자 수. 제출한 주최자·회원·게스트를 포함하며 수정·재참여·계정 연결·개인 목록 숨김으로 중복 집계하거나 제외하지 않음. 초안·제출 전 확인만 존재하면 제외하며 현재 수정 라운드의 재제출 수나 고정 분석 배치 인원이 아님",
-            "example": 0,
-            "minimum": 0
           }
         },
         "required": [
@@ -5753,6 +5753,19 @@
           "confirm_early": {
             "type": "boolean",
             "description": "자동 조건 충족 전 조기 마감을 재확인했는지 여부"
+          },
+          "analysis_contract": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "선택 분석 계약. 생략/null은 서버 기본 정책(운영의 지원 가능한 자연어 모임은 V5), 명시 LEGACY는 기존 경로",
+            "enum": [
+              "LEGACY",
+              "DSL_APPROVED_TERMS_V3",
+              "DSL_CONTEXT_MODE_V4",
+              "DSL_STRUCTURAL_V5"
+            ]
           }
         }
       },
@@ -6019,6 +6032,36 @@
           "variants"
         ]
       },
+      "RecommendationParticipantStatusResponse": {
+        "type": "object",
+        "description": "고정 분석 배치의 한 참여자에 대한 전체 추천 시간 범위의 조건 판정",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "AVAILABLE은 지원 조건 충족, UNAVAILABLE은 확인된 조건 불일치, UNKNOWN은 미검증·해석 실패·누락·미지원·근거 부족",
+            "enum": [
+              "AVAILABLE",
+              "UNAVAILABLE",
+              "UNKNOWN"
+            ]
+          },
+          "participant_ref": {
+            "type": "string",
+            "description": "동일 analysis의 variant와 대안 페이지에서만 안정적인 공개 참조; 인증·조회 키나 다른 분석의 개인 식별자가 아님",
+            "example": "p1",
+            "pattern": "p[1-9][0-9]*"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "공개 표시 이름; 동명이인은 서로 다른 participant_ref로 구분"
+          }
+        },
+        "required": [
+          "display_name",
+          "participant_ref",
+          "status"
+        ]
+      },
       "RecommendationVariantResponse": {
         "type": "object",
         "description": "시간안의 방식·장소·참석 조합",
@@ -6069,7 +6112,7 @@
           },
           "excluded_participant_names": {
             "type": "array",
-            "description": "고정 분석 배치에서 이 조합에 참석하지 않는 참여자의 공개 이름; 전원 참석은 빈 배열",
+            "description": "고정 분석 배치에서 이 조합에 포함되지 않은 참여자의 공개 이름; 불참 확정이나 제외 사유를 뜻하지 않음; 전원 참석은 빈 배열",
             "items": {
               "type": "string"
             }
@@ -6077,6 +6120,20 @@
           "attendance_confirmed": {
             "type": "boolean",
             "description": "false이면 시간만 일치하고 장소·이동 충족 및 실제 참석은 미확정; 주최자 확정 후에도 유지"
+          },
+          "available_participant_names": {
+            "type": "array",
+            "description": "고정 분석 배치에서 이 조합에 포함된 참여자의 공개 이름; 동명이인은 각각 유지; attendance_confirmed=false이면 시간만 일치하고 실제 참석은 미확정",
+            "items": {
+              "type": "string"
+            }
+          },
+          "participant_statuses": {
+            "type": "array",
+            "description": "고정 분석 배치 전체 참여자의 variant별 상태; option 전체 time_range 기준이며 짧게 선택한 실제 시간으로 재판정하지 않음; 미제출자·배치 고정 이후 참여자는 미포함; 포함/제외 이름만으로 상태를 추정하지 않음; 구 서버에서는 필드 누락 가능",
+            "items": {
+              "$ref": "#/components/schemas/RecommendationParticipantStatusResponse"
+            }
           }
         },
         "required": [

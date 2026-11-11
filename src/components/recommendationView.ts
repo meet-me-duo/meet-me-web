@@ -1,4 +1,10 @@
 // Presentation values only. The server's native OpenAPI supplies the API contract.
+export interface RecommendationParticipantStatusView {
+  participantRef: string;
+  displayName: string;
+  status: "AVAILABLE" | "UNAVAILABLE" | "UNKNOWN";
+}
+
 export interface RecommendationVariantView {
   id: string;
   startAt: string;
@@ -10,6 +16,7 @@ export interface RecommendationVariantView {
   excludedParticipantNames?: string[];
   attendanceConfirmed?: boolean;
   summary?: string;
+  participantStatuses?: RecommendationParticipantStatusView[];
 }
 
 export interface RecommendationOptionView {

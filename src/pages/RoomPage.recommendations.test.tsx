@@ -80,6 +80,34 @@ async function refresh(view: ReturnType<typeof mount>, room: Room, primary: Reco
 }
 afterEach(() => { cleanup(); for (const client of clients.splice(0)) client.clear(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
+describe("native participant status response mapping", () => {
+  it("preserves the primary response's mode-specific statuses through choosing a variant", async () => {
+    const choice = option();
+    choice.variants[0] = { ...choice.variants[0]!, participant_statuses: [{ participant_ref: "p1", display_name: "합성 참가자", status: "UNKNOWN" }] };
+    choice.variants[1] = { ...choice.variants[1]!, participant_statuses: [{ participant_ref: "p1", display_name: "합성 참가자", status: "AVAILABLE" }] };
+    mount(ready, list([choice]));
+    const lists = await screen.findAllByRole("list", { name: "참가자별 가능 여부" });
+    expect(lists[0]).toHaveTextContent("합성 참가자확인 필요");
+    expect(lists[1]).toHaveTextContent("합성 참가자가능");
+    await chooseOnline();
+    expect(screen.getByRole("list", { name: "참가자별 가능 여부" })).toHaveTextContent("합성 참가자가능");
+    expect(screen.queryByText(/확인 필요: 일정이나 장소 조건/)).not.toBeInTheDocument();
+  });
+
+  it("keeps alternative-page statuses distinct from the primary recommendation", async () => {
+    const first = option();
+    first.variants = [{ ...first.variants[0]!, participant_statuses: [{ participant_ref: "p1", display_name: "합성 참가자", status: "AVAILABLE" }] }];
+    const alternative = option(o4, 4, "11");
+    alternative.variants = [{ ...alternative.variants[0]!, participant_statuses: [{ participant_ref: "p1", display_name: "합성 참가자", status: "UNAVAILABLE" }] }];
+    const view = mount(ready, list([first], { has_alternatives: true }));
+    view.alternatives.mockResolvedValue(list([alternative]));
+    fireEvent.click(await screen.findByRole("button", { name: "다른 가능한 시간 보기" }));
+    const heading = await screen.findByRole("heading", { name: "다른 가능한 시간 4" });
+    expect(heading.closest("article")).toHaveTextContent("합성 참가자불가");
+    expect(screen.getByRole("heading", { name: "추천안 1" }).closest("article")).toHaveTextContent("합성 참가자가능");
+  });
+});
+
 describe("#19 native protocol routing and recommendation presentation", () => {
   it("preserves conditional attendance in server explanation after restoring a saved in-person selection", async () => {
     const summary = "4명의 시간 조건이 맞지만 장소·이동 조건은 미확인이라 실제 대면 참석 여부는 미확정입니다.";

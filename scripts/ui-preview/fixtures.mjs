@@ -11,12 +11,14 @@ export const scenes = {
   history: ['내 모임', '/account/rooms'], empty: ['내 모임 · 빈 목록', '/account/rooms'], security: ['계정 메뉴·보안', '/account/security'],
   collecting: ['조건 입력', `/rooms/${code}`], checking: ['조건 확인 중', `/rooms/${code}`], saved: ['조건 제출 완료', `/rooms/${code}`],
   analyzing: ['분석 중', `/rooms/${code}`], ready: ['추천 시간 3개', `/rooms/${code}`], confirmed: ['확정 결과', `/rooms/${code}`],
+  participant_statuses: ['참가자별 가능·불가·확인 필요', `/rooms/${code}`], participant_status_modes: ['방식별 참가자 상태 비교', `/rooms/${code}`],
+  participant_status_many: ['참가자 7명 · 더보기와 접기', `/rooms/${code}`],
   review: ['결과 리뷰', `/rooms/${code}`], no_match: ['일치하는 시간 없음', `/rooms/${code}`], error: ['방 조회 실패', `/rooms/${code}`],
 };
 const raw = '화요일과 목요일 오후 7시부터 9시까지 온라인으로 가능해요.';
 export function fixture(scene) {
   let account = !['landing', 'login'].includes(scene);
-  let status = ({ analyzing: 'ANALYZING', ready: 'READY', confirmed: 'CONFIRMED', review: 'CONFIRMED', no_match: 'NO_MATCH' })[scene] ?? 'COLLECTING';
+  let status = ({ analyzing: 'ANALYZING', ready: 'READY', participant_statuses: 'READY', participant_status_modes: 'READY', participant_status_many: 'READY', confirmed: 'CONFIRMED', review: 'CONFIRMED', no_match: 'NO_MATCH' })[scene] ?? 'COLLECTING';
   let purpose = '함께 준비하는 주말 모임';
   let activeCode = code;
   let activeRole = "HOST";
@@ -36,6 +38,23 @@ export function fixture(scene) {
     time_range: { start_at: time(day, '10'), end_at: time(day, '12') },
     variants: [{ variant_id: variantId, meeting_mode: 'REMOTE', attendance_count: 4, total_participants: 4, partial_attendance: false, excluded_participants: [], place: null }],
   }));
+  if (['participant_statuses', 'participant_status_modes', 'participant_status_many'].includes(scene)) {
+    // Entirely fictional UI examples, unrelated to real A/B inputs.
+    const names = scene === 'participant_status_many' ? ['서윤', '도윤', '지우', '하린', '가람', '나래', '다온'] : ['서윤', '도윤', '지우', '하린'];
+    expectedParticipants = submittedParticipantCount = names.length;
+    for (const [index, option] of options.entries()) {
+      const variant = option.variants[0];
+      Object.assign(variant, { attendance_count: names.length, total_participants: names.length });
+      variant.participant_statuses = names.map((display_name, position) => ({ participant_ref: `p${position + 1}`, display_name, status: position < names.length - 1 || index === 0 ? 'AVAILABLE' : index === 1 ? 'UNAVAILABLE' : 'UNKNOWN' }));
+      variant.available_participant_names = variant.participant_statuses.filter(person => person.status === 'AVAILABLE').map(person => person.display_name);
+      if (index === 1) Object.assign(variant, { meeting_mode: 'IN_PERSON', attendance_count: names.length - 1, partial_attendance: true, excluded_participant_names: [names.at(-1)], place: { display_name: '합정역 근처', latitude: null, longitude: null } });
+      if (index === 2) Object.assign(variant, { meeting_mode: 'IN_PERSON', attendance_confirmed: false, summary: `${names.length}명의 시간이 맞지만 장소·이동 조건은 확인이 필요해요.` });
+    }
+    if (scene === 'participant_status_modes') {
+      options[0].variants = [options[1].variants[0], { ...options[0].variants[0], variant_id: '44444444-4444-4444-8444-444444444444' }];
+      options.splice(1);
+    }
+  }
   let result = { confirmed_at: now(), selection: { protocol: 'diverse-time-v1', analysis_id: id, option_id: options[0].option_id, variant_id: variantId, start_at: time(1, '10'), end_at: time(1, '11') },
     candidate: { candidate_id: null, plan_type: 'A', rank: 1, meeting_mode: 'REMOTE', attendance_count: 4, total_participants: 4, place: null, summary: '모두 함께할 수 있는 온라인 모임', time_ranges: [{ start_at: time(1, '10'), end_at: time(1, '11') }] } };
   const room = () => ({ invite_code: activeCode, purpose, meeting_mode: 'EITHER', time_zone_id: 'Asia/Seoul', search_start_date: date(0), search_end_date: date(7), search_range_source: 'HOST_SPECIFIED', expected_participants: expectedParticipants, submitted_participant_count: submittedParticipantCount, submission_deadline: deadline, manual_only: manualOnly,
@@ -70,10 +89,12 @@ export function fixture(scene) {
     }
     if (path === root + '/submission' && method === 'GET') return [404, { code: 'SUBMISSION_NOT_FOUND' }];
     if (path === root + '/close' && method === 'POST') { status = 'READY'; return [200, room()]; }
-    if (path === root + '/recommendations' && method === 'GET') return [200, { protocol: 'diverse-time-v1', analysis_id: id, state_version: 1, quality: 'COMPLETE', total_options: 3, options, has_alternatives: false, next_cursor: null }];
+    if (path === root + '/recommendations' && method === 'GET') return [200, { protocol: 'diverse-time-v1', analysis_id: id, state_version: 1, quality: 'COMPLETE', total_options: options.length, options, has_alternatives: false, next_cursor: null }];
     if (path.startsWith(root + '/recommendations/') && path.endsWith('/confirmation') && method === 'POST') {
-      if (!options.some(option => path.includes(option.option_id))) return [404, { detail: '미리보기 후보가 없어요.' }];
-      status = 'CONFIRMED'; result = { ...result, selection: { ...result.selection, ...body, option_id: path.split('/').at(-2) }, candidate: { ...result.candidate, time_ranges: [{ start_at: body.start_at, end_at: body.end_at }] } }; return [200, result];
+      const option = options.find(option => path.includes(option.option_id));
+      const variant = option?.variants.find(variant => variant.variant_id === body.variant_id);
+      if (!variant) return [404, { detail: '미리보기 후보가 없어요.' }];
+      status = 'CONFIRMED'; result = { ...result, selection: { ...result.selection, ...body, option_id: option.option_id }, candidate: { ...result.candidate, meeting_mode: variant.meeting_mode, attendance_count: variant.attendance_count, total_participants: variant.total_participants, attendance_confirmed: variant.attendance_confirmed ?? true, place: variant.place, summary: variant.summary ?? result.candidate.summary, time_ranges: [{ start_at: body.start_at, end_at: body.end_at }] } }; return [200, result];
     }
     if (path === root + '/result' && method === 'GET') return [200, result];
     if (path === root + '/candidates/unapplied-inputs' && method === 'GET') return [200, []];

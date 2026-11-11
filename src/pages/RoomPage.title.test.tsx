@@ -48,7 +48,8 @@ it.each([401, 403, 404])("clears a cached room name on access or deletion error 
   await waitFor(() => expect(document.title).toBe("Meet me - 가족 모임"));
   read.mockRejectedValue(new ApiError(status, { detail: "조회할 수 없는 모임" }));
   await act(async () => { await client.invalidateQueries({ queryKey: ["room", codeA] }); });
-  expect(document.title).toBe("Meet me — 스마트 일정 조율");
+  // React Query schedules observer notifications after the fetch promise settles.
+  await waitFor(() => expect(document.title).toBe("Meet me — 스마트 일정 조율"));
 });
 
 it("shows the second room after successful SPA navigation", async () => {

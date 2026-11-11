@@ -408,6 +408,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/account/rooms/{inviteCode}/hide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 본인 내 모임 목록에서 숨김
+         * @description 로그인 계정의 HOST·MEMBER 관계만 숨긴다. 모임·참여·역할·제출·결과 접근과 타인 목록은 유지한다. body 없음. 반복 요청은 멱등이며 Web은 204 응답을 JSON으로 파싱하지 않는다.
+         */
+        post: operations["hideAccountRoom"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rooms/{inviteCode}": {
         parameters: {
             query?: never;
@@ -683,26 +703,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/account/rooms/{inviteCode}/hide": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * 본인 내 모임 목록에서 숨김
-         * @description 로그인 계정의 HOST·MEMBER 관계만 숨긴다. 모임·참여·역할·제출·결과 접근과 타인 목록은 유지한다. body 없음. 반복 요청은 멱등이며 Web은 204 응답을 JSON으로 파싱하지 않는다.
-         */
-        post: operations["hideAccountRoom"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -712,14 +712,18 @@ export interface components {
             empty?: boolean;
             null?: boolean;
             float?: boolean;
+            object?: boolean;
             container?: boolean;
             missingNode?: boolean;
+            string?: boolean;
+            integralNumber?: boolean;
+            /** @deprecated */
+            textual?: boolean;
+            boolean?: boolean;
             number?: boolean;
             /** @enum {string} */
             nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
-            integralNumber?: boolean;
             valueNode?: boolean;
-            object?: boolean;
             pojo?: boolean;
             floatingPointNumber?: boolean;
             short?: boolean;
@@ -728,11 +732,7 @@ export interface components {
             double?: boolean;
             bigDecimal?: boolean;
             bigInteger?: boolean;
-            /** @deprecated */
-            textual?: boolean;
-            boolean?: boolean;
             binary?: boolean;
-            string?: boolean;
             embeddedValue?: boolean;
         };
         /** @description 현재 익명 참여자의 자연어 제출 또는 수정 요청 */
@@ -933,6 +933,12 @@ export interface components {
             /** @description 공개 방 초대 코드 */
             invite_code?: string;
             /**
+             * Format: date-time
+             * @description 실제 저장된 방 생성 시각부터 30×24시간 후인 UTC 정리 기준 시각. 상태·개인 숨김과 무관하며 정확한 물리 삭제 실행 시각을 보장하지 않음
+             * @example 2026-11-30T12:00:00Z
+             */
+            expires_at: string;
+            /**
              * @description 선호 모임 방식
              * @enum {string}
              */
@@ -962,6 +968,12 @@ export interface components {
              * @description 자동 마감 참여자 목표
              */
             expected_participants?: number | null;
+            /**
+             * Format: int32
+             * @description 현재 최신 제출 버전이 존재하는 고유 참여자 수. 제출한 주최자·회원·게스트를 포함하며 수정·재참여·계정 연결·개인 목록 숨김으로 중복 집계하거나 제외하지 않음. 초안·제출 전 확인만 존재하면 제외하며 현재 수정 라운드의 재제출 수나 고정 분석 배치 인원이 아님
+             * @example 0
+             */
+            submitted_participant_count: number;
             /**
              * Format: date-time
              * @description 제출 마감 절대 시각
@@ -1030,18 +1042,6 @@ export interface components {
             submission_protocol?: "LEGACY" | "PRE_SUBMIT_V1" | "PRE_SUBMIT_V2";
             /** @description 리뷰 API 계약 지원 힌트. 참여·확정 여부와 claim이 최종 권한을 판정하며, 누락은 미지원 */
             review_prompt_supported?: boolean;
-            /**
-             * Format: date-time
-             * @description 실제 저장된 방 생성 시각부터 30×24시간 후인 UTC 정리 기준 시각. 상태·개인 숨김과 무관하며 정확한 물리 삭제 실행 시각을 보장하지 않음
-             * @example 2026-11-30T12:00:00Z
-             */
-            expires_at: string;
-            /**
-             * Format: int32
-             * @description 현재 최신 제출 버전이 존재하는 고유 참여자 수. 제출한 주최자·회원·게스트를 포함하며 수정·재참여·계정 연결·개인 목록 숨김으로 중복 집계하거나 제외하지 않음. 초안·제출 전 확인만 존재하면 제외하며 현재 수정 라운드의 재제출 수나 고정 분석 배치 인원이 아님
-             * @example 0
-             */
-            submitted_participant_count: number;
         };
         /** @description 현재 브라우저 세션의 방 참여 상태 */
         ViewerParticipationResponse: {
@@ -1585,6 +1585,11 @@ export interface components {
         CloseRoomRequest: {
             /** @description 자동 조건 충족 전 조기 마감을 재확인했는지 여부 */
             confirm_early?: boolean;
+            /**
+             * @description 선택 분석 계약. 생략/null은 서버 기본 정책(운영의 지원 가능한 자연어 모임은 V5), 명시 LEGACY는 기존 경로
+             * @enum {string|null}
+             */
+            analysis_contract?: "LEGACY" | "DSL_APPROVED_TERMS_V3" | "DSL_CONTEXT_MODE_V4" | "DSL_STRUCTURAL_V5" | null;
         };
         /** @description 저장된 최신 입력을 다시 조율하는 명령. 저장만으로 분석하지 않음 */
         AnalyzeRevisionRequest: {
@@ -1733,6 +1738,21 @@ export interface components {
             /** @description 실제 지역 날짜와 양쪽 종료 경계를 보존한 시간 설명 */
             summary: string;
         };
+        /** @description 고정 분석 배치의 한 참여자에 대한 전체 추천 시간 범위의 조건 판정 */
+        RecommendationParticipantStatusResponse: {
+            /**
+             * @description AVAILABLE은 지원 조건 충족, UNAVAILABLE은 확인된 조건 불일치, UNKNOWN은 미검증·해석 실패·누락·미지원·근거 부족
+             * @enum {string}
+             */
+            status: "AVAILABLE" | "UNAVAILABLE" | "UNKNOWN";
+            /**
+             * @description 동일 analysis의 variant와 대안 페이지에서만 안정적인 공개 참조; 인증·조회 키나 다른 분석의 개인 식별자가 아님
+             * @example p1
+             */
+            participant_ref: string;
+            /** @description 공개 표시 이름; 동명이인은 서로 다른 participant_ref로 구분 */
+            display_name: string;
+        };
         /** @description 시간안의 방식·장소·참석 조합 */
         RecommendationVariantResponse: {
             /** @description 확인된 시간과 미확인 장소·이동 조건을 함께 설명; 타인의 원문은 비공개 */
@@ -1761,10 +1781,14 @@ export interface components {
             partial_attendance: boolean;
             /** @description 대면 대표 지역; 온라인은 null */
             place: components["schemas"]["CandidatePlaceResponse"] | null;
-            /** @description 고정 분석 배치에서 이 조합에 참석하지 않는 참여자의 공개 이름; 전원 참석은 빈 배열 */
+            /** @description 고정 분석 배치에서 이 조합에 포함되지 않은 참여자의 공개 이름; 불참 확정이나 제외 사유를 뜻하지 않음; 전원 참석은 빈 배열 */
             excluded_participant_names?: string[];
             /** @description false이면 시간만 일치하고 장소·이동 충족 및 실제 참석은 미확정; 주최자 확정 후에도 유지 */
             attendance_confirmed?: boolean;
+            /** @description 고정 분석 배치에서 이 조합에 포함된 참여자의 공개 이름; 동명이인은 각각 유지; attendance_confirmed=false이면 시간만 일치하고 실제 참석은 미확정 */
+            available_participant_names?: string[];
+            /** @description 고정 분석 배치 전체 참여자의 variant별 상태; option 전체 time_range 기준이며 짧게 선택한 실제 시간으로 재판정하지 않음; 미제출자·배치 고정 이후 참여자는 미포함; 포함/제외 이름만으로 상태를 추정하지 않음; 구 서버에서는 필드 누락 가능 */
+            participant_statuses?: components["schemas"]["RecommendationParticipantStatusResponse"][];
         };
         /** @description 동명 기록을 구분하는 공개 선택 정보 */
         GuestRecordResponse: {
@@ -4105,6 +4129,63 @@ export interface operations {
             };
         };
     };
+    hideAccountRoom: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description 본인이 참여한 모임의 초대 코드 */
+                inviteCode: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 본인 모임 숨김 완료 또는 이미 숨김. 응답 body 없음 */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 로그인 계정 누락(ACCOUNT_REQUIRED) 또는 무효·만료 인증. guest cookie로 대체 불가 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description Origin 누락(ORIGIN_NOT_ALLOWED) 또는 불허 Origin. 기존 CORS 거부는 Problem JSON을 보장하지 않음 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 타인 모임·없는/잘못된 코드·생성일부터 30일 초과를 동일하게 ROOM_NOT_FOUND 처리 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 인증 검증 키 사용 불가 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
     get_1: {
         parameters: {
             query?: never;
@@ -5097,63 +5178,6 @@ export interface operations {
             };
             /** @description 로그인 필요 */
             401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-            /** @description 인증 검증 키 사용 불가 */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-        };
-    };
-    hideAccountRoom: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description 본인이 참여한 모임의 초대 코드 */
-                inviteCode: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description 본인 모임 숨김 완료 또는 이미 숨김. 응답 body 없음 */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description 로그인 계정 누락(ACCOUNT_REQUIRED) 또는 무효·만료 인증. guest cookie로 대체 불가 */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-            /** @description Origin 누락(ORIGIN_NOT_ALLOWED) 또는 불허 Origin. 기존 CORS 거부는 Problem JSON을 보장하지 않음 */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-            /** @description 타인 모임·없는/잘못된 코드·생성일부터 30일 초과를 동일하게 ROOM_NOT_FOUND 처리 */
-            404: {
                 headers: {
                     [name: string]: unknown;
                 };

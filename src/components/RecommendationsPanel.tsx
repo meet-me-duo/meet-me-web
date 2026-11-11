@@ -16,6 +16,9 @@ function presentation(option: RecommendationOption, position: number) {
     meetingMode: variant.meeting_mode, place: variant.place?.display_name ?? null,
     excludedParticipantNames: variant.excluded_participant_names ?? [],
     attendanceConfirmed: variant.attendance_confirmed, summary: variant.summary,
+    participantStatuses: variant.participant_statuses?.map(participant => ({
+      participantRef: participant.participant_ref, displayName: participant.display_name, status: participant.status,
+    })),
   })) };
 }
 

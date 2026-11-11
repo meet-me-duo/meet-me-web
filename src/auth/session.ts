@@ -9,6 +9,7 @@ const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
 let session: AuthSession | null = null;
 let version = 0;
 let generation = 0;
+let profileRevision = 0;
 let restoring: Promise<Account | null> | null = null;
 const listeners = new Set<() => void>();
 function publish(next: AuthSession | null, status: SessionRestoreStatus = next ? "authenticated" : "anonymous") {
@@ -33,6 +34,7 @@ export function subscribeSession(listener: () => void): () => void { listeners.a
 export function restoreSession(): Promise<Account | null> {
   if (restoring) return restoring;
   const started = generation;
+  const startedProfile = profileRevision;
   const knownAccount = session !== null || getSessionRestoreStatus() === "expired";
   setSessionRestoreStatus("checking");
   for (const listener of listeners) listener();
@@ -43,7 +45,12 @@ export function restoreSession(): Promise<Account | null> {
       if (started !== generation) return null;
       const body: unknown = response.ok ? await response.json() : null;
       if (started !== generation) return null;
-      const next = validSession(body) ? body : null;
+      let next = validSession(body) ? body : null;
+      // A refresh begun before a confirmed profile save can carry the old name.
+      // Preserve only that name; tokens, expiry and capabilities still come from refresh.
+      if (next && startedProfile !== profileRevision && session?.account.id === next.account.id) {
+        next = { ...next, account: { ...next.account, displayName: session.account.displayName } };
+      }
       publish(next, next ? "authenticated" : response.status === 401 ? knownAccount ? "expired" : "anonymous" : "unavailable");
       return next?.account ?? null;
     } catch {
@@ -54,6 +61,25 @@ export function restoreSession(): Promise<Account | null> {
   restoring = work;
   void work.finally(() => { if (restoring === work) restoring = null; });
   return work;
+}
+
+export type ProfileUpdateOutcome = { status: "updated" | "saved_session_unavailable"; version: number } | { status: "stale" };
+
+/** PUT confirms the profile only. A normal cookie refresh supplies the new JWT. */
+export async function completeAccountProfileUpdate(account: Account, expectedVersion: number): Promise<ProfileUpdateOutcome> {
+  if (!session || session.account.id !== account.id || version !== expectedVersion) return { status: "stale" };
+  const started = generation;
+  profileRevision++;
+  publish({ ...session, account });
+  const previousRefresh = restoring;
+  if (previousRefresh) await previousRefresh;
+  if (started !== generation || session && (session.account.id !== account.id || version !== expectedVersion)) return { status: "stale" };
+  if (!session) return { status: "saved_session_unavailable", version };
+  // Do not join a refresh that started before the confirmed save.
+  if (restoring === previousRefresh) restoring = null;
+  const refreshed = await restoreSession();
+  if (started !== generation || refreshed && (refreshed.id !== account.id || version !== expectedVersion)) return { status: "stale" };
+  return { status: refreshed ? "updated" : "saved_session_unavailable", version };
 }
 export async function endSession(allDevices = false): Promise<void> {
   const token = getAccessToken();

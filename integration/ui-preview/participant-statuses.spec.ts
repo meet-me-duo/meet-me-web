@@ -72,7 +72,7 @@ test("mode-specific statuses stay with their variant instead of becoming radio l
   await expect(page.getByRole("list")).not.toContainText("불가");
 });
 
-test("long and duplicate names remain visible at 320px without horizontal overflow", async ({ page }) => {
+test("long and duplicate names retain full text with single-line ellipsis at 320px", async ({ page }, info) => {
   const name = "가나다라마바사아자차카타파하가나다라마바";
   await page.setViewportSize({ width: 320, height: 800 });
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -87,8 +87,22 @@ test("long and duplicate names remain visible at 320px without horizontal overfl
   });
   await page.goto("/__preview?scene=participant_statuses");
   await expect(page.getByText(name, { exact: true })).toHaveCount(6);
-  for (const row of await page.getByText(name, { exact: true }).all()) await expect(row).toBeVisible();
+  for (const row of await page.getByText(name, { exact: true }).all()) {
+    await expect(row).toBeVisible();
+    await expect(row).toHaveAttribute("title", name);
+    const text = await row.evaluate(element => ({ scroll: element.scrollWidth, width: element.clientWidth, whiteSpace: getComputedStyle(element).whiteSpace, overflow: getComputedStyle(element).textOverflow }));
+    expect(text.scroll).toBeGreaterThan(text.width);
+    expect(text.whiteSpace).toBe("nowrap");
+    expect(text.overflow).toBe("ellipsis");
+    await row.scrollIntoViewIfNeeded();
+    expect(await row.evaluate(element => {
+      const bounds = element.getBoundingClientRect();
+      const hit = document.elementFromPoint(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+      return hit === element || !!hit && element.contains(hit);
+    })).toBe(true);
+  }
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.locator(".recommendation-card").first().screenshot({ path: info.outputPath("participant-long-name-ellipsis.png") });
 });
 
 test("larger groups expand independently without selecting the card or hiding a pending-condition notice", async ({ page }, info) => {
@@ -128,4 +142,32 @@ test("larger groups expand independently without selecting the card or hiding a 
   await expect(page.getByRole("listitem").nth(6)).toHaveText("다온확인 필요");
   await page.getByRole("button", { name: "가능한 범위 전체 선택" }).click();
   await expect(page.getByRole("button", { name: "일정 확정", exact: true })).toBeEnabled();
+});
+
+test("participant name clicks select their card while disclosure, radio and keyboard controls remain independent", async ({ page }, info) => {
+  await page.setViewportSize(info.project.name === "desktop" ? { width: 1440, height: 1000 } : { width: 390, height: 844 });
+  await page.goto("/__preview?scene=participant_status_many");
+  const cards = page.locator(".recommendation-card");
+  const selection = (index: number) => cards.nth(index).getByRole("button", { name: "이 시간 선택" });
+  const firstName = cards.nth(0).locator(".recommendation-participant-name").first();
+  await firstName.scrollIntoViewIfNeeded();
+  const beforeNameClick = await page.evaluate(() => scrollY);
+  await firstName.click();
+  expect(await page.evaluate(() => scrollY)).toBe(beforeNameClick);
+  await expect(selection(0)).toHaveAttribute("aria-pressed", "true");
+  await expect(selection(0)).toBeFocused();
+  await expect(selection(2)).toHaveAttribute("aria-pressed", "false");
+  await cards.nth(2).getByRole("button", { name: "나머지 3명 더보기" }).click();
+  await expect(selection(2)).toHaveAttribute("aria-pressed", "false");
+  await expect(selection(0)).toHaveAttribute("aria-pressed", "true");
+  await cards.nth(2).locator(".recommendation-participant-name").last().click();
+  await expect(selection(2)).toHaveAttribute("aria-pressed", "true");
+  await expect(selection(2)).toBeFocused();
+  await expect(selection(0)).toHaveAttribute("aria-pressed", "false");
+  await selection(1).focus(); await page.keyboard.press("Enter");
+  await expect(selection(1)).toHaveAttribute("aria-pressed", "true");
+  await expect(selection(2)).toHaveAttribute("aria-pressed", "false");
+  await page.goto("/__preview?scene=participant_status_modes");
+  await page.getByRole("radio", { name: /온라인/ }).check();
+  await expect(page.getByRole("button", { name: "이 시간 선택" })).toHaveAttribute("aria-pressed", "false");
 });

@@ -39,6 +39,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Bearer Access Token 계정 조회 */
+        get: operations["me"];
+        /** 현재 로그인 계정의 표시 이름 변경 */
+        put: operations["updateMe"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rooms": {
         parameters: {
             query?: never;
@@ -666,23 +684,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/auth/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Bearer Access Token 계정 조회 */
-        get: operations["me"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/account/rooms": {
         parameters: {
             query?: never;
@@ -712,19 +713,14 @@ export interface components {
             empty?: boolean;
             null?: boolean;
             float?: boolean;
-            object?: boolean;
-            container?: boolean;
-            missingNode?: boolean;
-            string?: boolean;
-            integralNumber?: boolean;
-            /** @deprecated */
-            textual?: boolean;
-            boolean?: boolean;
             number?: boolean;
+            string?: boolean;
+            missingNode?: boolean;
             /** @enum {string} */
             nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
-            valueNode?: boolean;
+            object?: boolean;
             pojo?: boolean;
+            integralNumber?: boolean;
             floatingPointNumber?: boolean;
             short?: boolean;
             int?: boolean;
@@ -732,7 +728,12 @@ export interface components {
             double?: boolean;
             bigDecimal?: boolean;
             bigInteger?: boolean;
+            /** @deprecated */
+            textual?: boolean;
+            boolean?: boolean;
             binary?: boolean;
+            valueNode?: boolean;
+            container?: boolean;
             embeddedValue?: boolean;
         };
         /** @description 현재 익명 참여자의 자연어 제출 또는 수정 요청 */
@@ -852,6 +853,28 @@ export interface components {
         GuestReplacementResponse: {
             /** @description 대체 입력 저장 성공 */
             replaced?: boolean;
+        };
+        /** @description 본인 계정의 표시 이름 변경. 모임별 이름과 저장된 분석 결과는 별도 유지 */
+        UpdateAccountDisplayNameRequest: {
+            /**
+             * @description 앞뒤 공백 제거 후 Unicode code point 1~50자. 공백만 또는 제어문자 입력 불가
+             * @example 모임친구
+             */
+            displayName?: string;
+        };
+        /** @description 현재 계정의 화면 접근 권한. 실제 API 인가를 대체하지 않는다 */
+        AccountCapabilitiesResponse: {
+            /** @description 운영 조회가 활성화되고 현재 계정이 명시적 운영자 허용 목록에 포함된 경우 true */
+            canViewOperations?: boolean;
+        };
+        /** @description 로그인 계정. 이메일과 공급자 토큰은 포함하지 않는다 */
+        AccountResponse: {
+            /** @description 계정 UUID */
+            id?: string;
+            /** @description 계정 표시 이름 */
+            displayName?: string;
+            /** @description 현재 계정에 대해 서버가 확인한 화면 접근 권한 */
+            capabilities?: components["schemas"]["AccountCapabilitiesResponse"];
         };
         /** @description 로그인한 계정의 모임 방 생성 요청 */
         CreateRoomRequest: {
@@ -1628,20 +1651,6 @@ export interface components {
              * @description 이 요청이 소비한 라운드 UUID
              */
             revision_round_id?: string;
-        };
-        /** @description 현재 계정의 화면 접근 권한. 실제 API 인가를 대체하지 않는다 */
-        AccountCapabilitiesResponse: {
-            /** @description 운영 조회가 활성화되고 현재 계정이 명시적 운영자 허용 목록에 포함된 경우 true */
-            canViewOperations?: boolean;
-        };
-        /** @description 로그인 계정. 이메일과 공급자 토큰은 포함하지 않는다 */
-        AccountResponse: {
-            /** @description 계정 UUID */
-            id?: string;
-            /** @description 계정 표시 이름 */
-            displayName?: string;
-            /** @description 현재 계정에 대해 서버가 확인한 화면 접근 권한 */
-            capabilities?: components["schemas"]["AccountCapabilitiesResponse"];
         };
         /** @description 15분 Access Token. 브라우저 메모리에만 보관한다 */
         AuthResponse: {
@@ -2463,6 +2472,104 @@ export interface operations {
                 };
             };
             /** @description 검증 또는 시도 제한 저장소 사용 불가 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
+    me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 현재 계정 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AccountResponse"];
+                };
+            };
+            /** @description Access 누락/검증 실패 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 계정 저장소 또는 검증 키 사용 불가 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+        };
+    };
+    updateMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateAccountDisplayNameRequest"];
+            };
+        };
+        responses: {
+            /** @description 최신 계정 정보. 인증 토큰은 새로 발급하지 않음 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AccountResponse"];
+                };
+            };
+            /** @description 올바르지 않은 표시 이름 또는 요청 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 유효한 본인 계정 인증 없음 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 정확한 Origin 불일치 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiProblemSchema"];
+                };
+            };
+            /** @description 계정 저장소 사용 불가 */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -5088,44 +5195,6 @@ export interface operations {
                 };
             };
             /** @description 인증 공급자/저장소 사용 불가 */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-        };
-    };
-    me: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description 현재 계정 */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["AccountResponse"];
-                };
-            };
-            /** @description Access 누락/검증 실패 */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ApiProblemSchema"];
-                };
-            };
-            /** @description 검증 키 사용 불가 */
             503: {
                 headers: {
                     [name: string]: unknown;

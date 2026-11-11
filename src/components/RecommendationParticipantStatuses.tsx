@@ -22,7 +22,7 @@ export function RecommendationParticipantStatuses({ participants, notice }: { pa
       {visibleParticipants.map(participant => {
         const { label, Icon } = statusLabels[participant.status] ?? statusLabels.UNKNOWN;
         return <li key={participant.participantRef} data-slot="badge" className={`participant-status participant-status-${participant.status.toLowerCase()}`}>
-          <span className="recommendation-participant-name">{participant.displayName}</span>
+          <span className="recommendation-participant-name" title={participant.displayName}>{participant.displayName}</span>
           <span className="participant-status-label"><Icon size={14} aria-hidden="true" />{label}</span>
         </li>;
       })}

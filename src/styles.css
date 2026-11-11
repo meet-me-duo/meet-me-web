@@ -513,6 +513,28 @@ fieldset.field legend { margin-bottom: 9px; }
 .account-menu-panel { position: absolute; z-index: 30; top: calc(100% + 6px); right: 0; width: min(216px, calc(100vw - 32px)); padding: 6px; border: 1px solid var(--border); border-radius: 10px; background: white; box-shadow: var(--shadow); }
 .account-menu-item { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 8px 10px; border: 0; border-radius: 6px; background: transparent; color: #334155; font: inherit; text-align: left; cursor: pointer; }
 .account-menu-item:hover { background: #f1f5f9; }
+.nickname-dialog { width: min(460px, calc(100% - 32px)); }
+.nickname-dialog-content { position: relative; padding: 28px; }
+.nickname-close { position: absolute; top: 12px; right: 12px; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 8px; background: transparent; color: #64748b; cursor: pointer; }
+.nickname-close:hover:not(:disabled) { background: #f1f5f9; color: #1e293b; }
+.nickname-close:focus-visible { outline: 3px solid var(--sky-dark); outline-offset: 2px; }
+.nickname-dialog-icon { display: inline-grid; place-items: center; width: 44px; height: 44px; margin-bottom: 14px; border: 1px solid #bae6fd; border-radius: 12px; background: #f0f9ff; color: #0369a1; }
+.nickname-dialog h2 { margin: 0; color: #172033; font-size: 1.35rem; line-height: 1.5; }
+.nickname-description { margin: 6px 0 24px; color: #64748b; font-size: .9rem; line-height: 1.6; }
+.nickname-field { margin: 0; gap: 8px; }
+.nickname-field > span { font-size: .875rem; font-weight: 600; }
+.nickname-field input { min-height: 48px; padding-inline: 13px; font-size: 1rem; }
+.nickname-field-footer { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-top: 8px; font-size: .75rem; line-height: 1.6; }
+.nickname-field-hint, .nickname-count { color: #64748b; }
+.nickname-field-error { color: #b91c1c; }
+.nickname-count { flex: none; }
+.nickname-scope { display: flex; align-items: flex-start; gap: 7px; margin: 22px 0 0; padding: 12px; border-radius: 10px; background: #f8fafc; color: #475569; font-size: .8rem; line-height: 1.6; word-break: keep-all; }
+.nickname-scope svg { flex: none; margin-top: 2px; color: #64748b; }
+.nickname-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+.nickname-actions > .button { min-width: 88px; }
+.nickname-save-error { margin-top: 14px; font-size: .85rem; }
+.nickname-save-notice { position: fixed; z-index: 60; right: 24px; bottom: 24px; margin: 0; padding: 13px 18px; border: 1px solid #a7f3d0; border-radius: 12px; background: #ecfdf5; color: #065f46; font-size: .875rem; box-shadow: var(--shadow); }
+@media (max-width: 540px) { .nickname-dialog-content { padding: 24px 20px; } .nickname-actions > .button { flex: 1; } .nickname-save-notice { right: 16px; bottom: 16px; left: 16px; text-align: center; } }
 .account-logout-error { position: absolute; z-index: 31; top: calc(100% + 8px); right: 0; width: min(340px, calc(100vw - 32px)); margin: 0; font-size: .85rem; text-align: left; overflow-wrap: anywhere; }
 .account-security-dialog { width: min(440px, calc(100% - 32px)); max-height: calc(100dvh - 32px); padding: 0; border: 1px solid var(--border); border-radius: 16px; background: white; color: #172033; box-shadow: var(--shadow); overflow-y: auto; }
 .account-security-dialog::backdrop { background: rgba(15, 23, 42, .45); }
@@ -779,7 +801,7 @@ fieldset.field legend { margin-bottom: 9px; }
 .recommendation-participants-heading { display: flex; flex-wrap: wrap; gap: 4px 8px; margin: 0 0 10px; color: #334155; font-size: .85rem; font-weight: 700; }
 .recommendation-participants-heading > span { color: #475569; font-size: .75rem; font-weight: 400; }
 .recommendation-participant-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; margin: 0; padding: 0; list-style: none; }
-.recommendation-participant-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.recommendation-participant-name { position: relative; z-index: 1; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .participant-status { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 100%; padding: 7px 10px; border: 1px solid transparent; border-radius: 10px; color: #1e293b; font-size: .85rem; line-height: 1.5; }
 .participant-status-label { display: inline-flex; flex: none; align-items: center; justify-content: flex-end; gap: 4px; min-width: 5rem; white-space: nowrap; font-size: .8rem; font-weight: 600; }
 .participant-status svg { flex: none; }

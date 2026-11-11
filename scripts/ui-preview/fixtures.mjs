@@ -9,6 +9,7 @@ const date = days => new Date(Date.now() + days * 86400000).toISOString().slice(
 export const scenes = {
   landing: ['랜딩 · 비로그인', '/'], login: ['로그인', '/login'], create: ['모임 만들기 · 합성 계정', '/create'],
   history: ['내 모임', '/account/rooms'], empty: ['내 모임 · 빈 목록', '/account/rooms'], security: ['계정 메뉴·보안', '/account/security'],
+  nickname_edit: ['닉네임 변경 · 계정 메뉴', '/account/rooms'], nickname_error: ['닉네임 변경 · 저장 오류', '/account/rooms'],
   collecting: ['조건 입력', `/rooms/${code}`], checking: ['조건 확인 중', `/rooms/${code}`], saved: ['조건 제출 완료', `/rooms/${code}`],
   analyzing: ['분석 중', `/rooms/${code}`], ready: ['추천 시간 3개', `/rooms/${code}`], confirmed: ['확정 결과', `/rooms/${code}`],
   participant_statuses: ['참가자별 가능·불가·확인 필요', `/rooms/${code}`], participant_status_modes: ['방식별 참가자 상태 비교', `/rooms/${code}`],
@@ -18,6 +19,8 @@ export const scenes = {
 const raw = '화요일과 목요일 오후 7시부터 9시까지 온라인으로 가능해요.';
 export function fixture(scene) {
   let account = !['landing', 'login'].includes(scene);
+  let accountName = ['nickname_edit', 'nickname_error'].includes(scene) ? '서윤' : '합성 주최자';
+  const previewAccount = () => ({ id, displayName: accountName, capabilities: { canViewOperations: ['nickname_edit', 'nickname_error'].includes(scene) } });
   let status = ({ analyzing: 'ANALYZING', ready: 'READY', participant_statuses: 'READY', participant_status_modes: 'READY', participant_status_many: 'READY', confirmed: 'CONFIRMED', review: 'CONFIRMED', no_match: 'NO_MATCH' })[scene] ?? 'COLLECTING';
   let purpose = '함께 준비하는 주말 모임';
   let activeCode = code;
@@ -70,7 +73,13 @@ export function fixture(scene) {
     let path = url.pathname;
     const historyIndex = Array.from({ length: 5 }, (_, i) => i ? code.slice(0, -1) + i : code).findIndex(value => path === `/api/rooms/${value}` || path.startsWith(`/api/rooms/${value}/`));
     if (historyIndex >= 0) { activeCode = historyIndex ? code.slice(0, -1) + historyIndex : code; if (scene === 'history') { purpose = titles[historyIndex]; activeRole = historyIndex % 2 ? 'MEMBER' : 'HOST'; } path = path.replace(`/api/rooms/${activeCode}`, root); }
-    if (path === '/api/auth/refresh' && method === 'POST') return account ? [200, { accessToken: 'ui-preview-synthetic-token', expiresAt: new Date(Date.now() + 900000).toISOString(), account: { id, displayName: '합성 주최자' } }] : [401, { code: 'AUTH_REFRESH_INVALID' }];
+    if (path === '/api/auth/refresh' && method === 'POST') return account ? [200, { accessToken: 'ui-preview-synthetic-token', expiresAt: new Date(Date.now() + 900000).toISOString(), account: previewAccount() }] : [401, { code: 'AUTH_REFRESH_INVALID' }];
+    if (path === '/api/auth/me' && method === 'PUT') {
+      if (!account) return [401, { code: 'AUTH_ACCESS_REQUIRED' }];
+      if (scene === 'nickname_error') return [503, { code: 'AUTH_UNAVAILABLE' }];
+      if (typeof body.displayName !== 'string' || /\p{Cc}/u.test(body.displayName) || !body.displayName.trim() || Array.from(body.displayName.trim()).length > 50) return [400, { code: 'VALIDATION_FAILED' }];
+      accountName = body.displayName.trim(); return [200, previewAccount()];
+    }
     if (['/api/auth/logout', '/api/auth/logout-all'].includes(path) && method === 'POST') { account = false; return [204, null]; }
     if (/^\/api\/auth\/(google|kakao)\/start$/.test(path)) return [409, { detail: '실제 로그인은 연결하지 않습니다. 화면 목록에서 합성 계정 화면을 선택하세요.' }];
     if (path === '/api/account/rooms' && method === 'GET') {

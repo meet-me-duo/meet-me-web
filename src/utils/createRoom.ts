@@ -21,7 +21,7 @@ export function defaultSearchDates(now = new Date()): { start: string; last: str
 }
 
 export const createRoomSchema = z.object({
-  hostName: z.string().trim().min(1, "이름을 입력해 주세요.").max(50, "50자 이하로 입력해 주세요."),
+  hostName: z.string().trim().min(1, "이름을 입력해 주세요.").refine(value => Array.from(value).length <= 50, "50자 이하로 입력해 주세요."),
   purpose: z.string().trim().min(1, "모임 목적을 입력해 주세요.").max(500, "500자 이하로 입력해 주세요."),
   meetingMode: z.enum(["EITHER", "IN_PERSON", "REMOTE"]),
   customSearch: z.boolean(),

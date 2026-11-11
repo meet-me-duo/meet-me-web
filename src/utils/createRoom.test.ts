@@ -64,3 +64,15 @@ describe("closure policy contract", () => {
     expect(createRoomSchema.safeParse({ ...base, useDeadline: true, deadline }).success).toBe(false);
   });
 });
+
+// Account names use Unicode code points, including names accepted by PUT /auth/me.
+describe("account nickname creation compatibility", () => {
+  it.each(["😀".repeat(50), "가".repeat(50), "👩‍💻".repeat(16)])("allows an accepted Unicode nickname to create a room", hostName => {
+    const parsed = createRoomSchema.safeParse({ ...base, hostName });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) expect(createRoomBody(parsed.data)).not.toHaveProperty("hostName");
+  });
+  it("still rejects names above 50 code points", () => {
+    expect(createRoomSchema.safeParse({ ...base, hostName: "😀".repeat(51) }).success).toBe(false);
+  });
+});

@@ -72,7 +72,7 @@ test("mode-specific statuses stay with their variant instead of becoming radio l
   await expect(page.getByRole("list")).not.toContainText("불가");
 });
 
-test("long and duplicate names remain visible at 320px without horizontal overflow", async ({ page }) => {
+test("long and duplicate names retain full text with single-line ellipsis at 320px", async ({ page }, info) => {
   const name = "가나다라마바사아자차카타파하가나다라마바";
   await page.setViewportSize({ width: 320, height: 800 });
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -87,8 +87,22 @@ test("long and duplicate names remain visible at 320px without horizontal overfl
   });
   await page.goto("/__preview?scene=participant_statuses");
   await expect(page.getByText(name, { exact: true })).toHaveCount(6);
-  for (const row of await page.getByText(name, { exact: true }).all()) await expect(row).toBeVisible();
+  for (const row of await page.getByText(name, { exact: true }).all()) {
+    await expect(row).toBeVisible();
+    await expect(row).toHaveAttribute("title", name);
+    const text = await row.evaluate(element => ({ scroll: element.scrollWidth, width: element.clientWidth, whiteSpace: getComputedStyle(element).whiteSpace, overflow: getComputedStyle(element).textOverflow }));
+    expect(text.scroll).toBeGreaterThan(text.width);
+    expect(text.whiteSpace).toBe("nowrap");
+    expect(text.overflow).toBe("ellipsis");
+    await row.scrollIntoViewIfNeeded();
+    expect(await row.evaluate(element => {
+      const bounds = element.getBoundingClientRect();
+      const hit = document.elementFromPoint(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+      return hit === element || !!hit && element.contains(hit);
+    })).toBe(true);
+  }
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.locator(".recommendation-card").first().screenshot({ path: info.outputPath("participant-long-name-ellipsis.png") });
 });
 
 test("larger groups expand independently without selecting the card or hiding a pending-condition notice", async ({ page }, info) => {

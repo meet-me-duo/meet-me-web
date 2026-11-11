@@ -114,7 +114,13 @@ function ChoicesSession({ options, alternatives = [], timeZone, canConfirm, pend
 
   return <div className="recommendation-choices">
     <p className="field-hint recommendation-zone">{recommendationTimeZoneLabel(timeZone)} · 우열 없는 시간 선택지예요.</p>
-    <div className="candidate-list">{(showOther ? allOptions : primary).map(item => <article key={item.id} className={`candidate-card recommendation-card ${selectedOption === item.id ? "is-selected" : ""}`} aria-labelledby={`${id}-${item.id}`}>
+    <div className="candidate-list">{(showOther ? allOptions : primary).map(item => <article key={item.id} className={`candidate-card recommendation-card ${selectedOption === item.id ? "is-selected" : ""}`} aria-labelledby={`${id}-${item.id}`} onClick={event => {
+      // Text above the stretched button keeps its native hover/title and card selection.
+      if (!canConfirm || pending || !item.variants.length || event.defaultPrevented || !(event.target instanceof Element)) return;
+      if (event.target.closest("button,input,select,textarea,a,label,[role='button'],[role='link']")) return;
+      buttons.current.get(item.id)?.focus({ preventScroll: true });
+      setSelectedOption(item.id);
+    }}>
       <h3 id={`${id}-${item.id}`}>{primary.some(option => option.id === item.id) ? "추천안" : "다른 가능한 시간"} {item.rank}</h3>
       <fieldset className="recommendation-variants"><legend>가능한 방식과 장소</legend>{item.variants.map(choice => <div className="recommendation-variant-group" key={choice.id}><label className="recommendation-variant">
         {item.variants.length > 1 && <input type="radio" name={`${id}-${item.id}-variant`} checked={(item.variants.find(variant => variant.id === variants[item.id]) ?? item.variants[0])?.id === choice.id} disabled={!canConfirm || pending} onChange={() => setVariants(previous => ({ ...previous, [item.id]: choice.id }))} />}

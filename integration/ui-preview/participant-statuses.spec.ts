@@ -143,3 +143,31 @@ test("larger groups expand independently without selecting the card or hiding a 
   await page.getByRole("button", { name: "가능한 범위 전체 선택" }).click();
   await expect(page.getByRole("button", { name: "일정 확정", exact: true })).toBeEnabled();
 });
+
+test("participant name clicks select their card while disclosure, radio and keyboard controls remain independent", async ({ page }, info) => {
+  await page.setViewportSize(info.project.name === "desktop" ? { width: 1440, height: 1000 } : { width: 390, height: 844 });
+  await page.goto("/__preview?scene=participant_status_many");
+  const cards = page.locator(".recommendation-card");
+  const selection = (index: number) => cards.nth(index).getByRole("button", { name: "이 시간 선택" });
+  const firstName = cards.nth(0).locator(".recommendation-participant-name").first();
+  await firstName.scrollIntoViewIfNeeded();
+  const beforeNameClick = await page.evaluate(() => scrollY);
+  await firstName.click();
+  expect(await page.evaluate(() => scrollY)).toBe(beforeNameClick);
+  await expect(selection(0)).toHaveAttribute("aria-pressed", "true");
+  await expect(selection(0)).toBeFocused();
+  await expect(selection(2)).toHaveAttribute("aria-pressed", "false");
+  await cards.nth(2).getByRole("button", { name: "나머지 3명 더보기" }).click();
+  await expect(selection(2)).toHaveAttribute("aria-pressed", "false");
+  await expect(selection(0)).toHaveAttribute("aria-pressed", "true");
+  await cards.nth(2).locator(".recommendation-participant-name").last().click();
+  await expect(selection(2)).toHaveAttribute("aria-pressed", "true");
+  await expect(selection(2)).toBeFocused();
+  await expect(selection(0)).toHaveAttribute("aria-pressed", "false");
+  await selection(1).focus(); await page.keyboard.press("Enter");
+  await expect(selection(1)).toHaveAttribute("aria-pressed", "true");
+  await expect(selection(2)).toHaveAttribute("aria-pressed", "false");
+  await page.goto("/__preview?scene=participant_status_modes");
+  await page.getByRole("radio", { name: /온라인/ }).check();
+  await expect(page.getByRole("button", { name: "이 시간 선택" })).toHaveAttribute("aria-pressed", "false");
+});

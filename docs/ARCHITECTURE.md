@@ -1,13 +1,14 @@
 # Frontend architecture
 
-## #110 운영 요약 경계
+## 운영자 모임 진단 경계 (#94, 2026-11-16)
 
-- `/operations`는 일반 모임 화면과 독립된 읽기 전용 화면이다. HOST·일반 회원·게스트를 운영자로 간주하지 않는다. 서버의 명시적 allowlist만 접근을 허용하며, 실제 운영자 등록과 공통 인증 연결 전에는 기본 거부다.
-- 운영 응답은 페이지 메모리에서만 유지한다. 공유 QueryClient·Web Storage·URL에 응답이나 인증을 저장하지 않는다. 화면 이동·조회 실패 시 기존 응답을 제거하고, 취소된 이전 요청의 늦은 결과를 무시한다. 자동 polling이나 쓰기 명령은 없다.
-- 세 GET API만 사용하며 20개 단위의 서버 cursor를 전달한다. 요청은 `cache: no-store`다. 허용 필드만 runtime 검증하고 고정된 오류 안내를 사용하며, 원문·이름·초대 코드·공급자 응답·비밀값을 렌더링하지 않는다. 서버 응답의 성공·오류 `Cache-Control: no-store`는 서버 계약이다.
-- 방 요약은 현재 설정이다. 실행의 종료·winner와 최종 결과 게시를 동일시하지 않는다. 기록된 경과 시간은 저장 시각 차이며 HTTP 지연 측정값이 아니다. 시도는 기록된 admission의 INITIAL/RETRY/FALLBACK 분류이며 parser dispatch·HTTP 횟수는 미상이다.
-- 알려진 사용량만 소계로 표시한다. 미상 null과 알려진 0을 구별하고, coverage 분모는 기록된 admission이다. 소계를 전체 사용량이나 실제 과금으로 해석하지 않는다. REUSED 라운드는 신규 provider 시도로 합산하지 않는다.
-- #109 공통 인증은 `createOperationsApi(getAccessToken)`에 메모리 토큰 공급자를 주입하고, 로그인·로그아웃·계정 전환마다 `OperationsPage`의 `authRevision`을 변경한다. 안정적인 API 인스턴스를 유지한다. revision은 권한·사용자 ID가 아닌 화면 수명 경계이며 전송·표시·보관하지 않는다. 요청 전후 토큰과 취소 상태도 확인한다. 기본 App에는 실제 공급자가 없어 운영 조회는 서버의 기본 거부에 머문다. 공통 store와 연결한 실인증·만료 흐름은 아직 통합 검증 전이다.
+- `/operations`는 일반 모임과 분리한 운영자 대시보드다. 공통 메모리 Access Token을 요청마다 공급하며, HOST·일반 회원·게스트를 운영자로 간주하지 않는다. 최종 인가는 서버 allowlist와 접근 감사에서 수행한다. 계정 전환·로그아웃은 응답을 즉시 제거하고 진행 요청을 취소한다.
+- 모임 목록은 제목·예정 기간·상태, 상세는 현재 설정과 선택한 분석의 고정 입력·저장 결과를 표시한다. 분석 이력 GET과 diagnostics GET은 정확한 room/run 연결을 검증하고 다른 분석으로 대체하지 않는다. 현재 접수 입력은 `CURRENT_COLLECTION`으로 구분한다. 20개 단위 서버 cursor를 유지하고 제목 검색·상태 필터는 불러온 페이지에 한정한다.
+- 최초 Jev의 실제 기록, 보완 후 기록, 현재 검사 상태를 분리한다. 과거 저장되지 않은 판정은 미기록으로 표시한다. 저장된 개별 조건을 전체 반영 성공으로 단정하지 않고, 추천에 포함되지 않은 사람을 불가능·분석 실패로 추정하지 않는다. 모델 재시도·폴백·시각은 실제 저장 기록만 표시한다.
+- 이름은 서버에서 첫 글자 외 마스킹하고 방 안 별칭을 제공한다. 반환 원문·질문·답변의 전화·이메일만 서버가 가리며, 실제 저장 원문과 모델 입력은 바꾸지 않는다. 운영 응답은 페이지 메모리에만 유지한다. QueryClient·Web Storage·URL에 응답이나 토큰을 보관하지 않고 성공·오류는 no-store, 오류 본문은 렌더링하지 않는다.
+- 운영자 재분석은 확인창 이후 POST `/api/operations/rooms/{roomId}/analyses` 한 번으로 요청한다. 검토한 `source_analysis_id`, 현재 방의 `expected_state_version`, 신규 `request_id`만 전송한다. 접수 불명확 시 자동 재시도 없이 같은 본문/ID로 수동 확인하고, 202 receipt의 새 분석을 조회한다. 확정·수집 중·수정 중·이전 분석에서는 실행하지 않는다. 활성 진행 분석의 읽기만 4초 간격으로 갱신한다.
+- 세부 실행은 허용된 transport·사용량 필드만 펼쳐 본다. 시도 승인과 실제 client call·HTTP 전송·청구를 구별하고, 미상 null과 알려진 0을 유지한다. 저장된 비용은 알려진 부분의 소계다.
+- 디자인 기준은 승인된 `design/operations-v1.html`이다. 운영 React는 TSX/CSS로 구현하며 Figma를 기준으로 삼지 않는다. 로컬 UI preview는 별도 loopback 서버와 합성 JSON으로만 작동하고 production bundle에서 제외한다. 합성 화면 성공은 운영 로그인·실제 Jev/LLM·재분석 실행 증거가 아니다.
 
 ## 범위
 
@@ -88,7 +89,7 @@
 
 ### #110 로컬 client call 관측 후속
 
-운영 요약은 승인 시도와 로컬 client call을 별도로 표시한다. 관측 부재 null, 확인된 무호출 빈 배열, 부분 관측의 알려진 호출 소계를 구분한다. HTTP 상태와 단조 경과 ns는 로컬 lifecycle 사실이며 수신·청구 보장이 아니다. actual local OpenAPI에서 operations3 경로와 참조 DTO만 기존 snapshot에 병합했다. #109 메모리 token supplier/authRevision 실제 주입은 통합 대기이며 기본 App은 운영 인증을 제공하지 않는다. 최종 로컬 근거는 docs/verification/issue-110-web-final.json이다.
+운영 요약은 승인 시도와 로컬 client call을 별도로 표시한다. 관측 부재 null, 확인된 무호출 빈 배열, 부분 관측의 알려진 호출 소계를 구분한다. HTTP 상태와 단조 경과 ns는 로컬 lifecycle 사실이며 수신·청구 보장이 아니다. actual local OpenAPI에서 operations3 경로와 참조 DTO만 기존 snapshot에 병합했다. #109 메모리 token supplier/authRevision은 AccountOperationsPage에서 실제 연결한다. 과거 transport 경계 근거는 docs/verification/issue-110-web-final.json이며 현재 화면은 위 운영자 모임 진단 계약을 따른다.
 
 ## 계정 메뉴와 방 입력 화면
 

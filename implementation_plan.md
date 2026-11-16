@@ -1,3 +1,12 @@
+## 2026-11-16 현재 — 운영자 모임 진단 대시보드 (#94)
+
+- [x] 서버 #241 계약과 실제 native OpenAPI를 동기화하고 승인 HTML 기준의 목록·상세·이력·Jev/보완답·분석 과정·최종 저장 결과를 구현했다.
+- [x] 메모리 인증 수명·늦은 응답 취소·확인 후 단일 POST·같은 ID 수동 재확인과 확정/수집 중 실행 방지를 검증했다. 예비 단위 973/973, 새 데스크톱·모바일 브라우저 6/6, API 생성 정합·타입·빌드·evidence preflight 3개가 통과했다.
+- [x] 전체 단위 982/982와 마지막 이력 취소 관련 acceptance 23/23, 고정 빌드 전체 browser 635 PASS/기존1 SKIP/실패0·retry0, 운영 preview 8/8, evidence 6/6·preflight3, API/lint/typecheck/build를 통과했다. 실제 desktop/mobile 캡처를 확인했으며 독립 보안 재검토의 P1/P2는0이다. 합성 예시는 실제 이용자 입력·모델 호출과 구분한다.
+- [ ] 서버 배포 검증 후 템플릿 PR로 develop/main을 통합하고 Web 배포 결과와 공개 자산을 검증한다. 사용자 승인 범위에서 진행하며 보호된 Environment 요구는 유지한다.
+
+최종 갱신: 2026-11-16 UTC. Commit/PR: 동일 커밋 예정.
+
 ## 2026-11-04 현재 — 승인된 미리보기 운영 반영
 
 - [x] 사용자가 Web #81·Server #211 병합, 정상 develop→main 승격·운영 배포와 CloudFront `/rooms/*` 전환을 승인했다. 별도 실험 호출 예산은 사용하지 않는다.

@@ -1,12 +1,13 @@
 import { expect, test } from "@playwright/test";
+import { diagnostics } from "./support/operations-diagnostics";
 
 const roomId = "11000000-0000-4000-8000-000000000001";
 const invocationId = "22000000-0000-4000-8000-000000000001";
 const secret = "BROWSER_PRIVATE_RAW_OWNER_TOKEN";
 const room = {
-  id: roomId, created_at: "2026-10-01T01:00:00Z", meeting_mode: "REMOTE", time_zone_id: "Asia/Seoul",
+  id: roomId, title: "합성 운영 모임", active_analysis_id: "33000000-0000-4000-8000-000000000001", created_at: "2026-10-01T01:00:00Z", meeting_mode: "REMOTE", time_zone_id: "Asia/Seoul",
   search_start_date: "2026-10-18", search_end_date: "2026-10-20", expected_participants: null,
-  submission_deadline: null, manual_only: true, collection_status: "COLLECTING", closure_reason: null,
+  submission_deadline: null, manual_only: true, collection_status: "CLOSED", closure_reason: null,
   closed_at: null, participant_count: 1, submitted_participant_count: 0, host_submitted: false,
   current_run_status: null, purpose: secret, owner_id: secret,
 };
@@ -57,7 +58,8 @@ test("mock operator drilldown preserves unknown values and erases the summary af
     if (deny) return route.fulfill({ status: 403, contentType: "application/problem+json", json: { detail: secret } });
     if (path === "/api/operations/rooms") return route.fulfill({ json: { items: [room], next_cursor: null } });
     if (path === `/api/operations/rooms/${roomId}`) return route.fulfill({ json: { room, invocations: [invocation], next_cursor: null, revision_counts: { open: 1, queued: 2, reused: 3 }, legacy_attempt_count: 4 } });
-    if (path === `/api/operations/invocations/${invocationId}`) return route.fulfill({ json: {
+    if (path === `/api/operations/rooms/${roomId}/analyses`) return route.fulfill({ json: diagnostics(roomId, invocation.run_id, null).history });
+    if (path === `/api/operations/rooms/${roomId}/diagnostics`) return route.fulfill({ json: diagnostics(roomId, invocation.run_id, {
       room_id: roomId, invocation, attempts: [{ id: "44000000-0000-4000-8000-000000000001", attempt_number: 1,
         provider: "GEMINI", model: "mock-model", policy_version: "v1", started_at: invocation.started_at, finished_at: null,
         failure_kind: null, input_tokens: null, output_tokens: null, estimated_cost_usd: null,
@@ -65,21 +67,22 @@ test("mock operator drilldown preserves unknown values and erases the summary af
       usage_by_provider: [{ provider: "GEMINI", recorded_attempt_count: 1, input_known_count: 0,
         output_known_count: 0, cost_known_count: 0, input_unknown_count: 1, output_unknown_count: 1, cost_unknown_count: 1,
         known_input_tokens: null, known_output_tokens: null, known_cost_usd: null, coverage_basis: "RECORDED_ADMISSIONS" }],
-    } });
+    }).detail });
     return route.abort();
   });
   await page.goto("/operations");
-  await page.getByRole("button", { name: `방 ${roomId}`, exact: true }).click();
+  await page.getByRole("button", { name: room.title, exact: true }).click();
+  await page.getByText("모임의 세부 설정·기록 범위", { exact: true }).click();
   await expect(page.getByRole("heading", { name: "현재 방 설정" })).toBeVisible();
   await expect(page.locator("body")).toContainText(/호스트.*미제출/);
-  await page.getByRole("button", { name: `실행 ${invocationId}`, exact: true }).click();
+  await page.getByText("자세한 실행·사용량 기록", { exact: true }).click();
   await expect(page.getByRole("heading", { name: "실행 기록 상세" })).toBeVisible();
   await expect(page.locator("body")).toContainText(/HTTP.*알 수 없음/);
   await expect(page.locator("body")).toContainText("알려진 비용 소계");
   await expect(page.locator("body")).not.toContainText(secret);
   await expect(page.locator("body")).not.toContainText(/전체 비용|최종 발행 성공/);
   deny = true;
-  await page.getByRole("button", { name: "방 목록", exact: true }).click();
+  await page.getByRole("button", { name: "모임 목록", exact: true }).click();
   await expect(page.getByText("운영 조회 권한이 없습니다.", { exact: true })).toBeVisible();
   await expect(page.locator("body")).not.toContainText(roomId);
   await expect(page.locator("body")).not.toContainText(invocationId);
@@ -91,7 +94,7 @@ test("mock operator drilldown preserves unknown values and erases the summary af
     expect(request.headers["x-operator-id"]).toBeUndefined();
     const url = new URL(request.url);
     expect(url.searchParams.has("operator_id")).toBe(false);
-    if (url.pathname.includes("/rooms")) expect(url.searchParams.get("limit")).toBe("20");
+    if (!url.pathname.endsWith("/diagnostics")) expect(url.searchParams.get("limit")).toBe("20");
   }
   expect(await page.evaluate(() => ({ local: { ...localStorage }, session: { ...sessionStorage } }))).toEqual({ local: {}, session: {} });
 });

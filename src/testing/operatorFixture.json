@@ -1,0 +1,455 @@
+{
+  "room": {
+    "id": "0000006e-1111-4111-8111-000000000001",
+    "title": "제품 기획 회의",
+    "created_at": "2027-01-04T01:32:00Z",
+    "meeting_mode": "EITHER",
+    "time_zone_id": "Asia/Seoul",
+    "search_start_date": "2027-01-04",
+    "search_end_date": "2027-01-09",
+    "expected_participants": 3,
+    "submission_deadline": null,
+    "manual_only": false,
+    "collection_status": "CLOSED",
+    "closure_reason": "EXPECTED_PARTICIPANTS",
+    "closed_at": "2027-01-04T01:38:00Z",
+    "participant_count": 3,
+    "submitted_participant_count": 3,
+    "host_submitted": true,
+    "current_run_status": "COMPLETED",
+    "active_analysis_id": "000000dc-1111-4111-8111-000000000001",
+    "state_version": 7,
+    "current_analysis_confirmed": false,
+    "has_open_revision_round": false
+  },
+  "history": {
+    "items": [
+      {
+        "id": "000000dc-1111-4111-8111-000000000001",
+        "status": "COMPLETED",
+        "created_at": "2027-01-04T01:38:00Z",
+        "fixed_at": "2027-01-04T01:38:00Z",
+        "active": true,
+        "contract": "DSL_STRUCTURAL_V5"
+      },
+      {
+        "id": "000000db-1111-4111-8111-000000000001",
+        "status": "COMPLETED",
+        "created_at": "2027-01-04T01:37:00Z",
+        "fixed_at": "2027-01-04T01:37:00Z",
+        "active": false,
+        "contract": "DSL_STRUCTURAL_V5"
+      }
+    ],
+    "next_cursor": null
+  },
+  "diagnostics": {
+    "room_id": "0000006e-1111-4111-8111-000000000001",
+    "scope": "FROZEN_ANALYSIS",
+    "analysis": {
+      "id": "000000dc-1111-4111-8111-000000000001",
+      "status": "COMPLETED",
+      "created_at": "2027-01-04T01:38:00Z",
+      "fixed_at": "2027-01-04T01:38:00Z",
+      "active": true,
+      "contract": "DSL_STRUCTURAL_V5"
+    },
+    "inputs": [
+      {
+        "alias": "참가자 A1B2C301",
+        "display_name": "한**",
+        "revision": 1,
+        "raw_text": "화요일과 목요일 오전 10시부터 낮 12시까지 가능해요.",
+        "created_at": "2027-01-04T01:32:00Z",
+        "reference_at": "2027-01-04T01:32:00Z",
+        "interpretation": "CONFIRMED",
+        "unresolved_reason": null,
+        "supplement": null,
+        "checks": [
+          {
+            "raw_text": "화요일과 목요일 오전 10시부터 낮 12시까지 가능해요.",
+            "created_at": "2027-01-04T01:32:00Z",
+            "reference_at": "2027-01-04T01:32:00Z",
+            "current_status": "RECEIVED",
+            "question": null,
+            "attempts": [
+              {
+                "generation": 1,
+                "started_at": "2027-01-04T01:32:00Z",
+                "finished_at": "2027-01-04T01:32:00Z",
+                "failure_code": null,
+                "classification": {
+                  "assessment": "CLEAR",
+                  "semantic_assessment": "CLEAR",
+                  "effective_assessment": "CLEAR",
+                  "reason": null,
+                  "confidence": 0.96,
+                  "provider": "TYPESAFE",
+                  "model": "jev-1.14.0",
+                  "probabilities": {}
+                }
+              }
+            ],
+            "attempts_truncated": false
+          }
+        ],
+        "checks_truncated": false,
+        "legacy_questions": [],
+        "stored_interpretation": {
+          "coverage": "STORED_DECLARATION",
+          "conditions": [
+            {
+              "effect": "AVAILABLE",
+              "interpretation": "EXPLICIT",
+              "temporal_resolution": "PRECISE_INTERVAL",
+              "dimension": "TIME",
+              "start": "2027-01-07T10:00",
+              "end": "2027-01-07T12:00"
+            }
+          ],
+          "problems": [],
+          "truncated": false
+        }
+      },
+      {
+        "alias": "참가자 A1B2C302",
+        "display_name": "서**",
+        "revision": 2,
+        "raw_text": "목요일 오전이 좋아요. 연락은 [이메일 숨김]으로 주세요.",
+        "created_at": "2027-01-04T01:38:00Z",
+        "reference_at": "2027-01-04T01:34:00Z",
+        "interpretation": "CONFIRMED",
+        "unresolved_reason": null,
+        "supplement": {
+          "prompt": "목요일에 만날 수 있는 시간대를 알려주세요.",
+          "excerpt": "목요일 오전",
+          "answer": "오전 10시 30분부터 12시까지 가능해요.",
+          "answered_at": "2027-01-04T01:38:00Z",
+          "consumed": true,
+          "choices": [],
+          "source_raw_text": "목요일 오전이 좋아요. 연락은 [이메일 숨김]으로 주세요."
+        },
+        "checks": [
+          {
+            "raw_text": "목요일 오전이 좋아요. 연락은 [이메일 숨김]으로 주세요.",
+            "created_at": "2027-01-04T01:34:00Z",
+            "reference_at": "2027-01-04T01:34:00Z",
+            "current_status": "SUPERSEDED",
+            "question": {
+              "prompt": "목요일에 만날 수 있는 시간대를 알려주세요.",
+              "excerpt": "목요일 오전",
+              "answer": "오전 10시 30분부터 12시까지 가능해요.",
+              "answered_at": "2027-01-04T01:38:00Z",
+              "consumed": true,
+              "choices": [],
+              "source_raw_text": "목요일 오전이 좋아요. 연락은 [이메일 숨김]으로 주세요."
+            },
+            "attempts": [
+              {
+                "generation": 1,
+                "started_at": "2027-01-04T01:34:00Z",
+                "finished_at": "2027-01-04T01:34:00Z",
+                "failure_code": null,
+                "classification": {
+                  "assessment": "NEEDS_REVIEW",
+                  "semantic_assessment": "NEEDS_REVIEW",
+                  "effective_assessment": "NEEDS_REVIEW",
+                  "reason": null,
+                  "confidence": 0.81,
+                  "provider": "TYPESAFE",
+                  "model": "jev-1.14.0",
+                  "probabilities": {}
+                }
+              }
+            ],
+            "attempts_truncated": false
+          },
+          {
+            "raw_text": "목요일 오전이 좋아요. 연락은 [이메일 숨김]으로 주세요.",
+            "created_at": "2027-01-04T01:38:00Z",
+            "reference_at": "2027-01-04T01:34:00Z",
+            "current_status": "RECEIVED",
+            "question": null,
+            "attempts": [
+              {
+                "generation": 1,
+                "started_at": "2027-01-04T01:38:00Z",
+                "finished_at": "2027-01-04T01:38:00Z",
+                "failure_code": null,
+                "classification": {
+                  "assessment": "CLEAR",
+                  "semantic_assessment": "CLEAR",
+                  "effective_assessment": "CLEAR",
+                  "reason": null,
+                  "confidence": 0.96,
+                  "provider": "TYPESAFE",
+                  "model": "jev-1.14.0",
+                  "probabilities": {}
+                }
+              }
+            ],
+            "attempts_truncated": false
+          }
+        ],
+        "checks_truncated": false,
+        "legacy_questions": [],
+        "stored_interpretation": {
+          "coverage": "STORED_DECLARATION",
+          "conditions": [
+            {
+              "effect": "AVAILABLE",
+              "interpretation": "EXPLICIT",
+              "temporal_resolution": "PRECISE_INTERVAL",
+              "dimension": "TIME",
+              "start": "2027-01-07T10:30",
+              "end": "2027-01-07T12:00"
+            }
+          ],
+          "problems": [],
+          "truncated": false
+        }
+      },
+      {
+        "alias": "참가자 A1B2C303",
+        "display_name": "민**",
+        "revision": 1,
+        "raw_text": "목요일 오전 11시부터 오후 1시까지 가능해요. 연락처는 [전화번호 숨김]이에요.",
+        "created_at": "2027-01-04T01:35:00Z",
+        "reference_at": "2027-01-04T01:35:00Z",
+        "interpretation": "CONFIRMED",
+        "unresolved_reason": null,
+        "supplement": null,
+        "checks": [
+          {
+            "raw_text": "목요일 오전 11시부터 오후 1시까지 가능해요. 연락처는 [전화번호 숨김]이에요.",
+            "created_at": "2027-01-04T01:35:00Z",
+            "reference_at": "2027-01-04T01:35:00Z",
+            "current_status": "RECEIVED",
+            "question": null,
+            "attempts": [
+              {
+                "generation": 1,
+                "started_at": "2027-01-04T01:35:00Z",
+                "finished_at": "2027-01-04T01:35:00Z",
+                "failure_code": null,
+                "classification": {
+                  "assessment": "CLEAR",
+                  "semantic_assessment": "CLEAR",
+                  "effective_assessment": "CLEAR",
+                  "reason": null,
+                  "confidence": 0.96,
+                  "provider": "TYPESAFE",
+                  "model": "jev-1.14.0",
+                  "probabilities": {}
+                }
+              }
+            ],
+            "attempts_truncated": false
+          }
+        ],
+        "checks_truncated": false,
+        "legacy_questions": [],
+        "stored_interpretation": {
+          "coverage": "STORED_DECLARATION",
+          "conditions": [
+            {
+              "effect": "AVAILABLE",
+              "interpretation": "EXPLICIT",
+              "temporal_resolution": "PRECISE_INTERVAL",
+              "dimension": "TIME",
+              "start": "2027-01-07T11:00",
+              "end": "2027-01-07T13:00"
+            }
+          ],
+          "problems": [],
+          "truncated": false
+        }
+      }
+    ],
+    "inputs_truncated": false,
+    "invocations": [
+      {
+        "room_id": "0000006e-1111-4111-8111-000000000001",
+        "invocation": {
+          "id": "0000014a-1111-4111-8111-000000000001",
+          "run_id": "000000dc-1111-4111-8111-000000000001",
+          "run_version": 1,
+          "started_at": "2027-01-04T01:38:01Z",
+          "deadline_at": "2027-01-04T01:39:01Z",
+          "finished_at": "2027-01-04T01:38:24Z",
+          "winner_attempt_id": "000001bb-1111-4111-8111-000000000001",
+          "gemini_admitted_attempts": 2,
+          "luna_admitted_attempts": 1,
+          "execution_ordinal": 1,
+          "revision_linked": false,
+          "recorded_elapsed_millis": 23000,
+          "parser_dispatch_count": 3,
+          "http_request_count": null,
+          "client_call_count": null,
+          "known_client_call_count": 0,
+          "transport_observed_attempt_count": 0,
+          "transport_unknown_attempt_count": 3
+        },
+        "attempts": [
+          {
+            "id": "000001b9-1111-4111-8111-000000000001",
+            "attempt_number": 1,
+            "provider": "GEMINI",
+            "model": "gemini-3.8-flash",
+            "policy_version": "c5-residual-luna-v2",
+            "started_at": "2027-01-04T01:38:01Z",
+            "finished_at": "2027-01-04T01:38:24Z",
+            "failure_kind": "SERVER",
+            "input_tokens": null,
+            "output_tokens": null,
+            "estimated_cost_usd": null,
+            "recorded_elapsed_millis": 2000,
+            "role": "INITIAL",
+            "parser_dispatched": null,
+            "client_calls": null
+          },
+          {
+            "id": "000001ba-1111-4111-8111-000000000001",
+            "attempt_number": 2,
+            "provider": "GEMINI",
+            "model": "gemini-3.8-flash",
+            "policy_version": "c5-residual-luna-v2",
+            "started_at": "2027-01-04T01:38:01Z",
+            "finished_at": "2027-01-04T01:38:24Z",
+            "failure_kind": "TIMEOUT",
+            "input_tokens": null,
+            "output_tokens": null,
+            "estimated_cost_usd": null,
+            "recorded_elapsed_millis": 15000,
+            "role": "RETRY",
+            "parser_dispatched": null,
+            "client_calls": null
+          },
+          {
+            "id": "000001bb-1111-4111-8111-000000000001",
+            "attempt_number": 3,
+            "provider": "OPENAI",
+            "model": "gpt-6-luna",
+            "policy_version": "c5-residual-luna-v2",
+            "started_at": "2027-01-04T01:38:01Z",
+            "finished_at": "2027-01-04T01:38:24Z",
+            "failure_kind": null,
+            "input_tokens": null,
+            "output_tokens": null,
+            "estimated_cost_usd": null,
+            "recorded_elapsed_millis": 6000,
+            "role": "FALLBACK",
+            "parser_dispatched": null,
+            "client_calls": null
+          }
+        ],
+        "usage_by_provider": []
+      }
+    ],
+    "invocations_truncated": false,
+    "timeline": [
+      {
+        "kind": "INPUTS_FROZEN",
+        "at": "2027-01-04T01:38:00Z",
+        "status": "RECORDED"
+      },
+      {
+        "kind": "ANALYSIS_CREATED",
+        "at": "2027-01-04T01:38:00Z",
+        "status": "RECORDED"
+      },
+      {
+        "kind": "OUTBOX_PUBLISHED",
+        "at": "2027-01-04T01:38:01Z",
+        "status": "RECORDED"
+      },
+      {
+        "kind": "INTERPRETATION_STORED",
+        "at": "2027-01-04T01:38:24Z",
+        "status": "RECORDED"
+      }
+    ],
+    "timeline_truncated": false,
+    "results": [
+      {
+        "start_at": "2027-01-07T02:00:00Z",
+        "end_at": "2027-01-07T03:00:00Z",
+        "meeting_mode": "IN_PERSON",
+        "place_name": null,
+        "place_unverified": false,
+        "available_aliases": [
+          "참가자 A1B2C301",
+          "참가자 A1B2C302",
+          "참가자 A1B2C303"
+        ]
+      },
+      {
+        "start_at": "2027-01-07T02:00:00Z",
+        "end_at": "2027-01-07T03:00:00Z",
+        "meeting_mode": "REMOTE",
+        "place_name": null,
+        "place_unverified": false,
+        "available_aliases": [
+          "참가자 A1B2C301",
+          "참가자 A1B2C302",
+          "참가자 A1B2C303"
+        ]
+      }
+    ],
+    "results_truncated": false
+  },
+  "roomDetail": {
+    "room": {
+      "id": "0000006e-1111-4111-8111-000000000001",
+      "title": "제품 기획 회의",
+      "created_at": "2027-01-04T01:32:00Z",
+      "meeting_mode": "EITHER",
+      "time_zone_id": "Asia/Seoul",
+      "search_start_date": "2027-01-04",
+      "search_end_date": "2027-01-09",
+      "expected_participants": 3,
+      "submission_deadline": null,
+      "manual_only": false,
+      "collection_status": "CLOSED",
+      "closure_reason": "EXPECTED_PARTICIPANTS",
+      "closed_at": "2027-01-04T01:38:00Z",
+      "participant_count": 3,
+      "submitted_participant_count": 3,
+      "host_submitted": true,
+      "current_run_status": "COMPLETED",
+      "active_analysis_id": "000000dc-1111-4111-8111-000000000001",
+      "state_version": 7,
+      "current_analysis_confirmed": false,
+      "has_open_revision_round": false
+    },
+    "invocations": [
+      {
+        "id": "0000014a-1111-4111-8111-000000000001",
+        "run_id": "000000dc-1111-4111-8111-000000000001",
+        "run_version": 1,
+        "started_at": "2027-01-04T01:38:01Z",
+        "deadline_at": "2027-01-04T01:39:01Z",
+        "finished_at": "2027-01-04T01:38:24Z",
+        "winner_attempt_id": "000001bb-1111-4111-8111-000000000001",
+        "gemini_admitted_attempts": 2,
+        "luna_admitted_attempts": 1,
+        "execution_ordinal": 1,
+        "revision_linked": false,
+        "recorded_elapsed_millis": 23000,
+        "parser_dispatch_count": 3,
+        "http_request_count": null,
+        "client_call_count": null,
+        "known_client_call_count": 0,
+        "transport_observed_attempt_count": 0,
+        "transport_unknown_attempt_count": 3
+      }
+    ],
+    "next_cursor": null,
+    "revision_counts": {
+      "open": 0,
+      "queued": 0,
+      "reused": 0
+    },
+    "legacy_attempt_count": 0
+  }
+}

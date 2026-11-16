@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export interface OperationRoom {
+  title?: string; active_analysis_id?: string | null; state_version?: number; current_analysis_confirmed?: boolean; has_open_revision_round?: boolean;
   id: string; created_at: string; meeting_mode: "IN_PERSON" | "REMOTE" | "EITHER"; time_zone_id: string;
   search_start_date: string; search_end_date: string; expected_participants: number | null;
   submission_deadline: string | null; manual_only: boolean; collection_status: "COLLECTING" | "CLOSED";
@@ -43,6 +44,9 @@ export interface OperationsApi {
   rooms(cursor?: string, signal?: AbortSignal): Promise<OperationRooms>;
   room(roomId: string, cursor?: string, signal?: AbortSignal): Promise<OperationRoomDetail>;
   invocation(invocationId: string, signal?: AbortSignal): Promise<OperationInvocationDetail>;
+  analyses(roomId: string, cursor?: string, signal?: AbortSignal): Promise<OperationAnalyses>;
+  diagnostics(roomId: string, analysisId: string | null, signal?: AbortSignal): Promise<OperationDiagnostics>;
+  reanalyze(roomId: string, body: OperationReanalysisRequest, signal?: AbortSignal): Promise<OperationReanalysisReceipt>;
 }
 export class OperationsError extends Error {
   constructor(public readonly status: number) { super("운영 요약 조회 실패"); this.name = "OperationsError"; }
@@ -53,6 +57,8 @@ export function operationsMessage(error: unknown): string {
       400: "조회 요청을 확인해 주세요.", 401: "운영자 인증이 필요합니다.",
       403: "운영 조회 권한이 없습니다.", 404: "조회 대상을 찾을 수 없습니다.",
       503: "운영 요약을 일시적으로 조회할 수 없습니다.",
+      409: "현재 상태에서는 다시 분석할 수 없어요. 최신 모임 상태를 확인해 주세요.",
+      429: "요청이 많아요. 잠시 후 다시 시도해 주세요.",
     };
     return messages[error.status] ?? "운영 요약 조회에 실패했습니다.";
   }
@@ -67,6 +73,9 @@ const decimal = z.string().max(128).regex(/^\d+(?:\.\d+)?$/).nullable();
 const cursor = z.string().min(1).max(256).regex(/^[A-Za-z0-9_-]+$/);
 const provider = z.enum(["GEMINI", "OPENAI"]);
 const roomSchema = z.object({
+  title: z.string().max(4000).optional(),
+  active_analysis_id: uuid.nullable().optional(), state_version: count.optional(),
+  current_analysis_confirmed: z.boolean().optional(), has_open_revision_round: z.boolean().optional(),
   id: uuid, created_at: instant, meeting_mode: z.enum(["IN_PERSON", "REMOTE", "EITHER"]),
   time_zone_id: z.string().min(1).max(100).regex(/^[A-Za-z0-9/_+:-]+$/),
   search_start_date: date, search_end_date: date, expected_participants: count.nullable(),
@@ -112,6 +121,71 @@ const roomDetailSchema = z.object({
 const invocationDetailSchema = z.object({
   room_id: uuid, invocation: invocationSchema, attempts: z.array(attemptSchema), usage_by_provider: z.array(usageSchema).max(2),
 });
+const analysisSchema = z.object({
+  id: uuid, status: z.enum(["QUEUED", "STRUCTURING", "MATCHING", "COMPLETED", "ANALYSIS_DELAYED", "DEAD_LETTERED"]),
+  created_at: instant, fixed_at: instant, active: z.boolean(), contract: z.string().min(1).max(128),
+});
+const questionSchema = z.object({
+  prompt: z.string().max(4000), excerpt: z.string().max(4000).nullable(), answer: z.string().max(4000).nullable(),
+  answered_at: instant.nullable(), consumed: z.boolean(), choices: z.array(z.string().max(4000)).max(4),
+  source_raw_text: z.string().max(4000).nullable(),
+});
+const assessmentSchema = z.enum(["CLEAR", "NEEDS_REVIEW", "INDETERMINATE"]);
+const classificationSchema = z.object({
+  assessment: assessmentSchema, semantic_assessment: assessmentSchema.nullable(), effective_assessment: assessmentSchema.nullable(),
+  reason: z.enum(["LOW_CONFIDENCE", "REFUSED", "MODEL_UNCERTAIN"]).nullable(),
+  confidence: z.number().finite().min(0).max(1).nullable(),
+  provider: z.string().min(1).max(256), model: z.string().min(1).max(256),
+  probabilities: z.partialRecord(assessmentSchema, z.number().finite().min(0).max(1)),
+});
+const personalAttemptSchema = z.object({
+  generation: count, started_at: instant.nullable(), finished_at: instant.nullable(),
+  failure_code: z.string().max(64).nullable(), classification: classificationSchema.nullable(),
+});
+const checkSchema = z.object({
+  raw_text: z.string().max(4000), created_at: instant, reference_at: instant, current_status: z.string().max(64),
+  question: questionSchema.nullable(), attempts: z.array(personalAttemptSchema).max(8), attempts_truncated: z.boolean(),
+});
+const storedInterpretationSchema = z.object({
+  coverage: z.string().max(64), conditions: z.array(z.object({
+    effect: z.string().max(64), interpretation: z.string().max(64), temporal_resolution: z.string().max(64),
+    dimension: z.string().max(64).nullable(), start: z.string().max(80).nullable(), end: z.string().max(80).nullable(),
+  })).max(64), problems: z.array(z.string().max(128)).max(64), truncated: z.boolean(),
+});
+const inputSchema = z.object({
+  alias: z.string().regex(/^참가자 [0-9A-F]{8}$/), display_name: z.string().max(400),
+  revision: count.nullable(), raw_text: z.string().max(4000).nullable(), created_at: instant.nullable(), reference_at: instant.nullable(),
+  interpretation: z.enum(["PENDING", "CONFIRMED", "UNRESOLVED"]).nullable(), unresolved_reason: z.string().max(256).nullable(),
+  supplement: questionSchema.nullable(), checks: z.array(checkSchema).max(8), checks_truncated: z.boolean(),
+  legacy_questions: z.array(questionSchema).max(8), stored_interpretation: storedInterpretationSchema.nullable(),
+});
+const analysesSchema = z.object({ items: z.array(analysisSchema).max(100), next_cursor: cursor.nullable() });
+const diagnosticsSchema = z.object({
+  room_id: uuid, scope: z.enum(["CURRENT_COLLECTION", "FROZEN_ANALYSIS"]), analysis: analysisSchema.nullable(),
+  inputs: z.array(inputSchema).max(50), inputs_truncated: z.boolean(),
+  invocations: z.array(invocationDetailSchema).max(20), invocations_truncated: z.boolean(),
+  timeline: z.array(z.object({ kind: z.string().max(64), at: instant.nullable(), status: z.string().max(64) })).max(100),
+  timeline_truncated: z.boolean(), results: z.array(z.object({
+    start_at: instant, end_at: instant, meeting_mode: z.enum(["IN_PERSON", "REMOTE"]), place_name: z.string().max(4000).nullable(),
+    place_unverified: z.boolean(), available_aliases: z.array(z.string().regex(/^참가자 [0-9A-F]{8}$/)).max(50),
+  })).max(20), results_truncated: z.boolean(),
+});
+const reanalysisRequestSchema = z.object({
+  request_id: uuid, source_analysis_id: uuid, expected_state_version: count.max(Number.MAX_SAFE_INTEGER - 1),
+}).strict();
+const receiptSchema = z.object({
+  request_id: uuid, source_analysis_id: uuid, analysis_id: uuid, accepted_state_version: count,
+  accepted_at: instant, analysis_contract_version: z.string().min(1).max(128).regex(/^[A-Za-z0-9._-]+$/),
+});
+export type OperationAnalysis = z.infer<typeof analysisSchema>;
+export type OperationAnalyses = z.infer<typeof analysesSchema>;
+export type OperationClassification = z.infer<typeof classificationSchema>;
+export type OperationInput = z.infer<typeof inputSchema>;
+export type OperationQuestion = z.infer<typeof questionSchema>;
+export type OperationDiagnostics = z.infer<typeof diagnosticsSchema>;
+export type OperationReanalysisRequest = z.infer<typeof reanalysisRequestSchema>;
+export type OperationReanalysisReceipt = z.infer<typeof receiptSchema>;
+
 const base = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
 type AccessTokenSupplier = () => string | null | undefined;
 async function read<T>(path: string, schema: z.ZodType<T>, signal?: AbortSignal, getAccessToken?: AccessTokenSupplier): Promise<T> {
@@ -159,6 +233,45 @@ export function createOperationsApi(getAccessToken?: AccessTokenSupplier): Opera
     rooms: async (next, signal) => read(`/api/operations/rooms?${pageQuery(next)}`, roomsSchema, signal, getAccessToken),
     room: async (id, next, signal) => read(`/api/operations/rooms/${resourceId(id)}?${pageQuery(next)}`, roomDetailSchema, signal, getAccessToken),
     invocation: async (id, signal) => read(`/api/operations/invocations/${resourceId(id)}`, invocationDetailSchema, signal, getAccessToken),
+    analyses: async (id, next, signal) => read(`/api/operations/rooms/${resourceId(id)}/analyses?${pageQuery(next)}`, analysesSchema, signal, getAccessToken),
+    diagnostics: async (id, analysis, signal) => {
+      const query = analysis === null ? "" : `?analysis_id=${resourceId(analysis)}`;
+      const result = await read(`/api/operations/rooms/${resourceId(id)}/diagnostics${query}`, diagnosticsSchema, signal, getAccessToken);
+      if (result.room_id !== id || (analysis === null
+        ? result.scope !== "CURRENT_COLLECTION" || result.analysis !== null
+        : result.scope !== "FROZEN_ANALYSIS" || result.analysis?.id !== analysis)) throw new OperationsError(503);
+      if (result.invocations.some(execution => execution.room_id !== id || analysis === null || execution.invocation.run_id !== analysis)) throw new OperationsError(503);
+      return result;
+    },
+    reanalyze: async (id, body, signal) => {
+      const parsed = reanalysisRequestSchema.safeParse(body);
+      if (!parsed.success) throw new OperationsError(400);
+      const path = `/api/operations/rooms/${resourceId(id)}/analyses`;
+      function currentToken() {
+        try { return getAccessToken?.() || null; }
+        catch (error) { if (error instanceof OperationsError) throw error; throw new OperationsError(503); }
+      }
+      if (signal?.aborted) throw new OperationsError(401);
+      const token = currentToken();
+      function checkContext() { if (signal?.aborted || currentToken() !== token) throw new OperationsError(401); }
+      try {
+        const response = await fetch(`${base}${path}`, {
+          method: "POST", credentials: "include", cache: "no-store", signal,
+          headers: { Accept: "application/json, application/problem+json", "Content-Type": "application/json", "Accept-Language": "ko-KR", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+          body: JSON.stringify(parsed.data),
+        });
+        checkContext();
+        if (response.status !== 202) throw new OperationsError(response.ok ? 503 : response.status);
+        const result = receiptSchema.parse(await response.json());
+        checkContext();
+        if (result.request_id !== body.request_id || result.source_analysis_id !== body.source_analysis_id ||
+          result.analysis_id === body.source_analysis_id || result.accepted_state_version <= body.expected_state_version) throw new OperationsError(503);
+        return result;
+      } catch (error) {
+        if (error instanceof OperationsError) throw error;
+        throw new OperationsError(503);
+      }
+    },
   };
 }
 export const operationsApi = createOperationsApi();

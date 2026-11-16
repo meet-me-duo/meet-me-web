@@ -1,5 +1,6 @@
 // Local UI fixtures only. Never imported by src/ or the production build.
 import { randomUUID } from 'node:crypto';
+import { operationsFixture } from './operations.mjs';
 export const code = 'abcdefghijklmnopqrstuv';
 const root = `/api/rooms/${code}`;
 const id = '11111111-1111-4111-8111-111111111111';
@@ -7,6 +8,7 @@ const variantId = '22222222-2222-4222-8222-222222222222';
 const now = () => new Date().toISOString();
 const date = days => new Date(Date.now() + days * 86400000).toISOString().slice(0, 10);
 export const scenes = {
+  operations: ['운영 관리 · 모임 진단', '/operations'],
   landing: ['랜딩 · 비로그인', '/'], login: ['로그인', '/login'], create: ['모임 만들기 · 합성 계정', '/create'],
   history: ['내 모임', '/account/rooms'], empty: ['내 모임 · 빈 목록', '/account/rooms'], security: ['계정 메뉴·보안', '/account/security'],
   nickname_edit: ['닉네임 변경 · 계정 메뉴', '/account/rooms'], nickname_error: ['닉네임 변경 · 저장 오류', '/account/rooms'],
@@ -18,9 +20,10 @@ export const scenes = {
 };
 const raw = '화요일과 목요일 오후 7시부터 9시까지 온라인으로 가능해요.';
 export function fixture(scene) {
+  const operator = scene === 'operations' ? operationsFixture() : null;
   let account = !['landing', 'login'].includes(scene);
   let accountName = ['nickname_edit', 'nickname_error'].includes(scene) ? '서윤' : '합성 주최자';
-  const previewAccount = () => ({ id, displayName: accountName, capabilities: { canViewOperations: ['nickname_edit', 'nickname_error'].includes(scene) } });
+  const previewAccount = () => ({ id, displayName: accountName, capabilities: { canViewOperations: ['nickname_edit', 'nickname_error', 'operations'].includes(scene) } });
   let status = ({ analyzing: 'ANALYZING', ready: 'READY', participant_statuses: 'READY', participant_status_modes: 'READY', participant_status_many: 'READY', confirmed: 'CONFIRMED', review: 'CONFIRMED', no_match: 'NO_MATCH' })[scene] ?? 'COLLECTING';
   let purpose = '함께 준비하는 주말 모임';
   let activeCode = code;
@@ -81,6 +84,7 @@ export function fixture(scene) {
       accountName = body.displayName.trim(); return [200, previewAccount()];
     }
     if (['/api/auth/logout', '/api/auth/logout-all'].includes(path) && method === 'POST') { account = false; return [204, null]; }
+    if (operator && path.startsWith('/api/operations/')) return account ? operator(method, url, body) ?? [404, {}] : [401, {}];
     if (/^\/api\/auth\/(google|kakao)\/start$/.test(path)) return [409, { detail: '실제 로그인은 연결하지 않습니다. 화면 목록에서 합성 계정 화면을 선택하세요.' }];
     if (path === '/api/account/rooms' && method === 'GET') {
       const rows = scene === 'empty' ? [] : Array.from({ length: 5 }, (_, i) => ({ invite_code: i ? code.slice(0, -1) + i : code, purpose: titles[i], role: i % 2 ? 'MEMBER' : 'HOST', created_at: now(), expires_at: new Date(Date.now() + 30 * 86400000).toISOString() }));

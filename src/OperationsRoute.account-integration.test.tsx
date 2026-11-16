@@ -12,7 +12,7 @@ import { OperationsError, operationsMessage } from "./api/operations";
 const now = Date.parse("2026-10-17T12:00:00Z");
 const roomId = "11000000-0000-4000-8000-000000000001";
 const room = {
-  id: roomId, created_at: "2026-10-01T01:00:00Z", meeting_mode: "REMOTE", time_zone_id: "Asia/Seoul",
+  id: roomId, title: "합성 운영 모임", created_at: "2026-10-01T01:00:00Z", meeting_mode: "REMOTE", time_zone_id: "Asia/Seoul",
   search_start_date: "2026-10-18", search_end_date: "2026-10-20", expected_participants: null,
   submission_deadline: null, manual_only: true, collection_status: "COLLECTING", closure_reason: null,
   closed_at: null, participant_count: 1, submitted_participant_count: 0, host_submitted: false, current_run_status: null,
@@ -55,12 +55,33 @@ afterEach(async () => {
 });
 
 describe("#110 route binding to the actual #109 memory session", () => {
+  it("immediately purges a known revoked capability on same-account refresh and ignores its old late reply", async () => {
+    restored = { ...first, account: { ...first.account, capabilities: { canViewOperations: true } } };
+    await session.restoreSession();
+    const revision = session.getSessionVersion();
+    const { container } = mount();
+    await screen.findByRole("button", { name: room.title });
+    let complete!: (response: Response) => void;
+    operationReply = () => new Promise(resolve => { complete = resolve; });
+    reloadRooms(container);
+    await waitFor(() => expect(operationCalls()).toHaveLength(2));
+    const oldSignal = operationCalls()[1]?.[1]?.signal;
+    restored = { ...first, accessToken: "synthetic-revoked", account: { ...first.account, capabilities: { canViewOperations: false } } };
+    await act(async () => { await session.restoreSession(); });
+    expect(session.getSessionVersion()).toBe(revision);
+    expect(oldSignal?.aborted).toBe(true);
+    expect(screen.getByRole("alert")).toHaveTextContent("운영 조회 권한이 없습니다.");
+    expect(container).not.toHaveTextContent(room.title);
+    await act(async () => { complete(json({ items: [room], next_cursor: null })); });
+    expect(container).not.toHaveTextContent(room.title);
+    expect(operationCalls()).toHaveLength(2);
+  });
   it("uses the current memory token on each request, including a same-account refresh", async () => {
     await session.restoreSession();
     const revision = session.getSessionVersion();
     const storage = vi.spyOn(Storage.prototype, "setItem");
     const { container } = mount();
-    await screen.findByRole("button", { name: new RegExp(roomId) });
+    await screen.findByRole("button", { name: room.title });
     expect(new Headers(operationCalls()[0]?.[1]?.headers).get("Authorization")).toBe(`Bearer ${first.accessToken}`);
     restored = { ...first, accessToken: "synthetic-110-memory-B" };
     await act(async () => { await session.restoreSession(); });
@@ -80,7 +101,7 @@ describe("#110 route binding to the actual #109 memory session", () => {
   it("shows authentication required for a known expired account before the next operations fetch", async () => {
     await session.restoreSession();
     const { container } = mount();
-    await screen.findByRole("button", { name: new RegExp(roomId) });
+    await screen.findByRole("button", { name: room.title });
     fetcher.mockClear();
     vi.mocked(Date.now).mockReturnValue(Date.parse(first.expiresAt));
     // The existing boundary timer remains in the future. The next user request
@@ -116,7 +137,7 @@ describe("#110 route binding to the actual #109 memory session", () => {
   it.each(["account switch", "logout"] as const)("erases old summary and aborts its late response after actual %s", async action => {
     await session.restoreSession();
     const { container } = mount();
-    await screen.findByRole("button", { name: new RegExp(roomId) });
+    await screen.findByRole("button", { name: room.title });
     let complete!: (response: Response) => void;
     operationReply = () => new Promise(resolve => { complete = resolve; });
     reloadRooms(container);
@@ -132,7 +153,7 @@ describe("#110 route binding to the actual #109 memory session", () => {
     expect(oldSignal?.aborted).toBe(true);
     await waitFor(() => expect(operationCalls()).toHaveLength(3));
     await act(async () => { complete(json({ items: [room], next_cursor: null })); });
-    expect(container).not.toHaveTextContent(roomId);
+    expect(container).not.toHaveTextContent(room.title);
     const expected = action === "logout" ? null : "Bearer synthetic-110-memory-C";
     expect(new Headers(operationCalls()[2]?.[1]?.headers).get("Authorization")).toBe(expected);
   });

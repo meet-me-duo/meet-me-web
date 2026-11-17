@@ -375,6 +375,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/operations/rooms/{roomId}/analyses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 운영자용 모임 분석 이력 페이지 조회 */
+        get: operations["analyses"];
+        put?: never;
+        /** 운영자 권한으로 현재 모임을 최신 분석 로직으로 다시 실행 */
+        post: operations["reanalyze"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/refresh": {
         parameters: {
             query?: never;
@@ -633,6 +651,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/operations/rooms/{roomId}/diagnostics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 운영자용 입력·Jev·보완·분석 기록 조회 */
+        get: operations["diagnostics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/operations/invocations/{invocationId}": {
         parameters: {
             query?: never;
@@ -713,14 +748,19 @@ export interface components {
             empty?: boolean;
             null?: boolean;
             float?: boolean;
-            number?: boolean;
-            string?: boolean;
+            object?: boolean;
+            container?: boolean;
             missingNode?: boolean;
+            string?: boolean;
+            integralNumber?: boolean;
+            /** @deprecated */
+            textual?: boolean;
+            boolean?: boolean;
+            number?: boolean;
             /** @enum {string} */
             nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
-            object?: boolean;
+            valueNode?: boolean;
             pojo?: boolean;
-            integralNumber?: boolean;
             floatingPointNumber?: boolean;
             short?: boolean;
             int?: boolean;
@@ -728,12 +768,7 @@ export interface components {
             double?: boolean;
             bigDecimal?: boolean;
             bigInteger?: boolean;
-            /** @deprecated */
-            textual?: boolean;
-            boolean?: boolean;
             binary?: boolean;
-            valueNode?: boolean;
-            container?: boolean;
             embeddedValue?: boolean;
         };
         /** @description 현재 익명 참여자의 자연어 제출 또는 수정 요청 */
@@ -1652,6 +1687,68 @@ export interface components {
              */
             revision_round_id?: string;
         };
+        /** @description 운영자가 현재 분석을 명시해 재분석을 요청하는 값 */
+        OperatorReanalysisRequestBody: {
+            /**
+             * Format: uuid
+             * @description 접수 확인과 재전송에 동일하게 사용하는 요청 UUID
+             */
+            request_id: string;
+            /**
+             * Format: uuid
+             * @description 현재 활성 분석 UUID
+             */
+            source_analysis_id: string;
+            /**
+             * Format: int64
+             * @description 운영자 요약에서 읽은 모임 상태 버전
+             */
+            expected_state_version: number;
+        };
+        /** @description 비동기 재분석의 불변 접수 기록. 실행의 현재 상태가 아님 */
+        OperatorReanalysisReceiptResponse: {
+            /**
+             * Format: uuid
+             * @description 접수된 요청 UUID
+             */
+            request_id: string;
+            /**
+             * Format: uuid
+             * @description 이력을 보존한 원본 분석 UUID
+             */
+            source_analysis_id: string;
+            /**
+             * Format: uuid
+             * @description 새 활성 분석 UUID
+             */
+            analysis_id: string;
+            /**
+             * Format: int64
+             * @description 접수 시 새 모임 상태 버전
+             */
+            accepted_state_version: number;
+            /**
+             * Format: date-time
+             * @description 접수 시각
+             */
+            accepted_at: string;
+            /** @description 새 실행에 동결된 분석 생성 계약 */
+            analysis_contract_version: string;
+        };
+        /** @description 고정 운영 조회 오류. 요청 경로와 임의 exception 값은 포함하지 않음 */
+        OperatorProblemResponse: {
+            /** @description 제한된 운영 조회 오류 코드 */
+            code?: string;
+            /** @description 고정 HTTP 상태 이름 */
+            title?: string;
+            /**
+             * Format: int32
+             * @description HTTP 상태 코드
+             */
+            status?: number;
+            /** @description 원문과 내부 오류 정보를 포함하지 않는 안내 */
+            detail?: string;
+        };
         /** @description 15분 Access Token. 브라우저 메모리에만 보관한다 */
         AuthResponse: {
             /** @description RS256 Bearer Access Token */
@@ -1865,20 +1962,6 @@ export interface components {
              */
             failure_scope?: "TIME" | "PLACE" | "INPUT" | null;
         };
-        /** @description 고정 운영 조회 오류. 요청 경로와 임의 exception 값은 포함하지 않음 */
-        OperatorProblemResponse: {
-            /** @description 제한된 운영 조회 오류 코드 */
-            code?: string;
-            /** @description 고정 HTTP 상태 이름 */
-            title?: string;
-            /**
-             * Format: int32
-             * @description HTTP 상태 코드
-             */
-            status?: number;
-            /** @description 원문과 내부 오류 정보를 포함하지 않는 안내 */
-            detail?: string;
-        };
         /** @description 운영자 전용 OperatorRoomPageResponse. 원문 및 자격 증명 없음 */
         OperatorRoomPageResponse: {
             /** @description 현재 페이지의 방 요약 */
@@ -1888,6 +1971,8 @@ export interface components {
         };
         /** @description 운영자 전용 RoomSummaryResponse. 원문 및 자격 증명 없음 */
         RoomSummaryResponse: {
+            /** @description 연락처를 가린 모임 제목 */
+            title?: string;
             /**
              * Format: uuid
              * @description 내부 방 참조. 초대 코드가 아님
@@ -1947,6 +2032,20 @@ export interface components {
             host_submitted?: boolean;
             /** @description 현재 활성 run 상태. 과거 실행 결과가 아님 */
             current_run_status?: string | null;
+            /**
+             * Format: uuid
+             * @description 현재 활성 분석 UUID. 분석 전이면 null
+             */
+            active_analysis_id?: string | null;
+            /**
+             * Format: int64
+             * @description 명령 요청에 사용할 현재 모임 상태 버전
+             */
+            state_version?: number;
+            /** @description 현재 분석의 최종 결과 확정 여부 */
+            current_analysis_confirmed?: boolean;
+            /** @description 참가자 입력 수정 라운드가 열려 있는지 여부 */
+            has_open_revision_round?: boolean;
         };
         /** @description 운영자 전용 InvocationSummaryResponse. 원문 및 자격 증명 없음 */
         InvocationSummaryResponse: {
@@ -2149,6 +2248,115 @@ export interface components {
              */
             http_status?: number | null;
         };
+        /** @description 운영자 전용 저장 기록 투영 */
+        OperatorAnalysisResponse: {
+            /**
+             * Format: uuid
+             * @description 분석 참조
+             */
+            id?: string;
+            /** @description 기록된 상태 */
+            status?: string;
+            /**
+             * Format: date-time
+             * @description 원본 기록 시각. 접수·결과 게시 시각과 다름
+             */
+            created_at?: string;
+            /**
+             * Format: date-time
+             * @description 분석 배치 고정 시각
+             */
+            fixed_at?: string;
+            /** @description 현재 활성 분석 여부 */
+            active?: boolean;
+            /** @description 선택된 분석 경로 종류. 응답 계약의 버전과 별개 */
+            contract?: string;
+        };
+        /** @description 저장된 첫 분류와 실제 서버 분기. 없던 판정을 복원하지 않음 */
+        OperatorClassificationResponse: {
+            /** @description 분류 어댑터의 정규화된 최초 판정 */
+            assessment?: string;
+            /** @description 최초 판정의 기록된 사유 */
+            reason?: string | null;
+            /**
+             * Format: double
+             * @description 모델 점수. 정확도 보장 또는 서버 최종 판정이 아님
+             */
+            confidence?: number | null;
+            /** @description 공급자의 최초 의미 선택. 정규화 판정과 다를 수 있음 */
+            semantic_assessment?: string | null;
+            /** @description 실제 서버 분기에 사용한 판정. 분기 전 실패하면 null */
+            effective_assessment?: string | null;
+            /** @description 실제 최초 분류 공급자 */
+            provider?: string;
+            /** @description 실제 최초 분류 모델 */
+            model?: string;
+            /** @description 공급자가 반환한 라벨별 점수. 최대 3개 */
+            probabilities?: {
+                [key: string]: number;
+            };
+        };
+        /** @description 운영자 전용 저장 기록 투영 */
+        OperatorInputCheckResponse: {
+            /** @description 연락처를 가린 원문 */
+            raw_text?: string;
+            /**
+             * Format: date-time
+             * @description 원본 기록 시각. 접수·결과 게시 시각과 다름
+             */
+            created_at?: string;
+            /**
+             * Format: date-time
+             * @description 해석 기준 시각
+             */
+            reference_at?: string;
+            /** @description 현재 사전검사 상태. 과거 Jev 판정이 아님 */
+            current_status?: string;
+            /** @description 실제 연결된 보완 질문과 답변 */
+            question?: components["schemas"]["OperatorQuestionResponse"] | null;
+            /** @description 기록된 사전검사 시도. 최대 8건 */
+            attempts?: components["schemas"]["OperatorPrecheckAttemptResponse"][];
+            /** @description 추가 시도 생략 여부 */
+            attempts_truncated?: boolean;
+        };
+        /** @description 운영자 전용 저장 기록 투영 */
+        OperatorInputResponse: {
+            /** @description 방 안에서 안정적인 참가자 표시 별칭 */
+            alias?: string;
+            /** @description 첫 글자만 남긴 방의 참가자 이름 */
+            display_name?: string;
+            /**
+             * Format: int32
+             * @description 선택한 입력 리비전. 미접수이면 null
+             */
+            revision?: number | null;
+            /** @description 연락처를 가린 원문 */
+            raw_text?: string | null;
+            /**
+             * Format: date-time
+             * @description 원본 기록 시각. 접수·결과 게시 시각과 다름
+             */
+            created_at?: string | null;
+            /**
+             * Format: date-time
+             * @description 해석 기준 시각
+             */
+            reference_at?: string | null;
+            /** @description 저장된 입력 해석 상태. Jev 최초 판정과 별개 */
+            interpretation?: string | null;
+            /** @description 저장된 미해결 사유 */
+            unresolved_reason?: string | null;
+            /** @description 고정 입력에 포함된 실제 보완 답변 */
+            supplement?: components["schemas"]["OperatorQuestionResponse"] | null;
+            /** @description 정확한 소유권으로 연결한 사전검사 계보. 최대 8건 */
+            checks?: components["schemas"]["OperatorInputCheckResponse"][];
+            /** @description 계보 깊이 제한·순환으로 생략 여부 */
+            checks_truncated?: boolean;
+            /** @description 명시적 입력 버전 계보로 연결된 이전 방식 질문·답변 */
+            legacy_questions?: components["schemas"]["OperatorQuestionResponse"][];
+            /** @description 엄격하게 복원한 저장 선언. 적용·가용성 재계산 결과가 아님 */
+            stored_interpretation?: components["schemas"]["OperatorStoredInterpretationResponse"];
+        };
         /** @description 운영자 전용 OperatorInvocationDetailResponse. 원문 및 자격 증명 없음 */
         OperatorInvocationDetailResponse: {
             /**
@@ -2162,6 +2370,135 @@ export interface components {
             attempts?: components["schemas"]["AttemptSummaryResponse"][];
             /** @description 공급자별 확인 범위와 알려진 소계 */
             usage_by_provider?: components["schemas"]["ProviderUsageResponse"][];
+        };
+        /** @description 운영자 전용 저장 기록 투영 */
+        OperatorPrecheckAttemptResponse: {
+            /**
+             * Format: int32
+             * @description 사전검사 시도 세대
+             */
+            generation?: number;
+            /**
+             * Format: date-time
+             * @description 기록된 실행 시작 시각
+             */
+            started_at?: string | null;
+            /**
+             * Format: date-time
+             * @description 기록된 실행 종료 시각
+             */
+            finished_at?: string | null;
+            /** @description 기록된 실패 분류. null은 실패 여부를 확정하지 않음 */
+            failure_code?: string | null;
+            /** @description 실제 저장된 첫 분류 결과. 과거 미기록이면 null */
+            classification?: components["schemas"]["OperatorClassificationResponse"] | null;
+        };
+        /** @description 운영자 전용 저장 기록 투영 */
+        OperatorQuestionResponse: {
+            /** @description 연락처를 가린 실제 질문 */
+            prompt?: string;
+            /** @description 연락처를 가린 질문 근거 */
+            excerpt?: string | null;
+            /** @description 실제 연결된 답변. 없으면 null */
+            answer?: string | null;
+            /**
+             * Format: date-time
+             * @description 기록된 답변 시각
+             */
+            answered_at?: string | null;
+            /** @description 선택한 입력에 답변이 포함되는지 여부 */
+            consumed?: boolean;
+            /** @description 연락처를 가린 저장된 선택지 */
+            choices?: string[];
+            /** @description 연락처를 가린 질문의 실제 원문 */
+            source_raw_text?: string | null;
+        };
+        /** @description 운영자 전용 저장 기록 투영 */
+        OperatorResultResponse: {
+            /**
+             * Format: date-time
+             * @description 추천 시작 시각 포함
+             */
+            start_at?: string;
+            /**
+             * Format: date-time
+             * @description 추천 종료 시각 제외
+             */
+            end_at?: string;
+            /** @description 추천 모임 방식 */
+            meeting_mode?: string;
+            /** @description 연락처를 가린 장소 설명 */
+            place_name?: string | null;
+            /** @description 장소 조건 미검증 여부 */
+            place_unverified?: boolean;
+            /** @description 저장된 추천에 포함된 참가자 별칭. 나머지 참가자의 불가를 뜻하지 않음 */
+            available_aliases?: string[];
+        };
+        /** @description 운영자 전용 저장 기록 투영 */
+        OperatorRoomDiagnosticsResponse: {
+            /**
+             * Format: uuid
+             * @description 대상 모임 참조
+             */
+            room_id?: string;
+            /** @description CURRENT_COLLECTION 또는 FROZEN_ANALYSIS */
+            scope?: string;
+            /** @description 선택한 고정 분석. 현재 입력 조회이면 null */
+            analysis?: components["schemas"]["OperatorAnalysisResponse"] | null;
+            /** @description 입력과 보완 이력. 최대 50명 */
+            inputs?: components["schemas"]["OperatorInputResponse"][];
+            /** @description 추가 참가자 생략 여부 */
+            inputs_truncated?: boolean;
+            /** @description 기록된 전체 AI 실행과 시도. 최대 20건 */
+            invocations?: components["schemas"]["OperatorInvocationDetailResponse"][];
+            /** @description 추가 AI 실행 생략 여부 */
+            invocations_truncated?: boolean;
+            /** @description 기록된 배치·큐·실패 단계. 최대 100건 */
+            timeline?: components["schemas"]["OperatorTimelineEventResponse"][];
+            /** @description 추가 단계 생략 여부 */
+            timeline_truncated?: boolean;
+            /** @description 저장된 추천. 최대 20건 */
+            results?: components["schemas"]["OperatorResultResponse"][];
+            /** @description 추가 추천 생략 여부 */
+            results_truncated?: boolean;
+        };
+        /** @description 운영자 전용 저장 기록 투영 */
+        OperatorStoredConditionResponse: {
+            /** @description 저장된 가능·불가·선호 효과 */
+            effect?: string;
+            /** @description 저장된 입력 해석 상태. Jev 최초 판정과 별개 */
+            interpretation?: string;
+            /** @description 저장된 시간 정밀도 */
+            temporal_resolution?: string;
+            /** @description 시간 또는 장소 조건 차원 */
+            dimension?: string | null;
+            /** @description 저장된 로컬 시작 시각 */
+            start?: string | null;
+            /** @description 저장된 로컬 종료 시각 */
+            end?: string | null;
+        };
+        /** @description 운영자 전용 저장 기록 투영 */
+        OperatorStoredInterpretationResponse: {
+            /** @description STORED_DECLARATION. 전체 원문 적용을 뜻하지 않음 */
+            coverage?: string;
+            /** @description conditions */
+            conditions?: components["schemas"]["OperatorStoredConditionResponse"][];
+            /** @description 저장된 조건 보류·프로그램 검증 사유 */
+            problems?: string[];
+            /** @description 추가 조건 또는 사유 생략 여부 */
+            truncated?: boolean;
+        };
+        /** @description 운영자 전용 저장 기록 투영 */
+        OperatorTimelineEventResponse: {
+            /** @description 기록 단계 종류 */
+            kind?: string;
+            /**
+             * Format: date-time
+             * @description 실제 기록된 단계 시각. 없으면 null
+             */
+            at?: string | null;
+            /** @description 기록된 상태 */
+            status?: string;
         };
         /** @description 운영자 전용 ProviderUsageResponse. 원문 및 자격 증명 없음 */
         ProviderUsageResponse: {
@@ -2216,6 +2553,13 @@ export interface components {
             known_cost_usd?: string | null;
             /** @description RECORDED_ADMISSIONS. 실제 dispatch 집계 분모가 아님 */
             coverage_basis?: string;
+        };
+        /** @description 분석 이력 페이지. 시도가 없는 실행도 포함 */
+        OperatorAnalysisPageResponse: {
+            /** @description 분석 목록 */
+            items?: components["schemas"]["OperatorAnalysisResponse"][];
+            /** @description 다음 페이지 커서 */
+            next_cursor?: string | null;
         };
         /** @description 생성일부터 30일 보관 정책의 본인 주최 또는 참여 모임 */
         AccountRoomResponse: {
@@ -4099,6 +4443,165 @@ export interface operations {
             };
         };
     };
+    analyses: {
+        parameters: {
+            query?: {
+                limit?: string;
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                roomId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 실제 run 기준 이력. 호출 전 실행도 포함 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OperatorAnalysisPageResponse"];
+                };
+            };
+            /** @description 고정 형식의 잘못된 조회 조건 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 검증된 회원 인증 없음 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 기본 접근 거부 또는 명시적 운영자 allowlist 미포함 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 모임 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 조회 또는 감사 저장 불가. 보호 데이터 미반환 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+        };
+    };
+    reanalyze: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                roomId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OperatorReanalysisRequestBody"];
+            };
+        };
+        responses: {
+            /** @description 새 분석 또는 동일 요청의 최초 접수 기록 */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperatorReanalysisReceiptResponse"];
+                };
+            };
+            /** @description 요청 형식 오류 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 회원 인증 필요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 운영자 권한 또는 Origin 불일치 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 모임 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 대상/상태 충돌 또는 지원하지 않는 입력 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 운영 요청 제한. Retry-After 제공 */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 인증/감사/요청 제한/저장 처리 불가 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+        };
+    };
     refresh: {
         parameters: {
             query?: never;
@@ -5044,6 +5547,75 @@ export interface operations {
                 };
                 content: {
                     "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 조회 또는 감사 저장 불가. 보호 데이터 미반환 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+        };
+    };
+    diagnostics: {
+        parameters: {
+            query?: {
+                analysis_id?: string;
+            };
+            header?: never;
+            path: {
+                roomId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 가림 처리된 실제 저장 기록. 누락 판정은 null */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OperatorRoomDiagnosticsResponse"];
+                };
+            };
+            /** @description 고정 형식의 잘못된 조회 조건 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 검증된 회원 인증 없음 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 기본 접근 거부 또는 명시적 운영자 allowlist 미포함 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["OperatorProblemResponse"];
+                };
+            };
+            /** @description 해당 모임 또는 해당 모임의 분석 없음 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OperatorProblemResponse"];
                 };
             };
             /** @description 조회 또는 감사 저장 불가. 보호 데이터 미반환 */

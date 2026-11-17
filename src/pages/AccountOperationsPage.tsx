@@ -1,4 +1,4 @@
-import { createOperationsApi, OperationsError } from "../api/operations";
+import { createOperationsApi, OperationsError, operationsMessage } from "../api/operations";
 import { getAccessToken, getSessionVersion } from "../auth/session";
 import { useAccountSession } from "../auth/useAccount";
 import OperationsPage from "./OperationsPage";
@@ -12,6 +12,7 @@ const api = createOperationsApi(() => {
 });
 
 export default function AccountOperationsPage() {
-  useAccountSession();
+  const session = useAccountSession();
+  if (session?.account.capabilities?.canViewOperations === false) return <p role="alert">{operationsMessage(new OperationsError(403))}</p>;
   return <OperationsPage api={api} authRevision={getSessionVersion()} />;
 }

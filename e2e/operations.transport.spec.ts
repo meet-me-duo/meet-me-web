@@ -1,12 +1,13 @@
 import { expect, test, type Page } from "@playwright/test";
+import { diagnostics } from "./support/operations-diagnostics";
 
 const roomId = "11000000-0000-4000-8000-000000000001";
 const invocationId = "22000000-0000-4000-8000-000000000001";
 const privateText = "TRANSPORT_PRIVATE_URL_HEADER_RAW_RESPONSE_SECRET";
 const room = {
-  id: roomId, created_at: "2026-10-17T01:00:00Z", meeting_mode: "REMOTE", time_zone_id: "Asia/Seoul",
+  id: roomId, title: "합성 전송 기록", active_analysis_id: "33000000-0000-4000-8000-000000000001", created_at: "2026-10-17T01:00:00Z", meeting_mode: "REMOTE", time_zone_id: "Asia/Seoul",
   search_start_date: "2026-10-18", search_end_date: "2026-10-20", expected_participants: null,
-  submission_deadline: null, manual_only: true, collection_status: "COLLECTING", closure_reason: null,
+  submission_deadline: null, manual_only: true, collection_status: "CLOSED", closure_reason: null,
   closed_at: null, participant_count: 1, submitted_participant_count: 0, host_submitted: false, current_run_status: null,
 };
 function fixture(partial: boolean) {
@@ -54,14 +55,15 @@ async function drilldown(page: Page, partial: boolean) {
     if (path === `/api/operations/rooms/${roomId}`) return route.fulfill({ headers, json: {
       room, invocations: [invocation], next_cursor: null, revision_counts: { open: 0, queued: 0, reused: 1 }, legacy_attempt_count: 1,
     } });
-    if (path === `/api/operations/invocations/${invocationId}`) return route.fulfill({ headers, json: {
+    if (path === `/api/operations/rooms/${roomId}/analyses`) return route.fulfill({ headers, json: diagnostics(roomId, invocation.run_id, null).history });
+    if (path === `/api/operations/rooms/${roomId}/diagnostics`) return route.fulfill({ headers, json: diagnostics(roomId, invocation.run_id, {
       room_id: roomId, invocation, attempts, usage_by_provider: [], provider_response: privateText,
-    } });
+    }).detail });
     return route.abort();
   });
   await page.goto("/operations");
-  await page.getByRole("button", { name: new RegExp(roomId) }).click();
-  await page.getByRole("button", { name: new RegExp(invocationId) }).click();
+  await page.getByRole("button", { name: room.title }).click();
+  await page.getByText("자세한 실행·사용량 기록", { exact: true }).click();
   const transport = page.getByRole("heading", { name: /로컬.*client call/i }).locator("..");
   await expect(transport).toBeVisible();
   return { transport, requests };

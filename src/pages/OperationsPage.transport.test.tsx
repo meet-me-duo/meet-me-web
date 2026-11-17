@@ -1,16 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
-import OperationsPage from "./OperationsPage";
-import type { OperationInvocationDetail, OperationRoom, OperationsApi } from "../api/operations";
+import { cleanup, render, screen, within } from "@testing-library/react";
+import { ExecutionDetail } from "./OperationsTechnicalDetails";
+import type { OperationInvocationDetail } from "../api/operations";
 
 const roomId = "11000000-0000-4000-8000-000000000001";
 const invocationId = "22000000-0000-4000-8000-000000000001";
-const room: OperationRoom = {
-  id: roomId, created_at: "2026-10-17T01:00:00Z", meeting_mode: "REMOTE", time_zone_id: "Asia/Seoul",
-  search_start_date: "2026-10-18", search_end_date: "2026-10-20", expected_participants: null,
-  submission_deadline: null, manual_only: true, collection_status: "COLLECTING", closure_reason: null,
-  closed_at: null, participant_count: 1, submitted_participant_count: 0, host_submitted: false, current_run_status: null,
-};
 function detail(partial: boolean): OperationInvocationDetail {
   const invocation = {
     id: invocationId, run_id: "33000000-0000-4000-8000-000000000001", run_version: 2,
@@ -33,15 +27,7 @@ function detail(partial: boolean): OperationInvocationDetail {
 }
 async function open(partial: boolean) {
   const execution = detail(partial);
-  const api: OperationsApi = {
-    rooms: vi.fn().mockResolvedValue({ items: [room], next_cursor: null }),
-    room: vi.fn().mockResolvedValue({ room, invocations: [execution.invocation], next_cursor: null,
-      revision_counts: { open: 0, queued: 0, reused: 0 }, legacy_attempt_count: 0 }),
-    invocation: vi.fn().mockResolvedValue(execution),
-  };
-  const view = render(<OperationsPage api={api} />);
-  fireEvent.click(await screen.findByRole("button", { name: new RegExp(roomId) }));
-  fireEvent.click(await screen.findByRole("button", { name: new RegExp(invocationId) }));
+  const view = render(<ExecutionDetail data={execution} />);
   await screen.findByRole("heading", { name: /로컬.*client call/i });
   return view;
 }

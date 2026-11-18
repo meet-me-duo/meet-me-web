@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { Layers3, MessageSquare, ShieldCheck } from "lucide-react";
 
 const features = [
-  { icon: MessageSquare, title: "말하듯 조건 작성", description: "“화·목 저녁 봉천역 근처”처럼 일상 언어로 편하게 입력하세요." },
+  { icon: MessageSquare, title: "말하듯 조건 작성", description: "“화·목 저녁 7~9시”처럼 일상 언어로 편하게 입력하세요." },
   { icon: ShieldCheck, title: "비공개 조건 입력", description: "참여자의 원문은 서로 공개하지 않아요. 주최자는 분석에 반영되지 않은 조건을 확인할 수 있어요." },
   { icon: Layers3, title: "최대 3개 시간 선택지", description: "우열 없는 시간 선택지에서 참석 인원과 방식을 비교하고, 실제 시작·종료 시간을 골라 확정해요." },
 ];

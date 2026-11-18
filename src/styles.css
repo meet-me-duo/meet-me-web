@@ -37,6 +37,16 @@ a { color: inherit; text-decoration: none; }
 .brand { display: flex; flex-shrink: 0; align-items: center; gap: 11px; }
 .brand > span:last-child { display: flex; flex-direction: column; }
 .brand strong { display: inline-block; padding-inline-end: .04em; font-size: 1.15rem; line-height: 1.1; letter-spacing: -.03em; }
+.brand-title { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.brand-beta { display: inline-flex; align-items: center; padding: 2px 7px; border: 1px solid #bae6fd; border-radius: 999px; background: var(--sky-soft); color: var(--sky-dark); font-size: 11px; line-height: 1.4; font-weight: 600; letter-spacing: .01em; }
+.brand-beta > span { display: inline-block; transform: translateY(1px); }
+@media (max-width: 540px) {
+  .brand-title { gap: 6px; }
+  .header-inner:has(.brand-beta), .brand:has(.brand-beta) { gap: 8px; }
+}
+@media (max-width: 360px) {
+  .header-inner:has(.brand-beta) .account-history-link svg { display: none; }
+}
 .brand small { margin-top: 2px; color: var(--sky-dark); font-size: .61rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .logo-mark { width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid #dce5ee; border-radius: 13px; background: white; box-shadow: 0 5px 16px rgb(15 23 42 / .07); }
 .logo-mark svg { width: 30px; height: 30px; fill: #1e293b; stroke: #1e293b; stroke-width: 3; stroke-linecap: round; }

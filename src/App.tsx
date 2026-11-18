@@ -14,14 +14,15 @@ import AccountSecurityPage from "./auth/AccountSecurityPage";
 const OperationsPage = lazy(() => import("./pages/AccountOperationsPage"));
 
 function Shell({ children }: { children: React.ReactNode }) {
-  const operations = useLocation().pathname === "/operations";
+  const pathname = useLocation().pathname;
+  const operations = pathname === "/operations";
   return (
     <div className={`app-shell${operations ? " ops-shell" : ""}`}>
       <header className="site-header">
         <div className="header-inner">
           <Link to="/" className="brand" aria-label="Meet me 홈">
             <MeetMeLogo />
-            <span><strong>Meet me</strong><small>{operations ? "운영 관리" : "스마트 일정 조율"}</small></span>
+            <span><span className="brand-title"><strong>Meet me</strong>{pathname === "/" && <span className="brand-beta"><span>Beta</span></span>}</span><small>{operations ? "운영 관리" : "스마트 일정 조율"}</small></span>
           </Link>
           <nav className="account-navigation" aria-label="계정과 내 모임"><Link to="/account/rooms" className="account-history-link"><List size={18} aria-hidden="true" /><span>내 모임</span></Link><AccountControls /></nav>
         </div>

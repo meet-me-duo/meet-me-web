@@ -34,7 +34,6 @@
 .ops-records .operations-fields{display:grid;grid-template-columns:minmax(80px,1fr) minmax(0,1.5fr);gap:6px 10px;font-size:10px;margin:10px 0}
 .ops-records .operations-fields dd{margin:0;overflow-wrap:anywhere}.ops-records .operations-table{overflow:auto;max-width:100%}
 .ops-records .operations-table table{font-size:10px;min-width:520px}.ops-records .operations-attempt{border-top:1px solid #dce3ec;margin-top:12px;padding-top:10px}
-.ops-shell .header-inner{width:min(1104px,calc(100% - 36px))}
 @media(max-width:760px){.ops-page .ops-heading{margin-top:0}.ops-heading>div>p{font-size:12px}.ops-page .ops-rooms th:first-child{width:auto}.ops-room-meta{max-width:230px}.ops-page .ops-detail-actions{flex-wrap:wrap}.ops-detail-actions select{min-width:0}.ops-page .ops-room-info{font-size:12px}.ops-page .ops-person-heading small{font-size:9px}.ops-time-option strong{font-size:15px}.ops-page .ops-section-heading{align-items:flex-start}}
 
 .ops-time-option>.ops-pill{display:inline-flex;margin-top:8px}

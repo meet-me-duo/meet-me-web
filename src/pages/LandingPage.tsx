@@ -86,8 +86,8 @@ export default function LandingPage({ creating = false }: { creating?: boolean }
         </div>
         <aside className="hero-example" aria-label="자연어 조건 입력 예시">
           <div className="example-heading"><span><MessageSquare size={16} aria-hidden="true" /> 내 조건 입력</span><span className="example-label">예시</span></div>
-          <blockquote>“화요일이나 목요일 저녁에 가능해요.<br />봉천역 근처면 좋겠어요.”</blockquote>
-          <div className="example-tags" aria-hidden="true"><span>시간 조건</span><span>장소 조건</span></div>
+          <blockquote>“화요일이나 목요일에 가능해요.<br />시간은 저녁 7시부터 9시까지 좋아요.”</blockquote>
+          <div className="example-tags" aria-hidden="true"><span>가능 요일</span><span>시간 조건</span></div>
           <div className="example-divider" />
           <p><LockKeyhole size={16} aria-hidden="true" /><span>다른 참여자에게는 원문을 공개하지 않아요.</span></p>
           <small>주최자는 분석에 반영되지 않은 조건을 확인할 수 있어요.</small>

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, RefreshCw, Search } from "lucide-react";
 import { OperationsError, operationsApi, operationsMessage, type OperationAnalyses, type OperationDiagnostics, type OperationReanalysisRequest, type OperationRoomDetail, type OperationRooms, type OperationsApi } from "../api/operations";
 import { RoomSettings } from "./OperationsTechnicalDetails";
-import { AnalysisTimeline, InputCards, Pill, StoredResults } from "./operations/DiagnosticViews";
+import { AnalysisOutcome, AnalysisTimeline, InputCards, Pill, StoredResults } from "./operations/DiagnosticViews";
 import { ReanalysisDialog } from "./operations/ReanalysisDialog";
 import { analysisStatus, canReanalyze, dateRange, modeLabel, roomStatus, stamp } from "./operations/presentation";
 import "./OperationsPage.css";
@@ -184,6 +184,7 @@ export default function OperationsPage({ api = operationsApi, authRevision = 0 }
         {view.analysis && !view.analysis.active && <p className="ops-old-note">이전 분석의 고정 입력과 결과예요. 다시 분석은 현재 분석에서 실행할 수 있어요.</p>}
         {room.current_analysis_confirmed && <p className="ops-old-note">확정한 모임은 다시 분석할 수 없어요.</p>}
         {room.has_open_revision_round && <p className="ops-old-note">참여자가 입력을 수정 중이에요. 수정이 끝나면 다시 분석할 수 있어요.</p>}
+        <AnalysisOutcome data={view} />
         <div className="ops-detail-grid"><div><InputCards data={view} zone={room.time_zone_id} /><StoredResults data={view} zone={room.time_zone_id} /></div><AnalysisTimeline data={view} zone={room.time_zone_id} /></div>
         <details className="ops-records ops-room-technical"><summary>모임의 세부 설정·기록 범위</summary><RoomSettings room={room} />
           <p>입력 수정 기록 · 진행 중 {detail.revision_counts.open}, 대기 {detail.revision_counts.queued}, 재사용 {detail.revision_counts.reused}</p>

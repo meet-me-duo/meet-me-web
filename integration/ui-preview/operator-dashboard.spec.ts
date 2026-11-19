@@ -1,5 +1,19 @@
 import { expect, test } from "@playwright/test";
 
+test("operator outcomes distinguish empty completed results, technical delay and isolated work", async ({ page }, info) => {
+  await page.setViewportSize(info.project.name === "desktop" ? { width: 1440, height: 1000 } : { width: 390, height: 844 });
+  await page.goto("/__preview?scene=operations");
+  await expect(page.getByText("작업 격리 · DLQ", { exact: true })).toBeVisible();
+  await page.screenshot({ path: info.outputPath("operator-outcome-list.png"), fullPage: true });
+  for (const [room, heading] of [["새해 회고", "분석 완료 · 저장된 후보 없음"], ["1월 독서 모임", "분석 지연 · 기술적 사유로 종결"], ["디자인 리뷰", "작업 격리 · DLQ 확인 필요"]]) {
+    await page.getByRole("button", { name: room, exact: true }).click();
+    await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: info.outputPath(`operator-outcome-${room}.png`), fullPage: true });
+    await page.getByRole("button", { name: "모임 목록" }).click();
+  }
+});
+
 test("operator diagnostics keep original inputs, first Jev decision, answers and recorded retries distinct", async ({ page }, info) => {
   await page.setViewportSize(info.project.name === "desktop" ? { width: 1440, height: 1000 } : { width: 390, height: 844 });
   const external: string[] = [], errors: string[] = [];

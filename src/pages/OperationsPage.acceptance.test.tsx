@@ -14,6 +14,24 @@ async function openRoom() { fireEvent.click(await screen.findByRole("button", { 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe("approved operator dashboard", () => {
+  it("shows the selected past outcome rather than borrowing the current room failure", async () => {
+    const data = operatorFixture();
+    data.room.current_run_status = "DEAD_LETTERED";
+    data.roomDetail.room = data.room;
+    data.history.items[0]!.status = "DEAD_LETTERED";
+    const diagnostics = vi.fn(async (_room: string, id: string | null): Promise<OperationDiagnostics> => ({
+      ...data.diagnostics, analysis: data.history.items.find(item => item.id === id)!, results: [],
+    }));
+    const { api } = mount({ rooms: vi.fn().mockResolvedValue({ items: [data.room], next_cursor: null }), room: vi.fn().mockResolvedValue(data.roomDetail), analyses: vi.fn().mockResolvedValue(data.history), diagnostics });
+    await screen.findByText("작업 격리 · DLQ");
+    expect(api.diagnostics).not.toHaveBeenCalled();
+    await openRoom();
+    await screen.findByRole("heading", { name: "작업 격리 · DLQ 확인 필요" });
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: data.history.items[1]!.id } });
+    await screen.findByRole("heading", { name: "분석 완료 · 저장된 후보 없음" });
+    expect(screen.queryByRole("heading", { name: "작업 격리 · DLQ 확인 필요" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "다시 분석" })).toBeDisabled();
+  });
   it.each([[401, "운영자 인증이 필요합니다."], [403, "운영 조회 권한이 없습니다."], [503, "운영 요약을 일시적으로 조회할 수 없습니다."], [404, "조회 대상을 찾을 수 없습니다."], [400, "조회 요청을 확인해 주세요."]] as const)("retains the fixed %s failure without arbitrary response or grant controls", async (status, message) => {
     const { container, api } = mount({ rooms: vi.fn().mockRejectedValue(Object.assign(new OperationsError(status), { detail: "PRIVATE_BODY", message: "PRIVATE_BODY" })) });
     await screen.findByText(message);

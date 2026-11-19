@@ -6,6 +6,29 @@ import { assessment, modeLabel, stamp } from "./presentation";
 export function Pill({ text, tone = "gray" }: { text: string; tone?: string }) {
   return <span className={`ops-pill ops-${tone}`}>{text}</span>;
 }
+export function AnalysisOutcome({ data }: { data: OperationDiagnostics }) {
+  if (data.scope !== "FROZEN_ANALYSIS" || !data.analysis) return null;
+  const status = data.analysis.status;
+  let title: string;
+  let description: string;
+  let tone: string;
+  if (status === "COMPLETED") {
+    tone = "green";
+    title = data.results.length > 0 ? "분석 완료 · 저장된 후보 있음" : data.results_truncated ? "분석 완료 · 결과 확인 필요" : "분석 완료 · 저장된 후보 없음";
+    description = "후보 계산이 끝난 분석이에요. 입력 미반영 여부와 저장된 조건 해석도 함께 확인해 주세요. 후보가 없다는 사실만으로 모든 입력이 정확히 해석됐다고 판단할 수는 없어요.";
+  } else if (status === "ANALYSIS_DELAYED") {
+    tone = "amber";
+    title = "분석 지연 · 기술적 사유로 종결";
+    description = "시간이 맞지 않아 후보가 없는 결과와는 구분해요. 전체 분석 과정의 실패·사용 한도·실행 기한 기록을 확인한 뒤 다시 분석해 주세요. 기록되지 않은 원인은 추정하지 않아요.";
+  } else if (status === "DEAD_LETTERED") {
+    tone = "red";
+    title = "작업 격리 · DLQ 확인 필요";
+    description = "반복된 작업 처리 오류로 자동 처리가 중단됐어요. 처리 이력을 확인하고 원인을 해결해 주세요. 이 화면의 다시 분석은 새 분석을 만드는 기능이며 DLQ 원문 재처리와는 다른 작업이에요.";
+  } else return null;
+  return <section className={`ops-card ops-outcome ops-outcome-${tone}`} aria-label="선택한 분석의 처리 결과">
+    <h2>{title}</h2><p>{description}</p>
+  </section>;
+}
 function Verdict({ value, label = "Jev 판정" }: { value: OperationClassification | null | undefined; label?: string }) {
   if (!value) return <div className="ops-assessment"><span>{label}</span><Pill text="판정 미기록" /></div>;
   const choice = value.semantic_assessment ?? value.assessment;

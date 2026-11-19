@@ -20,7 +20,7 @@ export function roomStatus(room: OperationRoom): { label: string; tone: string; 
 export function analysisStatus(status: string | null): { label: string; tone: string; group: string } {
   if (status === "COMPLETED") return { label: "분석 완료", tone: "green", group: "complete" };
   if (status === "ANALYSIS_DELAYED") return { label: "분석 지연", tone: "amber", group: "attention" };
-  if (status === "DEAD_LETTERED") return { label: "분석 중단", tone: "red", group: "attention" };
+  if (status === "DEAD_LETTERED") return { label: "작업 격리 · DLQ", tone: "red", group: "attention" };
   if (status === "STRUCTURING" || status === "MATCHING") return { label: "분석 중", tone: "blue", group: "progress" };
   return { label: "분석 대기", tone: "blue", group: "progress" };
 }

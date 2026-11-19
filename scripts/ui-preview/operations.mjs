@@ -10,7 +10,15 @@ export function operationsFixture() {
     value.room.title = title;
     value.diagnostics.room_id = value.room.id;
     for (const execution of value.diagnostics.invocations) execution.room_id = value.room.id;
-    if ([1, 5].includes(index)) value.room.current_run_status = 'ANALYSIS_DELAYED';
+    if (index === 1) value.room.current_run_status = 'ANALYSIS_DELAYED';
+    if (index === 3) value.room.current_run_status = 'DEAD_LETTERED';
+    value.history.items[0].status = value.room.current_run_status;
+    value.diagnostics.analysis.status = value.room.current_run_status;
+    if ([1, 3, 5].includes(index)) value.diagnostics.results = [];
+    if ([1, 3].includes(index)) {
+      value.diagnostics.invocations = [];
+      value.diagnostics.timeline = [];
+    }
     if (index === 2) Object.assign(value.room, { collection_status: 'COLLECTING', current_run_status: null, active_analysis_id: null, closed_at: null, closure_reason: null, submitted_participant_count: 2 });
     if (index === 4) value.room.current_analysis_confirmed = true;
     value.roomDetail.room = value.room;
